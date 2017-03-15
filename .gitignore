@@ -1,4 +1,13 @@
 .*.swp
+*.o
+
+flightpanel
+flightpanel.bin
+
 en.stm32f4_dsp_stdperiph_lib.zip
 stdperiph.a
 STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/
+ext-st/include
+ext-st/include-cmsis
+ext-st/include-cmsis-dev
+ext-st/stm32f407.ld
