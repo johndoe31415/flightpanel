@@ -31,18 +31,16 @@ int main(void) {
 
 	while (1) {
 		i++;
-		if (i & 0x10000) {
+		if (i == 0x100000) {
 			GPIOD->ODR ^= GPIO_Pin_12;
-		}
-		if (i & 0x20000) {
+		} else if (i == 0x200000) {
 			GPIOD->ODR ^= GPIO_Pin_13;
-		}
-		if (i & 0x40000) {
+		} else if (i == 0x400000) {
 			GPIOD->ODR ^= GPIO_Pin_14;
-		}
-		if (i & 0x80000) {
+		} else if (i == 0x800000) {
 			GPIOD->ODR ^= GPIO_Pin_15;
-			printf("toggle %d\n", i);
+			i = 0;
+			printf("Round trip!\n");
 		}
 	}
 	return 0;
