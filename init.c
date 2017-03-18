@@ -4,6 +4,7 @@
 #include <stm32f4xx_usart.h>
 #include <stm32f4xx_flash.h>
 #include <stm32f4xx_spi.h>
+#include <stm32f4xx_dma.h>
 #include <misc.h>
 
 #define PLL_M					8
@@ -221,13 +222,37 @@ static void init_spi(void) {
 		.SPI_NSS = SPI_NSS_Soft,
 		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32,
 		.SPI_FirstBit = SPI_FirstBit_MSB,
+		.SPI_CRCPolynomial = 1,
 	};
 	SPI_Init(SPI2, &SPI_InitStructure);
 	SPI_Cmd(SPI2, ENABLE);
-#if 0
-  /* Enable DMA SPI TX Stream */
-  DMA_Cmd(SPIx_TX_DMA_STREAM,ENABLE);
-#endif
+}
+
+static void init_spi_dma(void) {
+	/* DMA1 Stream3 Channel 0: SPI2 RX (unused) */
+	/* DMA1 Stream4 Channel 1: SPI2 TX */
+
+	// Enable DMA2 clock
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
+
+	/* TX */
+	DMA_InitTypeDef DMA_InitStructure = {
+		.DMA_Channel = DMA_Channel_0,
+		.DMA_PeripheralBaseAddr = (uint32_t)&(SPI2->DR),
+		.DMA_Memory0BaseAddr = 0,
+		.DMA_DIR = DMA_DIR_MemoryToPeripheral,
+		.DMA_BufferSize = 1,
+		.DMA_PeripheralInc = DMA_PeripheralInc_Disable,
+		.DMA_MemoryInc = DMA_MemoryInc_Enable,
+		.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte,
+		.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte,
+		.DMA_Mode = DMA_Mode_Normal,
+		.DMA_Priority = DMA_Priority_Medium,
+		.DMA_FIFOMode = DMA_FIFOMode_Disable,
+		.DMA_MemoryBurst = DMA_MemoryBurst_Single,
+		.DMA_PeripheralBurst = DMA_PeripheralBurst_Single,
+	};
+	DMA_Init(DMA1_Stream4, &DMA_InitStructure);
 }
 
 void SystemInit() {
@@ -238,5 +263,6 @@ void SystemInit() {
 	init_timer();
 	init_rotary_encoders();
 	init_spi();
+	init_spi_dma();
 	__enable_irq();
 }

@@ -6,9 +6,11 @@
 
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_spi.h>
+#include <stm32f4xx_dma.h>
 
 #include "rs232.h"
 #include "rotary.h"
+#include "spi.h"
 
 int main(void) {
 	printf("Reset successful.\n");
@@ -32,7 +34,10 @@ int main(void) {
 			}
 			i = 0;
 
-			spi_tx_data("muhkuh", 6);
+			//spi_tx_data("muhkuh", 6);
+			//while (DMA_GetFlagStatus(DMA2_Stream3, QSPI_DMA_FLAG_TC) == RESET);
+			spi_tx_data_dma("muhkuh", 6);
+
 		}
 
 	}

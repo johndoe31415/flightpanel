@@ -2,7 +2,7 @@
 
 LIBRARY_PATH := STM32F4xx_DSP_StdPeriph_Lib_V1.8.0
 PREFIX := arm-none-eabi-
-CFLAGS := -std=c11 -Wall -Os -mcpu=cortex-m4
+CFLAGS := -std=c11 -Wall -Os -mcpu=cortex-m4 -g
 CFLAGS += -include library_config.h -ffunction-sections -fdata-sections
 CFLAGS += -I. -I$(LIBRARY_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/inc/ -I${LIBRARY_PATH}/Libraries/CMSIS/Include -I${LIBRARY_PATH}/Libraries/CMSIS/Device/ST/STM32F4xx/Include/
 

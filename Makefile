@@ -11,7 +11,7 @@ AR := $(PREFIX)ar
 GDB := $(PREFIX)gdb
 STFLASH := st-flash
 
-CFLAGS := -std=c11 -Wall -Wmissing-prototypes -Wstrict-prototypes -Os -ggdb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb -include ext-st/library_config.h -Iext-st/include -Iext-st/include-cmsis -Iext-st/include-cmsis-dev 
+CFLAGS := -std=c11 -Wall -Wmissing-prototypes -Wstrict-prototypes -Os -g3 -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb -include ext-st/library_config.h -Iext-st/include -Iext-st/include-cmsis -Iext-st/include-cmsis-dev
 CFLAGS += -ffunction-sections -fdata-sections
 #CFLAGS += -Iusb -Iusb/Core/Inc -Iusb/Class/HID/Inc
 #CFLAGS += -specs=nano.specs -specs=rdimon.specs

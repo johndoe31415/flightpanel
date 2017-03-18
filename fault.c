@@ -1,5 +1,11 @@
+#include <stdio.h>
 #include <stdbool.h>
 #include "fault.h"
+
+void fail_assertion(const char *assertion, const char *filename, int lineno) {
+	printf("Assertion failed: %s (%s:%d)\n", assertion, filename, lineno);
+	while (true);
+}
 
 void HardFault_Handler(void) {
         while (true);
