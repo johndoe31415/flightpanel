@@ -41,10 +41,10 @@ static void init_clock(void) {
 	while (!(RCC->CR & RCC_CR_HSERDY));
 
 	/* Enable APB1 */
-	RCC->APB1ENR |= RCC_APB1ENR_PWREN;	
+	RCC->APB1ENR |= RCC_APB1ENR_PWREN;
 
 	/* HSICAL 192 */
-	PWR->CR |= PWR_CR_PMODE;  
+	PWR->CR |= PWR_CR_PMODE;
 
 	/* HCLK = SYSCLK / 1 */
 	RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
@@ -92,7 +92,7 @@ static void init_uart(void) {
 	/* Connect PXx to USARTx_Tx*/
 	GPIO_PinAFConfig(GPIOD, UART_TX_SOURCE, GPIO_AF_USART2);
 	GPIO_PinAFConfig(GPIOD, UART_RX_SOURCE, GPIO_AF_USART2);
-	
+
 	{
 		GPIO_InitTypeDef GPIO_InitStructure = {
 			.GPIO_Pin = GPIO_Pin_5,
@@ -127,10 +127,10 @@ static void init_uart(void) {
 		.USART_Mode = USART_Mode_Rx | USART_Mode_Tx,
 	};
 	USART_Init(USART2, &USART_InitStructure);
-	
+
 	/* Enable USART */
 	USART_Cmd(USART2, ENABLE);
-	
+
 	/* Enable the USARTx Interrupt */
 	NVIC_InitTypeDef NVIC_InitStructure = {
 		.NVIC_IRQChannel = USART2_IRQn,
@@ -253,6 +253,16 @@ static void init_spi_dma(void) {
 		.DMA_PeripheralBurst = DMA_PeripheralBurst_Single,
 	};
 	DMA_Init(DMA1_Stream4, &DMA_InitStructure);
+
+	/* Enable IRQ */
+	NVIC_InitTypeDef NVIC_InitStructure = {
+		.NVIC_IRQChannel = DMA1_Stream4_IRQn,
+		.NVIC_IRQChannelPreemptionPriority = 0,
+		.NVIC_IRQChannelSubPriority = 0,
+		.NVIC_IRQChannelCmd = ENABLE,
+	};
+	NVIC_Init(&NVIC_InitStructure);
+	DMA_ITConfig(DMA1_Stream4, DMA_IT_TC, ENABLE);
 }
 
 void SystemInit() {

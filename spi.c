@@ -2,6 +2,13 @@
 #include <stm32f4xx_dma.h>
 #include "spi.h"
 
+void DMA1_Stream4_IRQHandler(void) {
+	if (DMA_GetITStatus(DMA1_Stream4, DMA_IT_TCIF4)) {
+		DMA_ClearITPendingBit(DMA1_Stream4, DMA_IT_TCIF4);
+		DMA_Cmd(DMA1_Stream4, DISABLE);
+	}
+}
+
 static uint8_t spi_transmit_byte(uint8_t byte) {
 	// Wait until SPI register flushed
 	while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET);
@@ -27,8 +34,4 @@ void spi_tx_data_dma(const void *data, int length) {
 	DMA1_Stream4->NDTR = length;
 	DMA_Cmd(DMA1_Stream4, ENABLE);
 	SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Tx, ENABLE);
-
-	while (DMA_GetFlagStatus(DMA1_Stream4, DMA_FLAG_TCIF4) == RESET);
-	DMA_ClearFlag(DMA1_Stream4, DMA_FLAG_TCIF4);
-	DMA_Cmd(DMA1_Stream4, DISABLE);
 }
