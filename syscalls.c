@@ -1,13 +1,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include <sys/stat.h>
 
 #include "rs232.h"
+#include "syscalls.h"
 
 extern uint8_t _ebss;
 static uint8_t *current_break = &_ebss;
-struct _reent;
 
 void *_sbrk(intptr_t increment) {
 	void *retval = current_break;

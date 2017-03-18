@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include "fault.h"
 
 void HardFault_Handler(void) {
         while (true);
