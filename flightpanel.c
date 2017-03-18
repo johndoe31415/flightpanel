@@ -10,11 +10,6 @@
 #include "rs232.h"
 #include "rotary.h"
 
-void muh(void);
-void muh(void) {
-	SPI_SendData(SPI2, 0xab);
-}
-
 int main(void) {
 	printf("Reset successful.\n");
 
@@ -37,7 +32,7 @@ int main(void) {
 			}
 			i = 0;
 
-			muh();
+			spi_tx_data("muhkuh", 6);
 		}
 
 	}

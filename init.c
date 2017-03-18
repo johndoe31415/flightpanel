@@ -213,7 +213,7 @@ static void init_spi(void) {
 	}
 
 	SPI_InitTypeDef SPI_InitStructure = {
-		.SPI_Direction = SPI_Direction_1Line_Tx,
+		.SPI_Direction = SPI_Direction_2Lines_FullDuplex,
 		.SPI_Mode = SPI_Mode_Master,
 		.SPI_DataSize = SPI_DataSize_8b,
 		.SPI_CPOL = SPI_CPOL_Low,
