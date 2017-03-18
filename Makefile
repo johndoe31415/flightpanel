@@ -1,4 +1,4 @@
-.PHONY: all clean readflash program bindump gdb gdbserver
+.PHONY: all clean readflash program bindump gdb gdbserver console
 
 TARGETS := flightpanel flightpanel.bin
 PROCESSOR := STM32F407VGT6
@@ -32,6 +32,8 @@ readflash:
 gdb:
 	$(GDB) flightpanel -ex "target extended-remote :4242"
 
+console:
+	picocom --baud 115200 /dev/ttyUSB0
 
 program: flightpanel.bin
 	-killall st-util

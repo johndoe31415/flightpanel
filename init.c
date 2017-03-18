@@ -3,6 +3,7 @@
 #include <stm32f4xx_tim.h>
 #include <stm32f4xx_usart.h>
 #include <stm32f4xx_flash.h>
+#include <stm32f4xx_spi.h>
 #include <misc.h>
 
 #define PLL_M					8
@@ -38,8 +39,10 @@ static void init_clock(void) {
 	/* Wait until HSE ready */
 	while (!(RCC->CR & RCC_CR_HSERDY));
 
-	/* Enable high performance mode, System frequency up to 168 MHz */
-	RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+	/* Enable APB1 */
+	RCC->APB1ENR |= RCC_APB1ENR_PWREN;	
+
+	/* HSICAL 192 */
 	PWR->CR |= PWR_CR_PMODE;  
 
 	/* HCLK = SYSCLK / 1 */
@@ -67,7 +70,7 @@ static void init_clock(void) {
 	RCC->CFGR &= ~RCC_CFGR_SW;
 	RCC->CFGR |= RCC_CFGR_SW_PLL;
 
-	/* Wait till the main PLL is used as system clock source */
+	/* Wait until the main PLL is used as system clock source */
 	while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL);
 }
 
@@ -179,6 +182,54 @@ static void init_rotary_encoders(void) {
 	GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
+static void init_spi(void) {
+	// SPI2 with PinPack 2 (PB13 = SCK, PB14 = MISO, PB15 = MOSI) on APB1, GPIOB on AHB1
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_SPI2);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource14, GPIO_AF_SPI2);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource15, GPIO_AF_SPI2);
+
+	{
+		GPIO_InitTypeDef GPIO_InitStructure = {
+			.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_15,
+			.GPIO_Mode = GPIO_Mode_AF,
+			.GPIO_OType = GPIO_OType_PP,
+			.GPIO_Speed = GPIO_Speed_2MHz,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
+		};
+		GPIO_Init(GPIOB, &GPIO_InitStructure);
+	}
+	{
+		GPIO_InitTypeDef GPIO_InitStructure = {
+			.GPIO_Pin = GPIO_Pin_14,
+			.GPIO_Mode = GPIO_Mode_AF,
+			.GPIO_OType = GPIO_OType_OD,
+			.GPIO_Speed = GPIO_Speed_2MHz,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
+		};
+		GPIO_Init(GPIOB, &GPIO_InitStructure);
+	}
+
+	SPI_InitTypeDef SPI_InitStructure = {
+		.SPI_Direction = SPI_Direction_1Line_Tx,
+		.SPI_Mode = SPI_Mode_Master,
+		.SPI_DataSize = SPI_DataSize_8b,
+		.SPI_CPOL = SPI_CPOL_Low,
+		.SPI_CPHA = SPI_CPHA_1Edge,
+		.SPI_NSS = SPI_NSS_Soft,
+		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32,
+		.SPI_FirstBit = SPI_FirstBit_MSB,
+	};
+	SPI_Init(SPI2, &SPI_InitStructure);
+	SPI_Cmd(SPI2, ENABLE);
+#if 0
+  /* Enable DMA SPI TX Stream */
+  DMA_Cmd(SPIx_TX_DMA_STREAM,ENABLE);
+#endif
+}
+
 void SystemInit() {
 	__disable_irq();
 	init_clock();
@@ -186,5 +237,6 @@ void SystemInit() {
 	init_uart();
 	init_timer();
 	init_rotary_encoders();
+	init_spi();
 	__enable_irq();
 }

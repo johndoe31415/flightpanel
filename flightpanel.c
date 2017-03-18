@@ -5,10 +5,15 @@
 #include <string.h>
 
 #include <stm32f4xx_gpio.h>
-#include <stm32f4xx_tim.h>
+#include <stm32f4xx_spi.h>
 
 #include "rs232.h"
 #include "rotary.h"
+
+void muh(void);
+void muh(void) {
+	SPI_SendData(SPI2, 0xab);
+}
 
 int main(void) {
 	printf("Reset successful.\n");
@@ -31,7 +36,10 @@ int main(void) {
 				printf("Value: %d\n", rotary.value);
 			}
 			i = 0;
+
+			muh();
 		}
+
 	}
 
 	return 0;
