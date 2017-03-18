@@ -5,44 +5,35 @@
 #include <string.h>
 
 #include <stm32f4xx_gpio.h>
-#if 0
-#include <usbd_desc.h>
-#include <usbd_core.h>
-#include <usbd_hid.h>
-#endif
+#include <stm32f4xx_tim.h>
 
 #include "rs232.h"
+#include "rotary.h"
 
 int main(void) {
-	int i = 0;
 	printf("Reset successful.\n");
-#if 0
-	USBD_HandleTypeDef USBD_Device;
 
-	/* Init Device Library */
-	USBD_Init(&USBD_Device, &HID_Desc, 0);
+	struct rotary_encoder_t rotary = {
+		.value = 0,
+		.max_value = 1200,
+		.wrap_around = true,
+	};
 
-	/* Add Supported Class */
-	USBD_RegisterClass(&USBD_Device, USBD_HID_CLASS);
-
-	/* Start Device Process */
-	USBD_Start(&USBD_Device);
-#endif
-
+	volatile uint32_t i = 0;
 	while (1) {
 		i++;
-		if (i == 0x100000) {
+		if (i == 0x800) {
 			GPIOD->ODR ^= GPIO_Pin_12;
-		} else if (i == 0x200000) {
-			GPIOD->ODR ^= GPIO_Pin_13;
-		} else if (i == 0x400000) {
-			GPIOD->ODR ^= GPIO_Pin_14;
-		} else if (i == 0x800000) {
-			GPIOD->ODR ^= GPIO_Pin_15;
+
+			bool v1 = (GPIOD->IDR & GPIO_Pin_10) != 0;
+			bool v2 = (GPIOD->IDR & GPIO_Pin_11) != 0;
+			if (rotary_encoder_update(&rotary, v1, v2)) {
+				printf("Value: %d\n", rotary.value);
+			}
 			i = 0;
-			printf("Round trip!\n");
 		}
 	}
+
 	return 0;
 }
 

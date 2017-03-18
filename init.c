@@ -5,24 +5,30 @@
 #include <stm32f4xx_flash.h>
 #include <misc.h>
 
-#define PLL_M      8
-#define PLL_N      336
-#define PLL_P      2
-#define PLL_Q      7
+#define PLL_M					8
+#define PLL_N					336
+#define PLL_P					2
+#define PLL_Q					7
 
-#define UART_TX_PIN                 GPIO_Pin_5
-#define UART_TX_GPIO_PORT           GPIOD
-#define UART_TX_GPIO_CLK            RCC_AHB1Periph_GPIOD
-#define UART_TX_SOURCE              GPIO_PinSource5
-#define UART_TX_AF                  GPIO_AF_USART2
+#define RUNNING_CLK_FREQUENCY	168000000UL
 
-#define UART_RX_PIN                 GPIO_Pin_6
-#define UART_RX_GPIO_PORT           GPIOD
-#define UART_RX_GPIO_CLK            RCC_AHB1Periph_GPIOD
-#define UART_RX_SOURCE              GPIO_PinSource6
-#define UART_RX_AF                  GPIO_AF_USART2
+#define TIM3_CLK_FREQUENCY		2000
+#define TIM3_PRESCALER			(RUNNING_CLK_FREQUENCY / 2 / TIM3_CLK_FREQUENCY)
+#define TIM3_PERIOD				(TIM3_CLK_FREQUENCY - 1)
 
-#define UART_IRQn                   USART2_IRQn
+#define UART_TX_PIN				GPIO_Pin_5
+#define UART_TX_GPIO_PORT		GPIOD
+#define UART_TX_GPIO_CLK		RCC_AHB1Periph_GPIOD
+#define UART_TX_SOURCE			GPIO_PinSource5
+#define UART_TX_AF				GPIO_AF_USART2
+
+#define UART_RX_PIN				GPIO_Pin_6
+#define UART_RX_GPIO_PORT		GPIOD
+#define UART_RX_GPIO_CLK		RCC_AHB1Periph_GPIOD
+#define UART_RX_SOURCE			GPIO_PinSource6
+#define UART_RX_AF				GPIO_AF_USART2
+
+#define UART_IRQn				USART2_IRQn
 
 
 static void init_clock(void) {
@@ -68,64 +74,117 @@ static void init_clock(void) {
 
 static void init_gpio(void) {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitTypeDef GPIO_InitStructure = {
+		.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15,
+		.GPIO_Mode = GPIO_Mode_OUT,
+		.GPIO_OType = GPIO_OType_PP,
+		.GPIO_Speed = GPIO_Speed_2MHz,
+		.GPIO_PuPd = GPIO_PuPd_NOPULL,
+	};
 	GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
 static void init_uart(void) {
-        /* Connect PXx to USARTx_Tx*/
-        GPIO_PinAFConfig(GPIOD, UART_TX_SOURCE, GPIO_AF_USART2);
-        GPIO_PinAFConfig(GPIOD, UART_RX_SOURCE, GPIO_AF_USART2);
-        
-        GPIO_InitTypeDef GPIO_InitStructure;
-        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
-        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-        GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-        GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-        GPIO_Init(GPIOD, &GPIO_InitStructure);
-        
-        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
-        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-        GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
-        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-        GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-        GPIO_Init(GPIOD, &GPIO_InitStructure);
+	/* Connect PXx to USARTx_Tx*/
+	GPIO_PinAFConfig(GPIOD, UART_TX_SOURCE, GPIO_AF_USART2);
+	GPIO_PinAFConfig(GPIOD, UART_RX_SOURCE, GPIO_AF_USART2);
+	
+	{
+		GPIO_InitTypeDef GPIO_InitStructure = {
+			.GPIO_Pin = GPIO_Pin_5,
+			.GPIO_Mode = GPIO_Mode_AF,
+			.GPIO_OType = GPIO_OType_PP,
+			.GPIO_Speed = GPIO_Speed_2MHz,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
+		};
+		GPIO_Init(GPIOD, &GPIO_InitStructure);
+	}
+	{
+		GPIO_InitTypeDef GPIO_InitStructure = {
+			.GPIO_Pin = GPIO_Pin_6,
+			.GPIO_Mode = GPIO_Mode_AF,
+			.GPIO_OType = GPIO_OType_OD,
+			.GPIO_Speed = GPIO_Speed_2MHz,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
+		};
+		GPIO_Init(GPIOD, &GPIO_InitStructure);
+	}
 
-        /* USART configuration */
-        RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-        RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+	/* USART configuration */
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 
-        USART_InitTypeDef USART_InitStructure;
-        USART_InitStructure.USART_BaudRate = 115200;
-        USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-        USART_InitStructure.USART_StopBits = USART_StopBits_1;
-        USART_InitStructure.USART_Parity = USART_Parity_No;
-        USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-        USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-        USART_Init(USART2, &USART_InitStructure);
-        
-        /* Enable the USARTx Interrupt */
-        NVIC_InitTypeDef NVIC_InitStructure;
-        NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-        NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-        NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-        NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-        NVIC_Init(&NVIC_InitStructure);
+	USART_InitTypeDef USART_InitStructure = {
+		.USART_BaudRate = 115200,
+		.USART_WordLength = USART_WordLength_8b,
+		.USART_StopBits = USART_StopBits_1,
+		.USART_Parity = USART_Parity_No,
+		.USART_HardwareFlowControl = USART_HardwareFlowControl_None,
+		.USART_Mode = USART_Mode_Rx | USART_Mode_Tx,
+	};
+	USART_Init(USART2, &USART_InitStructure);
+	
+	/* Enable USART */
+	USART_Cmd(USART2, ENABLE);
+	
+	/* Enable the USARTx Interrupt */
+	NVIC_InitTypeDef NVIC_InitStructure = {
+		.NVIC_IRQChannel = USART2_IRQn,
+		.NVIC_IRQChannelPreemptionPriority = 0,
+		.NVIC_IRQChannelSubPriority = 0,
+		.NVIC_IRQChannelCmd = ENABLE,
+	};
+	NVIC_Init(&NVIC_InitStructure);
+	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 
-        /* Enable USART */
-        USART_Cmd(USART2, ENABLE);
-        
-        USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+	/* Send a null byte (first byte will be lost */
+	USART_SendData(USART2, 0);
+}
+
+static void init_timer(void) {
+	/* Enable clock */
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+
+	/* Setup time base */
+	TIM_TimeBaseInitTypeDef t = {
+		.TIM_Prescaler = TIM3_PRESCALER,
+		.TIM_CounterMode  = TIM_CounterMode_Up,
+		.TIM_Period = TIM3_PERIOD,
+		.TIM_ClockDivision = TIM_CKD_DIV1,
+		.TIM_RepetitionCounter = 0,
+	};
+	TIM_TimeBaseInit(TIM3, &t);
+	TIM_Cmd(TIM3, ENABLE);
+
+	/* Enable IRQ */
+	NVIC_InitTypeDef NVIC_InitStructure = {
+		.NVIC_IRQChannel = TIM3_IRQn,
+		.NVIC_IRQChannelPreemptionPriority = 0,
+		.NVIC_IRQChannelSubPriority = 0,
+		.NVIC_IRQChannelCmd = ENABLE,
+	};
+	NVIC_Init(&NVIC_InitStructure);
+	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+}
+
+static void init_rotary_encoders(void) {
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+	GPIO_InitTypeDef GPIO_InitStructure = {
+		.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11,
+		.GPIO_Mode = GPIO_Mode_IN,
+		.GPIO_OType = GPIO_OType_OD,
+		.GPIO_Speed = GPIO_Speed_2MHz,
+		.GPIO_PuPd = GPIO_PuPd_UP,
+	};
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
 void SystemInit() {
+	__disable_irq();
 	init_clock();
 	init_gpio();
 	init_uart();
+	init_timer();
+	init_rotary_encoders();
+	__enable_irq();
 }

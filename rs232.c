@@ -12,6 +12,6 @@ void USART2_IRQHandler(void) {
 }
 
 void rs232_transmitchar(char c) {
-	USART_SendData(USART2, c);
 	while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);	
+	USART_SendData(USART2, c);
 }

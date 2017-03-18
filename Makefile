@@ -12,13 +12,14 @@ GDB := $(PREFIX)gdb
 STFLASH := st-flash
 
 CFLAGS := -std=c11 -Wall -Os -ggdb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb -include ext-st/library_config.h -Iext-st/include -Iext-st/include-cmsis -Iext-st/include-cmsis-dev 
+CFLAGS += -ffunction-sections -fdata-sections
 #CFLAGS += -Iusb -Iusb/Core/Inc -Iusb/Class/HID/Inc
 #CFLAGS += -specs=nano.specs -specs=rdimon.specs
-LDFLAGS := -Text-st/stm32f407.ld
+LDFLAGS := -Text-st/stm32f407.ld -Wl,--gc-sections
 STATICLIBS := ext-st/init.o ext-st/stdperiph.a
 #usb/usb.a
 
-OBJS := flightpanel.o syscalls.o init.o rs232.o fault.o
+OBJS := flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o
 
 all: $(TARGETS)
 
@@ -33,6 +34,7 @@ gdb:
 
 
 program: flightpanel.bin
+	-killall st-util
 	$(STFLASH) write $< 0x08000000
 
 bindump: flightpanel.bin
