@@ -1,13 +1,22 @@
 .*.swp
 *.o
 
+__pycache__
+
 flightpanel
 flightpanel.bin
 
-en.stm32f4_dsp_stdperiph_lib.zip
 stdperiph.a
+en.stm32f4_dsp_stdperiph_lib.zip
 STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/
 ext-st/include
 ext-st/include-cmsis
 ext-st/include-cmsis-dev
 ext-st/stm32f407.ld
+
+cube.a
+en.stm32cubef4.zip
+STM32Cube_FW_F4_V1.15.0/
+cube/include-hal
+cube/include-core
+cube/include-cmsis

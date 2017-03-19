@@ -3,16 +3,15 @@
 #include <stdint.h>
 #include <usbd_def.h>
 #include <usbd_core.h>
-#include <usbd_hid.h>
 #include <usbd_conf.h>
-//#include <stm32f4xx_hal.h>
+#include "usbd_hid.h"
 
+typedef struct anon USB_OTG_GlobalTypeDef;
+#include "stm32f4xx_hal.h"
 #include "usb.h"
 
-typedef PCD_HandleTypeDef;
 extern PCD_HandleTypeDef hpcd;
 static USBD_HandleTypeDef USBD_Device;
-extern USBD_DescriptorsTypeDef HID_Desc;
 
 void OTG_FS_WKUP_IRQHandler(void) {
 	printf("Unhandled: OTG FS Wakeup IRQ\n");
@@ -23,14 +22,31 @@ void OTG_FS_IRQHandler(void) {
 	HAL_PCD_IRQHandler(&hpcd);
 }
 
+struct report {
+	uint8_t value;
+};
+
 void init_usb_late(void) {
-  /* Init Device Library */
-  USBD_Init(&USBD_Device, &HID_Desc, 0);
+	/* Init Device Library */
+	USBD_Init(&USBD_Device, &FlightPanelUSBDescriptors, 0);
 
-  /* Add Supported Class */
-  USBD_RegisterClass(&USBD_Device, USBD_HID_CLASS);
+	/* Add Supported Class */
+	USBD_RegisterClass(&USBD_Device, &FlightPanelUSBHIDClass);
 
-  /* Start Device Process */
-  USBD_Start(&USBD_Device);
+	/* Start Device Process */
+	USBD_Start(&USBD_Device);
 
+	struct report report = { 0 };
+	while (true) {
+		report.value++;
+		if (report.value == 101) {
+			report.value = 0;
+		}
+
+		USBD_HID_SendReport(&USBD_Device, (uint8_t*)&report, 1);
+		for (volatile int i = 0; i < 1000000; i++) { }
+		printf("Report %d\n", report.value);
+
+	}
 }
+

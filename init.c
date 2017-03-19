@@ -267,6 +267,7 @@ static void init_spi_dma(void) {
 	DMA_ITConfig(DMA1_Stream4, DMA_IT_TC, ENABLE);
 }
 
+#if 0
 static void init_usb(void) {
 	/* VBUS = PA9, ID = PA10, D- = PA11, D+ = PA12 */
 	/* PowerSwitchOn = PC0, OverCurrent = PD5 */
@@ -336,6 +337,7 @@ static void init_usb(void) {
 	};
 	NVIC_Init(&NVIC_InitStructure);
 }
+#endif
 
 static void init_systick(void) {
 	SysTick_Config(RUNNING_CLK_FREQUENCY / 1000);

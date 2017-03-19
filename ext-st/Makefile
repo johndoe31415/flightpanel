@@ -28,7 +28,7 @@ init.o: $(LIBRARY_PATH)/Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc
 	${PREFIX}gcc -c ${CFLAGS} -o $@ $<
 
 stm32f407.ld: $(LIBRARY_PATH)/Project/STM32F4xx_StdPeriph_Templates/SW4STM32/STM32F40_41xxx/STM32F417IGHx_FLASH.ld
-	cp $< $@
+	cp -n $< $@
 
 .c.o:
 	${PREFIX}gcc -c ${CFLAGS} -o $@ $<
