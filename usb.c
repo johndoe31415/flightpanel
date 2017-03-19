@@ -36,14 +36,14 @@ void init_usb_late(void) {
 	/* Start Device Process */
 	USBD_Start(&USBD_Device);
 
-	struct report report = { 0 };
+	struct hid_report_t report = { 0 };
 	while (true) {
 		report.value++;
 		if (report.value == 101) {
 			report.value = 0;
 		}
 
-		USBD_HID_SendReport(&USBD_Device, (uint8_t*)&report, 1);
+		USBD_HID_SendReport(&USBD_Device, &report);
 		for (volatile int i = 0; i < 1000000; i++) { }
 		printf("Report %d\n", report.value);
 

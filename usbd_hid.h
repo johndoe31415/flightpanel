@@ -1,6 +1,10 @@
 #ifndef __USBD_HID_H__
 #define __USBD_HID_H__
 
+struct hid_report_t {
+	uint8_t value;
+} __attribute__ ((packed));
+
 typedef enum {
 	HID_IDLE = 0,
 	HID_BUSY,
@@ -60,7 +64,7 @@ extern USBD_DescriptorsTypeDef FlightPanelUSBDescriptors;
 extern USBD_ClassTypeDef FlightPanelUSBHIDClass;
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
-uint8_t USBD_HID_SendReport(USBD_HandleTypeDef *pdev, uint8_t *report, uint16_t len);
+uint8_t USBD_HID_SendReport(USBD_HandleTypeDef *pdev, const struct hid_report_t *report);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

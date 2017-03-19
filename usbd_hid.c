@@ -184,12 +184,12 @@ static uint8_t USBD_HID_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *re
 	return USBD_OK;
 }
 
-uint8_t USBD_HID_SendReport(USBD_HandleTypeDef *pdev, uint8_t *report, uint16_t len) {
+uint8_t USBD_HID_SendReport(USBD_HandleTypeDef *pdev, const struct hid_report_t *report) {
 	USBD_HID_HandleTypeDef *hhid = (USBD_HID_HandleTypeDef *) pdev->pClassData;
 
 	if ((pdev->dev_state == USBD_STATE_CONFIGURED) && (hhid->state == HID_IDLE)) {
 		hhid->state = HID_BUSY;
-		USBD_LL_Transmit(pdev, HID_EPIN_ADDR, report, len);
+		USBD_LL_Transmit(pdev, HID_EPIN_ADDR, (uint8_t*)report, sizeof(struct hid_report_t));
 	}
 	return USBD_OK;
 }
