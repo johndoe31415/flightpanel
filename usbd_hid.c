@@ -18,7 +18,7 @@
 
 #define MAX_POWER_MILLIAMPS									100
 #define POLLING_INTERVAL_MILLISECONDS						20
-#define ENDPOINT_COUNT										1
+#define ENDPOINT_COUNT										2
 
 static uint8_t USBDeviceDescriptor[] = {
 	18,																			/* bLength */
@@ -48,8 +48,8 @@ static uint8_t HIDReportDescriptor[] = {
 };
 #define HID_REPORT_DESCRIPTOR_SIZE_BYTES					sizeof(HIDReportDescriptor)
 
-#define USB_HID_CONFIGURATION_DESCRIPTOR_SIZE_BYTES			34
-#define USB_HID_DESCRIPTOR_OFFSET							18
+#define USB_HID_CONFIGURATION_DESCRIPTOR_SIZE_BYTES			(9 + 9 + 9 + 7 + 7)
+#define USB_HID_DESCRIPTOR_OFFSET							(9 + 9)
 static uint8_t USBD_HID_CfgDesc[USB_HID_CONFIGURATION_DESCRIPTOR_SIZE_BYTES] = {
 	// Configuration Descriptor
 	9, 																			/* bLength */
@@ -81,12 +81,20 @@ static uint8_t USBD_HID_CfgDesc[USB_HID_CONFIGURATION_DESCRIPTOR_SIZE_BYTES] = {
 	DESCRIPTOR_TYPE_HID_REPORT,													/* bDescriptorType*/
 	UINT16(HID_REPORT_DESCRIPTOR_SIZE_BYTES),									/* wItemLength */
 
-	// Endpoint Descriptor
+	// Endpoint Descriptor Interrupt IN
 	7,																			/* bLength */
 	DESCRIPTOR_TYPE_ENDPOINT,													/* bDescriptorType */
 	HID_EPIN_ADDR,																/* bEndpointAddress */
 	EP_BMATTR_TT_INTERRUPT,														/* bmAttributes */
 	UINT16(HID_EPIN_SIZE),														/* wMaxPacketSize */
+	POLLING_INTERVAL_MILLISECONDS,												/* bInterval */
+
+	// Endpoint Descriptor Interrupt OUT
+	7,																			/* bLength */
+	DESCRIPTOR_TYPE_ENDPOINT,													/* bDescriptorType */
+	HID_EPOUT_ADDR,																/* bEndpointAddress */
+	EP_BMATTR_TT_INTERRUPT,														/* bmAttributes */
+	UINT16(HID_EPOUT_SIZE),														/* wMaxPacketSize */
 	POLLING_INTERVAL_MILLISECONDS,												/* bInterval */
 };
 
@@ -108,6 +116,7 @@ static uint8_t usbd_desc_string_buffer[USBD_MAX_STR_DESC_SIZ];
 static uint8_t USBD_HID_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx) {
 	uint8_t ret = 0;
 	USBD_LL_OpenEP(pdev, HID_EPIN_ADDR, USBD_EP_TYPE_INTR, HID_EPIN_SIZE);
+	USBD_LL_OpenEP(pdev, HID_EPOUT_ADDR, USBD_EP_TYPE_INTR, HID_EPOUT_SIZE);
 	pdev->pClassData = USBD_malloc(sizeof(USBD_HID_HandleTypeDef));
 	if (pdev->pClassData) {
 		((USBD_HID_HandleTypeDef *) pdev->pClassData)->state = HID_IDLE;
@@ -119,6 +128,7 @@ static uint8_t USBD_HID_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx) {
 
 static uint8_t USBD_HID_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx) {
 	USBD_LL_CloseEP(pdev, HID_EPIN_ADDR);
+	USBD_LL_CloseEP(pdev, HID_EPOUT_ADDR);
 	if (pdev->pClassData != NULL) {
 		USBD_free(pdev->pClassData);
 		pdev->pClassData = NULL;
@@ -200,15 +210,20 @@ static uint8_t* USBD_HID_GetCfgDesc(uint16_t *length) {
 }
 
 static uint8_t USBD_HID_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum) {
-  /* Ensure that the FIFO is empty before a new transfer, this condition could
-     be caused by  a new transfer before the end of the previous transfer */
-  ((USBD_HID_HandleTypeDef *) pdev->pClassData)->state = HID_IDLE;
-  return USBD_OK;
+	/* Ensure that the FIFO is empty before a new transfer, this condition could
+	   be caused by  a new transfer before the end of the previous transfer */
+	((USBD_HID_HandleTypeDef *) pdev->pClassData)->state = HID_IDLE;
+	return USBD_OK;
+}
+
+static uint8_t USBD_HID_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum) {
+	printf("DataOut!\n");
+	return USBD_OK;
 }
 
 static uint8_t* USBD_HID_GetDeviceQualifierDesc(uint16_t *length) {
-  *length = sizeof(USBD_HID_DeviceQualifierDesc);
-  return USBD_HID_DeviceQualifierDesc;
+	*length = sizeof(USBD_HID_DeviceQualifierDesc);
+	return USBD_HID_DeviceQualifierDesc;
 }
 
 static uint8_t* USBD_HID_DeviceDescriptor(USBD_SpeedTypeDef speed, uint16_t *length) {
@@ -263,6 +278,7 @@ USBD_ClassTypeDef FlightPanelUSBHIDClass = {
 	.DeInit = USBD_HID_DeInit,
 	.Setup = USBD_HID_Setup,
 	.DataIn = USBD_HID_DataIn,
+	.DataOut = USBD_HID_DataOut,
 	.GetFSConfigDescriptor = USBD_HID_GetCfgDesc,
 	.GetOtherSpeedConfigDescriptor = USBD_HID_GetCfgDesc,
 	.GetDeviceQualifierDescriptor = USBD_HID_GetDeviceQualifierDesc,

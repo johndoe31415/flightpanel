@@ -22,6 +22,9 @@ typedef struct {
 #define HID_EPIN_ADDR										0x81
 #define HID_EPIN_SIZE										0x04
 
+#define HID_EPOUT_ADDR										0x01
+#define HID_EPOUT_SIZE										0x04
+
 #define HID_REQ_SET_PROTOCOL								0x0b
 #define HID_REQ_GET_PROTOCOL								0x03
 #define HID_REQ_SET_IDLE									0x0a
