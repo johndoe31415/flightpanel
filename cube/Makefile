@@ -21,7 +21,7 @@ setup:
 	rm -f ${LIBRARY_PATH}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_conf_template.h
 	cp -n ${LIBRARY_PATH}/Projects/STM32F4-Discovery/Demonstrations/Inc/usbd_conf.h .
 	cp -n ${LIBRARY_PATH}/Projects/STM32F4-Discovery/Demonstrations/Src/usbd_conf.c .
-	cp -n ${LIBRARY_PATH}/Projects/STM32F401-Discovery/Examples/BSP/Inc/stm32f4xx_hal_conf.h .
+	cat ${LIBRARY_PATH}/Projects/STM32F401-Discovery/Examples/BSP/Inc/stm32f4xx_hal_conf.h | sed "s/.*#define assert_param.*//g;" >stm32f4xx_hal_conf.h
 	ln -fs ${LIBRARY_PATH}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/ include-core
 	ln -fs ${LIBRARY_PATH}/Drivers/STM32F4xx_HAL_Driver/Inc include-hal
 	ln -fs ${LIBRARY_PATH}/Drivers/CMSIS/Device/ST/STM32F4xx/Include include-cmsis

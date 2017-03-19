@@ -1,4 +1,5 @@
 #define STM32F40_41xxx
+#define HAL_PCD_MODULE_ENABLED
 #define STM32F407xx
 #define HSE_VALUE			((uint32_t)8000000)
 //#define assert_param(x)
