@@ -22,10 +22,6 @@ void OTG_FS_IRQHandler(void) {
 	HAL_PCD_IRQHandler(&hpcd);
 }
 
-struct report {
-	uint8_t value;
-};
-
 void init_usb_late(void) {
 	/* Init Device Library */
 	USBD_Init(&USBD_Device, &FlightPanelUSBDescriptors, 0);
@@ -36,8 +32,9 @@ void init_usb_late(void) {
 	/* Start Device Process */
 	USBD_Start(&USBD_Device);
 
+#if 0
 	struct hid_report_t report = { 0 };
-	while (true) {
+	while (false) {
 		report.value++;
 		if (report.value == 101) {
 			report.value = 0;
@@ -46,7 +43,7 @@ void init_usb_late(void) {
 		USBD_HID_SendReport(&USBD_Device, &report);
 		for (volatile int i = 0; i < 1000000; i++) { }
 		printf("Report %d\n", report.value);
-
 	}
+#endif
 }
 
