@@ -11,9 +11,12 @@
 #include "rs232.h"
 #include "rotary.h"
 #include "spi.h"
+#include "usb.h"
 
 int main(void) {
 	printf("Reset successful.\n");
+	init_usb_late();
+	printf("USB initialized.\n");
 
 	struct rotary_encoder_t rotary = {
 		.value = 0,
