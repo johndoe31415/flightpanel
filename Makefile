@@ -32,7 +32,7 @@ gdb:
 	$(GDB) flightpanel -ex "target extended-remote :4242"
 
 console:
-	picocom --baud 115200 /dev/ttyUSB1
+	picocom --baud 115200 /dev/ttyUSB*
 
 program: flightpanel.bin
 	-killall st-util

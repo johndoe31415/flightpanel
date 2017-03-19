@@ -5,25 +5,13 @@ struct hid_report_t {
 	uint8_t value;
 } __attribute__ ((packed));
 
-typedef enum {
-	HID_IDLE = 0,
-	HID_BUSY,
-} HID_StateTypeDef;
-
-typedef struct {
-	uint32_t Protocol;
-	uint32_t IdleState;
-	uint32_t AltSetting;
-	HID_StateTypeDef state;
-} USBD_HID_HandleTypeDef;
-
 #define UINT16(x)											((x) >> 0) & 0xff, ((x) >> 8) & 0xff
 
 #define HID_EPIN_ADDR										0x81
 #define HID_EPIN_SIZE										0x04
 
 #define HID_EPOUT_ADDR										0x01
-#define HID_EPOUT_SIZE										0x04
+#define HID_EPOUT_SIZE										0x10
 
 #define HID_REQ_SET_PROTOCOL								0x0b
 #define HID_REQ_GET_PROTOCOL								0x03
@@ -62,6 +50,19 @@ typedef struct {
 #define NINTERFACE_PROTOCOL_NONE							0
 
 #define BCOUNTRY_CODE_UNSUPPORTED							0
+
+typedef enum {
+	HID_IDLE = 0,
+	HID_BUSY,
+} HID_StateTypeDef;
+
+typedef struct {
+	uint32_t Protocol;
+	uint32_t IdleState;
+	uint32_t AltSetting;
+	HID_StateTypeDef state;
+	uint8_t out_buffer[HID_EPOUT_SIZE];
+} USBD_HID_HandleTypeDef;
 
 extern USBD_DescriptorsTypeDef FlightPanelUSBDescriptors;
 extern USBD_ClassTypeDef FlightPanelUSBHIDClass;

@@ -119,7 +119,9 @@ static uint8_t USBD_HID_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx) {
 	USBD_LL_OpenEP(pdev, HID_EPOUT_ADDR, USBD_EP_TYPE_INTR, HID_EPOUT_SIZE);
 	pdev->pClassData = USBD_malloc(sizeof(USBD_HID_HandleTypeDef));
 	if (pdev->pClassData) {
-		((USBD_HID_HandleTypeDef *) pdev->pClassData)->state = HID_IDLE;
+		USBD_HID_HandleTypeDef *hhid = (USBD_HID_HandleTypeDef*)pdev->pClassData;
+		hhid->state = HID_IDLE;
+		USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR, hhid->out_buffer, HID_EPOUT_SIZE);
 	} else {
 		ret = 1;
 	}
@@ -217,7 +219,9 @@ static uint8_t USBD_HID_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum) {
 }
 
 static uint8_t USBD_HID_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum) {
-	printf("DataOut!\n");
+	USBD_HID_HandleTypeDef *hhid = (USBD_HID_HandleTypeDef*)pdev->pClassData;
+	printf("DataOut! %02x %02x\n", hhid->out_buffer[0], hhid->out_buffer[1]);
+	USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR , hhid->out_buffer, HID_EPOUT_SIZE);
 	return USBD_OK;
 }
 
