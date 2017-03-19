@@ -4,10 +4,10 @@ LIBRARY_PATH := STM32Cube_FW_F4_V1.15.0
 PREFIX := arm-none-eabi-
 CFLAGS := -std=c11 -Wall -Os -mcpu=cortex-m4 -g
 CFLAGS += -include ../library_config.h -ffunction-sections -fdata-sections
-CFLAGS += -I. -I$(LIBRARY_PATH)/Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I$(LIBRARY_PATH)/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc -I$(LIBRARY_PATH)/Drivers/STM32F4xx_HAL_Driver/Inc -I$(LIBRARY_PATH)/Drivers/CMSIS/Device/ST/STM32F4xx/Include
+CFLAGS += -I. -I.. -I$(LIBRARY_PATH)/Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I$(LIBRARY_PATH)/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc -I$(LIBRARY_PATH)/Drivers/STM32F4xx_HAL_Driver/Inc -I$(LIBRARY_PATH)/Drivers/CMSIS/Device/ST/STM32F4xx/Include
 CFLAGS += -I../ext-st/include -I../ext-st/include-cmsis -I../ext-st/include-cmsis-dev
 
-LIBRARY_SRCS := $(wildcard $(LIBRARY_PATH)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/*.c) $(wildcard $(LIBRARY_PATH)/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/*.c) $(wildcard $(LIBRARY_PATH)/Drivers/STM32F4xx_HAL_Driver/Src/*.c) usbd_conf.c usbd_desc.c
+LIBRARY_SRCS := $(wildcard $(LIBRARY_PATH)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/*.c) $(wildcard $(LIBRARY_PATH)/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/*.c) $(wildcard $(LIBRARY_PATH)/Drivers/STM32F4xx_HAL_Driver/Src/*.c) usbd_conf.c
 LIBRARY_OBJS := $(LIBRARY_SRCS:.c=.o)
 
 all: cube.a
@@ -21,8 +21,6 @@ setup:
 	rm -f ${LIBRARY_PATH}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_conf_template.h
 	cp -n ${LIBRARY_PATH}/Projects/STM32F4-Discovery/Demonstrations/Inc/usbd_conf.h .
 	cp -n ${LIBRARY_PATH}/Projects/STM32F4-Discovery/Demonstrations/Src/usbd_conf.c .
-	cp -n ${LIBRARY_PATH}/Projects/STM32F4-Discovery/Demonstrations/Inc/usbd_desc.h .
-	cp -n ${LIBRARY_PATH}/Projects/STM32F4-Discovery/Demonstrations/Src/usbd_desc.c .
 	cp -n ${LIBRARY_PATH}/Projects/STM32F401-Discovery/Examples/BSP/Inc/stm32f4xx_hal_conf.h .
 	ln -fs ${LIBRARY_PATH}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/ include-core
 	ln -fs ${LIBRARY_PATH}/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc/ include-hid

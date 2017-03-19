@@ -39,7 +39,7 @@ int main(void) {
 
 			//spi_tx_data("muhkuh", 6);
 			//while (DMA_GetFlagStatus(DMA2_Stream3, QSPI_DMA_FLAG_TC) == RESET);
-			spi_tx_data_dma("muhkuh", 6);
+//			spi_tx_data_dma("muhkuh", 6);
 
 		}
 
