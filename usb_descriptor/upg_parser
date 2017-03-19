@@ -1,0 +1,64 @@
+#!/usr/bin/python3
+import sys
+import re
+
+digit_start_re = re.compile("^(\d+)(.*)")
+space_lowercase_re = re.compile(" ([a-z])")
+
+def to_enum(text):
+	text = text.replace("è", "e")
+	text = text.replace("é", "e")
+	text = space_lowercase_re.sub(lambda x: x.group(1).upper(), text)
+	text = text.replace(" ", "")
+	text = text.replace("/", "_")
+	text = text.replace("!", "Excl")
+	text = text.replace("@", "AtSign")
+	text = text.replace("$", "Dollar")
+	text = text.replace("%", "Percent")
+	text = text.replace("^", "Circumflex")
+	text = text.replace("&", "Ampersand")
+	text = text.replace("*", "Asterisk")
+	text = text.replace("(", "OpenBracket")
+	text = text.replace(")", "CloseBracket")
+	text = text.replace("+", "Plus")
+	text = text.replace("-", "Minus")
+	text = text.replace("=", "Equals")
+	text = text.replace("#", "Hash")
+	text = text.replace("[", "OpenSquareBracket")
+	text = text.replace("]", "CloseSquareBracket")
+	text = text.replace("{", "OpenCurlyBracket")
+	text = text.replace("}", "CloseCurlyBracket")
+	text = text.replace("\\", "Backslash")
+	text = text.replace("|", "Pipe")
+	text = text.replace(";", "Semicolon")
+	text = text.replace(":", "Colon")
+	text = text.replace("'", "Apostrophe")
+	text = text.replace("\"", "QuotationMarks")
+	text = text.replace(",", "Comma")
+	text = text.replace("<", "LeftChevron")
+	text = text.replace(".", "Period")
+	text = text.replace(">", "RightChevron")
+	text = text.replace("?", "QuestionMark")
+	text = text.replace("~", "Tilde")
+	text = digit_start_re.sub(r"\2\1", text)
+	return text
+
+def parse(filename):
+	with open(filename, encoding = "latin1") as f:
+		for	(lineno, line) in enumerate(f, 1):
+			line = line.rstrip("\r\n\t ")
+			if lineno == 1:
+				print("class %s(enum.IntEnum):" % (to_enum(line)))
+			elif lineno >= 3:
+				(itm_id, text) = line.split(maxsplit = 1)
+				try:
+					itm_id = int(itm_id, 16)
+					enum_text = to_enum(text)
+					print("	%s = 0x%x" % (enum_text, itm_id))				
+				except ValueError:
+					print("	# %s: %s" % (itm_id, text))
+	print()
+
+print("import enum")
+for filename in sys.argv[1:]:
+	parse(filename)
