@@ -32,9 +32,10 @@ int main(void) {
 //	volatile uint32_t i = 0;
 
 
+//	eeprom_write(10, "Hallo", 5);
 	while (true) {
 		//i2c_scanbus(I2C1);
-		eeprom_dump();
+		eeprom_dump(10);
 		delay_millis(1000);
 	}
 
