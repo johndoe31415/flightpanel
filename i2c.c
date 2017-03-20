@@ -31,20 +31,6 @@ void i2c_scanbus(void) {
 			continue;
 		}
 
-		// TODO: Don't think we need this
-#if 0
-		/* Then wait for address ACK */
-		timeout = 500;
-		while ((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) && timeout) {
-			timeout--;
-		}
-		if (timeout == 0) {
-			printf("Timeout at selecting receiver mode.\n");
-			I2C_GenerateSTOP(I2C1, ENABLE);
-			continue;
-		}
-#endif
-
 		I2C_AcknowledgeConfig(I2C1, DISABLE);
 		while ((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_RECEIVED)) && timeout) {
 			timeout--;
