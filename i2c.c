@@ -3,6 +3,9 @@
 #include <stm32f4xx_i2c.h>
 #include "i2c.h"
 
+
+
+
 void i2c_scanbus(I2C_TypeDef *I2Cx) {
 	for (int addr = 0; addr < 256; addr += 2) {
 		I2C_ClearFlag(I2Cx, I2C_FLAG_AF);
@@ -31,6 +34,7 @@ void i2c_scanbus(I2C_TypeDef *I2Cx) {
 			continue;
 		}
 
+		timeout = 5000;
 		I2C_AcknowledgeConfig(I2Cx, DISABLE);
 		while ((!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED)) && timeout) {
 			timeout--;
