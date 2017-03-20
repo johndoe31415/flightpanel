@@ -14,9 +14,7 @@
 #include "spi.h"
 #include "usb.h"
 #include "timer.h"
-
-#define xAF			(1 << 10)
-#define xADDR		(1 << 1)
+#include "i2c.h"
 
 int main(void) {
 	printf("Reset successful.\n");
@@ -31,69 +29,12 @@ int main(void) {
 	};
 */
 //	volatile uint32_t i = 0;
-	uint8_t addr = 0;
+
+
 	while (true) {
-		delay_millis(100);
-
-		addr += 0x10;
-		printf("Addressing 0x%x\n", addr);
-
-		I2C1->SR1 &= ~xAF;
-		I2C_AcknowledgeConfig(I2C1, ENABLE);
-		I2C_GenerateSTART(I2C1, ENABLE);
-
-		/* Test on SB Flag */
-		uint32_t timeout = 50000;
-		while ((!I2C_GetFlagStatus(I2C1, I2C_FLAG_SB)) && timeout) {
-			timeout--;
-		}
-		if (timeout == 0) {
-			printf("Timeout generating START.\n");
-			continue;
-		}
-
-		/* Send IOExpander address for read */
-		I2C_Send7bitAddress(I2C1, addr | 1, I2C_Direction_Receiver);
-
-		/* Wait for address to be sent out */
-		while (!(I2C1->SR1 & (xADDR | xAF)));
-
-		if (I2C1->SR1 & xAF) {
-			/* ACK fail */
-			I2C_GenerateSTOP(I2C1, ENABLE);
-			continue;
-		}
-
-		/* Then wait for address ACK */
-		timeout = 50000;
-		while ((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) && timeout) {
-			timeout--;
-		}
-		if (timeout == 0) {
-			I2C_GenerateSTOP(I2C1, ENABLE);
-			continue;
-		}
-
-
-		while ((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_RECEIVED)) && timeout) {
-			timeout--;
-		}
-		if (timeout == 0) {
-			printf("Timeout at receiving.\n");
-			I2C_GenerateSTOP(I2C1, ENABLE);
-			continue;
-		}
-
-//		while (!I2C_GetFlagStatus(I2C1, I2C_FLAG_BTF)) { }
-
-		I2C_AcknowledgeConfig(I2C1, DISABLE);
-		I2C_GenerateSTOP(I2C1, ENABLE);
-		while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_RECEIVED) );
-		uint8_t data = I2C_ReceiveData(I2C1);
-		printf("READ %x\n", data);
-
-
-
+		i2c_scanbus();
+		delay_millis(1000);
+	}
 #if 0
 		i++;
 		if (i == 0x800) {
@@ -113,7 +54,6 @@ int main(void) {
 		}
 
 #endif
-	}
 
 	return 0;
 }
