@@ -20,21 +20,25 @@ int main(void) {
 	init_usb_late();
 	printf("USB initialized.\n");
 
+	/*
 	struct rotary_encoder_t rotary = {
 		.value = 0,
 		.max_value = 1200,
 		.wrap_around = true,
 	};
-
-	volatile uint32_t i = 0;
+*/
+//	volatile uint32_t i = 0;
+	uint8_t addr = 0;
 	while (true) {
-		printf("Moo\n");
+		addr++;
+		printf("Addressing %x\n", addr);
 
 
+		 I2C_AcknowledgeConfig(I2C1, ENABLE);
 		I2C_GenerateSTART(I2C1, ENABLE);
 
 		/* Test on SB Flag */
-		uint32_t timeout = 500000;
+		uint32_t timeout = 50000;
 		while ((!I2C_GetFlagStatus(I2C1, I2C_FLAG_SB)) && timeout) {
 			timeout--;
 		}
@@ -44,18 +48,27 @@ int main(void) {
 		}
 
 		/* Send IOExpander address for read */
-		I2C_Send7bitAddress(I2C1, 0x50, I2C_Direction_Receiver);
+		I2C_Send7bitAddress(I2C1, addr, I2C_Direction_Receiver);
 
-		timeout = 500000;
+		timeout = 50000;
 		while ((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) && timeout) {
 			timeout--;
 		}
 		if (timeout == 0) {
-			printf("Timeout EV\n");
+//			printf("Timeout EV\n");
+			I2C_GenerateSTOP(I2C1, ENABLE);
 			continue;
 		}
-
 		I2C_GenerateSTOP(I2C1, ENABLE);
+
+		printf("SUCCESS 0x%x\n", addr);
+		I2C_AcknowledgeConfig(I2C1, DISABLE);
+		uint8_t data = I2C_ReceiveData(I2C1);
+		printf("READ %x\n", data);
+
+	//	while (!I2C_GetFlagStatus(I2C1, I2C_FLAG_BTF)) { }
+
+
 #if 0
   /* Test on SB Flag */
   timeout = TIMEOUT_MAX;

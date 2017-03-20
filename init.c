@@ -352,6 +352,15 @@ static void init_i2c(void) {
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource6, GPIO_AF_I2C1);
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource9, GPIO_AF_I2C1);
 
+	GPIO_InitTypeDef GPIO_InitStructure = {
+		.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_9,
+		.GPIO_Mode = GPIO_Mode_AF,
+		.GPIO_OType = GPIO_OType_OD,
+		.GPIO_Speed = GPIO_Speed_2MHz,
+		.GPIO_PuPd = GPIO_PuPd_NOPULL,
+	};
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+
 	I2C_InitTypeDef I2C_InitStructure = {
 		.I2C_ClockSpeed = 400000,
 		.I2C_Mode = I2C_Mode_I2C,
