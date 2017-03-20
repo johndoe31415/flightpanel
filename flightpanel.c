@@ -15,6 +15,7 @@
 #include "usb.h"
 #include "timer.h"
 #include "i2c.h"
+#include "eeprom.h"
 
 int main(void) {
 	printf("Reset successful.\n");
@@ -32,7 +33,8 @@ int main(void) {
 
 
 	while (true) {
-		i2c_scanbus(I2C1);
+		//i2c_scanbus(I2C1);
+		eeprom_dump();
 		delay_millis(1000);
 	}
 
