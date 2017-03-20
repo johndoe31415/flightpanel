@@ -32,28 +32,9 @@ int main(void) {
 
 
 	while (true) {
-		i2c_scanbus();
+		i2c_scanbus(I2C1);
 		delay_millis(1000);
 	}
-#if 0
-		i++;
-		if (i == 0x800) {
-			GPIOD->ODR ^= GPIO_Pin_12;
-
-			bool v1 = (GPIOD->IDR & GPIO_Pin_10) != 0;
-			bool v2 = (GPIOD->IDR & GPIO_Pin_11) != 0;
-			if (rotary_encoder_update(&rotary, v1, v2)) {
-				printf("Value: %d\n", rotary.value);
-			}
-			i = 0;
-
-			//spi_tx_data("muhkuh", 6);
-			//while (DMA_GetFlagStatus(DMA2_Stream3, QSPI_DMA_FLAG_TC) == RESET);
-//			spi_tx_data_dma("muhkuh", 6);
-
-		}
-
-#endif
 
 	return 0;
 }
