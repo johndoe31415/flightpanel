@@ -2,71 +2,76 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stm32f4xx_i2c.h>
+#include <stm32f4xx_gpio.h>
 #include "i2c.h"
 
-void i2c_stop(I2C_TypeDef *I2Cx) {
-	I2C_GenerateSTOP(I2Cx, ENABLE);
+static bool i2c_wait_for_event(I2C_TypeDef *I2Cx, uint32_t event) {
+	int timeout = 75;
+	bool success;
+	while (!(success = I2C_CheckEvent(I2Cx, event))) {
+		timeout--;
+		if (timeout == 0) {
+			break;
+		}
+	}
+#ifdef DEBUG_I2C
+	if (!success) {
+		printf("I2C Timeout: ");
+		if (event == I2C_EVENT_MASTER_MODE_SELECT) {
+			printf("I2C_EVENT_MASTER_MODE_SELECT\n");
+		} else if (event == I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED) {
+			printf("I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED\n");
+		} else if (event == I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED) {
+			printf("I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED\n");
+		} else if (event == I2C_EVENT_MASTER_BYTE_RECEIVED) {
+			printf("I2C_EVENT_MASTER_BYTE_RECEIVED\n");
+		} else if (event == I2C_EVENT_MASTER_BYTE_TRANSMITTED) {
+			printf("I2C_EVENT_MASTER_BYTE_TRANSMITTED\n");
+		} else {
+			printf("%lx\n", event);
+		}
+	}
+#endif
+	return success;
 }
+
+#ifdef DEBUG_I2C
+void i2c_dumpflags(I2C_TypeDef *I2Cx, const char *msg) {
+	printf("Flags (%s): ", msg);
+	printf("%s", I2C_GetFlagStatus(I2Cx, I2C_FLAG_AF) ? "AF " : "");
+	printf("%s", I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY) ? "BUSY " : "");
+	printf("%s", I2C_GetFlagStatus(I2Cx, I2C_FLAG_BTF) ? "BTF " : "");
+	printf("\n");
+}
+#endif
 
 bool i2c_start(I2C_TypeDef *I2Cx, int address, bool do_read) {
 	I2C_ClearFlag(I2Cx, I2C_FLAG_AF);
 	I2C_AcknowledgeConfig(I2Cx, ENABLE);
+
+	// Generate and check for fulfilled START condition
 	I2C_GenerateSTART(I2Cx, ENABLE);
-
-	// Check for fulfilled START condition
-	int timeout = 5000;
-	while ((!I2C_GetFlagStatus(I2Cx, I2C_FLAG_SB)) && timeout) {
-		timeout--;
-	}
-	if (timeout == 0) {
+	if (!i2c_wait_for_event(I2Cx, I2C_EVENT_MASTER_MODE_SELECT)) {
+		// Could not acquire the bus.
 		return false;
 	}
 
-	// Check for ACKed START
-	timeout = 5000;
-	while ((!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_MODE_SELECT)) && timeout) {
-		timeout--;
-	}
-	if (timeout == 0) {
-		return false;
-	}
-
-	// Try to select slave
+	// Try to select slave and check if selction successful
 	I2C_Send7bitAddress(I2Cx, (address & 0xfe) | (do_read ? 1 : 0), do_read ? I2C_Direction_Receiver : I2C_Direction_Transmitter);
-
-	if (do_read) {
-		/* Wait for either addressing or acknowledge failure */
-		while (!(I2C_GetFlagStatus(I2Cx, I2C_FLAG_ADDR) || I2C_GetFlagStatus(I2Cx, I2C_FLAG_AF)));
-
-		if (I2C_GetFlagStatus(I2Cx, I2C_FLAG_AF)) {
-			/* ACK failure, STOP */
-			I2C_GenerateSTOP(I2Cx, ENABLE);
-			return false;
-		}
-	}
-
-	/* Wait for receiver or transmitter mode */
-	timeout = 5000;
-	if (do_read) {
-		while ((!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) && timeout--);
-	} else {
-		while ((!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) && timeout--);
-	}
-	if (timeout == 0) {
+	if (!i2c_wait_for_event(I2Cx, do_read ? I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED : I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {
 		i2c_stop(I2Cx);
 		return false;
 	}
 	return true;
 }
 
+void i2c_stop(I2C_TypeDef *I2Cx) {
+	I2C_GenerateSTOP(I2Cx, ENABLE);
+}
+
 int i2c_receive_byte(I2C_TypeDef *I2Cx, bool ack_byte) {
-	int timeout = 5000;
-	I2C_AcknowledgeConfig(I2Cx, ack_byte);
-	while ((!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED)) && timeout) {
-		timeout--;
-	}
-	if (timeout == 0) {
-		i2c_stop(I2Cx);
+	I2C_AcknowledgeConfig(I2Cx, ack_byte ? ENABLE : DISABLE);
+	if (!i2c_wait_for_event(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED)) {
 		return -1;
 	}
 	if (!ack_byte) {
@@ -87,9 +92,9 @@ bool i2c_receive_bytes(I2C_TypeDef *I2Cx, uint8_t *buffer, int length) {
 	return true;
 }
 
-void i2c_transmit_byte(I2C_TypeDef *I2Cx, uint8_t data) {
+bool i2c_transmit_byte(I2C_TypeDef *I2Cx, uint8_t data) {
 	I2C_SendData(I2Cx, data);
-	while (!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	return i2c_wait_for_event(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED);
 }
 
 void i2c_scanbus(I2C_TypeDef *I2Cx) {
