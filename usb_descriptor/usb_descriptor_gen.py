@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from GeneralEnums import *
 from SpecificEnums import *
+from DescriptorParser import DescriptorParser
 
 class USBHidReportDescriptor(object):
 	def __init__(self):
@@ -22,12 +23,14 @@ class USBHidReportDescriptor(object):
 
 	def _add_item(self, enum, data):
 		value = int(enum) << 2
-		if data <= 255:
+		if data is None:
+			encoding = [ ]
+		elif 0 <= data <= 255:
 			value |= 0b01
 			encoding = [ data ]
-		elif data <= 65535:
+		elif 256 <= data <= 65535:
 			value |= 0b10
-			encoding = [ (data >> 8) & 0xff, (data >> 0) & 0xff ]
+			encoding = [ (data >> 0) & 0xff, (data >> 8) & 0xff ]
 		else:
 			raise Exception("Unsupported.")
 		self._append([ value ] + encoding)
@@ -103,15 +106,50 @@ hid_report.add_usage(GenericDesktop.Joystick)
 collection = hid_report.add_collection(Collection.Application)
 
 collection.add_usage_page(UsagePage.SimulationControls)
-collection.add_usage(SimulationControls.Throttle)
+
+# VHF1, VHF2, NAV1, NAV2
+collection.add_usage(SimulationControls.FlightCommunication)
+collection.add_usage(SimulationControls.FlightCommunication)
+collection.add_usage(SimulationControls.FlightCommunication)
+collection.add_usage(SimulationControls.FlightCommunication)
+collection.add_usage(SimulationControls.FlightCommunication)
+collection.add_usage(SimulationControls.FlightCommunication)
+collection.add_usage(SimulationControls.FlightCommunication)
+collection.add_usage(SimulationControls.FlightCommunication)
+#collection.add_usage_minimum(0)
+#collection.add_usage_maximum(7)
+#collection.add_usage_minimum(SimulationControls.FlightCommunication)
+#collection.add_usage_maximum(SimulationControls.FlightCommunication)
 collection.add_logical_minimum(0)
-collection.add_logical_maximum(100)
-collection.add_report_size(8)
+collection.add_logical_maximum(2047)
+collection.add_report_size(16)
+collection.add_report_count(8)
+collection.add_unit_exponent(0)
+collection.add_unit(0)
+collection.add_input(InputOutputFeatureFlags.Variable | InputOutputFeatureFlags.Volatile)
+
+# Transponder
+collection.add_usage(SimulationControls.FlightCommunication)
+collection.add_logical_minimum(0)
+collection.add_logical_maximum(4095)
+collection.add_report_size(16)
 collection.add_report_count(1)
 collection.add_unit_exponent(0)
 collection.add_unit(0)
-collection.add_input(InputOutputFeatureFlags.Variable)
-collection.add_pushbuttons(8)
+collection.add_input(InputOutputFeatureFlags.Variable | InputOutputFeatureFlags.Volatile)
+
+# Pushbuttons:
+# 4: VHF1, VHF2, NAV1, NAV2
+# 1: Transponder Charly
+# 1: NAV/GPS
+# 1: AP enabled
+# 5: AP: NAV, HDG, APR, REV, ALT
+# 2: Trottle down/throttle up
+collection.add_pushbuttons(16)
 data = bytes(hid_report)
 print("// " + data.hex())
-print((", ".join("0x%02x" % (c) for c in data)))
+print()
+print("static uint8_t HIDReportDescriptor[] = {")
+DescriptorParser(base_indent = 1).dump(data)
+print("};")
+
