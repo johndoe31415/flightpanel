@@ -18,7 +18,7 @@ CFLAGS += -Icube -Icube/include-core -Icube/include-hid -Icube/include-hal -Icub
 LDFLAGS := -Text-st/stm32f407.ld -Wl,--gc-sections
 STATICLIBS := ext-st/init.o ext-st/stdperiph.a cube/cube.a
 
-OBJS := flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o
+OBJS := flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o configuration.o
 
 all: $(TARGETS)
 

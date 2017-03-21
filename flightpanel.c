@@ -16,6 +16,7 @@
 #include "timer.h"
 #include "i2c.h"
 #include "eeprom.h"
+#include "configuration.h"
 
 int main(void) {
 	printf("Reset successful.\n");
@@ -32,6 +33,9 @@ int main(void) {
 //	volatile uint32_t i = 0;
 
 
+	struct configuration config;
+	read_configuration(&config);
+	printf("Config: %d CRC %x\n", config.some_value, config.crc32);
 //	eeprom_write(20, "Test", 4);
 	while (true) {
 		//i2c_scanbus(I2C1);

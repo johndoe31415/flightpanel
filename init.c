@@ -372,6 +372,10 @@ static void init_i2c(void) {
 	I2C_Cmd(I2C1, ENABLE);
 }
 
+static void init_crc(void) {
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_CRC, ENABLE);
+}
+
 void SystemInit() {
 	__disable_irq();
 	init_clock();
@@ -383,6 +387,7 @@ void SystemInit() {
 	init_spi_dma();
 	init_systick();
 	init_i2c();
+	init_crc();
 //	init_usb();
 	__enable_irq();
 }
