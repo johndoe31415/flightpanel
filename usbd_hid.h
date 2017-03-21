@@ -1,14 +1,21 @@
 #ifndef __USBD_HID_H__
 #define __USBD_HID_H__
 
+#include "usbd_def.h"
+
 struct hid_report_t {
-	uint8_t value;
+	uint16_t vhf1, vhf1_backup;
+	uint16_t vhf2, vhf2_backup;
+	uint16_t backup1, backup1_backup;
+	uint16_t backup2, backup2_backup;
+	uint16_t squawk;
+	uint16_t buttons;
 } __attribute__ ((packed));
 
 #define UINT16(x)											((x) >> 0) & 0xff, ((x) >> 8) & 0xff
 
 #define HID_EPIN_ADDR										0x81
-#define HID_EPIN_SIZE										0x04
+#define HID_EPIN_SIZE										sizeof(struct hid_report_t)
 
 #define HID_EPOUT_ADDR										0x01
 #define HID_EPOUT_SIZE										0x10

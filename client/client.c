@@ -19,7 +19,7 @@ int main(void) {
 	struct hid_device_info *current = info;
 	while (current) {
 		if (current->serial_number == NULL) {
-			fprintf(stderr, "Warning: No serial number provided, do you have rights to the node at /dev/bus/usb?\n");
+			fprintf(stderr, "Warning: No serial number provided, do you have rights to the node at %s?\n", current->path);
 		}
 		fprintf(stderr, "%04x:%04x: %ls : %ls, serial %ls\n", current->vendor_id, current->product_id, current->manufacturer_string, current->product_string, current->serial_number);
 		current = current->next;
