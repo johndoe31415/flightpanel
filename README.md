@@ -18,10 +18,8 @@ Building
 ========
 To build this, you first need the following dependencies:
 
-  * STM32 F4 DSP and Standard Peripheral Library 
-    http://www.st.com/en/embedded-software/stm32-standard-peripheral-libraries.html
-  * STM32 CubeF4 
-    http://www.st.com/en/embedded-software/stm32cube-embedded-software.html
+  * [STM32 F4 DSP and Standard Peripheral Library](http://www.st.com/en/embedded-software/stm32-standard-peripheral-libraries.html)
+  * [STM32 CubeF4](http://www.st.com/en/embedded-software/stm32cube-embedded-software.html)
 
 I've used the Standard Library v1.8.0 and Cube FW v1.15.0 with the following MD5SUMs:
 
