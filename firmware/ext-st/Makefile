@@ -11,12 +11,6 @@ LIBRARY_OBJS := $(LIBRARY_SRCS:.c=.o)
 
 all: stdperiph.a init.o stm32f407.ld
 
-setup:
-	rm -f ${LIBRARY_PATH}/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_fmc.c
-	ln -s ${LIBRARY_PATH}/Libraries/STM32F4xx_StdPeriph_Driver/inc include
-	ln -s ${LIBRARY_PATH}/Libraries/CMSIS/Include include-cmsis
-	ln -s ${LIBRARY_PATH}/Libraries/CMSIS/Device/ST/STM32F4xx/Include include-cmsis-dev
-
 clean:
 	rm -f ${LIBRARY_OBJS}
 	rm -f init.o stm32f407.ld stdperiph.a include include-cmsis include-cmsis-dev
