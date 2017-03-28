@@ -25,8 +25,10 @@ To build this, you first need the following dependencies:
 
 I've used the Standard Library v1.8.0 and Cube FW v1.15.0 with the following MD5SUMs:
 
+```
 c876e4a7fe8e499a47d3854fb86305f4  en.stm32f4_dsp_stdperiph_lib.zip
 d3535e7ae5782cb83df6e48a52688810  en.stm32cubef4.zip
+```
 
 After downloading, copy the ZIP files into the firmware/ subdirectory and
 execute the bootstraping script. It will copy some files, patch them slightly
