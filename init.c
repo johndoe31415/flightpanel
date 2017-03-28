@@ -7,6 +7,7 @@
 #include <stm32f4xx_dma.h>
 #include <stm32f4xx_i2c.h>
 #include <misc.h>
+#include "pinmap.h"
 
 #define PLL_M					8
 #define PLL_N					336
@@ -376,6 +377,18 @@ static void init_crc(void) {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_CRC, ENABLE);
 }
 
+static void init_debug(void) {
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+	GPIO_InitTypeDef GPIO_InitStructure = {
+		.GPIO_Pin = Dbg1_Pin | Dbg2_Pin | Dbg3_Pin | Dbg4_Pin,
+		.GPIO_Mode = GPIO_Mode_OUT,
+		.GPIO_OType = GPIO_OType_PP,
+		.GPIO_Speed = GPIO_Speed_2MHz,
+		.GPIO_PuPd = GPIO_PuPd_NOPULL,
+	};
+	GPIO_Init(Dbg1_GPIO, &GPIO_InitStructure);
+}
+
 void SystemInit() {
 	__disable_irq();
 	init_clock();
@@ -388,6 +401,7 @@ void SystemInit() {
 	init_systick();
 	init_i2c();
 	init_crc();
+	init_debug();
 //	init_usb();
 	__enable_irq();
 }

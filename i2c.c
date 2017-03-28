@@ -5,8 +5,11 @@
 #include <stm32f4xx_gpio.h>
 #include "i2c.h"
 
+// Set this to 1 for prod
+#define FACTOR		4
+
 static bool i2c_wait_for_event(I2C_TypeDef *I2Cx, uint32_t event) {
-	int timeout = 75;
+	int timeout = 75 * FACTOR;
 	bool success;
 	while (!(success = I2C_CheckEvent(I2Cx, event))) {
 		timeout--;

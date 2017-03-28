@@ -1,0 +1,73 @@
+# USB
+PC0		OUT		USB_PowerSwitchOn
+PD5		IN		USB_FS_OverCurrent
+PA9		IN		USB_OTG_VBUS
+PA11	IO		USB_OTG_M
+PA12	IO		USB_OTG_P
+PA10	IN		USB_OTG_ID
+
+# User switch
+PA0		IN_DN	UserButton
+
+# LEDs
+PD12	OUT		LEDGreen
+PD13	OUT		LEDOrange
+PD14	OUT		LEDRed
+PD15	OUT		LEDBlue
+
+# MEMS
+PE0		IN		MEMS_INT1
+PE1		IN		MEMS_INT2
+PA7		OUT		MEMS_MOSI
+PA6		IN		MEMS_MISO
+PA5		OUT		MEMS_SCK
+PE3		OUT		MEMS_I2C_SPI
+
+# Audio
+PD4		OUT		AudioReset
+PC3		IN		AudioPDM_OUT
+PC7		?		Audio_MCK
+PC10	?		Audio_SCK
+PC12	?		Audio_SD
+PA4		?		Audio_WS
+PB6		IO		Audio_SCL
+PB9		IO		Audio_SDA
+PB10	OUT		Audio_CLK_IN
+
+########### My additions
+# LCD Display
+PB13	OUT		Display_SCK
+PB14	IN		Display_MISO
+PB15	OUT		Display_MOSI
+PB12	OUT		Display_DC
+PB0		OUT		Display1_nSS
+PB1		OUT		Display2_nSS
+PB2		OUT		Display3_nSS
+PB3		OUT		Display4_nSS
+PB4		OUT		Display5_nSS
+PB5		OUT		Display6_nSS
+PB6		OUT		Display7_nSS
+PB7		OUT		Display8_nSS
+
+
+# Rotary1
+PD10	IN_UP	Rotary1_A
+PD11	IN_UP	Rotary1_B
+PD9		IN_UP	Rotary1_Btn
+
+# Configuration
+PB9		IO		EEPROM_SDA
+PB6		IO		EEPROM_SCL
+
+# Debug
+PD1		OUT		Dbg1
+PD2		OUT		Dbg2
+PD3		OUT		Dbg3
+PD4		OUT		Dbg4
+
+# 12 LEDs (12 OUT)
+# 10 Displays (10 OUT)
+
+# 8 Rotary Encoders (24 IN)
+# 27 Switches (27 IN)
+# -> 7 x 74165
