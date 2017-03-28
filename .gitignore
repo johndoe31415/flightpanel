@@ -6,17 +6,20 @@ __pycache__
 flightpanel
 flightpanel.bin
 
-stdperiph.a
 en.stm32f4_dsp_stdperiph_lib.zip
-STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/
-ext-st/include
-ext-st/include-cmsis
-ext-st/include-cmsis-dev
-ext-st/stm32f407.ld
+firmware/ext-st/stdperiph.a
+firmware/ext-st/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/
+firmware/ext-st/include
+firmware/ext-st/include-cmsis
+firmware/ext-st/include-cmsis-dev
+firmware/ext-st/stm32f407.ld
 
-cube.a
 en.stm32cubef4.zip
-STM32Cube_FW_F4_V1.15.0/
-cube/include-hal
-cube/include-core
-cube/include-cmsis
+firmware/cube/cube.a
+firmware/cube/STM32Cube_FW_F4_V1.15.0/
+firmware/cube/include-hal
+firmware/cube/include-core
+firmware/cube/include-cmsis
+firmware/cube/stm32f4xx_hal_conf.h
+firmware/cube/usbd_conf.c
+firmware/cube/usbd_conf.h
