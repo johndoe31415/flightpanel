@@ -28,21 +28,13 @@ I've used the Standard Library v1.8.0 and Cube FW v1.15.0 with the following MD5
 c876e4a7fe8e499a47d3854fb86305f4  en.stm32f4_dsp_stdperiph_lib.zip
 d3535e7ae5782cb83df6e48a52688810  en.stm32cubef4.zip
 
-After downloading, copy the Stdperipheral library to the ext-st/ subdirectory
-and the Cube library to cube/. First build ext-st:
+After downloading, copy the ZIP files into the firmware/ subdirectory and
+execute the bootstraping script. It will copy some files, patch them slightly
+and create all symlinks you need for building properly.
 
-$ cd ext-st
-$ make setup
-$ make
+```
+$ ./bootstrap.sh
+```
 
-The "make setup" step is important, it will create necessary symlinks.
-Afterwards, do the same for the cube library:
-
-$ cd ../cube
-$ make setup
-$ make
-
-Then you should be able to build flightpanel:
-
-$ cd ..
-$ make
+Then, simply "make" the ext-st/ and cube/ subdirectories and you should be able
+to build the firmware of flightpanel.
