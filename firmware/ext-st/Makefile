@@ -13,16 +13,13 @@ all: stdperiph.a init.o stm32f407.ld
 
 clean:
 	rm -f ${LIBRARY_OBJS}
-	rm -f init.o stm32f407.ld stdperiph.a include include-cmsis include-cmsis-dev
+	rm -f init.o stdperiph.a
 
 stdperiph.a: $(LIBRARY_OBJS)
 	${PREFIX}ar r $@ $(LIBRARY_OBJS)
 
 init.o: $(LIBRARY_PATH)/Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc_ride7/startup_stm32f40_41xxx.s
 	${PREFIX}gcc -c ${CFLAGS} -o $@ $<
-
-stm32f407.ld: $(LIBRARY_PATH)/Project/STM32F4xx_StdPeriph_Templates/SW4STM32/STM32F40_41xxx/STM32F417IGHx_FLASH.ld
-	cp -n $< $@
 
 .c.o:
 	${PREFIX}gcc -c ${CFLAGS} -o $@ $<
