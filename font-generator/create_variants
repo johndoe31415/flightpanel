@@ -1,14 +1,35 @@
 #!/usr/bin/python3
 import sys
 import subprocess
+from FriendlyArgumentParser import FriendlyArgumentParser
 
-fontname = sys.argv[1]
-fontsize = float(sys.argv[2])
+parser = FriendlyArgumentParser()
+parser.add_argument("-l", "--threshold-step", metavar = "count", type = int, default = 20, help = "Threshold step to use when incrementing from min-threshold to max-threshold. Defaults to %(default)d.")
+parser.add_argument("-t", "--min-threshold", metavar = "lvl", type = int, default = 20, help = "Minimal threshold level. Defaults to %(default)d.")
+parser.add_argument("-T", "--max-threshold", metavar = "lvl", type = int, default = 235, help = "Maximal threshold level. Defaults to %(default)d.")
+parser.add_argument("-f", "--fontsize-step", metavar = "inc", type = float, default = 1, help = "Increase of font size to choose between min-fontsize and max-fontsize. Defaults to %(default)d.")
+parser.add_argument("-s", "--min-fontsize", metavar = "size", type = float, default = 20, help = "Minimal font size. Defaults to %(default).3f.")
+parser.add_argument("-S", "--max-fontsize", metavar = "size", type = float, default = 20, help = "Minimal font size. Defaults to %(default).3f.")
+parser.add_argument("-a", "--antialias", metavar = "method", choices = [ "default", "none", "gray", "subpixel", "fast", "good", "best" ], default = "default", help = "Antialiasing method to use when rasterizing the font. Can be one of %(choices)s and defaults to %(default)s.")
+parser.add_argument("-v", "--verbose", action = "store_true", help = "Increase verbosity during generation.")
+parser.add_argument("fontname", metavar = "fontname", type = str, help = "Name of the font to generate variants of.")
+args = parser.parse_args(sys.argv[1:])
 
-filename_prefix = fontname.lower().replace(" ", "-")
-json_filename = "%s-%.3f.json" % (filename_prefix, fontsize)
+def fltrange(minval, maxval, step):
+	(minval, maxval) = (min(minval, maxval), max(minval, maxval))
+	value = minval
+	while value <= maxval:
+		yield value
+		value += step
 
-subprocess.check_call([ "./font-rasterize", "--fontsize=%.3f" % (fontsize), "--antialias=best", fontname, json_filename ])
-for threshold in range(5, 250, 5):
-	subprocess.check_call([ "./json-to-c.py", "-t", str(threshold), "--filename-include-threshold", "--create-pnm", "-f", json_filename ])
-
+filename_prefix = args.fontname.lower().replace(" ", "-")
+for fontsize in fltrange(args.min_fontsize, args.max_fontsize, args.fontsize_step):
+	json_filename = "%s-%.3f.json" % (filename_prefix, fontsize)
+	if args.verbose:
+		print("Rasterizing %s with %.3f pt and %s antialiasing to %s" % (args.fontname, fontsize, args.antialias, json_filename))
+	subprocess.check_call([ "./font-rasterize", "--fontsize=%.3f" % (fontsize), "--antialias=%s" % (args.antialias), args.fontname, json_filename ])
+	for threshold in fltrange(args.min_threshold, args.max_threshold, args.threshold_step):
+		if args.verbose:
+			print("Applying threshold %d to rasterized font." % (threshold))
+		threshold = round(threshold)
+		subprocess.check_call([ "./json-to-c.py", "-t", str(threshold), "--filename-include-threshold", "--create-pnm", json_filename ])

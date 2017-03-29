@@ -169,7 +169,7 @@ static void show_syntax(const char *pgmname, const char *errmsg) {
 	fprintf(stderr, "%s [--antialias=default|none|gray|subpixel|fast|good|best] [-s fontsize] (fontname) (outfile.json)\n", pgmname);
 	fprintf(stderr, "\n");
 	fprintf(stderr, "  -a, --antialias=VALUE   Set the Cairo antialiasing mode for fonts to either default, none, gray,\n");
-	fprintf(stderr, "                          subpixel, fast, good or best.");
+	fprintf(stderr, "                          subpixel, fast, good or best.\n");
 	fprintf(stderr, "  -s, --fontsize SIZE     Set the font size which is used.\n");
 	fprintf(stderr, "  -v                      Increase verbosity durign generation of rendered font.\n");
 	fprintf(stderr, "  (fontname)              Name of the font that should be rendered.\n");
