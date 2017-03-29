@@ -1,0 +1,14 @@
+#!/usr/bin/python3
+import sys
+import subprocess
+
+fontname = sys.argv[1]
+fontsize = float(sys.argv[2])
+
+filename_prefix = fontname.lower().replace(" ", "-")
+json_filename = "%s-%.3f.json" % (filename_prefix, fontsize)
+
+subprocess.check_call([ "./font-rasterize", fontname, str(fontsize), json_filename ])
+for threshold in range(5, 250, 5):
+	subprocess.check_call([ "./json-to-c.py", "-t", str(threshold), "--filename-include-threshold", "--create-pnm", "-f", json_filename ])
+
