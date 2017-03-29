@@ -18,7 +18,7 @@ static struct pgmopts_t {
 	const char *outfilename;
 	bool verbose;
 } pgmopts = {
-	.antialias = CAIRO_ANTIALIAS_BEST,
+	.antialias = CAIRO_ANTIALIAS_DEFAULT,
 	.fontsize = 20,
 	.verbose = false,
 };
@@ -39,6 +39,7 @@ void cairo_font_surface_init(struct cairo_font_surface_t *cfs, const char *fontn
 
 	cairo_font_options_t *fopts = cairo_font_options_create();
 	cairo_font_options_set_antialias(fopts, pgmopts.antialias);
+
 	cairo_select_font_face(cfs->cctx, fontname ? fontname : "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 	cairo_set_font_size(cfs->cctx, fontsize);
 	cairo_set_font_options(cfs->cctx, fopts);
