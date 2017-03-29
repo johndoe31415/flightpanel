@@ -75,53 +75,13 @@
 #define USB_OTG_P_SetLOW() USB_OTG_P_GPIO->BSRRH = USB_OTG_P_Pin
 #define USB_OTG_P_SetTo(value) if (value) { USB_OTG_P_SetHIGH(); } else { USB_OTG_P_SetLOW(); }
 
-// PB0: Display1_nSS (OUT)
-#define Display1_nSS_GPIO GPIOB
-#define Display1_nSS_PinSource GPIO_PinSource0
-#define Display1_nSS_Pin GPIO_Pin_0
-#define Display1_nSS_SetHIGH() Display1_nSS_GPIO->BSRRL = Display1_nSS_Pin
-#define Display1_nSS_SetLOW() Display1_nSS_GPIO->BSRRH = Display1_nSS_Pin
-#define Display1_nSS_SetTo(value) if (value) { Display1_nSS_SetHIGH(); } else { Display1_nSS_SetLOW(); }
-
-// PB1: Display2_nSS (OUT)
-#define Display2_nSS_GPIO GPIOB
-#define Display2_nSS_PinSource GPIO_PinSource1
-#define Display2_nSS_Pin GPIO_Pin_1
-#define Display2_nSS_SetHIGH() Display2_nSS_GPIO->BSRRL = Display2_nSS_Pin
-#define Display2_nSS_SetLOW() Display2_nSS_GPIO->BSRRH = Display2_nSS_Pin
-#define Display2_nSS_SetTo(value) if (value) { Display2_nSS_SetHIGH(); } else { Display2_nSS_SetLOW(); }
-
-// PB2: Display3_nSS (OUT)
-#define Display3_nSS_GPIO GPIOB
-#define Display3_nSS_PinSource GPIO_PinSource2
-#define Display3_nSS_Pin GPIO_Pin_2
-#define Display3_nSS_SetHIGH() Display3_nSS_GPIO->BSRRL = Display3_nSS_Pin
-#define Display3_nSS_SetLOW() Display3_nSS_GPIO->BSRRH = Display3_nSS_Pin
-#define Display3_nSS_SetTo(value) if (value) { Display3_nSS_SetHIGH(); } else { Display3_nSS_SetLOW(); }
-
-// PB3: Display4_nSS (OUT)
-#define Display4_nSS_GPIO GPIOB
-#define Display4_nSS_PinSource GPIO_PinSource3
-#define Display4_nSS_Pin GPIO_Pin_3
-#define Display4_nSS_SetHIGH() Display4_nSS_GPIO->BSRRL = Display4_nSS_Pin
-#define Display4_nSS_SetLOW() Display4_nSS_GPIO->BSRRH = Display4_nSS_Pin
-#define Display4_nSS_SetTo(value) if (value) { Display4_nSS_SetHIGH(); } else { Display4_nSS_SetLOW(); }
-
-// PB4: Display5_nSS (OUT)
-#define Display5_nSS_GPIO GPIOB
-#define Display5_nSS_PinSource GPIO_PinSource4
-#define Display5_nSS_Pin GPIO_Pin_4
-#define Display5_nSS_SetHIGH() Display5_nSS_GPIO->BSRRL = Display5_nSS_Pin
-#define Display5_nSS_SetLOW() Display5_nSS_GPIO->BSRRH = Display5_nSS_Pin
-#define Display5_nSS_SetTo(value) if (value) { Display5_nSS_SetHIGH(); } else { Display5_nSS_SetLOW(); }
-
-// PB5: Display6_nSS (OUT)
-#define Display6_nSS_GPIO GPIOB
-#define Display6_nSS_PinSource GPIO_PinSource5
-#define Display6_nSS_Pin GPIO_Pin_5
-#define Display6_nSS_SetHIGH() Display6_nSS_GPIO->BSRRL = Display6_nSS_Pin
-#define Display6_nSS_SetLOW() Display6_nSS_GPIO->BSRRH = Display6_nSS_Pin
-#define Display6_nSS_SetTo(value) if (value) { Display6_nSS_SetHIGH(); } else { Display6_nSS_SetLOW(); }
+// PB0: Display_RESET (OUT)
+#define Display_RESET_GPIO GPIOB
+#define Display_RESET_PinSource GPIO_PinSource0
+#define Display_RESET_Pin GPIO_Pin_0
+#define Display_RESET_SetHIGH() Display_RESET_GPIO->BSRRL = Display_RESET_Pin
+#define Display_RESET_SetLOW() Display_RESET_GPIO->BSRRH = Display_RESET_Pin
+#define Display_RESET_SetTo(value) if (value) { Display_RESET_SetHIGH(); } else { Display_RESET_SetLOW(); }
 
 // PB6: Audio_SCL (IO)
 #define Audio_SCL_GPIO GPIOB
@@ -130,13 +90,6 @@
 #define Audio_SCL_SetHIGH() Audio_SCL_GPIO->BSRRL = Audio_SCL_Pin
 #define Audio_SCL_SetLOW() Audio_SCL_GPIO->BSRRH = Audio_SCL_Pin
 #define Audio_SCL_SetTo(value) if (value) { Audio_SCL_SetHIGH(); } else { Audio_SCL_SetLOW(); }
-// PB6: Display7_nSS (OUT)
-#define Display7_nSS_GPIO GPIOB
-#define Display7_nSS_PinSource GPIO_PinSource6
-#define Display7_nSS_Pin GPIO_Pin_6
-#define Display7_nSS_SetHIGH() Display7_nSS_GPIO->BSRRL = Display7_nSS_Pin
-#define Display7_nSS_SetLOW() Display7_nSS_GPIO->BSRRH = Display7_nSS_Pin
-#define Display7_nSS_SetTo(value) if (value) { Display7_nSS_SetHIGH(); } else { Display7_nSS_SetLOW(); }
 // PB6: EEPROM_SCL (IO)
 #define EEPROM_SCL_GPIO GPIOB
 #define EEPROM_SCL_PinSource GPIO_PinSource6
@@ -144,14 +97,6 @@
 #define EEPROM_SCL_SetHIGH() EEPROM_SCL_GPIO->BSRRL = EEPROM_SCL_Pin
 #define EEPROM_SCL_SetLOW() EEPROM_SCL_GPIO->BSRRH = EEPROM_SCL_Pin
 #define EEPROM_SCL_SetTo(value) if (value) { EEPROM_SCL_SetHIGH(); } else { EEPROM_SCL_SetLOW(); }
-
-// PB7: Display8_nSS (OUT)
-#define Display8_nSS_GPIO GPIOB
-#define Display8_nSS_PinSource GPIO_PinSource7
-#define Display8_nSS_Pin GPIO_Pin_7
-#define Display8_nSS_SetHIGH() Display8_nSS_GPIO->BSRRL = Display8_nSS_Pin
-#define Display8_nSS_SetLOW() Display8_nSS_GPIO->BSRRH = Display8_nSS_Pin
-#define Display8_nSS_SetTo(value) if (value) { Display8_nSS_SetHIGH(); } else { Display8_nSS_SetLOW(); }
 
 // PB9: Audio_SDA (IO)
 #define Audio_SDA_GPIO GPIOB

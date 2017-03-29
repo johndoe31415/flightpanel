@@ -20,8 +20,10 @@
 #include "usbd_hid.h"
 #include "usb.h"
 #include "ssd1306.h"
+#include "displays.h"
 #include "pinmap.h"
 
+#if 0
 uint32_t x32 = 314159265;
 static uint32_t xorshift32(void)
 {
@@ -30,11 +32,17 @@ static uint32_t xorshift32(void)
   x32 ^= x32 << 5;
   return x32;
 }
+#endif
 
 int main(void) {
 	printf("Reset successful.\n");
 	init_usb_late();
 	printf("USB initialized.\n");
+
+	init_displays();
+
+	while (true) {
+	}
 
 #if 0
 	struct rotary_encoder_t rotary = {
@@ -51,16 +59,16 @@ int main(void) {
 		delay_millis(1000);
 	}
 #endif
-	while (true) {
 #if 0
+	while (true) {
 		xorshift32();
 		Dbg1_SetTo(x32 & 0x100);
 		for (volatile int i = 0; i < 100; i++) { }
 		Dbg2_SetTo(x32 & 1);
 		for (volatile int i = 0; i < 100; i++) { }
-#endif
 	}
 
+#endif
 //	struct configuration config;
 //	read_configuration(&config);
 //	eeprom_write(20, "Test", 4);
