@@ -1,0 +1,50 @@
+#!/usr/bin/python3
+import sys
+import subprocess
+import re
+from HexDump import HexDump
+
+infile = sys.argv[1]
+symbol_name = sys.argv[2]
+prefix = "arm-none-eabi-"
+
+symbol_re = re.compile("(?P<addr>[a-f0-9]+)\s+(?P<size>[a-f0-9]+)\s+(?P<type>.)\s+(?P<name>.*)$")
+symbols = subprocess.check_output([ prefix + "nm", "-S", infile ])
+symbols = symbols.decode().split("\n")
+for line in symbols:
+	result = symbol_re.fullmatch(line)
+	if result is None:
+		continue
+	result = result.groupdict()
+	if result["name"] == symbol_name:
+		break
+else:
+	raise Exception("No such symbol '%s' found." % (symbol_name))
+
+addr = int(result["addr"], 16)
+size = int(result["size"], 16)
+print("%s: 0x%x (0x%x = %d bytes size)" % (symbol_name, addr, size, size))
+
+# Find segments
+segment_re = re.compile("^  (?P<loadtype>[A-Za-z]+)\s+0x(?P<offset>[a-f0-9]+)\s+0x(?P<virtaddr>[a-f0-9]+)\s+0x(?P<physaddr>[a-f0-9]+)\s+0x(?P<filesize>[a-f0-9]+)\s+0x(?P<memsize>[a-f0-9]+)\s+(?P<flags>[A-Z]+)\s+0x(?P<align>[a-f0-9]+)")
+segments = subprocess.check_output([ prefix + "readelf", "--segments", infile ])
+segments = segments.decode().split("\n")
+for line in segments:
+	result = segment_re.fullmatch(line)
+	if result is None:
+		continue
+	result = result.groupdict()
+
+	physaddr = int(result["physaddr"], 16)
+	virtaddr = int(result["virtaddr"], 16)
+	filesize = int(result["filesize"], 16)
+	if physaddr <= addr < physaddr + filesize:
+		segment_offset_in_elf = int(result["offset"], 16)
+		file_offset = addr - virtaddr + segment_offset_in_elf
+		print("Found segment: virtual address 0x%x, ELF offset 0x%x"  % (virtaddr, file_offset))
+		with open(infile, "rb") as f:
+			f.seek(file_offset)
+			data = f.read(size)
+		HexDump().dump(data)
+
+
