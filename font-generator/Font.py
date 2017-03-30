@@ -28,6 +28,23 @@ class Font(object):
 	def max_glyph_height(self):
 		return max(glyph.height for glyph in self._glyphs.values())
 
+	def enumerate_glyphs(self):
+		for (charindex, (codepoint, glyph)) in enumerate(self):
+			glyph.charindex = charindex
+
+	def charindex_to_glyph_mapping(self):
+		cp_diff = [ (codepoint, codepoint - charindex) for (charindex, (codepoint, glyph)) in enumerate(self) ]
+		ranges = [ ]
+		for (codepoint, difference) in cp_diff:
+			if (len(ranges) == 0) or (difference != ranges[-1][2]):
+				ranges.append([ codepoint, codepoint, difference ])
+			else:
+				ranges[-1][1] = codepoint
+		return ranges
+
+	def __iter__(self):
+		return iter(sorted(self._glyphs.items()))
+
 	def __len__(self):
 		return len(self._glyphs)
 

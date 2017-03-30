@@ -17,6 +17,14 @@ class BitmapGlyph(object):
 				self._bitmap_data.append(databyte)
 
 	@property
+	def glyph(self):
+		return self._glyph
+
+	@property
+	def data(self):
+		return bytes(self._bitmap_data)
+
+	@property
 	def row_width(self):
 		return (self._glyph.width + 7) // 8
 
@@ -57,6 +65,16 @@ class Glyph(object):
 		self._width = metadata["width"]
 		self._height = metadata["height"]
 		self._rawdata = bytes.fromhex(metadata["data"])
+		self._charindex = None
+
+	@property
+	def charindex(self):
+		return self._charindex
+
+	@charindex.setter
+	def charindex(self, value):
+		assert(self._charindex is None)
+		self._charindex = value
 
 	@property
 	def codepoint(self):

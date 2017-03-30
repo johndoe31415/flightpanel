@@ -1,0 +1,45 @@
+#!/usr/bin/python3
+from PnmPicture import PnmPicture
+import sys
+
+if len(sys.argv) == 5:
+	width = int(sys.argv[1])
+	height = int(sys.argv[2])
+	data = sys.argv[3]
+	pnm_filename = sys.argv[4]
+	data = data.replace("0x", "").replace(",", "")
+	data = bytes.fromhex(data)
+
+	pnm = PnmPicture.new(width, height)
+	rowwidth = (width + 7) // 8
+	for y in range(height):
+		for x in range(width):
+			byte_offset = (x // 8) + (y * rowwidth)
+			bit_offset = x % 8
+			pixel = ((data[byte_offset] >> bit_offset) & 1) != 0
+			if pixel:
+				pnm.set_pixel(x, y, (0, 0, 0))
+	pnm.write_file(pnm_filename)
+elif len(sys.argv) == 2:
+	pnm_filename = sys.argv[1]
+	pic = PnmPicture.read_file(pnm_filename)
+
+	rowwidth = (pic.width + 7) // 8
+	data = bytearray(rowwidth * pic.height)
+	for y in range(pic.height):
+		for x in range(pic.width):
+			if pic.get_pixel(x, y) != (255, 255, 255):
+				byte_offset = (x // 8) + (y * rowwidth)
+				bit_offset = x % 8
+				data[byte_offset] |= (1 << bit_offset)
+
+	print(", ".join("0x%02x" % (c) for c in data))
+else:
+	print("%s [width] [height] [hexdata] [outfile]" % (sys.argv[0]))
+	print("%s [pnm-filename]" % (sys.argv[0]))
+	print("You need to specify either one or four parameters.")
+	sys.exit(1)
+
+
+
+
