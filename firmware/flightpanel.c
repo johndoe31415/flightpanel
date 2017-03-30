@@ -19,9 +19,8 @@
 #include "configuration.h"
 #include "usbd_hid.h"
 #include "usb.h"
-#include "ssd1306.h"
 #include "displays.h"
-#include "pinmap.h"
+#include "instruments.h"
 
 #if 0
 uint32_t x32 = 314159265;
@@ -40,18 +39,8 @@ int main(void) {
 	printf("USB initialized.\n");
 
 	init_displays();
+	instruments_idle_loop();
 
-	while (true) {
-	}
-
-#if 0
-	struct rotary_encoder_t rotary = {
-		.value = 0,
-		.max_value = 1200,
-		.wrap_around = true,
-	};
-#endif
-//	volatile uint32_t i = 0;
 
 #if 0
 	while (true) {

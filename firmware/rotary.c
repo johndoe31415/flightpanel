@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -7,11 +8,9 @@ bool rotary_encoder_update(struct rotary_encoder_t *rotary, bool value1, bool va
 	bool changed = false;
 
 	uint8_t change_value = 1;
-	if (rotary->time_since_last_change < 48) {
-		change_value = 8;
-	} else if (rotary->time_since_last_change < 96) {
+	if (rotary->time_since_last_change <= 5) {
 		change_value = 4;
-	} else if (rotary->time_since_last_change < 144) {
+	} else if (rotary->time_since_last_change < 10) {
 		change_value = 2;
 	}
 
@@ -50,9 +49,10 @@ bool rotary_encoder_update(struct rotary_encoder_t *rotary, bool value1, bool va
 	}
 
 	if (changed) {
+		//printf("%d\n", rotary->time_since_last_change);
 		rotary->time_since_last_change = 0;
 	} else {
-		if (rotary->time_since_last_change != 0xff) {
+		if (rotary->time_since_last_change != 0xffff) {
 			rotary->time_since_last_change++;
 		}
 	}

@@ -45,38 +45,38 @@
 #define CMD_SET_CHARGEPUMP(on_off)												0x8d, (0x10 | ((on_off) & 0x01) << 2)
 
 static const uint8_t initialization_routine[] = {
-	CMD_SET_MEMORY_ADDRESSING_MODE_HORIZONTAL,			// 20 00
-	CMD_SET_MULTIPLEX_RATIO(0),							// a8 3f
+	CMD_SET_MEMORY_ADDRESSING_MODE_HORIZONTAL,
+	CMD_SET_MULTIPLEX_RATIO(0),
 
-	CMD_SET_DISPLAY_OFFSET(0),							// d3 00
-	CMD_SET_DISPLAY_START_LINE(0),						// 40
+	CMD_SET_DISPLAY_OFFSET(0),
+	CMD_SET_DISPLAY_START_LINE(0),
 
-	CMD_SET_SEGMENT_REMAP(1),							// a1
-	CMD_SET_COM_OUTPUT_SCAN_DIRECTION_REMAPPED,			// c8
+	CMD_SET_SEGMENT_REMAP(1),
+	CMD_SET_COM_OUTPUT_SCAN_DIRECTION_REMAPPED,
 
-	CMD_SET_COM_PINS_HW_CONFIG(1, 0),					// da 12
+	CMD_SET_COM_PINS_HW_CONFIG(1, 0),
 
-	CMD_SET_CONTRAST_CONTROL(0x7f),						// 81 7f
+	CMD_SET_CONTRAST_CONTROL(0x7f),					/* Higher is brighter */
 
-	CMD_ENTIRE_DISPLAY_ON(0),							// a4
-	CMD_SET_INVERSE_DISPLAY(0),							// a6
+	CMD_ENTIRE_DISPLAY_ON(0),
+	CMD_SET_INVERSE_DISPLAY(0),
 
-	CMD_SET_DISPLAY_CLK_DIVIDE(1, 0x8),					// d5 80
+	CMD_SET_DISPLAY_CLK_DIVIDE(1, 0x8),
 
-	CMD_SET_CHARGEPUMP(1),								// 8d 14
+	CMD_SET_CHARGEPUMP(1),
 };
 
-void ssd1306_set_data(const struct ssd1306_display *display) {
+void ssd1306_set_data(const struct ssd1306_display_t *display) {
 	/* D/#C high */
 	GPIO_SetBits(Display_DC_GPIO, Display_DC_Pin);
 }
 
-void ssd1306_set_control(const struct ssd1306_display *display) {
+void ssd1306_set_control(const struct ssd1306_display_t *display) {
 	/* D/#C low */
 	GPIO_ResetBits(Display_DC_GPIO, Display_DC_Pin);
 }
 
-static void ssd1306_send_data(const struct ssd1306_display *display, const uint8_t *data, int length) {
+static void ssd1306_send_data(const struct ssd1306_display_t *display, const uint8_t *data, int length) {
 	if (display->nSS_GPIO) {
 		GPIO_ResetBits(display->nSS_GPIO, display->nSS_Pin);
 	}
@@ -86,20 +86,22 @@ static void ssd1306_send_data(const struct ssd1306_display *display, const uint8
 	}
 }
 
-void ssd1306_init(const struct ssd1306_display *display) {
+void ssd1306_init(const struct ssd1306_display_t *display) {
 	/* Initialize everything, but don't turn display on just yet */
 	ssd1306_set_control(display);
 	ssd1306_send_data(display, initialization_routine, sizeof(initialization_routine));
 
 	/* Then send complete content */
 	ssd1306_set_data(display);
-	ssd1306_send_data(display, display->display_data, sizeof(display->display_data));
+	ssd1306_send_data(display, display->surface->data, display->surface->width * display->surface->height / 8);
 
 	/* Finally enable display */
 	ssd1306_set_control(display);
 	const uint8_t display_on_cmd[] = {
-		CMD_SET_DISPLAY_ON(1),								// af
+		CMD_SET_DISPLAY_ON(1),
 	};
 	ssd1306_send_data(display, display_on_cmd, sizeof(display_on_cmd));
-}
 
+	/* Set data line */
+	ssd1306_set_data(display);
+}

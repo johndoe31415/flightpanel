@@ -39,15 +39,15 @@ PB10	OUT		Audio_CLK_IN
 PB13	OUT		Display_SCK
 PB14	IN		Display_MISO
 PB15	OUT		Display_MOSI
-PB12	OUT		Display_DC
-PB0		OUT		Display1_nSS
-PB1		OUT		Display2_nSS
-PB2		OUT		Display3_nSS
-PB3		OUT		Display4_nSS
-PB4		OUT		Display5_nSS
-PB5		OUT		Display6_nSS
-PB6		OUT		Display7_nSS
-PB7		OUT		Display8_nSS
+PD1		OUT		Display_DC
+PD2		OUT		Display_nRESET
+PB1		OUT		Display1_nSS
+PB2		OUT		Display2_nSS
+PB3		OUT		Display3_nSS
+PB4		OUT		Display4_nSS
+PB5		OUT		Display5_nSS
+PB6		OUT		Display6_nSS
+PB7		OUT		Display7_nSS
 
 
 # Rotary1

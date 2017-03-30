@@ -1,5 +1,7 @@
 #include <stm32f4xx_tim.h>
 #include "timer.h"
+#include "instruments.h"
+#include "pinmap.h"
 
 void HAL_IncTick(void);
 
@@ -18,8 +20,12 @@ void TIM3_IRQHandler(void) {
 }
 
 void SysTick_Handler(void) {
+	Dbg4_SetHIGH();
+	hid_tick();
+
 	if (milli_ticks) {
 		milli_ticks--;
 	}
 	HAL_IncTick();
+	Dbg4_SetLOW();
 }

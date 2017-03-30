@@ -48,7 +48,9 @@ class PinmapGenerator(object):
 	def _write(self, f):
 		print("#ifndef __PINMAP_H__", file = f)
 		print("#define __PINMAP_H__", file = f)
-
+		print(file = f)
+		print("#include <stm32f4xx_gpio.h>", file = f)
+		print(file = f)
 		for pins in sorted(self._pins.values()):
 			for pin in pins:
 				print("// P%s%d: %s (%s)" % (pin.port, pin.pin, pin.name, pin.usage), file = f)
@@ -67,3 +69,4 @@ class PinmapGenerator(object):
 			self._write(f)
 
 PinmapGenerator("pinmap.txt").write_header("pinmap.h")
+

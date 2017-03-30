@@ -4,8 +4,9 @@
 #define DISPLAY_COUNT		1
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void displays_dma_finished(void);
-void displays_update_via_dma(uint8_t display_index);
+void display_dma_finished(void);
+void display_mark_surface_dirty(int display_index);
+const struct surface_t* displays_get_surface(int display_index);
 void init_displays(void);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 

@@ -201,7 +201,7 @@ static void init_spi(void) {
 			.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_15,
 			.GPIO_Mode = GPIO_Mode_AF,
 			.GPIO_OType = GPIO_OType_PP,
-			.GPIO_Speed = GPIO_Speed_2MHz,
+			.GPIO_Speed = GPIO_Speed_25MHz,
 			.GPIO_PuPd = GPIO_PuPd_NOPULL,
 		};
 		GPIO_Init(GPIOB, &GPIO_InitStructure);
@@ -224,7 +224,7 @@ static void init_spi(void) {
 		.SPI_CPOL = SPI_CPOL_Low,
 		.SPI_CPHA = SPI_CPHA_1Edge,
 		.SPI_NSS = SPI_NSS_Soft,
-		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32,
+		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4,
 		.SPI_FirstBit = SPI_FirstBit_MSB,
 		.SPI_CRCPolynomial = 1,
 	};

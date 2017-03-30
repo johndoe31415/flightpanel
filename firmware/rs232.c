@@ -12,10 +12,12 @@ void USART2_IRQHandler(void) {
 
 		if ((rxChar >= 'a') && (rxChar <= 'a' + 0xf)) {
 			rxChar -= 'a';
+			/*
 			Dbg1_SetTo(rxChar & 0x01);
 			Dbg2_SetTo(rxChar & 0x02);
 			Dbg3_SetTo(rxChar & 0x04);
 			Dbg4_SetTo(rxChar & 0x08);
+			*/
 		}
 
 	}
