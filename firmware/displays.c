@@ -6,7 +6,7 @@
 #include "timer.h"
 #include "surface.h"
 #include "spi.h"
-
+#include "fncmap.h"
 #include "font.h"
 
 static void displays_check_dma_schedule(void);
@@ -36,7 +36,7 @@ static void displays_disable_cs(int display_index) {
 static void display_dma_start(int display_index) {
 	current_dma_update = display_index;
 	displays_enable_cs(display_index);
-	spi_tx_data_dma(displays[display_index].surface->data, 128 * 64 / 8);
+	spi_tx_data_dma(DisplaySPI_SPI, DisplaySPI_DMAStream_TX, displays[display_index].surface->data, 128 * 64 / 8);
 }
 
 void display_dma_finished(void) {

@@ -11,14 +11,14 @@ AR := $(PREFIX)ar
 GDB := $(PREFIX)gdb
 STFLASH := st-flash
 
-CFLAGS := -std=c11 -Wall -Wmissing-prototypes -Wstrict-prototypes -Os -g3 -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb -include library_config.h -Iext-st/include -Iext-st/include-cmsis -Iext-st/include-cmsis-dev
+CFLAGS := -std=c11 -Wall -Wmissing-prototypes -Wstrict-prototypes -Werror=implicit-function-declaration -Os -g3 -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb -include library_config.h -Iext-st/include -Iext-st/include-cmsis -Iext-st/include-cmsis-dev
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -Icube -Icube/include-core -Icube/include-hid -Icube/include-hal -Icube/include-cmsis
 #CFLAGS += -specs=nano.specs -specs=rdimon.specs
 LDFLAGS := -Text-st/stm32f407.ld -Wl,--gc-sections
 STATICLIBS := ext-st/init.o ext-st/stdperiph.a cube/cube.a
 
-OBJS := flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o configuration.o ssd1306.o displays.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o instruments.o
+OBJS := flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o configuration.o ssd1306.o displays.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o instruments.o iomux.o
 
 all: $(TARGETS)
 

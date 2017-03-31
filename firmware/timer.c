@@ -1,6 +1,9 @@
+#include <stdio.h>
+#include <stdbool.h>
 #include <stm32f4xx_tim.h>
 #include "timer.h"
 #include "instruments.h"
+#include "iomux.h"
 #include "pinmap.h"
 
 void HAL_IncTick(void);
@@ -28,4 +31,8 @@ void SysTick_Handler(void) {
 	}
 	HAL_IncTick();
 	Dbg4_SetLOW();
+
+	iomux_trigger();
 }
+
+

@@ -49,6 +49,11 @@ PB5		OUT		Display5_nSS
 PB6		OUT		Display6_nSS
 PB7		OUT		Display7_nSS
 
+# I/O mulitplexer
+PC10	OUT		IOMux_SCK
+PC11	IN		IOMux_MISO
+PC12	OUT		IOMux_MOSI
+#PD2		OUT		IOMux_OE
 
 # Rotary1
 PD10	IN_UP	Rotary1_A

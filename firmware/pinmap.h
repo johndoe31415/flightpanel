@@ -223,6 +223,21 @@
 #define Audio_SCK_SetHIGH() Audio_SCK_GPIO->BSRRL = Audio_SCK_Pin
 #define Audio_SCK_SetLOW() Audio_SCK_GPIO->BSRRH = Audio_SCK_Pin
 #define Audio_SCK_SetTo(value) if (value) { Audio_SCK_SetHIGH(); } else { Audio_SCK_SetLOW(); }
+// PC10: IOMux_SCK (OUT)
+#define IOMux_SCK_GPIO GPIOC
+#define IOMux_SCK_PinSource GPIO_PinSource10
+#define IOMux_SCK_Pin GPIO_Pin_10
+#define IOMux_SCK_SetHIGH() IOMux_SCK_GPIO->BSRRL = IOMux_SCK_Pin
+#define IOMux_SCK_SetLOW() IOMux_SCK_GPIO->BSRRH = IOMux_SCK_Pin
+#define IOMux_SCK_SetTo(value) if (value) { IOMux_SCK_SetHIGH(); } else { IOMux_SCK_SetLOW(); }
+
+// PC11: IOMux_MISO (IN)
+#define IOMux_MISO_GPIO GPIOC
+#define IOMux_MISO_PinSource GPIO_PinSource11
+#define IOMux_MISO_Pin GPIO_Pin_11
+#define IOMux_MISO_SetHIGH() IOMux_MISO_GPIO->BSRRL = IOMux_MISO_Pin
+#define IOMux_MISO_SetLOW() IOMux_MISO_GPIO->BSRRH = IOMux_MISO_Pin
+#define IOMux_MISO_SetTo(value) if (value) { IOMux_MISO_SetHIGH(); } else { IOMux_MISO_SetLOW(); }
 
 // PC12: Audio_SD (?)
 #define Audio_SD_GPIO GPIOC
@@ -231,6 +246,13 @@
 #define Audio_SD_SetHIGH() Audio_SD_GPIO->BSRRL = Audio_SD_Pin
 #define Audio_SD_SetLOW() Audio_SD_GPIO->BSRRH = Audio_SD_Pin
 #define Audio_SD_SetTo(value) if (value) { Audio_SD_SetHIGH(); } else { Audio_SD_SetLOW(); }
+// PC12: IOMux_MOSI (OUT)
+#define IOMux_MOSI_GPIO GPIOC
+#define IOMux_MOSI_PinSource GPIO_PinSource12
+#define IOMux_MOSI_Pin GPIO_Pin_12
+#define IOMux_MOSI_SetHIGH() IOMux_MOSI_GPIO->BSRRL = IOMux_MOSI_Pin
+#define IOMux_MOSI_SetLOW() IOMux_MOSI_GPIO->BSRRH = IOMux_MOSI_Pin
+#define IOMux_MOSI_SetTo(value) if (value) { IOMux_MOSI_SetHIGH(); } else { IOMux_MOSI_SetLOW(); }
 
 // PD1: Display_DC (OUT)
 #define Display_DC_GPIO GPIOD

@@ -187,7 +187,7 @@ static void init_rotary_encoders(void) {
 	GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
-static void init_spi(void) {
+static void init_display_spi(void) {
 	// SPI2 with PinPack 2 (PB13 = SCK, PB14 = MISO, PB15 = MOSI) on APB1, GPIOB on AHB1
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
@@ -232,11 +232,11 @@ static void init_spi(void) {
 	SPI_Cmd(SPI2, ENABLE);
 }
 
-static void init_spi_dma(void) {
+static void init_display_spi_dma(void) {
+	/* DMA1 Stream4 Channel 0: SPI2 TX */
 	/* DMA1 Stream3 Channel 0: SPI2 RX (unused) */
-	/* DMA1 Stream4 Channel 1: SPI2 TX */
 
-	// Enable DMA2 clock
+	// Enable DMA1 clock
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
 
 	/* TX */
@@ -267,6 +267,120 @@ static void init_spi_dma(void) {
 	};
 	NVIC_Init(&NVIC_InitStructure);
 	DMA_ITConfig(DMA1_Stream4, DMA_IT_TC, ENABLE);
+}
+
+
+static void init_iomux_spi(void) {
+	// SPI3 with PinPack ? (PC10 = SCK, PC11 = MISO, PC12 = MOSI) on APB1, GPIOC on AHB1
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
+
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_SPI3);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_SPI3);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource12, GPIO_AF_SPI3);
+
+	{
+		GPIO_InitTypeDef GPIO_InitStructure = {
+			.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_12,
+			.GPIO_Mode = GPIO_Mode_AF,
+			.GPIO_OType = GPIO_OType_PP,
+			.GPIO_Speed = GPIO_Speed_25MHz,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
+		};
+		GPIO_Init(GPIOC, &GPIO_InitStructure);
+	}
+	{
+		GPIO_InitTypeDef GPIO_InitStructure = {
+			.GPIO_Pin = GPIO_Pin_11,
+			.GPIO_Mode = GPIO_Mode_AF,
+			.GPIO_OType = GPIO_OType_OD,
+			.GPIO_Speed = GPIO_Speed_25MHz,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
+		};
+		GPIO_Init(GPIOC, &GPIO_InitStructure);
+	}
+
+	SPI_InitTypeDef SPI_InitStructure = {
+		.SPI_Direction = SPI_Direction_2Lines_FullDuplex,
+		.SPI_Mode = SPI_Mode_Master,
+		.SPI_DataSize = SPI_DataSize_8b,
+		.SPI_CPOL = SPI_CPOL_Low,
+		.SPI_CPHA = SPI_CPHA_1Edge,
+		.SPI_NSS = SPI_NSS_Soft,
+		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64,
+		.SPI_FirstBit = SPI_FirstBit_MSB,
+		.SPI_CRCPolynomial = 1,
+	};
+	SPI_Init(SPI3, &SPI_InitStructure);
+	SPI_Cmd(SPI3, ENABLE);
+}
+
+static void init_iomux_spi_dma(void) {
+	/* DMA1 Stream5 Channel 0: SPI3 TX */
+	/* DMA1 Stream2 Channel 0: SPI3 RX */
+
+	// Enable DMA1 clock
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
+
+	/* TX */
+	{
+		DMA_InitTypeDef DMA_InitStructure = {
+			.DMA_Channel = DMA_Channel_0,
+			.DMA_PeripheralBaseAddr = (uint32_t)&(SPI3->DR),
+			.DMA_Memory0BaseAddr = 0,
+			.DMA_DIR = DMA_DIR_MemoryToPeripheral,
+			.DMA_BufferSize = 1,
+			.DMA_PeripheralInc = DMA_PeripheralInc_Disable,
+			.DMA_MemoryInc = DMA_MemoryInc_Enable,
+			.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte,
+			.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte,
+			.DMA_Mode = DMA_Mode_Normal,
+			.DMA_Priority = DMA_Priority_Medium,
+			.DMA_FIFOMode = DMA_FIFOMode_Disable,
+			.DMA_MemoryBurst = DMA_MemoryBurst_Single,
+			.DMA_PeripheralBurst = DMA_PeripheralBurst_Single,
+		};
+		DMA_Init(DMA1_Stream5, &DMA_InitStructure);
+	}
+
+	/* RX */
+	{
+		DMA_InitTypeDef DMA_InitStructure = {
+			.DMA_Channel = DMA_Channel_0,
+			.DMA_PeripheralBaseAddr = (uint32_t)&(SPI3->DR),
+			.DMA_Memory0BaseAddr = 0,
+			.DMA_DIR = DMA_DIR_PeripheralToMemory,
+			.DMA_BufferSize = 1,
+			.DMA_PeripheralInc = DMA_PeripheralInc_Disable,
+			.DMA_MemoryInc = DMA_MemoryInc_Enable,
+			.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte,
+			.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte,
+			.DMA_Mode = DMA_Mode_Normal,
+			.DMA_Priority = DMA_Priority_Medium,
+			.DMA_FIFOMode = DMA_FIFOMode_Disable,
+			.DMA_MemoryBurst = DMA_MemoryBurst_Single,
+			.DMA_PeripheralBurst = DMA_PeripheralBurst_Single,
+		};
+		DMA_Init(DMA1_Stream2, &DMA_InitStructure);
+	}
+
+	/* Enable IRQ */
+	NVIC_InitTypeDef NVIC_InitStructure = {
+		.NVIC_IRQChannel = DMA1_Stream5_IRQn,
+		.NVIC_IRQChannelPreemptionPriority = 0,
+		.NVIC_IRQChannelSubPriority = 0,
+		.NVIC_IRQChannelCmd = ENABLE,
+	};
+	NVIC_Init(&NVIC_InitStructure);
+	NVIC_InitTypeDef NVIC_InitStructure2 = {
+		.NVIC_IRQChannel = DMA1_Stream2_IRQn,
+		.NVIC_IRQChannelPreemptionPriority = 0,
+		.NVIC_IRQChannelSubPriority = 0,
+		.NVIC_IRQChannelCmd = ENABLE,
+	};
+	NVIC_Init(&NVIC_InitStructure2);
+	DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE);
+	DMA_ITConfig(DMA1_Stream2, DMA_IT_TC, ENABLE);
 }
 
 #if 0
@@ -394,14 +508,16 @@ void SystemInit() {
 	init_clock();
 	init_gpio();
 	init_uart();
-	init_timer();
 	init_rotary_encoders();
-	init_spi();
-	init_spi_dma();
-	init_systick();
+	init_display_spi();
+	init_display_spi_dma();
+	init_iomux_spi();
+	init_iomux_spi_dma();
 	init_i2c();
 	init_crc();
 	init_debug();
 //	init_usb();
+	init_systick();
+	init_timer();
 	__enable_irq();
 }

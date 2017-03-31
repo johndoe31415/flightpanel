@@ -5,6 +5,7 @@
 #include "pinmap.h"
 #include "spi.h"
 #include "timer.h"
+#include "fncmap.h"
 
 // Fundamental commands
 #define CMD_SET_CONTRAST_CONTROL(value)											0x81, (value)
@@ -80,7 +81,7 @@ static void ssd1306_send_data(const struct ssd1306_display_t *display, const uin
 	if (display->nSS_GPIO) {
 		GPIO_ResetBits(display->nSS_GPIO, display->nSS_Pin);
 	}
-	spi_tx_data(data, length);
+	spi_tx_data(DisplaySPI_SPI, data, length);
 	if (display->nSS_GPIO) {
 		GPIO_SetBits(display->nSS_GPIO, display->nSS_Pin);
 	}
