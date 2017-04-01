@@ -26,8 +26,8 @@ for line in open("used_events.txt"):
 	events.append(event)
 
 lookup = mako.lookup.TemplateLookup([ "." ], strict_undefined = True)
-with open("../event-enum.c", "w") as f:
+with open("../simconnect-events.c", "w") as f:
 	f.write(lookup.get_template("template_enum.c").render(events = events))
-with open("../event-enum.h", "w") as f:
+with open("../simconnect-events.h", "w") as f:
 	f.write(lookup.get_template("template_enum.h").render(events = events))
 

@@ -1,14 +1,14 @@
-#ifndef __EVENT_ENUM_H__
-#define __EVENT_ENUM_H__
+#ifndef __SIMCONNECT_EVENTS_H__
+#define __SIMCONNECT_EVENTS_H__
 
 #include <stdint.h>
 
-struct event_enum_data_t {
+struct simconnect_event_enum_data_t {
 	uint32_t flags;
 	const char *name;
 };
 
-enum event_t {
+enum simconnect_event_t {
 %for event in events:
 	${event.enum_name},			// ${event.text}
 %endfor
@@ -19,8 +19,8 @@ enum event_t {
 extern "C" {
 #endif
 
-const struct event_enum_data_t *get_event_enum_data(enum event_t value);
-const char *get_event_enum_name(enum event_t value);
+const struct simconnect_event_enum_data_t *get_simconnect_event_enum_data(enum simconnect_event_t value);
+const char *get_simconnect_event_enum_name(enum simconnect_event_t value);
 
 #ifdef __cplusplus
 };

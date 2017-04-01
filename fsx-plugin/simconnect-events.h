@@ -1,21 +1,43 @@
-#ifndef __EVENT_ENUM_H__
-#define __EVENT_ENUM_H__
+#ifndef __SIMCONNECT_EVENTS_H__
+#define __SIMCONNECT_EVENTS_H__
 
 #include <stdint.h>
 
-struct event_enum_data_t {
+struct simconnect_event_enum_data_t {
 	uint32_t flags;
 	const char *name;
 };
 
-enum event_t {
+enum simconnect_event_t {
 	EVENT_SIM_START,			// Start simulation
 	EVENT_AP_MASTER,			// Toggles AP on/off
 	EVENT_AUTOPILOT_OFF,			// Turns AP off
 	EVENT_AUTOPILOT_ON,			// Turns AP on
+	EVENT_YAW_DAMPER_TOGGLE,			// Toggles yaw damper on/off
 	EVENT_AP_PANEL_HEADING_HOLD,			// Toggles heading hold mode on/off
 	EVENT_AP_PANEL_ALTITUDE_HOLD,			// Toggles altitude hold mode on/off
+	EVENT_AP_ATT_HOLD_ON,			// Turns on AP wing leveler and pitch hold mode
+	EVENT_AP_LOC_HOLD_ON,			// Turns AP localizer hold on/armed and glide-slope hold mode off
+	EVENT_AP_APR_HOLD_ON,			// Turns both AP localizer and glide-slope modes on/armed
+	EVENT_AP_HDG_HOLD_ON,			// Turns heading hold mode on
+	EVENT_AP_ALT_HOLD_ON,			// Turns altitude hold mode on
+	EVENT_AP_WING_LEVELER_ON,			// Turns wing leveler mode on
+	EVENT_AP_BC_HOLD_ON,			// Turns localizer back course hold mode on/armed
+	EVENT_AP_NAV1_HOLD_ON,			// Turns lateral hold mode on
+	EVENT_AP_ATT_HOLD_OFF,			// Turns off attitude hold mode
+	EVENT_AP_LOC_HOLD_OFF,			// Turns off localizer hold mode
+	EVENT_AP_APR_HOLD_OFF,			// Turns off approach hold mode
+	EVENT_AP_HDG_HOLD_OFF,			// Turns off heading hold mode
+	EVENT_AP_ALT_HOLD_OFF,			// Turns off altitude hold mode
+	EVENT_AP_WING_LEVELER_OFF,			// Turns off wing leveler mode
+	EVENT_AP_BC_HOLD_OFF,			// Turns off backcourse mode for localizer hold
+	EVENT_AP_NAV1_HOLD_OFF,			// Turns off nav hold mode
 	EVENT_AP_AIRSPEED_HOLD,			// Toggles airspeed hold mode
+	EVENT_AUTO_THROTTLE_ARM,			// Toggles autothrottle arming mode
+	EVENT_AUTO_THROTTLE_TO_GA,			// Toggles Takeoff/Go Around mode
+	EVENT_HEADING_BUG_INC,			// Increments heading hold reference bug
+	EVENT_HEADING_BUG_DEC,			// Decrements heading hold reference bug
+	EVENT_HEADING_BUG_SET,			// Set heading hold reference bug (degrees)
 	EVENT_AP_PANEL_SPEED_HOLD,			// Toggles airspeed hold mode
 	EVENT_AP_ALT_VAR_INC,			// Increments reference altitude
 	EVENT_AP_ALT_VAR_DEC,			// Decrements reference altitude
@@ -23,17 +45,43 @@ enum event_t {
 	EVENT_AP_VS_VAR_DEC,			// Decrements vertical speed reference
 	EVENT_AP_SPD_VAR_INC,			// Increments airspeed hold reference
 	EVENT_AP_SPD_VAR_DEC,			// Decrements airspeed hold reference
-	EVENT_AP_ALT_VAR_SET_METRIC,			// Sets reference altitude in meters
 	EVENT_AP_VS_VAR_SET_ENGLISH,			// Sets reference vertical speed in feet per minute
 	EVENT_AP_SPD_VAR_SET,			// Sets airspeed reference in knots
+	EVENT_YAW_DAMPER_ON,			// Turns yaw damper on
+	EVENT_YAW_DAMPER_OFF,			// Turns yaw damper off
+	EVENT_YAW_DAMPER_SET,			// Sets yaw damper on/off (1,0)
 	EVENT_AP_AIRSPEED_ON,			// Turns airspeed hold on
 	EVENT_AP_AIRSPEED_OFF,			// Turns airspeed hold off
-	EVENT_AP_MACH_ON,			// Turns mach hold on
-	EVENT_AP_MACH_OFF,			// Turns mach hold off
+	EVENT_AP_AIRSPEED_SET,			// Sets airspeed hold on/off (1,0)
 	EVENT_AP_PANEL_ALTITUDE_ON,			// Turns altitude hold mode on (without capturing current altitude)
 	EVENT_AP_PANEL_ALTITUDE_OFF,			// Turns altitude hold mode off
+	EVENT_AP_PANEL_ALTITUDE_SET,			// Sets altitude hold mode on/off (1,0)
 	EVENT_AP_PANEL_HEADING_ON,			// Turns heading mode on (without capturing current heading)
 	EVENT_AP_PANEL_HEADING_OFF,			// Turns heading mode off
+	EVENT_AP_PANEL_HEADING_SET,			// Set heading mode on/off (1,0)
+	EVENT_AP_PANEL_SPEED_ON,			// Turns on speed hold mode
+	EVENT_AP_PANEL_SPEED_OFF,			// Turns off speed hold mode
+	EVENT_AP_PANEL_SPEED_SET,			// Set speed hold mode on/off (1,0)
+	EVENT_AP_ALT_VAR_SET_ENGLISH,			// Sets altitude reference in feet
+	EVENT_AP_PANEL_SPEED_HOLD_TOGGLE,			// Turns airspeed hold mode on with current airspeed
+	EVENT_AP_NAV_SELECT_SET,			// Sets the nav (1 or 2) which is used by the Nav hold modes
+	EVENT_HEADING_BUG_SELECT,			// Selects the heading bug for use with +/-
+	EVENT_ALTITUDE_BUG_SELECT,			// Selects the altitude reference for use with +/-
+	EVENT_VSI_BUG_SELECT,			// Selects the vertical speed reference for use with +/-
+	EVENT_AIRSPEED_BUG_SELECT,			// Selects the airspeed reference for use with +/-
+	EVENT_AP_PITCH_REF_INC_UP,			// Increments the pitch reference for pitch hold mode
+	EVENT_AP_PITCH_REF_INC_DN,			// Decrements the pitch reference for pitch hold mode
+	EVENT_AP_PITCH_REF_SELECT,			// Selects pitch reference for use with +/-
+	EVENT_AP_ATT_HOLD,			// Toggle attitude hold mode
+	EVENT_AP_LOC_HOLD,			// Toggles localizer (only) hold mode
+	EVENT_AP_APR_HOLD,			// Toggles approach hold (localizer and glide-slope)
+	EVENT_AP_HDG_HOLD,			// Toggles heading hold mode
+	EVENT_AP_ALT_HOLD,			// Toggles altitude hold mode
+	EVENT_AP_WING_LEVELER,			// Toggles wing leveler mode
+	EVENT_AP_BC_HOLD,			// Toggles the backcourse mode for the localizer hold
+	EVENT_AP_NAV1_HOLD,			// Toggles the nav hold mode
+	EVENT_AP_MAX_BANK_INC,			// Autopilot max bank angle increment.
+	EVENT_AP_MAX_BANK_DEC,			// Autopilot max bank angle decrement.
 	EVENT_COM_RADIO_WHOLE_DEC,			// Decrements COM by one MHz
 	EVENT_COM_RADIO_WHOLE_INC,			// Increments COM by one MHz
 	EVENT_COM_RADIO_FRACT_DEC,			// Decrements COM by 25 KHz
@@ -189,8 +237,8 @@ enum event_t {
 extern "C" {
 #endif
 
-const struct event_enum_data_t *get_event_enum_data(enum event_t value);
-const char *get_event_enum_name(enum event_t value);
+const struct simconnect_event_enum_data_t *get_simconnect_event_enum_data(enum simconnect_event_t value);
+const char *get_simconnect_event_enum_name(enum simconnect_event_t value);
 
 #ifdef __cplusplus
 };

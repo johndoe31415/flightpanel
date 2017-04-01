@@ -5,9 +5,31 @@ SIM_START	Start simulation
 AP_MASTER	Toggles AP on/off
 AUTOPILOT_OFF	Turns AP off
 AUTOPILOT_ON	Turns AP on
+YAW_DAMPER_TOGGLE	Toggles yaw damper on/off
 AP_PANEL_HEADING_HOLD	Toggles heading hold mode on/off
 AP_PANEL_ALTITUDE_HOLD	Toggles altitude hold mode on/off
+AP_ATT_HOLD_ON	Turns on AP wing leveler and pitch hold mode
+AP_LOC_HOLD_ON	Turns AP localizer hold on/armed and glide-slope hold mode off
+AP_APR_HOLD_ON	Turns both AP localizer and glide-slope modes on/armed
+AP_HDG_HOLD_ON	Turns heading hold mode on
+AP_ALT_HOLD_ON	Turns altitude hold mode on
+AP_WING_LEVELER_ON	Turns wing leveler mode on
+AP_BC_HOLD_ON	Turns localizer back course hold mode on/armed
+AP_NAV1_HOLD_ON	Turns lateral hold mode on
+AP_ATT_HOLD_OFF	Turns off attitude hold mode
+AP_LOC_HOLD_OFF	Turns off localizer hold mode
+AP_APR_HOLD_OFF	Turns off approach hold mode
+AP_HDG_HOLD_OFF	Turns off heading hold mode
+AP_ALT_HOLD_OFF	Turns off altitude hold mode
+AP_WING_LEVELER_OFF	Turns off wing leveler mode
+AP_BC_HOLD_OFF	Turns off backcourse mode for localizer hold
+AP_NAV1_HOLD_OFF	Turns off nav hold mode
 AP_AIRSPEED_HOLD	Toggles airspeed hold mode
+AUTO_THROTTLE_ARM	Toggles autothrottle arming mode
+AUTO_THROTTLE_TO_GA	Toggles Takeoff/Go Around mode
+HEADING_BUG_INC	Increments heading hold reference bug
+HEADING_BUG_DEC	Decrements heading hold reference bug
+HEADING_BUG_SET	Set heading hold reference bug (degrees)
 AP_PANEL_SPEED_HOLD	Toggles airspeed hold mode
 AP_ALT_VAR_INC	Increments reference altitude
 AP_ALT_VAR_DEC	Decrements reference altitude
@@ -15,17 +37,43 @@ AP_VS_VAR_INC	Increments vertical speed reference
 AP_VS_VAR_DEC	Decrements vertical speed reference
 AP_SPD_VAR_INC	Increments airspeed hold reference
 AP_SPD_VAR_DEC	Decrements airspeed hold reference
-AP_ALT_VAR_SET_METRIC	Sets reference altitude in meters
 AP_VS_VAR_SET_ENGLISH	Sets reference vertical speed in feet per minute
 AP_SPD_VAR_SET	Sets airspeed reference in knots
+YAW_DAMPER_ON	Turns yaw damper on
+YAW_DAMPER_OFF	Turns yaw damper off
+YAW_DAMPER_SET	Sets yaw damper on/off (1,0)
 AP_AIRSPEED_ON	Turns airspeed hold on
 AP_AIRSPEED_OFF	Turns airspeed hold off
-AP_MACH_ON	Turns mach hold on
-AP_MACH_OFF	Turns mach hold off
+AP_AIRSPEED_SET	Sets airspeed hold on/off (1,0)
 AP_PANEL_ALTITUDE_ON	Turns altitude hold mode on (without capturing current altitude)
 AP_PANEL_ALTITUDE_OFF	Turns altitude hold mode off
+AP_PANEL_ALTITUDE_SET	Sets altitude hold mode on/off (1,0)
 AP_PANEL_HEADING_ON	Turns heading mode on (without capturing current heading)
 AP_PANEL_HEADING_OFF	Turns heading mode off
+AP_PANEL_HEADING_SET	Set heading mode on/off (1,0)
+AP_PANEL_SPEED_ON	Turns on speed hold mode
+AP_PANEL_SPEED_OFF	Turns off speed hold mode
+AP_PANEL_SPEED_SET	Set speed hold mode on/off (1,0)
+AP_ALT_VAR_SET_ENGLISH	Sets altitude reference in feet
+AP_PANEL_SPEED_HOLD_TOGGLE	Turns airspeed hold mode on with current airspeed
+AP_NAV_SELECT_SET	Sets the nav (1 or 2) which is used by the Nav hold modes
+HEADING_BUG_SELECT	Selects the heading bug for use with +/-
+ALTITUDE_BUG_SELECT	Selects the altitude reference for use with +/-
+VSI_BUG_SELECT	Selects the vertical speed reference for use with +/-
+AIRSPEED_BUG_SELECT	Selects the airspeed reference for use with +/-
+AP_PITCH_REF_INC_UP	Increments the pitch reference for pitch hold mode
+AP_PITCH_REF_INC_DN	Decrements the pitch reference for pitch hold mode
+AP_PITCH_REF_SELECT	Selects pitch reference for use with +/-
+AP_ATT_HOLD	Toggle attitude hold mode
+AP_LOC_HOLD	Toggles localizer (only) hold mode
+AP_APR_HOLD	Toggles approach hold (localizer and glide-slope)
+AP_HDG_HOLD	Toggles heading hold mode
+AP_ALT_HOLD	Toggles altitude hold mode
+AP_WING_LEVELER	Toggles wing leveler mode
+AP_BC_HOLD	Toggles the backcourse mode for the localizer hold
+AP_NAV1_HOLD	Toggles the nav hold mode
+AP_MAX_BANK_INC	Autopilot max bank angle increment.
+AP_MAX_BANK_DEC	Autopilot max bank angle decrement.
 
 COM_RADIO_WHOLE_DEC	Decrements COM by one MHz
 COM_RADIO_WHOLE_INC	Increments COM by one MHz
