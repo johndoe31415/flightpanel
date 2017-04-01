@@ -8,6 +8,8 @@
 #include <windows.h>
 #include "SimConnect.h"
 
+static FILE *dbg_f = fopen("debug.log", "a");
+
 struct information_data_t {
 	char title[256];
 };
@@ -38,17 +40,28 @@ static bool loop_running;
 
 static int adf_byte1_bcd32_to_khz(uint8_t byte1) {
 	if ((byte1 & 0xf0) == 0xb0) {
-		return (byte1 & 0x0f) + 10; 
+		return (byte1 & 0x0f) + 10;
 	} else {
 		switch (byte1) {
+			case 0x72:
+			case 0x78:
+			case 0x79:
 			case 0x74:		return 1;
+			case 0x84:
 			case 0x82:		return 2;
+			case 0x8c:
 			case 0x8a:		return 3;
+			case 0x92:
 			case 0x91:		return 4;
+			case 0x96:
 			case 0x95:		return 5;
+			case 0x9a:
 			case 0x99:		return 6;
+			case 0x9e:
 			case 0x9d:		return 7;
+			case 0xa1:
 			case 0xa0:		return 8;
+			case 0xa3:
 			case 0xa2:		return 9;
 			default:
 				printf("Cannot interpret ADF byte 1: 0x%x\n", byte1);
@@ -57,11 +70,12 @@ static int adf_byte1_bcd32_to_khz(uint8_t byte1) {
 	}
 }
 
-uint32_t adf_bcd32_to_khz(uint64_t value) {	
-	return adf_byte1_bcd32_to_khz((value >> (8 * 6)) & 0xff) * 100000;
-//			+ ((value >> (4 * 12)) & 0x0f) * 10000
-//			+ ((value >> (4 * 11)) & 0x0f) * 1000
-//			+ ((value >> (4 * 10)) & 0x0f) * 100;
+uint32_t adf_bcd32_to_khz(uint64_t value) {
+	return adf_byte1_bcd32_to_khz((value >> (8 * 6)) & 0xff) * 100000
+			+ ((value >> (4 * 12)) & 0x0f) * 10000
+			+ ((value >> (4 * 11)) & 0x0f) * 1000
+			+ ((value >> (4 * 10)) & 0x0f) * 100;
+
 }
 
 void CALLBACK MyDispatchProcRD(SIMCONNECT_RECV* pData, DWORD cbData, void *pContext) {
@@ -74,7 +88,7 @@ void CALLBACK MyDispatchProcRD(SIMCONNECT_RECV* pData, DWORD cbData, void *pCont
 			SimConnect_RequestDataOnSimObjectType(hSimConnect, REQUEST_DATADEF_INFO, DATADEF_INFO, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 			SimConnect_RequestDataOnSimObjectType(hSimConnect, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 		} else if (evt->uGroupID == EVENTGROUP_INSTRUMENT_CHANGED) {
-			printf("Instrument changed: %s\n", get_event_enum_name(event_id));
+			//printf("Instrument changed: %s\n", get_event_enum_name(event_id));
 			SimConnect_RequestDataOnSimObjectType(hSimConnect, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 		} else {
 			printf("Unhandled event received: 0x%lx\n", evt->uEventID);
@@ -89,7 +103,8 @@ void CALLBACK MyDispatchProcRD(SIMCONNECT_RECV* pData, DWORD cbData, void *pCont
 		} else if (pObjData->dwRequestID == REQUEST_DATADEF_INSTRUMENTS) {
 			//DWORD object_id = pObjData->dwObjectID;
 			struct instrument_data_t *fdata = (struct instrument_data_t*)&pObjData->dwData;
-			printf("Receive data object %ld: QNH %.0f NAV1 %.2f (%.2f) ADF %u sound %" PRIx64 " align %.2f\n", object_id, fdata->qnh, fdata->nav1_active, fdata->nav1_standby, adf_bcd32_to_khz(fdata->adf1_active), fdata->adf1_sound, fdata->align);
+			//uint32_t adfx = adf_bcd32_to_khz(fdata->adf1_active);
+			//printf("Receive data object %ld: QNH %.0f NAV1 %.2f (%.2f) ADF %u.%03u sound %" PRIx64 " align %.2f\n", object_id, fdata->qnh, fdata->nav1_active, fdata->nav1_standby, adf / 1000, adf % 1000, fdata->adf1_sound, fdata->align);
 			/*
 			printf("%d raw bytes:\n", sizeof(instrument_data_t));
 			for (int i = 0; i < sizeof(struct instrument_data_t); i++) {
@@ -99,9 +114,21 @@ void CALLBACK MyDispatchProcRD(SIMCONNECT_RECV* pData, DWORD cbData, void *pCont
 			}
 			printf("\n");
 			*/
+
+			/*
 			printf("%lu values:\n", pObjData->dwDefineCount);
 			for (unsigned int i = 0; i < pObjData->dwDefineCount; i++) {
-				printf("%d: %" PRId64 "\n", i, ((uint64_t*)fdata)[i]);
+				printf("%d: %" PRIx64 "\n", i, ((uint64_t*)fdata)[i]);
+			}
+			*/
+			{
+				//uint64_t adf = fdata->adf1_active;
+				//for (int i = 7; i >= 0; i--) {
+				//	fprintf(f, "%x ", (adf >> (32 + (4 * i))) & 0xf);
+				//}
+				//fprintf(f, " -> %u\n", adfx);
+				fprintf(dbg_f, "%" PRIx64 "\n", fdata->adf1_active);
+				fflush(dbg_f);
 			}
 		} else {
 			printf("Recevied unhandled data for request 0x%lx\n", pObjData->dwRequestID);
@@ -154,6 +181,7 @@ int main() {
 				SimConnect_MapClientEventToSimEvent(hSimConnect, event_enum, event_data->name);
 				SimConnect_AddClientEventToNotificationGroup(hSimConnect, EVENTGROUP_INSTRUMENT_CHANGED, event_enum);
 			}
+			event_enum++;
 		}
 
 		simconnect_loop(hSimConnect);
