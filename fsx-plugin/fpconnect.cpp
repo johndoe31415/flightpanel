@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <math.h>
 #include "inttypes_emulation.h"
 #include "event-enum.h"
 
@@ -15,12 +16,82 @@ struct information_data_t {
 };
 
 struct instrument_data_t {
+	uint16_t qnh_millibar;
+	uint32_t vhf1_active_khz, vhf1_stby_khz;
+	uint32_t vhf2_active_khz, vhf2_stby_khz;
+	uint32_t nav1_active_khz, nav1_stby_khz;
+	uint32_t nav2_active_khz, nav2_stby_khz;
+	uint32_t adf_hz;
+	uint16_t squawk;
+	bool tx_vhf1, rx_vhf1;
+	bool tx_vhf2, rx_vhf2;
+	bool nav1_sound, nav2_sound;
+	bool dme_ident, adf_ident;
+	bool light_bcn, light_land, light_taxi, light_nav, light_strb;
+};
+
+struct simconnect_instrument_data_t {
 	double qnh;
+	double vhf1_active, vhf1_standby;
+	double vhf2_active, vhf2_standby;
+	uint64_t vhf1_tx, vhf2_tx, vhf_rx_all;
 	double nav1_active, nav1_standby;
-	uint64_t adf1_active;
-	uint64_t adf1_sound;
-	double align;
+	double nav2_active, nav2_standby;
+	uint64_t nav1_sound, nav2_sound;
+	double adf1_active;
+	uint64_t dme_ident;
+	uint64_t adf1_ident;
+	uint64_t squawk;
+	uint64_t lights_on;
 } __attribute__((packed));
+
+void simconnect_instrument_to_abstract(const struct simconnect_instrument_data_t *in, struct instrument_data_t *out) {
+	out->qnh_millibar = round(in->qnh);
+	out->vhf1_active_khz = round(in->vhf1_active * 1e3);
+	out->vhf1_stby_khz = round(in->vhf1_standby * 1e3);
+	out->vhf2_active_khz = round(in->vhf2_active * 1e3);
+	out->vhf2_stby_khz = round(in->vhf2_standby * 1e3);
+	out->nav1_active_khz = round(in->nav1_active * 1e3);
+	out->nav1_stby_khz = round(in->nav1_standby * 1e3);
+	out->nav2_active_khz = round(in->nav2_active * 1e3);
+	out->nav2_stby_khz = round(in->nav2_standby * 1e3);
+	out->nav1_sound = in->nav1_sound;
+	out->nav2_sound = in->nav2_sound;
+	out->adf_hz = round(in->adf1_active * 1e6);
+	out->tx_vhf1 = in->vhf1_tx;
+	out->tx_vhf2 = in->vhf2_tx;
+	if (in->vhf_rx_all) {
+		out->rx_vhf1 = true;
+		out->rx_vhf2 = true;
+	} else {
+		out->rx_vhf1 = out->tx_vhf1;
+		out->rx_vhf2 = out->tx_vhf2;
+	}
+	out->dme_ident = in->dme_ident;
+	out->adf_ident = in->adf1_ident;
+	//printf("squawk %" PRIx64 "\n", in->squawk);
+	out->squawk = in->squawk >> (64 - 16);
+	printf("lights %" PRIx64 "\n", in->lights_on);
+	uint64_t lights = in->lights_on >> (64 - 16);
+	out->light_nav = (lights & 0x0001);
+	out->light_bcn = (lights & 0x0002);
+	out->light_land = (lights & 0x0004);
+	out->light_taxi = (lights & 0x0008);
+	out->light_strb = (lights & 0x0010);
+}
+
+void dump_instrument_data(const struct instrument_data_t *data) {
+	printf("VHF1: %3d.%03d (%3d.%03d)     ", data->vhf1_active_khz / 1000, data->vhf1_active_khz % 1000, data->vhf1_stby_khz / 1000, data->vhf1_stby_khz % 1000);
+	printf("VHF2: %3d.%03d (%3d.%03d)\n", data->vhf2_active_khz / 1000, data->vhf2_active_khz % 1000, data->vhf2_stby_khz / 1000, data->vhf2_stby_khz % 1000);
+	printf("NAV1: %3d.%03d (%3d.%03d)     ", data->nav1_active_khz / 1000, data->nav1_active_khz % 1000, data->nav1_stby_khz / 1000, data->nav1_stby_khz % 1000);
+	printf("NAV2: %3d.%03d (%3d.%03d)\n", data->nav2_active_khz / 1000, data->nav2_active_khz % 1000, data->nav2_stby_khz / 1000, data->nav2_stby_khz % 1000);
+	printf("ADF %4d.%d kHz    QNH %d mBar\n", data->adf_hz / 1000, data->adf_hz % 1000 / 100, data->qnh_millibar);
+	printf("Squawk %04x\n", data->squawk);
+	printf("Radios: %1s%4s  %1s%4s %4s %4s %3s %3s\n", data->tx_vhf1 ? ">" : "", data->rx_vhf1 ? "VHF1" : "", data->tx_vhf2 ? ">" : "", data->rx_vhf2 ? "VHF2" : "",
+			data->nav1_sound ? "NAV1" : "", data->nav2_sound ? "NAV2" : "",
+			data->dme_ident ? "DME" : "", data->adf_ident ? "ADF" : "");
+	printf("Lights: %3s %4s %4s %3s %4s\n", data->light_bcn ? "BCN" : "", data->light_land ? "LAND" : "", data->light_taxi ? "TAXI" : "", data->light_nav ? "NAV" : "", data->light_strb ? "STRB" : "");
+}
 
 enum event_group_t {
 	EVENTGROUP_INSTRUMENT_CHANGED
@@ -37,46 +108,6 @@ enum data_request_t {
 };
 
 static bool loop_running;
-
-static int adf_byte1_bcd32_to_khz(uint8_t byte1) {
-	if ((byte1 & 0xf0) == 0xb0) {
-		return (byte1 & 0x0f) + 10;
-	} else {
-		switch (byte1) {
-			case 0x72:
-			case 0x78:
-			case 0x79:
-			case 0x74:		return 1;
-			case 0x84:
-			case 0x82:		return 2;
-			case 0x8c:
-			case 0x8a:		return 3;
-			case 0x92:
-			case 0x91:		return 4;
-			case 0x96:
-			case 0x95:		return 5;
-			case 0x9a:
-			case 0x99:		return 6;
-			case 0x9e:
-			case 0x9d:		return 7;
-			case 0xa1:
-			case 0xa0:		return 8;
-			case 0xa3:
-			case 0xa2:		return 9;
-			default:
-				printf("Cannot interpret ADF byte 1: 0x%x\n", byte1);
-				return 0;
-		}
-	}
-}
-
-uint32_t adf_bcd32_to_khz(uint64_t value) {
-	return adf_byte1_bcd32_to_khz((value >> (8 * 6)) & 0xff) * 100000
-			+ ((value >> (4 * 12)) & 0x0f) * 10000
-			+ ((value >> (4 * 11)) & 0x0f) * 1000
-			+ ((value >> (4 * 10)) & 0x0f) * 100;
-
-}
 
 void CALLBACK MyDispatchProcRD(SIMCONNECT_RECV* pData, DWORD cbData, void *pContext) {
 	HANDLE hSimConnect = (HANDLE)pContext;
@@ -102,34 +133,12 @@ void CALLBACK MyDispatchProcRD(SIMCONNECT_RECV* pData, DWORD cbData, void *pCont
 			printf("Receive data about object %ld: %s\n", object_id, fdata->title);
 		} else if (pObjData->dwRequestID == REQUEST_DATADEF_INSTRUMENTS) {
 			//DWORD object_id = pObjData->dwObjectID;
-			struct instrument_data_t *fdata = (struct instrument_data_t*)&pObjData->dwData;
-			//uint32_t adfx = adf_bcd32_to_khz(fdata->adf1_active);
-			//printf("Receive data object %ld: QNH %.0f NAV1 %.2f (%.2f) ADF %u.%03u sound %" PRIx64 " align %.2f\n", object_id, fdata->qnh, fdata->nav1_active, fdata->nav1_standby, adf / 1000, adf % 1000, fdata->adf1_sound, fdata->align);
-			/*
-			printf("%d raw bytes:\n", sizeof(instrument_data_t));
-			for (int i = 0; i < sizeof(struct instrument_data_t); i++) {
-				if (i && ((i % 16) == 0)) printf("\n");
-				printf("%02x ", ((uint8_t*)fdata)[i]);
+			struct simconnect_instrument_data_t *simconnect_data = (struct simconnect_instrument_data_t*)&pObjData->dwData;
 
-			}
-			printf("\n");
-			*/
-
-			/*
-			printf("%lu values:\n", pObjData->dwDefineCount);
-			for (unsigned int i = 0; i < pObjData->dwDefineCount; i++) {
-				printf("%d: %" PRIx64 "\n", i, ((uint64_t*)fdata)[i]);
-			}
-			*/
-			{
-				//uint64_t adf = fdata->adf1_active;
-				//for (int i = 7; i >= 0; i--) {
-				//	fprintf(f, "%x ", (adf >> (32 + (4 * i))) & 0xf);
-				//}
-				//fprintf(f, " -> %u\n", adfx);
-				fprintf(dbg_f, "%" PRIx64 "\n", fdata->adf1_active);
-				fflush(dbg_f);
-			}
+			struct instrument_data_t abstract_data;
+			memset(&abstract_data, 0, sizeof(abstract_data));
+			simconnect_instrument_to_abstract(simconnect_data, &abstract_data);
+			dump_instrument_data(&abstract_data);
 		} else {
 			printf("Recevied unhandled data for request 0x%lx\n", pObjData->dwRequestID);
 		}
@@ -164,11 +173,24 @@ int main() {
 		printf("Connected.\n");
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INFO, "Title", NULL, SIMCONNECT_DATATYPE_STRING256);
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "KOHLSMAN SETTING MB", "MilliBars");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM ACTIVE FREQUENCY:1", "MHz");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM STANDBY FREQUENCY:1", "MHz");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM ACTIVE FREQUENCY:2", "MHz");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM STANDBY FREQUENCY:2", "MHz");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM TRANSMIT:1", "Bool");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM TRANSMIT:2", "Bool");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM RECEIVE ALL", "Bool");
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV ACTIVE FREQUENCY:1", "MHz");
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV STANDBY FREQUENCY:1", "MHz");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "ADF ACTIVE FREQUENCY:1", "Frequency ADF BCD32");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV ACTIVE FREQUENCY:2", "MHz");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV STANDBY FREQUENCY:2", "MHz");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV SOUND:1", "Bool");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV SOUND:2", "Bool");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "ADF ACTIVE FREQUENCY:1", "MHz");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "DME SOUND:1", "Bool");
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "ADF SOUND:1", "Bool");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV ACTIVE FREQUENCY:1", "MHz");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "TRANSPONDER CODE:1", "BCO16");
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "LIGHT ON STATES", "MASK");
 
 		SimConnect_SubscribeToSystemEvent(hSimConnect, EVENT_SIM_START, "SimStart");
 
