@@ -1,0 +1,34 @@
+#!/usr/bin/python3
+#
+# ADF byte 1 has strange values (1xx.xx MHz = 0x74, 2xx.xx MHz = 0x82, ..., 13xx.xx MHz = 0xb3)
+# This small script hopefully helps me find out how this weird encoding works.
+# Remaining digits are simple BCD, only first (two) digits are odd.
+
+adf_byte1 = list(enumerate([
+	0x74,
+	0x82,
+	0x8a,
+	0x91,
+	0x95,
+	0x99,
+	0x9d,
+	0xa0,
+	0xa2,
+	0xb0,
+	0xb1,
+	0xb2,
+	0xb3,
+	0xb4,
+	0xb5,
+	0xb6,
+	0xb7
+], 1))
+
+for (value, encoding) in adf_byte1:
+#	print("%2d 0x%02x %8s" % (value, encoding, bin(encoding)[2:]))
+
+	if (encoding & 0xf0) == 0xb0:
+		print(value, (encoding & 0xf) + 10)
+	else:
+		print(value, ((encoding & 0x2e) >> 1), "WRONG")
+

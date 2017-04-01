@@ -1,0 +1,33 @@
+#!/usr/bin/python3
+#
+#
+import collections
+import mako.lookup
+
+Event = collections.namedtuple("Event", [ "symbol", "enum_name", "text", "flags" ])
+
+flags = "0"
+events = [ ]
+for line in open("used_events.txt"):
+	line = line.rstrip("\r\n")
+	if line == "":
+		continue
+	if line.startswith("#"):
+		continue
+	if line.startswith(":flags"):
+		flags = line.split("=")[1]
+		continue
+	line = line.split("\t")
+	if len(line) != 2:
+		raise Exception("Malformatted line.")
+	event, description = line
+
+	event = Event(symbol = event, enum_name = "EVENT_" + event, text = description, flags = flags)
+	events.append(event)
+
+lookup = mako.lookup.TemplateLookup([ "." ], strict_undefined = True)
+with open("../event-enum.c", "w") as f:
+	f.write(lookup.get_template("template_enum.c").render(events = events))
+with open("../event-enum.h", "w") as f:
+	f.write(lookup.get_template("template_enum.h").render(events = events))
+
