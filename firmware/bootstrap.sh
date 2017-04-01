@@ -57,6 +57,10 @@ if [ ! -d "$CUBE_SUBDIR" ]; then
 	exit 1
 fi
 
+# Fix broken ZIP file permissions
+find "$CUBE_SUBDIR" -type d -exec chmod 755 {} \+
+find "$CUBE_SUBDIR" -type f -exec chmod 644 {} \+
+
 # Do some adaptions and create symlinks
 rm -f "${CUBE_SUBDIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_rtc.c"
 rm -f "${CUBE_SUBDIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_timebase_rtc_wakeup_template.c"
