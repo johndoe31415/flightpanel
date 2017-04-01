@@ -12,7 +12,7 @@ void dump_instrument_data(FILE *f, const struct instrument_data_t *data) {
 			data->nav1.sound ? "NAV1" : "", data->nav2.sound ? "NAV2" : "",
 			data->dme.sound ? "DME" : "", data->adf.sound ? "ADF" : "");
 	fprintf(f, "Lights: %3s %4s %4s %3s %4s\n", data->lights.beacon ? "BCN" : "", data->lights.landing ? "LAND" : "", data->lights.taxi ? "TAXI" : "", data->lights.nav ? "NAV" : "", data->lights.strobe ? "STRB" : "");
-	fprintf(f, "AP: %3s, %u ft, %u ft/min, %u° [%3s %3s %3s %3s %3s %3s]\n", data->ap.active ? "On" : "Off", data->ap.altitude_ft, data->ap.climbrate_ft_per_min, data->ap.heading,
+	fprintf(f, "AP: %3s, %u ft, %u ft/min, %u deg [%3s %3s %3s %3s %3s %3s]\n", data->ap.active ? "On" : "Off", data->ap.altitude_ft, data->ap.climbrate_ft_per_min, data->ap.heading,
 			data->ap.hdg_hold ? "HDG" : "", data->ap.nav_hold ? "NAV" : "", data->ap.alt_hold ? "ALT" : "", data->ap.rev_hold ? "REV" : "", data->ap.apr_hold ? "APR" : "", data->ap.ias_hold ? "IAS" : "");
 }
 

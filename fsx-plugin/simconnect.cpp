@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <math.h>
+#include <stddef.h>
 #include "inttypes_emulation.h"
 #include "simconnect-events.h"
 #include "fsconnection.hpp"
@@ -16,22 +17,25 @@ struct information_data_t {
 	char title[256];
 };
 
-struct simconnect_instrument_data_t {
+struct  __attribute__((__packed__))  simconnect_instrument_data_t{
 	double qnh;
 	double vhf1_active, vhf1_standby;
 	double vhf2_active, vhf2_standby;
-	uint64_t vhf1_tx, vhf2_tx, vhf_rx_all;
 	double nav1_active, nav1_standby;
 	double nav2_active, nav2_standby;
-	uint64_t nav1_sound, nav2_sound;
 	double adf1_active;
-	uint64_t dme_ident;
-	uint64_t adf1_ident;
+	uint32_t nav1_sound, nav2_sound;
+	uint32_t vhf1_tx, vhf2_tx, vhf_rx_all;
+	uint32_t dme_ident;
+	uint32_t adf1_ident;
 	uint32_t squawk;
 	uint32_t lights_on;
-} __attribute__((packed));
+} __attribute__((__packed__));
+static_assert(sizeof(struct simconnect_instrument_data_t) == (8 * 10) + (4 * 9), "Structure is not packed.");
 
 static void simconnect_instrument_to_abstract(const struct simconnect_instrument_data_t *in, struct instrument_data_t *out) {
+	printf("DEBUG offset %x\n", offsetof(struct simconnect_instrument_data_t, qnh));
+
 	out->vhf1.freq_active_khz = round(in->vhf1_active * 1e3);
 	out->vhf1.freq_standby_khz = round(in->vhf1_standby * 1e3);
 	out->vhf1.tx = in->vhf1_tx;
@@ -45,21 +49,22 @@ static void simconnect_instrument_to_abstract(const struct simconnect_instrument
 		out->vhf1.rx = out->vhf1.tx;
 		out->vhf2.rx = out->vhf2.tx;
 	}
-	
+
 	out->nav1.freq_active_khz = round(in->nav1_active * 1e3);
 	out->nav1.freq_standby_khz = round(in->nav1_standby * 1e3);
 	out->nav1.sound = in->nav1_sound;
-	
+
 	out->nav2.freq_active_khz = round(in->nav2_active * 1e3);
 	out->nav2.freq_standby_khz = round(in->nav2_standby * 1e3);
 	out->nav2.sound = in->nav2_sound;
-	
+
 	out->adf.freq_hz = round(in->adf1_active * 1e6);
 	out->adf.sound = in->adf1_ident;
-	
+
 	out->dme.sound = in->dme_ident;
 
 	//printf("squawk %" PRIx64 "\n", in->squawk);
+	printf("XPDR offset %x\n", offsetof(struct simconnect_instrument_data_t, squawk));
 	out->xpdr.squawk = in->squawk;
 	printf("lights %u\n", in->lights_on);
 
@@ -69,7 +74,7 @@ static void simconnect_instrument_to_abstract(const struct simconnect_instrument
 	out->lights.landing = (lights & 0x0004);
 	out->lights.taxi = (lights & 0x0008);
 	out->lights.strobe = (lights & 0x0010);
-	
+
 	out->misc.qnh_millibar = round(in->qnh);
 }
 
@@ -112,6 +117,20 @@ static void CALLBACK simconnect_callback(SIMCONNECT_RECV* pData, DWORD cbData, v
 		} else if (pObjData->dwRequestID == REQUEST_DATADEF_INSTRUMENTS) {
 			struct simconnect_instrument_data_t *simconnect_data = (struct simconnect_instrument_data_t*)&pObjData->dwData;
 
+			printf("%d datums\n", pObjData->dwDefineCount);
+			printf("%4x  ", 0);
+			for (int i = 0; i < sizeof(struct simconnect_instrument_data_t); i++) {
+				if (i && ((i % 16) == 0)) {
+					printf("\n%4x  ", i);
+				} else if (i && ((i % 8) == 0)) {
+					printf(" -  ");
+				} else if (i && ((i % 4) == 0)) {
+					printf(" ");
+				}
+				printf("%02x ", ((uint8_t*)simconnect_data)[i]);
+			}
+			printf("\n");
+
 			struct instrument_data_t abstract_data;
 			memset(&abstract_data, 0, sizeof(abstract_data));
 			simconnect_instrument_to_abstract(simconnect_data, &abstract_data);
@@ -148,18 +167,18 @@ void* simconnect_init(void) {
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM STANDBY FREQUENCY:1", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM ACTIVE FREQUENCY:2", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM STANDBY FREQUENCY:2", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM TRANSMIT:1", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM TRANSMIT:2", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM RECEIVE ALL", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM TRANSMIT:1", "Bool", SIMCONNECT_DATATYPE_INT32);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM TRANSMIT:2", "Bool", SIMCONNECT_DATATYPE_INT32);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM RECEIVE ALL", "Bool", SIMCONNECT_DATATYPE_INT32);
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV ACTIVE FREQUENCY:1", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV STANDBY FREQUENCY:1", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV ACTIVE FREQUENCY:2", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV STANDBY FREQUENCY:2", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV SOUND:1", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV SOUND:2", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV SOUND:1", "Bool", SIMCONNECT_DATATYPE_INT32);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV SOUND:2", "Bool", SIMCONNECT_DATATYPE_INT32);
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "ADF ACTIVE FREQUENCY:1", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "DME SOUND:1", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "ADF SOUND:1", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "DME SOUND:1", "Bool", SIMCONNECT_DATATYPE_INT32);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "ADF SOUND:1", "Bool", SIMCONNECT_DATATYPE_INT32);
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "TRANSPONDER CODE:1", "BCO16", SIMCONNECT_DATATYPE_INT32);
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "LIGHT ON STATES", "MASK", SIMCONNECT_DATATYPE_INT32);
 
