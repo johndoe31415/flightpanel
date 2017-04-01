@@ -594,6 +594,106 @@ static const struct event_enum_data_t event_enum_data[] = {
 		.name = "RADIO_SELECTED_DME_IDENT_TOGGLE",
 		.flags = 1,
 	},
+	[EVENT_STROBES_TOGGLE] = {
+		.name = "STROBES_TOGGLE",
+		.flags = 1,
+	},
+	[EVENT_ALL_LIGHTS_TOGGLE] = {
+		.name = "ALL_LIGHTS_TOGGLE",
+		.flags = 1,
+	},
+	[EVENT_PANEL_LIGHTS_TOGGLE] = {
+		.name = "PANEL_LIGHTS_TOGGLE",
+		.flags = 1,
+	},
+	[EVENT_LANDING_LIGHTS_TOGGLE] = {
+		.name = "LANDING_LIGHTS_TOGGLE",
+		.flags = 1,
+	},
+	[EVENT_LANDING_LIGHT_UP] = {
+		.name = "LANDING_LIGHT_UP",
+		.flags = 1,
+	},
+	[EVENT_LANDING_LIGHT_DOWN] = {
+		.name = "LANDING_LIGHT_DOWN",
+		.flags = 1,
+	},
+	[EVENT_LANDING_LIGHT_LEFT] = {
+		.name = "LANDING_LIGHT_LEFT",
+		.flags = 1,
+	},
+	[EVENT_LANDING_LIGHT_RIGHT] = {
+		.name = "LANDING_LIGHT_RIGHT",
+		.flags = 1,
+	},
+	[EVENT_LANDING_LIGHT_HOME] = {
+		.name = "LANDING_LIGHT_HOME",
+		.flags = 1,
+	},
+	[EVENT_STROBES_ON] = {
+		.name = "STROBES_ON",
+		.flags = 1,
+	},
+	[EVENT_STROBES_OFF] = {
+		.name = "STROBES_OFF",
+		.flags = 1,
+	},
+	[EVENT_STROBES_SET] = {
+		.name = "STROBES_SET",
+		.flags = 1,
+	},
+	[EVENT_PANEL_LIGHTS_ON] = {
+		.name = "PANEL_LIGHTS_ON",
+		.flags = 1,
+	},
+	[EVENT_PANEL_LIGHTS_OFF] = {
+		.name = "PANEL_LIGHTS_OFF",
+		.flags = 1,
+	},
+	[EVENT_PANEL_LIGHTS_SET] = {
+		.name = "PANEL_LIGHTS_SET",
+		.flags = 1,
+	},
+	[EVENT_LANDING_LIGHTS_ON] = {
+		.name = "LANDING_LIGHTS_ON",
+		.flags = 1,
+	},
+	[EVENT_LANDING_LIGHTS_OFF] = {
+		.name = "LANDING_LIGHTS_OFF",
+		.flags = 1,
+	},
+	[EVENT_LANDING_LIGHTS_SET] = {
+		.name = "LANDING_LIGHTS_SET",
+		.flags = 1,
+	},
+	[EVENT_TOGGLE_BEACON_LIGHTS] = {
+		.name = "TOGGLE_BEACON_LIGHTS",
+		.flags = 1,
+	},
+	[EVENT_TOGGLE_TAXI_LIGHTS] = {
+		.name = "TOGGLE_TAXI_LIGHTS",
+		.flags = 1,
+	},
+	[EVENT_TOGGLE_LOGO_LIGHTS] = {
+		.name = "TOGGLE_LOGO_LIGHTS",
+		.flags = 1,
+	},
+	[EVENT_TOGGLE_RECOGNITION_LIGHTS] = {
+		.name = "TOGGLE_RECOGNITION_LIGHTS",
+		.flags = 1,
+	},
+	[EVENT_TOGGLE_WING_LIGHTS] = {
+		.name = "TOGGLE_WING_LIGHTS",
+		.flags = 1,
+	},
+	[EVENT_TOGGLE_NAV_LIGHTS] = {
+		.name = "TOGGLE_NAV_LIGHTS",
+		.flags = 1,
+	},
+	[EVENT_TOGGLE_CABIN_LIGHTS] = {
+		.name = "TOGGLE_CABIN_LIGHTS",
+		.flags = 1,
+	},
 };
 
 const struct event_enum_data_t *get_event_enum_data(enum event_t value) {

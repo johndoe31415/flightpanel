@@ -157,6 +157,31 @@ enum event_t {
 	EVENT_RADIO_SELECTED_DME_IDENT_DISABLE,			// Turns off the identification sound for the selected DME.
 	EVENT_RADIO_SELECTED_DME_IDENT_SET,			// Sets the DME identification sound to the given filename.
 	EVENT_RADIO_SELECTED_DME_IDENT_TOGGLE,			// Turns on or off the identification sound for the selected DME.
+	EVENT_STROBES_TOGGLE,			// Toggle strobe lights
+	EVENT_ALL_LIGHTS_TOGGLE,			// Toggle all lights
+	EVENT_PANEL_LIGHTS_TOGGLE,			// Toggle panel lights
+	EVENT_LANDING_LIGHTS_TOGGLE,			// Toggle landing lights
+	EVENT_LANDING_LIGHT_UP,			// Rotate landing light up
+	EVENT_LANDING_LIGHT_DOWN,			// Rotate landing light down
+	EVENT_LANDING_LIGHT_LEFT,			// Rotate landing light left
+	EVENT_LANDING_LIGHT_RIGHT,			// Rotate landing light right
+	EVENT_LANDING_LIGHT_HOME,			// Return landing light to default position
+	EVENT_STROBES_ON,			// Turn strobe lights on
+	EVENT_STROBES_OFF,			// Turn strobe light off
+	EVENT_STROBES_SET,			// Set strobe lights on/off (1,0)
+	EVENT_PANEL_LIGHTS_ON,			// Turn panel lights on
+	EVENT_PANEL_LIGHTS_OFF,			// Turn panel lights off
+	EVENT_PANEL_LIGHTS_SET,			// Set panel lights on/off (1,0)
+	EVENT_LANDING_LIGHTS_ON,			// Turn landing lights on
+	EVENT_LANDING_LIGHTS_OFF,			// Turn landing lights off
+	EVENT_LANDING_LIGHTS_SET,			// Set landing lights on/off (1,0)
+	EVENT_TOGGLE_BEACON_LIGHTS,			// Toggle beacon lights
+	EVENT_TOGGLE_TAXI_LIGHTS,			// Toggle taxi lights
+	EVENT_TOGGLE_LOGO_LIGHTS,			// Toggle logo lights
+	EVENT_TOGGLE_RECOGNITION_LIGHTS,			// Toggle recognition lights
+	EVENT_TOGGLE_WING_LIGHTS,			// Toggle wing lights
+	EVENT_TOGGLE_NAV_LIGHTS,			// Toggle navigation lights
+	EVENT_TOGGLE_CABIN_LIGHTS,			// Toggle cockpit/cabin lights
 	EVENT_LAST
 };
 
