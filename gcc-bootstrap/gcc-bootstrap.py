@@ -11,6 +11,7 @@ packages = [
 	Package(name = "gcc", url = "https://ftp.gnu.org/gnu/gcc/gcc-6.3.0/gcc-6.3.0.tar.gz", subdir = "gcc-6.3.0"),
 	Package(name = "newlib", url = "http://ftp.gwdg.de/pub/linux/sources.redhat.com/newlib/newlib-2.5.0.20170323.tar.gz", subdir = "newlib-2.5.0.20170323"),
 	Package(name = "gdb", url = "https://ftp.gnu.org/gnu/gdb/gdb-7.12.tar.gz", subdir = "gdb-7.12"),
+	Package(name = "stlink2", url = "https://github.com/texane/stlink/archive/1.3.1.tar.gz", subdir = "stlink-1.3.1"),
 ]
 prefix_dir = os.getenv("HOME") + "/bin/gcc-cm4"
 
@@ -74,6 +75,14 @@ class Installer(object):
 		finally:
 			os.chdir(self._root)
 
+	def configure_cmake(self, configure_options):
+		try:
+			os.makedirs(self._builddir)
+			os.chdir(self._builddir)
+			subprocess.check_call([ "cmake", "-DCMAKE_INSTALL_PREFIX:PATH=" + self._prefix ] + configure_options + [ self._work + "/" + self._pkg.subdir ])
+		finally:
+			os.chdir(self._root)
+
 	def compile(self):
 		try:
 			os.chdir(self._builddir)
@@ -88,11 +97,14 @@ class Installer(object):
 		finally:
 			os.chdir(self._root)
 
-	def start(self, configure_options):
+	def start(self, configure_options, cmake = False):
 		self.download()
 		self.cleanup()
 		self.extract()
-		self.configure(configure_options)
+		if not cmake:
+			self.configure(configure_options)
+		else:
+			self.configure_cmake(configure_options)
 		self.compile()
 		self.install()
 		self.cleanup()
@@ -152,4 +164,11 @@ if (len(build_packages) == 0) or (installer.name in build_packages):
 installer = Installer("gdb", packages["gdb"], prefix_dir)
 if (len(build_packages) == 0) or (installer.name in build_packages):
 	installer.start(configure_options = base_options)
+
+installer = Installer("stlink2", packages["stlink2"], prefix_dir)
+if (len(build_packages) == 0) or (installer.name in build_packages):
+	installer.start(configure_options = [
+		"-DSTLINK_MODPROBED_DIR:PATH=" + prefix_dir + "/etc/modprobe.d",
+		"-DSTLINK_UDEV_RULES_DIR:PATH=" + prefix_dir + "/etc/udev.d",
+	], cmake = True)
 
