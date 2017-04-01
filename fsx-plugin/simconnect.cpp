@@ -27,8 +27,8 @@ struct simconnect_instrument_data_t {
 	double adf1_active;
 	uint64_t dme_ident;
 	uint64_t adf1_ident;
-	uint64_t squawk;
-	uint64_t lights_on;
+	uint32_t squawk;
+	uint32_t lights_on;
 } __attribute__((packed));
 
 static void simconnect_instrument_to_abstract(const struct simconnect_instrument_data_t *in, struct instrument_data_t *out) {
@@ -60,10 +60,10 @@ static void simconnect_instrument_to_abstract(const struct simconnect_instrument
 	out->dme.sound = in->dme_ident;
 
 	//printf("squawk %" PRIx64 "\n", in->squawk);
-	out->xpdr.squawk = in->squawk >> (64 - 16);
-	printf("lights %" PRIx64 "\n", in->lights_on);
+	out->xpdr.squawk = in->squawk;
+	printf("lights %u\n", in->lights_on);
 
-	uint64_t lights = in->lights_on >> (64 - 16);
+	uint32_t lights = in->lights_on;
 	out->lights.nav = (lights & 0x0001);
 	out->lights.beacon = (lights & 0x0002);
 	out->lights.landing = (lights & 0x0004);
@@ -142,25 +142,26 @@ void* simconnect_init(void) {
 	if (SUCCEEDED(SimConnect_Open(&hSimConnect, "Flight Panel", NULL, 0, 0, 0))) {
 		printf("Connected to simulator.\n");
 		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INFO, "Title", NULL, SIMCONNECT_DATATYPE_STRING256);
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "KOHLSMAN SETTING MB", "MilliBars");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM ACTIVE FREQUENCY:1", "MHz");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM STANDBY FREQUENCY:1", "MHz");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM ACTIVE FREQUENCY:2", "MHz");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM STANDBY FREQUENCY:2", "MHz");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM TRANSMIT:1", "Bool");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM TRANSMIT:2", "Bool");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM RECEIVE ALL", "Bool");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV ACTIVE FREQUENCY:1", "MHz");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV STANDBY FREQUENCY:1", "MHz");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV ACTIVE FREQUENCY:2", "MHz");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV STANDBY FREQUENCY:2", "MHz");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV SOUND:1", "Bool");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV SOUND:2", "Bool");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "ADF ACTIVE FREQUENCY:1", "MHz");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "DME SOUND:1", "Bool");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "ADF SOUND:1", "Bool");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "TRANSPONDER CODE:1", "BCO16");
-		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "LIGHT ON STATES", "MASK");
+
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "KOHLSMAN SETTING MB", "MilliBars", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM ACTIVE FREQUENCY:1", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM STANDBY FREQUENCY:1", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM ACTIVE FREQUENCY:2", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM STANDBY FREQUENCY:2", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM TRANSMIT:1", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM TRANSMIT:2", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "COM RECEIVE ALL", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV ACTIVE FREQUENCY:1", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV STANDBY FREQUENCY:1", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV ACTIVE FREQUENCY:2", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV STANDBY FREQUENCY:2", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV SOUND:1", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "NAV SOUND:2", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "ADF ACTIVE FREQUENCY:1", "MHz", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "DME SOUND:1", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "ADF SOUND:1", "Bool", SIMCONNECT_DATATYPE_FLOAT64);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "TRANSPONDER CODE:1", "BCO16", SIMCONNECT_DATATYPE_INT32);
+		SimConnect_AddToDataDefinition(hSimConnect, DATADEF_INSTRUMENTS, "LIGHT ON STATES", "MASK", SIMCONNECT_DATATYPE_INT32);
 
 		SimConnect_SubscribeToSystemEvent(hSimConnect, EVENT_SIM_START, "SimStart");
 
