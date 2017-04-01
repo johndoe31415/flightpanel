@@ -1,0 +1,24 @@
+#!/usr/bin/python3
+import sys
+from XMLParser import XMLParser
+
+input_svg = sys.argv[1]
+
+xml = XMLParser().parsefile(input_svg)
+for tag in xml.search("image"):
+	tag["style"] = "opacity:1"
+for tag in xml.search("path"):
+	tag["style"] += ";opacity:0"
+for tag in xml.search("circle"):
+	tag["style"] += ";opacity:0"
+for tag in xml.search("rect"):
+	if not "pattern" in tag["style"]:
+		tag["style"] += ";opacity:0"
+with open("only_images.svg", "w") as f:
+	xml.write(f)
+
+xml = XMLParser().parsefile(input_svg)
+for tag in xml.search("image"):
+	tag["style"] = "opacity:0"
+with open("no_images.svg", "w") as f:
+	xml.write(f)
