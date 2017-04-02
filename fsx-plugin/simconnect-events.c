@@ -887,6 +887,22 @@ static const struct simconnect_event_enum_data_t event_enum_data[] = {
 		.name = "TOGGLE_CABIN_LIGHTS",
 		.flags = 1,
 	},
+	[EVENT_KOHLSMAN_INC] = {
+		.name = "KOHLSMAN_INC",
+		.flags = 1,
+	},
+	[EVENT_KOHLSMAN_DEC] = {
+		.name = "KOHLSMAN_DEC",
+		.flags = 1,
+	},
+	[EVENT_KOHLSMAN_SET] = {
+		.name = "KOHLSMAN_SET",
+		.flags = 1,
+	},
+	[EVENT_TOGGLE_GPS_DRIVES_NAV1] = {
+		.name = "TOGGLE_GPS_DRIVES_NAV1",
+		.flags = 1,
+	},
 };
 
 const struct simconnect_event_enum_data_t *get_simconnect_event_enum_data(enum simconnect_event_t value) {

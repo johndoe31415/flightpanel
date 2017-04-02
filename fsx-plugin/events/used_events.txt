@@ -225,4 +225,9 @@ TOGGLE_WING_LIGHTS	Toggle wing lights
 TOGGLE_NAV_LIGHTS	Toggle navigation lights
 TOGGLE_CABIN_LIGHTS	Toggle cockpit/cabin lights
 
+KOHLSMAN_INC	Increments altimeter setting
+KOHLSMAN_DEC	Decrements altimeter setting
+KOHLSMAN_SET	Sets altimeter setting (Millibars * 16)
+TOGGLE_GPS_DRIVES_NAV1	Toggles between GPS and NAV 1 driving NAV 1 OBS display (and AP)
+
 # vim:set tabstop=38:

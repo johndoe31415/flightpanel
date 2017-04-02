@@ -29,6 +29,8 @@ struct adf_data_t {
 };
 
 struct dme_data_t {
+	bool available;
+	uint8_t nav_id;
 	uint16_t distance_nm_tenths;
 	uint16_t speed_kt;
 	bool sound;
@@ -45,7 +47,7 @@ struct light_data_t {
 struct ap_data_t {
 	bool active;
 	uint32_t altitude_ft;
-	uint16_t climbrate_ft_per_min;
+	int16_t climbrate_ft_per_min;
 	uint16_t heading;
 	bool hdg_hold, nav_hold, alt_hold, rev_hold, apr_hold, ias_hold;
 };
@@ -58,6 +60,7 @@ struct misc_data_t {
 	uint16_t ias_kt;
 	uint16_t indicated_alt_ft;
 	uint16_t qnh_millibar;
+	bool guide_gps;
 };
 
 struct instrument_data_t {

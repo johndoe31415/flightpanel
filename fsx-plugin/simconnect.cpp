@@ -14,7 +14,7 @@
 #include "SimConnect.h"
 
 /* Internal data structure passed to callback, masked outside this module as
- * struct flightsim_connection_t* 
+ * struct flightsim_connection_t*
  **/
 struct simconnect_context_t {
 	HANDLE simconnect_handle;
@@ -68,15 +68,25 @@ static void simconnect_instrument_to_abstract(const struct simconnect_datatype_i
 
 	out->nav1.freq_active_khz = frequency_bcd32_to_khz(in->nav1_freq_active);
 	out->nav1.freq_standby_khz = frequency_bcd32_to_khz(in->nav1_freq_standby);
+	out->nav1.obs = round(in->nav1_obs_deg);
 	out->nav1.sound = in->nav1_sound;
+	memcpy(out->nav1.ident, in->nav1_ident, 8);
 
 	out->nav2.freq_active_khz = frequency_bcd32_to_khz(in->nav2_freq_active);
 	out->nav2.freq_standby_khz = frequency_bcd32_to_khz(in->nav2_freq_standby);
+	out->nav2.obs = round(in->nav2_obs_deg);
 	out->nav2.sound = in->nav2_sound;
+	memcpy(out->nav2.ident, in->nav2_ident, 8);
 
 	out->adf.freq_hz = adf_frequency_bcd32_to_hz(in->adf_freq_active);
+	out->adf.compass_rose = round(in->adf_compass_rose_deg);
 	out->adf.sound = in->adf_sound;
+	memcpy(out->adf.ident, in->adf_ident, 8);
 
+	out->dme.nav_id = in->dme_selected;
+	out->dme.available = ((out->dme.nav_id == 1) && (in->dme_nav1)) || ((out->dme.nav_id == 2) && (in->dme_nav2));
+	out->dme.distance_nm_tenths = round(in->dme_distance * 10);
+	out->dme.speed_kt = round(in->dme_speed);
 	out->dme.sound = in->dme_sound;
 
 	out->xpdr.squawk = bcd_to_decimal(in->xpdr_squawk);
@@ -87,7 +97,21 @@ static void simconnect_instrument_to_abstract(const struct simconnect_datatype_i
 	out->lights.taxi = (in->light_states & 0x0008);
 	out->lights.strobe = (in->light_states & 0x0010);
 
+	out->ap.active = in->ap_master;
+	out->ap.altitude_ft = round(in->ap_altitude_ft);
+	out->ap.climbrate_ft_per_min = round(in->ap_climbrate_ft_per_min);
+	out->ap.heading = round(in->ap_heading_deg);
+	out->ap.hdg_hold = in->ap_hdg_hold;
+	out->ap.nav_hold = in->ap_nav_hold;
+	out->ap.apr_hold = in->ap_apr_hold;
+	out->ap.rev_hold = in->ap_rev_hold;
+	out->ap.alt_hold = in->ap_alt_hold;
+	out->ap.ias_hold = in->ap_ias_hold;
+
+	out->misc.ias_kt = round(in->ias);
+	out->misc.indicated_alt_ft = round(in->indicated_alt_ft);
 	out->misc.qnh_millibar = round(in->qnh_millibar);
+	out->misc.guide_gps = in->gps_drives_nav;
 }
 
 enum event_group_t {
@@ -147,13 +171,19 @@ static void CALLBACK simconnect_callback(SIMCONNECT_RECV* pData, DWORD cbData, v
 }
 
 void simconnect_event_loop(struct flightsim_connection_t *fsconnection) {
+	int loopcnt = 0;
 	struct simconnect_context_t *context = (struct simconnect_context_t*)fsconnection;
 	context->loop_running = true;
 	SimConnect_RequestDataOnSimObjectType(context->simconnect_handle, REQUEST_DATADEF_INFO, DATADEF_INFO, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 	SimConnect_RequestDataOnSimObjectType(context->simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 	while (context->loop_running) {
 		SimConnect_CallDispatch(context->simconnect_handle, simconnect_callback, context);
-		usleep(10 * 1000);
+		if (loopcnt == 50) {
+			/* Update instruments every second regardless of events */
+			SimConnect_RequestDataOnSimObjectType(context->simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
+			loopcnt = 0;
+		}
+		usleep(20 * 1000);
 	}
 }
 

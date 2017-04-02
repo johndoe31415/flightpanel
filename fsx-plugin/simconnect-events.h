@@ -230,6 +230,10 @@ enum simconnect_event_t {
 	EVENT_TOGGLE_WING_LIGHTS,			// Toggle wing lights
 	EVENT_TOGGLE_NAV_LIGHTS,			// Toggle navigation lights
 	EVENT_TOGGLE_CABIN_LIGHTS,			// Toggle cockpit/cabin lights
+	EVENT_KOHLSMAN_INC,			// Increments altimeter setting
+	EVENT_KOHLSMAN_DEC,			// Decrements altimeter setting
+	EVENT_KOHLSMAN_SET,			// Sets altimeter setting (Millibars * 16)
+	EVENT_TOGGLE_GPS_DRIVES_NAV1,			// Toggles between GPS and NAV 1 driving NAV 1 OBS display (and AP)
 	EVENT_LAST
 };
 

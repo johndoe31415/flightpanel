@@ -12,11 +12,13 @@ static_assert(sizeof(struct simconnect_datatype_information_t) == 256, "struct s
 struct simconnect_datatype_instruments_t {
 	char nav1_ident[8];
 	double nav1_obs_deg;
+	char nav2_ident[8];
 	double nav2_obs_deg;
 	char adf_ident[8];
 	double adf_compass_rose_deg;
 	double dme_speed;
 	double dme_distance;
+	double ap_heading_deg;
 	double ap_altitude_ft;
 	double ap_climbrate_ft_per_min;
 	double ias;
@@ -38,6 +40,9 @@ struct simconnect_datatype_instruments_t {
 	int32_t adf_freq_active;
 	int32_t adf_sound;
 	int32_t dme_sound;
+	int32_t dme_selected;
+	int32_t dme_nav1;
+	int32_t dme_nav2;
 	int32_t xpdr_squawk;
 	int32_t light_states;
 	int32_t ap_master;
@@ -47,9 +52,10 @@ struct simconnect_datatype_instruments_t {
 	int32_t ap_rev_hold;
 	int32_t ap_apr_hold;
 	int32_t ap_ias_hold;
+	int32_t gps_drives_nav;
 } __attribute__((packed));
-static_assert(sizeof(struct simconnect_datatype_instruments_t) == 196, "struct simconnect_datatype_instruments_t incorrectly packed.");
-#define SIMCONNECT_DATATYPE_INSTRUMENTS_DATUM_COUNT			37
+static_assert(sizeof(struct simconnect_datatype_instruments_t) == 228, "struct simconnect_datatype_instruments_t incorrectly packed.");
+#define SIMCONNECT_DATATYPE_INSTRUMENTS_DATUM_COUNT			43
 
 
 void simconnect_datadefs_register_information(void *hSimConnect, int group_id);
