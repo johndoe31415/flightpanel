@@ -1,0 +1,34 @@
+# vim:set ts=28:
+# vim:set tw=0:
+
+information	TITLE	String256	title
+
+################################################################
+
+instruments	COM ACTIVE FREQUENCY:1	MHz	vhf1_freq_active
+instruments	COM STANDBY FREQUENCY:1	MHz	vhf1_freq_standby
+instruments	COM TRANSMIT:1	Bool	vhf1_tx
+
+instruments	COM ACTIVE FREQUENCY:2	MHz	vhf2_freq_active
+instruments	COM STANDBY FREQUENCY:2	MHz	vhf2_freq_standby
+instruments	COM TRANSMIT:2	Bool	vhf2_tx
+instruments	COM RECEIVE ALL	Bool	vhf_all_rx
+
+instruments	NAV ACTIVE FREQUENCY:1	MHz	nav1_freq_active
+instruments	NAV STANDBY FREQUENCY:1	MHz	nav1_freq_standby
+instruments	NAV SOUND:1	Bool	nav1_sound
+
+instruments	NAV ACTIVE FREQUENCY:2	MHz	nav2_freq_active
+instruments	NAV STANDBY FREQUENCY:2	MHz	nav2_freq_standby
+instruments	NAV SOUND:2	Bool	nav2_sound
+
+instruments	ADF ACTIVE FREQUENCY:1	MHz	adf_freq_active
+instruments	ADF SOUND:1	Bool	adf_sound
+
+instruments	DME SOUND:1	Bool	dme_sound
+
+instruments	TRANSPONDER CODE:1	BCO16	xpdr_squawk
+
+instruments	LIGHT ON STATES	MASK	light_states
+
+instruments	KOHLSMAN SETTING MB	MilliBars	qnh_millibar

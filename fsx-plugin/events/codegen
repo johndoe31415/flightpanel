@@ -5,29 +5,81 @@ import collections
 import mako.lookup
 
 Event = collections.namedtuple("Event", [ "symbol", "enum_name", "text", "flags" ])
+DataDef = collections.namedtuple("DataDef", [ "orig_order", "group", "name", "unit", "varname", "datatype", "datatypesize", "simconnect_type" ])
+data_units = {
+	"mhz":			"double",
+	"bco16":		"int32_t",
+	"mask":			"int32_t",
+	"bool":			"int32_t",
+	"millibars":	"double",
+	"string256":	"char[256]",
+}
+data_type_sizes = {
+	"double":		8,
+	"int32_t":		4,
+	"char[256]":	256,
+}
+simconnect_types = {
+	"double":		"SIMCONNECT_DATATYPE_FLOAT64",
+	"int32_t":		"SIMCONNECT_DATATYPE_INT32",
+	"char[256]":	"SIMCONNECT_DATATYPE_STRING256",
+}
 
-flags = "0"
-events = [ ]
-for line in open("used_events.txt"):
-	line = line.rstrip("\r\n")
-	if line == "":
-		continue
-	if line.startswith("#"):
-		continue
-	if line.startswith(":flags"):
-		flags = line.split("=")[1]
-		continue
-	line = line.split("\t")
-	if len(line) != 2:
-		raise Exception("Malformatted line.")
-	event, description = line
+def read_events(filename):
+	flags = "0"
+	events = [ ]
+	for line in open(filename):
+		line = line.rstrip("\r\n")
+		if line == "":
+			continue
+		if line.startswith("#"):
+			continue
+		if line.startswith(":flags"):
+			flags = line.split("=")[1]
+			continue
+		line = line.split("\t")
+		if len(line) != 2:
+			raise Exception("Malformatted line.")
+		event, description = line
 
-	event = Event(symbol = event, enum_name = "EVENT_" + event, text = description, flags = flags)
-	events.append(event)
+		event = Event(symbol = event, enum_name = "EVENT_" + event, text = description, flags = flags)
+		events.append(event)
+	return events
 
+def read_datadefs(filename):
+	datadefs = collections.defaultdict(list)
+	for line in open(filename):
+		line = line.rstrip("\r\n")
+		if line == "":
+			continue
+		if line.startswith("#"):
+			continue
+		line = line.split("\t")
+		if len(line) != 4:
+			raise Exception("Malformatted line.")
+		(group, name, unit, varname) = line
+		datatype = data_units.get(unit.lower())
+		if datatype is None:
+			raise Exception("No mapping for '%s' to a C structure data type." % (unit))
+		datatypesize = data_type_sizes.get(datatype)
+		if datatypesize is None:
+			raise Exception("Storage size of %s is unknown." % (datatype))
+
+		datadef = DataDef(orig_order = len(datadefs), group = group, name = name, unit = unit, varname = varname, datatype = datatype, datatypesize = datatypesize, simconnect_type = simconnect_types[datatype])
+
+		datadefs[group].append(datadef)
+	for deflist in datadefs.values():
+		deflist.sort(key = lambda x: (-x.datatypesize, x.orig_order))
+	return datadefs
+
+events = read_events("used_events.txt")
+datadefs = read_datadefs("used_datadefs.txt")
 lookup = mako.lookup.TemplateLookup([ "." ], strict_undefined = True)
 with open("../simconnect-events.c", "w") as f:
 	f.write(lookup.get_template("template_enum.c").render(events = events))
 with open("../simconnect-events.h", "w") as f:
 	f.write(lookup.get_template("template_enum.h").render(events = events))
-
+with open("../simconnect-datadefs.cpp", "w") as f:
+	f.write(lookup.get_template("template_datadefs.cpp").render(datadefs = datadefs))
+with open("../simconnect-datadefs.hpp", "w") as f:
+	f.write(lookup.get_template("template_datadefs.hpp").render(datadefs = datadefs))
