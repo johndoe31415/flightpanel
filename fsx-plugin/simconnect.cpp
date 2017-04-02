@@ -14,6 +14,15 @@
 
 static bool simconnect_connected;
 
+static uint32_t bcd_to_decimal(uint32_t bcd_value) {
+	uint32_t result = 0;
+	while (bcd_value) {
+		result = (10 * result) + ((bcd_value >> 28) & 0xf);
+		bcd_value <<= 4;
+	}
+	return result;
+}
+
 static void simconnect_instrument_to_abstract(const struct simconnect_datatype_instruments_t *in, struct instrument_data_t *out) {
 //	printf("DEBUG offset %x\n", offsetof(struct simconnect_instrument_data_t, qnh));
 
@@ -46,7 +55,7 @@ static void simconnect_instrument_to_abstract(const struct simconnect_datatype_i
 
 	//printf("squawk %" PRIx64 "\n", in->squawk);
 //	printf("XPDR offset %x\n", offsetof(struct simconnect_instrument_data_t, squawk));
-	out->xpdr.squawk = in->xpdr_squawk;
+	out->xpdr.squawk = bcd_to_decimal(in->xpdr_squawk);
 
 	out->lights.nav = (in->light_states & 0x0001);
 	out->lights.beacon = (in->light_states & 0x0002);

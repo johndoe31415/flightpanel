@@ -7,7 +7,7 @@ void dump_instrument_data(FILE *f, const struct instrument_data_t *data) {
 	fprintf(f, "NAV1: %3d.%03d (%3d.%03d)     ", data->nav1.freq_active_khz / 1000, data->nav1.freq_active_khz % 1000, data->nav1.freq_standby_khz / 1000, data->nav1.freq_standby_khz % 1000);
 	fprintf(f, "NAV2: %3d.%03d (%3d.%03d)\n", data->nav2.freq_active_khz / 1000, data->nav2.freq_active_khz % 1000, data->nav2.freq_standby_khz / 1000, data->nav2.freq_standby_khz % 1000);
 	fprintf(f, "ADF %4d.%d kHz    QNH %d mBar\n", data->adf.freq_hz / 1000, data->adf.freq_hz % 1000 / 100, data->misc.qnh_millibar);
-	fprintf(f, "Squawk %04x\n", data->xpdr.squawk);
+	fprintf(f, "Squawk %04d\n", data->xpdr.squawk);
 	fprintf(f, "Radios: %1s%4s  %1s%4s %4s %4s %3s %3s\n", data->vhf1.tx ? ">" : "", data->vhf1.rx ? "VHF1" : "", data->vhf2.tx ? ">" : "", data->vhf2.rx ? "VHF2" : "",
 			data->nav1.sound ? "NAV1" : "", data->nav2.sound ? "NAV2" : "",
 			data->dme.sound ? "DME" : "", data->adf.sound ? "ADF" : "");
