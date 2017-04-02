@@ -36,8 +36,8 @@ instruments	NAV DMESPEED:1	Knots	dme_speed
 instruments	NAV DME:1	Nautical miles	dme_distance
 instruments	DME SOUND:1	Bool	dme_sound
 instruments	SELECTED DME	Number	dme_selected
-instruments	NAV HAS DME:1	Bool	dme_nav1
-instruments	NAV HAS DME:2	Bool	dme_nav2
+instruments	NAV HAS NAV:1	Bool	dme_nav1
+instruments	NAV HAS NAV:2	Bool	dme_nav2
 
 instruments	TRANSPONDER CODE:1	BCO16	xpdr_squawk
 

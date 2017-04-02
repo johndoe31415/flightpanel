@@ -40,8 +40,8 @@ void simconnect_datadefs_register_instruments(void *hSimConnect, int group_id) {
 	SimConnect_AddToDataDefinition(hSimConnect, group_id, "ADF SOUND:1", "Bool", SIMCONNECT_DATATYPE_INT32);
 	SimConnect_AddToDataDefinition(hSimConnect, group_id, "DME SOUND:1", "Bool", SIMCONNECT_DATATYPE_INT32);
 	SimConnect_AddToDataDefinition(hSimConnect, group_id, "SELECTED DME", "Number", SIMCONNECT_DATATYPE_INT32);
-	SimConnect_AddToDataDefinition(hSimConnect, group_id, "NAV HAS DME:1", "Bool", SIMCONNECT_DATATYPE_INT32);
-	SimConnect_AddToDataDefinition(hSimConnect, group_id, "NAV HAS DME:2", "Bool", SIMCONNECT_DATATYPE_INT32);
+	SimConnect_AddToDataDefinition(hSimConnect, group_id, "NAV HAS NAV:1", "Bool", SIMCONNECT_DATATYPE_INT32);
+	SimConnect_AddToDataDefinition(hSimConnect, group_id, "NAV HAS NAV:2", "Bool", SIMCONNECT_DATATYPE_INT32);
 	SimConnect_AddToDataDefinition(hSimConnect, group_id, "TRANSPONDER CODE:1", "BCO16", SIMCONNECT_DATATYPE_INT32);
 	SimConnect_AddToDataDefinition(hSimConnect, group_id, "LIGHT ON STATES", "MASK", SIMCONNECT_DATATYPE_INT32);
 	SimConnect_AddToDataDefinition(hSimConnect, group_id, "AUTOPILOT MASTER", "Bool", SIMCONNECT_DATATYPE_INT32);

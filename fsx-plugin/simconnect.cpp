@@ -10,6 +10,7 @@
 #include "simconnect-datadefs.hpp"
 #include "fsconnection.hpp"
 
+#include <pthread.h>
 #include <windows.h>
 #include "SimConnect.h"
 
@@ -19,6 +20,7 @@
 struct simconnect_context_t {
 	HANDLE simconnect_handle;
 	bool loop_running;
+	pthread_t periodic_query_thread;
 };
 
 static uint32_t bcd_to_decimal(uint32_t bcd_value) {
@@ -170,21 +172,31 @@ static void CALLBACK simconnect_callback(SIMCONNECT_RECV* pData, DWORD cbData, v
 	}
 }
 
+static void* simconnect_periodic_query_thread(void *fsconnection) {
+	struct simconnect_context_t *context = (struct simconnect_context_t*)fsconnection;
+	while (context->loop_running) {
+		Sleep(1000);
+		SimConnect_RequestDataOnSimObjectType(context->simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
+	}
+	return NULL;
+}
+
 void simconnect_event_loop(struct flightsim_connection_t *fsconnection) {
-	int loopcnt = 0;
 	struct simconnect_context_t *context = (struct simconnect_context_t*)fsconnection;
 	context->loop_running = true;
 	SimConnect_RequestDataOnSimObjectType(context->simconnect_handle, REQUEST_DATADEF_INFO, DATADEF_INFO, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 	SimConnect_RequestDataOnSimObjectType(context->simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
+
+	/* Create thread that polls the status every second */
+	pthread_create(&context->periodic_query_thread, NULL, simconnect_periodic_query_thread, context);
+
 	while (context->loop_running) {
 		SimConnect_CallDispatch(context->simconnect_handle, simconnect_callback, context);
-		if (loopcnt == 50) {
-			/* Update instruments every second regardless of events */
-			SimConnect_RequestDataOnSimObjectType(context->simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
-			loopcnt = 0;
-		}
-		usleep(20 * 1000);
+		Sleep(10);
 	}
+
+	/* Clean up loop thread */
+	pthread_join(context->periodic_query_thread, NULL);
 }
 
 struct flightsim_connection_t* simconnect_init(void) {
