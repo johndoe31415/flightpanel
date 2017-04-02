@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/* Opaque type, only referenced via pointer */
+struct flightsim_connection_t;
+
 struct vhf_data_t {
 	uint32_t freq_active_khz;
 	uint32_t freq_standby_khz;
@@ -14,15 +17,20 @@ struct nav_data_t {
 	uint32_t freq_active_khz;
 	uint32_t freq_standby_khz;
 	uint16_t obs;
+	char ident[8];
 	bool sound;
 };
 
 struct adf_data_t {
 	uint32_t freq_hz;
+	char ident[8];
+	uint16_t compass_rose;
 	bool sound;
 };
 
 struct dme_data_t {
+	uint16_t distance_nm_tenths;
+	uint16_t speed_kt;
 	bool sound;
 };
 
@@ -47,6 +55,8 @@ struct transponder_data_t {
 };
 
 struct misc_data_t {
+	uint16_t ias_kt;
+	uint16_t indicated_alt_ft;
 	uint16_t qnh_millibar;
 };
 

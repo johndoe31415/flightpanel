@@ -7,7 +7,7 @@
 #include "simconnect.hpp"
 
 int main(void) {
-	void *fs_connection = simconnect_init();
+	struct flightsim_connection_t *fs_connection = simconnect_init();
 	simconnect_event_loop(fs_connection);
 	simconnect_close(fs_connection);
 	return 0;

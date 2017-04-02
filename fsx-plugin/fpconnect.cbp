@@ -43,6 +43,7 @@
 		</Unit>
 		<Unit filename="fpconnect.cpp" />
 		<Unit filename="fsconnection.cpp" />
+		<Unit filename="simconnect-datadefs.cpp" />
 		<Unit filename="simconnect-events.c">
 			<Option compilerVar="CC" />
 		</Unit>

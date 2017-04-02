@@ -7,22 +7,32 @@ import mako.lookup
 Event = collections.namedtuple("Event", [ "symbol", "enum_name", "text", "flags" ])
 DataDef = collections.namedtuple("DataDef", [ "orig_order", "group", "name", "unit", "varname", "datatype", "datatypesize", "simconnect_type" ])
 data_units = {
-	"mhz":			"double",
-	"bco16":		"int32_t",
-	"mask":			"int32_t",
-	"bool":			"int32_t",
-	"millibars":	"double",
-	"string256":	"char[256]",
+	"mhz":					"double",
+	"bco16":				"int32_t",
+	"mask":					"int32_t",
+	"bool":					"int32_t",
+	"millibars":			"double",
+	"string256":			"char[256]",
+	"frequency bcd32":		"int32_t",
+	"adf frequency bcd32":	"int32_t",
+	"icao code":			"char[8]",
+	"degrees":				"double",
+	"knots":				"double",
+	"nautical miles":		"double",
+	"feet":					"double",
+	"feet/minute":			"double",
 }
 data_type_sizes = {
 	"double":		8,
 	"int32_t":		4,
 	"char[256]":	256,
+	"char[8]":		8,
 }
 simconnect_types = {
 	"double":		"SIMCONNECT_DATATYPE_FLOAT64",
 	"int32_t":		"SIMCONNECT_DATATYPE_INT32",
 	"char[256]":	"SIMCONNECT_DATATYPE_STRING256",
+	"char[8]":		"SIMCONNECT_DATATYPE_STRING8",
 }
 
 def read_events(filename):

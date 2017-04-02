@@ -5,30 +5,49 @@ information	TITLE	String256	title
 
 ################################################################
 
-instruments	COM ACTIVE FREQUENCY:1	MHz	vhf1_freq_active
-instruments	COM STANDBY FREQUENCY:1	MHz	vhf1_freq_standby
+instruments	COM ACTIVE FREQUENCY:1	Frequency BCD32	vhf1_freq_active
+instruments	COM STANDBY FREQUENCY:1	Frequency BCD32	vhf1_freq_standby
 instruments	COM TRANSMIT:1	Bool	vhf1_tx
 
-instruments	COM ACTIVE FREQUENCY:2	MHz	vhf2_freq_active
-instruments	COM STANDBY FREQUENCY:2	MHz	vhf2_freq_standby
+instruments	COM ACTIVE FREQUENCY:2	Frequency BCD32	vhf2_freq_active
+instruments	COM STANDBY FREQUENCY:2	Frequency BCD32	vhf2_freq_standby
 instruments	COM TRANSMIT:2	Bool	vhf2_tx
 instruments	COM RECEIVE ALL	Bool	vhf_all_rx
 
-instruments	NAV ACTIVE FREQUENCY:1	MHz	nav1_freq_active
-instruments	NAV STANDBY FREQUENCY:1	MHz	nav1_freq_standby
+instruments	NAV ACTIVE FREQUENCY:1	Frequency BCD32	nav1_freq_active
+instruments	NAV STANDBY FREQUENCY:1	Frequency BCD32	nav1_freq_standby
 instruments	NAV SOUND:1	Bool	nav1_sound
+instruments	NAV IDENT	ICAO code	nav1_ident
+instruments	NAV OBS:1	Degrees	nav1_obs_deg
 
-instruments	NAV ACTIVE FREQUENCY:2	MHz	nav2_freq_active
-instruments	NAV STANDBY FREQUENCY:2	MHz	nav2_freq_standby
+instruments	NAV ACTIVE FREQUENCY:2	Frequency BCD32	nav2_freq_active
+instruments	NAV STANDBY FREQUENCY:2	Frequency BCD32	nav2_freq_standby
 instruments	NAV SOUND:2	Bool	nav2_sound
+instruments	NAV OBS:2	Degrees	nav2_obs_deg
 
-instruments	ADF ACTIVE FREQUENCY:1	MHz	adf_freq_active
+instruments	ADF ACTIVE FREQUENCY:1	ADF Frequency BCD32	adf_freq_active
 instruments	ADF SOUND:1	Bool	adf_sound
+instruments	ADF IDENT	ICAO code	adf_ident
+instruments	ADF CARD	Degrees	adf_compass_rose_deg
 
+instruments	NAV DMESPEED:1	Knots	dme_speed
+instruments	NAV DME:1	Nautical miles	dme_distance
 instruments	DME SOUND:1	Bool	dme_sound
 
 instruments	TRANSPONDER CODE:1	BCO16	xpdr_squawk
 
 instruments	LIGHT ON STATES	MASK	light_states
 
+instruments	AUTOPILOT MASTER	Bool	ap_master
+instruments	AUTOPILOT HEADING LOCK	Bool	ap_hdg_hold
+instruments	AUTOPILOT NAV1 LOCK	Bool	ap_nav_hold
+instruments	AUTOPILOT ALTITUDE LOCK	Bool	ap_alt_hold
+instruments	AUTOPILOT ALTITUDE LOCK VAR	Feet	ap_altitude_ft
+instruments	AUTOPILOT VERTICAL HOLD VAR	Feet/minute	ap_climbrate_ft_per_min
+instruments	AUTOPILOT BACKCOURSE HOLD	Bool	ap_rev_hold
+instruments	AUTOPILOT APPROACH HOLD	Bool	ap_apr_hold
+instruments	AUTOPILOT AIRSPEED HOLD	Bool	ap_ias_hold
+
+instruments	AIRSPEED INDICATED	Knots	ias
+instruments	INDICATED ALTITUDE	Feet	indicated_alt_ft
 instruments	KOHLSMAN SETTING MB	MilliBars	qnh_millibar
