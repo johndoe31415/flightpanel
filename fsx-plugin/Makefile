@@ -10,11 +10,12 @@ OBJDUMP := $(PREFIX)objdump
 AR := $(PREFIX)ar
 GDB := $(PREFIX)gdb
 
-CFLAGS := -std=c11 -Isdk -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -O3 -pthread
-CXXFLAGS := -std=c++11 -Isdk -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -O3 -pthread
-LDFLAGS := -Lsdk -lSimConnect -lpthread
+SHARED_CFLAGS := -Isdk -Ihidapi/hidapi -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -O3 -pthread
+CFLAGS := -std=c11 $(SHARED_CFLAGS)
+CXXFLAGS := -std=c++11 $(SHARED_CFLAGS)
+LDFLAGS := -Lsdk -lSimConnect -lpthread -Lhidapi/windows/.libs -lhidapi
 
-OBJS := fpconnect.o fsconnection.o simconnect.o simconnect-events.o simconnect-datadefs.o
+OBJS := fpconnect.o fsconnection.o simconnect.o simconnect-events.o simconnect-datadefs.o fpconnection.o
 
 all: $(TARGETS)
 
