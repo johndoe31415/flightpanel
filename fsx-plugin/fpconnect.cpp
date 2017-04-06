@@ -8,6 +8,9 @@
 
 int main(void) {
 	struct flightsim_connection_t *fs_connection = simconnect_init();
+	if (!fs_connection) {
+		exit(EXIT_FAILURE);
+	}
 	simconnect_event_loop(fs_connection);
 	simconnect_close(fs_connection);
 	return 0;

@@ -9,13 +9,14 @@ OBJCOPY := $(PREFIX)objcopy
 OBJDUMP := $(PREFIX)objdump
 AR := $(PREFIX)ar
 GDB := $(PREFIX)gdb
+WINDRES := $(PREFIX)windres
 
 SHARED_CFLAGS := -Isdk -Ihidapi/hidapi -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -O3 -pthread
 CFLAGS := -std=c11 $(SHARED_CFLAGS)
 CXXFLAGS := -std=c++11 $(SHARED_CFLAGS)
-LDFLAGS := -Lsdk -lSimConnect -lpthread -Lhidapi/windows/.libs -lhidapi
+LDFLAGS := -Lsdk -lSimConnect -Lhidapi/windows/.libs -lhidapi
 
-OBJS := fpconnect.o fsconnection.o simconnect.o simconnect-events.o simconnect-datadefs.o fpconnection.o
+OBJS := fpconnect.res fpconnect.o fsconnection.o simconnect.o simconnect-events.o simconnect-datadefs.o fpconnection.o
 
 all: $(TARGETS)
 
@@ -30,3 +31,6 @@ fpconnect.exe: $(OBJS)
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+fpconnect.res: fpconnect.rc
+	$(WINDRES) --input $< --output $@ --output-format=coff

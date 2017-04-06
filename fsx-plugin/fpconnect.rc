@@ -1,0 +1,2 @@
+#include "winuser.h"
+ISOLATIONAWARE_MANIFEST_RESOURCE_ID RT_MANIFEST fpconnect.manifest
