@@ -1,2 +1,29 @@
 #include "winuser.h"
-ISOLATIONAWARE_MANIFEST_RESOURCE_ID RT_MANIFEST fpconnect.manifest
+
+1 VERSIONINFO
+FILEVERSION     0,0,1,0
+PRODUCTVERSION  0,0,1,0
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904E4"
+		BEGIN
+			VALUE "CompanyName", "Johannes Bauer"
+			VALUE "FileDescription", "Flightpanel"
+			VALUE "FileVersion", "0.01"
+			VALUE "InternalName", "fpconnect"
+			VALUE "LegalCopyright", "Flightpanel"
+			VALUE "OriginalFilename", "fpconnect.exe"
+			VALUE "ProductName", "Flightpanel"
+			VALUE "ProductVersion", "0.01"
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x409, 1252
+	END
+END
+
+2 ICON "fpconnect.ico"
+
+ISOLATIONAWARE_MANIFEST_RESOURCE_ID RT_MANIFEST "fpconnect.manifest"
