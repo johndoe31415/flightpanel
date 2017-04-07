@@ -3,7 +3,9 @@
 #include "fsconnection.hpp"
 
 void dump_instrument_data(FILE *f, const struct instrument_data_t *data) {
+#if defined(VARIANT_WINDOWS)
 	system("cls");
+#endif
 	fprintf(f, "VHF1: %3d.%03d (%3d.%03d)     ", data->vhf1.freq_active_khz / 1000, data->vhf1.freq_active_khz % 1000, data->vhf1.freq_standby_khz / 1000, data->vhf1.freq_standby_khz % 1000);
 	fprintf(f, "VHF2: %3d.%03d (%3d.%03d)\n", data->vhf2.freq_active_khz / 1000, data->vhf2.freq_active_khz % 1000, data->vhf2.freq_standby_khz / 1000, data->vhf2.freq_standby_khz % 1000);
 	fprintf(f, "NAV1: %3d.%03d (%3d.%03d)     ", data->nav1.freq_active_khz / 1000, data->nav1.freq_active_khz % 1000, data->nav1.freq_standby_khz / 1000, data->nav1.freq_standby_khz % 1000);

@@ -4,14 +4,24 @@
 #include <stdint.h>
 #include <math.h>
 
+#include "fsconnection.hpp"
+
+#if defined(VARIANT_WINDOWS)
 #include "simconnect.hpp"
+#define DefaultConnection		SimConnectConnection
+
+
+#elif defined(VARIANT_LINUX)
+#include "emulator.hpp"
+#define DefaultConnection		EmulatedConnection
+#endif
 
 int main(void) {
-	struct flightsim_connection_t *fs_connection = simconnect_init();
+	FSConnection *fs_connection = new DefaultConnection();
 	if (!fs_connection) {
 		exit(EXIT_FAILURE);
 	}
-	simconnect_event_loop(fs_connection);
-	simconnect_close(fs_connection);
+	fs_connection->event_loop();
+	delete fs_connection;
 	return 0;
 }

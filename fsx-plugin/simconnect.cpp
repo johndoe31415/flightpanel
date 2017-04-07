@@ -9,19 +9,7 @@
 #include "simconnect-events.h"
 #include "simconnect-datadefs.hpp"
 #include "fsconnection.hpp"
-
-#include <pthread.h>
-#include <windows.h>
-#include "SimConnect.h"
-
-/* Internal data structure passed to callback, masked outside this module as
- * struct flightsim_connection_t*
- **/
-struct simconnect_context_t {
-	HANDLE simconnect_handle;
-	bool loop_running;
-	pthread_t periodic_query_thread;
-};
+#include "simconnect.hpp"
 
 static uint32_t bcd_to_decimal(uint32_t bcd_value) {
 	uint32_t result = 0;
@@ -131,17 +119,17 @@ enum data_request_t {
 };
 
 static void CALLBACK simconnect_callback(SIMCONNECT_RECV* pData, DWORD cbData, void *vcontext) {
-	struct simconnect_context_t *context = (struct simconnect_context_t*)vcontext;
+	SimConnectConnection *conn = (SimConnectConnection*)vcontext;
 	if (pData->dwID == SIMCONNECT_RECV_ID_EVENT) {
 		SIMCONNECT_RECV_EVENT *evt = (SIMCONNECT_RECV_EVENT*)pData;
 		enum simconnect_event_t event_id = (enum simconnect_event_t)evt->uEventID;
 		if (event_id == EVENT_SIM_START) {
 			printf("Simulation started.\n");
-			SimConnect_RequestDataOnSimObjectType(context->simconnect_handle, REQUEST_DATADEF_INFO, DATADEF_INFO, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
-			SimConnect_RequestDataOnSimObjectType(context->simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
+			SimConnect_RequestDataOnSimObjectType(conn->get_simconnect_handle(), REQUEST_DATADEF_INFO, DATADEF_INFO, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
+			SimConnect_RequestDataOnSimObjectType(conn->get_simconnect_handle(), REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 		} else if (evt->uGroupID == EVENTGROUP_INSTRUMENT_CHANGED) {
 			//printf("Instrument changed: %s\n", get_event_enum_name(event_id));
-			SimConnect_RequestDataOnSimObjectType(context->simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
+			SimConnect_RequestDataOnSimObjectType(conn->get_simconnect_handle(), REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 		} else {
 			printf("Unhandled event received: 0x%lx\n", evt->uEventID);
 		}
@@ -165,53 +153,49 @@ static void CALLBACK simconnect_callback(SIMCONNECT_RECV* pData, DWORD cbData, v
 			printf("Recevied unhandled data for request 0x%lx\n", pObjData->dwRequestID);
 		}
 	} else if (pData->dwID == SIMCONNECT_RECV_ID_QUIT) {
-		context->loop_running = false;
+		conn->set_quit();
 		printf("Received termination signal.\n");
 	} else {
 		printf("Unhandled callback dwID 0x%lx\n", pData->dwID);
 	}
 }
 
-static void* simconnect_periodic_query_thread(void *fsconnection) {
-	struct simconnect_context_t *context = (struct simconnect_context_t*)fsconnection;
-	while (context->loop_running) {
+static void* simconnect_periodic_query_thread(void *vcontext) {
+	SimConnectConnection *conn = (SimConnectConnection*)vcontext;
+	while (conn->is_loop_running()) {
 		Sleep(1000);
-		SimConnect_RequestDataOnSimObjectType(context->simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
+		SimConnect_RequestDataOnSimObjectType(conn->get_simconnect_handle(), REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 	}
 	return NULL;
 }
 
-void simconnect_event_loop(struct flightsim_connection_t *fsconnection) {
-	struct simconnect_context_t *context = (struct simconnect_context_t*)fsconnection;
-	context->loop_running = true;
-	SimConnect_RequestDataOnSimObjectType(context->simconnect_handle, REQUEST_DATADEF_INFO, DATADEF_INFO, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
-	SimConnect_RequestDataOnSimObjectType(context->simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
+void SimConnectConnection::event_loop() {
+	_loop_running = true;
+	SimConnect_RequestDataOnSimObjectType(_simconnect_handle, REQUEST_DATADEF_INFO, DATADEF_INFO, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
+	SimConnect_RequestDataOnSimObjectType(_simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 
 	/* Create thread that polls the status every second */
-	pthread_create(&context->periodic_query_thread, NULL, simconnect_periodic_query_thread, context);
+	pthread_create(&_periodic_query_thread, NULL, simconnect_periodic_query_thread, this);
 
-	while (context->loop_running) {
-		SimConnect_CallDispatch(context->simconnect_handle, simconnect_callback, context);
+	while (_loop_running) {
+		SimConnect_CallDispatch(_simconnect_handle, simconnect_callback, this);
 		Sleep(10);
 	}
 
 	/* Clean up loop thread */
-	pthread_join(context->periodic_query_thread, NULL);
+	pthread_join(_periodic_query_thread, NULL);
 }
 
-struct flightsim_connection_t* simconnect_init(void) {
-	/* Allocate memory for opaque structure first */
-	struct simconnect_context_t *context = (struct simconnect_context_t*)calloc(1, sizeof(*context));
-	if (!context) {
-		fprintf(stderr, "calloc simconnect_context_t: %s\n", strerror(errno));
-		return NULL;
-	}
+SimConnectConnection::SimConnectConnection() {
+	_simconnect_handle = NULL;
+	_loop_running = false;
+	memset(&_periodic_query_thread, 0, sizeof(_periodic_query_thread));
 
-	if (SUCCEEDED(SimConnect_Open(&context->simconnect_handle, "Flight Panel", NULL, 0, 0, 0))) {
-		printf("Successfully connected to flight simulator.\n");
-		simconnect_datadefs_register_information(context->simconnect_handle, DATADEF_INFO);
-		simconnect_datadefs_register_instruments(context->simconnect_handle, DATADEF_INSTRUMENTS);
-		SimConnect_SubscribeToSystemEvent(context->simconnect_handle, EVENT_SIM_START, "SimStart");
+	if (SUCCEEDED(SimConnect_Open(&_simconnect_handle, "Flight Panel", NULL, 0, 0, 0))) {
+		printf("Successfully connected to flight simulator via SimConnect.\n");
+		simconnect_datadefs_register_information(_simconnect_handle, DATADEF_INFO);
+		simconnect_datadefs_register_instruments(_simconnect_handle, DATADEF_INSTRUMENTS);
+		SimConnect_SubscribeToSystemEvent(_simconnect_handle, EVENT_SIM_START, "SimStart");
 
 		/* Register all enum values which have flag 1 for instrument changed events */
 		int event_enum = 0;
@@ -219,23 +203,20 @@ struct flightsim_connection_t* simconnect_init(void) {
 		while ((event_data = get_simconnect_event_enum_data((simconnect_event_t)event_enum)) != NULL) {
 			if (event_data->flags == 1) {
 				/* Instrument changed group */
-				SimConnect_MapClientEventToSimEvent(context->simconnect_handle, event_enum, event_data->name);
-				SimConnect_AddClientEventToNotificationGroup(context->simconnect_handle, EVENTGROUP_INSTRUMENT_CHANGED, event_enum);
+				SimConnect_MapClientEventToSimEvent(_simconnect_handle, event_enum, event_data->name);
+				SimConnect_AddClientEventToNotificationGroup(_simconnect_handle, EVENTGROUP_INSTRUMENT_CHANGED, event_enum);
 			}
 			event_enum++;
 		}
 	} else {
-		fprintf(stderr, "Connection to flight simulator failed.\n");
-		free(context);
-		return NULL;
+		fprintf(stderr, "Connection to flight simulator via SimConnect failed.\n");
+		_simconnect_handle = NULL;
 	}
-
-	return (struct flightsim_connection_t*)context;
 }
 
-void simconnect_close(struct flightsim_connection_t *fsconnection) {
-	struct simconnect_context_t *context = (struct simconnect_context_t*)fsconnection;
-	SimConnect_Close(context->simconnect_handle);
-	free(context);
+SimConnectConnection::~SimConnectConnection() {
+	if (_simconnect_handle) {
+		SimConnect_Close(_simconnect_handle);
+	}
 }
 

@@ -4,8 +4,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-/* Opaque type, only referenced via pointer */
-struct flightsim_connection_t;
+class FSConnection {
+	public:
+		FSConnection() {
+		}
+
+		virtual void event_loop(void) = 0;
+
+		virtual ~FSConnection() {
+		}
+};
 
 struct vhf_data_t {
 	uint32_t freq_active_khz;

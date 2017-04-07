@@ -1,29 +1,51 @@
-.PHONY: all clean
+.PHONY: all clean test
 
-TARGETS := fpconnect.exe
+#VARIANT := windows
 
+ifeq ($(VARIANT),windows)
+TARGET := fpconnect.exe
 PREFIX := i686-w64-mingw32-
 CXX := $(PREFIX)g++
 CC := $(PREFIX)gcc
-OBJCOPY := $(PREFIX)objcopy
-OBJDUMP := $(PREFIX)objdump
 AR := $(PREFIX)ar
 GDB := $(PREFIX)gdb
 WINDRES := $(PREFIX)windres
+BUILDDIR := build/windows
+PLATFORM_CFLAGS := -Isdk -DVARIANT_WINDOWS
+PLATFORM_LDFLAGS := -Lsdk -lSimConnect -Lhidapi/windows/.libs -lhidapi
+PLATFORM_OBJS := simconnect.o simconnect-events.o simconnect-datadefs.o fpconnect.res
+else ifeq ($(VARIANT),linux)
+TARGET := fpconnect
+PREFIX :=
+CXX := $(PREFIX)g++
+CC := $(PREFIX)gcc
+AR := $(PREFIX)ar
+GDB := $(PREFIX)gdb
+WINDRES := $(PREFIX)windres
+BUILDDIR := build/linux
+PLATFORM_CFLAGS := -DVARIANT_LINUX
+PLATFORM_LDFLAGS := -Lhidapi/libusb/.libs -lhidapi-libusb
+PLATFORM_OBJS := emulator.o
+else
+$(error The VARIANT variable needs to be either "linux" or "windows", not "$(VARIANT)")
+endif
 
-SHARED_CFLAGS := -Isdk -Ihidapi/hidapi -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -O3 -pthread
+SHARED_CFLAGS := $(PLATFORM_CFLAGS) -Ihidapi/hidapi -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -O3 -pthread -g
 CFLAGS := -std=c11 $(SHARED_CFLAGS)
 CXXFLAGS := -std=c++11 $(SHARED_CFLAGS)
-LDFLAGS := -Lsdk -lSimConnect -Lhidapi/windows/.libs -lhidapi
+LDFLAGS := $(PLATFORM_LDFLAGS)
 
-OBJS := fpconnect.res fpconnect.o fsconnection.o simconnect.o simconnect-events.o simconnect-datadefs.o fpconnection.o
+OBJS := fpconnect.o fsconnection.o fpconnection.o $(PLATFORM_OBJS)
 
-all: $(TARGETS)
+all: $(TARGET)
 
 clean:
-	rm -f $(OBJS) $(TARGETS)
+	rm -f $(OBJS) $(TARGET)
 
-fpconnect.exe: $(OBJS)
+test: all
+	LD_LIBRARY_PATH="`pwd`/hidapi/libusb/.libs" ./$(TARGET)
+
+$(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS)
 
 .cpp.o:
@@ -34,3 +56,4 @@ fpconnect.exe: $(OBJS)
 
 fpconnect.res: fpconnect.rc
 	$(WINDRES) --input $< --output $@ --output-format=coff
+
