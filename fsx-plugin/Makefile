@@ -47,8 +47,7 @@ AR := $(PREFIX)ar
 GDB := $(PREFIX)gdb
 BUILDDIR := build/linux
 PLATFORM_CFLAGS := -fPIC -DLIN -DVARIANT_LINUX_XPLANE -Ixsquawkbox/CHeaders/XPLM/
-#PLATFORM_LDFLAGS := -shared -Lbuild/linux -lhidapi-libusb
-PLATFORM_LDFLAGS := -shared
+PLATFORM_LDFLAGS := -Wl,--version-script=fpconnect.ld -shared -Lbuild/linux -lhidapi-libusb
 PLATFORM_OBJS := $(LINUX_XPLANE_OBJS)
 XPLANE_PATH := $(HOME)/xplane
 
@@ -61,8 +60,7 @@ CFLAGS := -std=c11 $(SHARED_CFLAGS)
 CXXFLAGS := -std=c++11 $(SHARED_CFLAGS)
 LDFLAGS := $(PLATFORM_LDFLAGS)
 
-#OBJS := fpconnect.o fsconnection.o fpconnection.o $(PLATFORM_OBJS)
-OBJS := xsquawkbox.o
+OBJS := fpconnect.o fsconnection.o fpconnection.o $(PLATFORM_OBJS)
 
 all: $(TARGET)
 

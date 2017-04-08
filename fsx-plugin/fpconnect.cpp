@@ -15,8 +15,8 @@
 #define FlightSimConnection		EmulatedConnection
 
 #elif defined(VARIANT_LINUX_XPLANE)
-#include "emulator.hpp"
-#define FlightSimConnection		EmulatedConnection
+#include "xsquawkbox.hpp"
+#define FlightSimConnection		XSquawkBoxConnection
 
 #else
 
