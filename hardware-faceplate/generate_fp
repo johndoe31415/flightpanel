@@ -117,3 +117,17 @@ for item in svg.search("use"):
 	else:
 		print("// WARNING: Unused element '%s'" % (label))
 	print()
+
+for item in svg.search("text"):
+	text = item.getcdata()
+	(x, y) = get_matrix(item).apply(float(item["x"]), float(item["y"]))
+	
+	(x, y) = (px_to_mm(x), px_to_mm(y))
+	y = width_mm - y
+	y += 1.5
+
+	cname = cnames.get("text")
+	print("var %s = new TextEngraving(\"%s\", \"%s\");" % (cname, cname, text))
+	print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
+	print()
+
