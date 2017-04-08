@@ -8,15 +8,24 @@
 
 #if defined(VARIANT_WINDOWS)
 #include "simconnect.hpp"
-#define DefaultConnection		SimConnectConnection
+#define FlightSimConnection		SimConnectConnection
 
-#elif defined(VARIANT_LINUX)
+#elif defined(VARIANT_LINUX_EMU)
 #include "emulator.hpp"
-#define DefaultConnection		EmulatedConnection
+#define FlightSimConnection		EmulatedConnection
+
+#elif defined(VARIANT_LINUX_XPLANE)
+#include "emulator.hpp"
+#define FlightSimConnection		EmulatedConnection
+
+#else
+
+#error "FIXME: Undefined variant."
+
 #endif
 
 int main(void) {
-	FSConnection *fs_connection = new DefaultConnection();
+	FSConnection *fs_connection = new FlightSimConnection();
 	if ((!fs_connection) || (!fs_connection->connected())) {
 		exit(EXIT_FAILURE);
 	}

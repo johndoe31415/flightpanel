@@ -27,6 +27,7 @@ firmware/cube/usbd_conf.h
 fsx-plugin/fpconnect
 fsx-plugin/fpconnect.exe
 fsx-plugin/fpconnect.res
+fsx-plugin/fpconnect.so
 fsx-plugin/build
 fsx-plugin/hidapi
 fsx-plugin/sdk-simconnect
