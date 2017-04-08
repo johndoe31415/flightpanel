@@ -5,7 +5,7 @@
 void dump_instrument_data(FILE *f, const struct instrument_data_t *data) {
 #if defined(VARIANT_WINDOWS)
 	system("cls");
-#elif defined(VARIANT_LINUX)
+#elif defined(VARIANT_LINUX_EMU) || defined(VARIANT_LINUX_XPLANE)
 	fprintf(f, "\x1b[3;J\x1b[H\x1b[2J");
 #endif
 	fprintf(f, "VHF1: %3d.%03d (%3d.%03d)     ", data->vhf1.freq_active_khz / 1000, data->vhf1.freq_active_khz % 1000, data->vhf1.freq_standby_khz / 1000, data->vhf1.freq_standby_khz % 1000);
