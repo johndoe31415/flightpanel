@@ -214,6 +214,16 @@ static void init_display_spi(void) {
 			.GPIO_Speed = GPIO_Speed_2MHz,
 			.GPIO_PuPd = GPIO_PuPd_NOPULL,
 		};
+	{
+		GPIO_InitTypeDef GPIO_InitStructure = {
+			.GPIO_Pin = GPIO_Pin_1,
+			.GPIO_Mode = GPIO_Mode_OUT,
+			.GPIO_OType = GPIO_OType_PP,
+			.GPIO_Speed = GPIO_Speed_25MHz,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
+		};
+		GPIO_Init(GPIOB, &GPIO_InitStructure);
+	}
 		GPIO_Init(GPIOB, &GPIO_InitStructure);
 	}
 
