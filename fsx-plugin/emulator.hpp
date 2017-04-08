@@ -12,6 +12,12 @@ class EmulatedConnection : public FSConnection {
 
 		void randomize(struct vhf_data_t &vhf);
 		void randomize(struct nav_data_t &nav);
+		void randomize(struct adf_data_t &adf);
+		void randomize(struct dme_data_t &dme);
+		void randomize(struct light_data_t &lights);
+		void randomize(struct ap_data_t &ap);
+		void randomize(struct transponder_data_t &xpdr);
+		void randomize(struct misc_data_t &misc);
 
 	public:
 		EmulatedConnection();
