@@ -6,6 +6,9 @@ LINUX_TARGET := fpconnect
 LINUX_OBJS := emulator.o
 
 ifeq ($(VARIANT),windows)
+ifeq ($(wildcard sdk-simconnect),)
+$(error The FSX SimConnect header files are not here. Place the SimConnect.h and SimConnect.lib in the sdk-simconnect subdirectory and try again)
+endif
 TARGET := $(WINDOWS_TARGET)
 PREFIX := i686-w64-mingw32-
 CXX := $(PREFIX)g++
