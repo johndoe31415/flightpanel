@@ -26,15 +26,9 @@ XSquawkBoxConnection::~XSquawkBoxConnection() {
 
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
 	fprintf(stderr, "X-Plane plugin start.\n");
-#if 0
 	strcpy(outName, "flightpanel");
 	strcpy(outSig, "flightpanel.main");
 	strcpy(outDesc, "Connects X-Plane to the flightpanel hardware unit.");
-#endif
-        strcpy(outName, "HelloWorld");
-        strcpy(outSig, "xplanesdk.examples.helloworld");
-        strcpy(outDesc, "A plugin that makes a window.");
-
 	return 1;
 }
 
@@ -53,6 +47,6 @@ PLUGIN_API int XPluginEnable(void) {
 }
 
 PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, void *inParam) {
-	fprintf(stderr, "X-Plane receive msg.\n");
+	fprintf(stderr, "X-Plane receive msg from %u: %ld (%p)\n", inFromWho, inMessage, inParam);
 }
 
