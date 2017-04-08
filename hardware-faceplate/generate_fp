@@ -1,0 +1,85 @@
+#!/usr/bin/python3
+import collections
+from XMLParser import XMLParser
+
+def convert_unit(strvalue):
+	if strvalue.endswith("mm"):
+		return float(strvalue[:-2])
+	else:
+		raise Exception(NotImplemented)
+
+def apply_transforms(transforms):
+	posx, posy = (0, 0)
+	for transform in transforms:
+		if transform.startswith("translate("):
+			(offx, offy) = (float(x) for x in transform[9:].strip("()").split(","))
+			posx += offx
+			posy += offy
+		else:
+			raise Exception(NotImplemented, transform)
+	
+	# Convert into mm, 90 dpi
+	posx = posx / 90 * 25.4
+	posy = posy / 90 * 25.4
+
+	return (posx, posy)
+
+def get_pos(item):
+	transforms = [ ]
+	while item is not None:
+		if item.get("transform") is not None:
+			transforms.append(item["transform"])
+		item = item.getparent()
+	return apply_transforms(transforms)
+
+class ComponentNames(object):
+	def __init__(self):
+		self._ids = collections.defaultdict(int)
+	
+	def get(self, name):
+		self._ids[name] += 1
+		return name + "_" + str(self._ids[name])
+
+svg = XMLParser().parsefile("instruments.svg")
+#svg.dump()
+
+width_mm = convert_unit(svg["width"])
+height_mm = convert_unit(svg["height"])
+print("var fp = new Frontpanel(\"instruments\", thick_2mm, %f, %f, alu_elox, elox_natural);" % (width_mm, height_mm))
+print("AddFrontpanel(fp);")
+cnames = ComponentNames()
+master_items = { }
+
+
+red_led = svg.searchunique("use", id = "use5425")
+print(red_led)
+print(get_pos(red_led))
+jiofsdjoi
+
+
+
+for item in svg.search("use"):
+	xlink = item["xlink:href"]
+	if xlink not in master_items:
+		master = svg.searchunique("g", id = xlink.lstrip("#"))
+		label = master["inkscape:label"]
+		master_items[xlink] = label
+	label = master_items[xlink]	
+	(x, y) = get_pos(item)
+	y = width_mm - y
+	cname = cnames.get(label[1:])
+	
+	if label == "#led":
+		print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname))
+		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))		
+	elif label == "#momentary":
+		print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname))
+		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
+	elif label == "#rotary":
+		print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname))
+		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
+	elif label == "#lcd":
+		print("var %s = new RectHole(\"%s\", 29.4, 12.3, 1);" % (cname, cname))
+		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
+	else:
+		print("// WARNING: Unused element '%s'" % (label))

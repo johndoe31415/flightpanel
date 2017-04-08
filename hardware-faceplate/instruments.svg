@@ -11,9 +11,9 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="135.89999mm"
-   height="218.60001mm"
-   viewBox="0 0 481.53544 774.56695"
+   width="154mm"
+   height="237mm"
+   viewBox="0 0 545.66932 839.76378"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
@@ -23,8 +23,13 @@
     <pattern
        inkscape:collect="always"
        xlink:href="#pattern5865"
+       id="pattern5140"
+       patternTransform="translate(-1343.3518,1484.4038)" />
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#pattern5865"
        id="pattern5870"
-       patternTransform="matrix(0.76922592,0,0,0.92651546,-1010.4595,-125.62414)" />
+       patternTransform="matrix(0.87088664,0,0,1.0060227,-1047.9768,-205.13983)" />
     <linearGradient
        id="linearGradient5855"
        osb:paint="solid">
@@ -42,12 +47,12 @@
       <image
          sodipodi:absref="/home/joe/Eigene_Dokumente/Programmieren/flightpanel/hardware-faceplate/MT510.jpg"
          xlink:href="MT510.jpg"
-         y="0"
-         x="0"
-         id="image10"
-         preserveAspectRatio="none"
+         width="450"
          height="450"
-         width="450" />
+         preserveAspectRatio="none"
+         id="image10"
+         x="0"
+         y="0" />
     </pattern>
   </defs>
   <sodipodi:namedview
@@ -57,9 +62,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.5"
-     inkscape:cx="882.83766"
-     inkscape:cy="127.60672"
+     inkscape:zoom="0.70710675"
+     inkscape:cx="226.20775"
+     inkscape:cy="357.39218"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -89,14 +94,14 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(961.99808,-421.94652)">
+     transform="translate(993.77519,-389.10337)">
     <rect
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:url(#pattern5870);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.99999994px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        id="rect4416"
-       width="481.53543"
-       height="774.56696"
-       x="-961.99811"
-       y="421.9465"
+       width="545.17505"
+       height="841.03497"
+       x="-993.11078"
+       y="389.41959"
        rx="10"
        ry="10" />
     <g
@@ -137,7 +142,8 @@
     </g>
     <g
        id="g4918"
-       transform="matrix(0.86465479,0.50236649,-0.50236649,0.86465479,-104.5819,354.77378)">
+       transform="matrix(0.86465479,0.50236649,-0.50236649,0.86465479,-104.5819,354.77378)"
+       inkscape:label="#led">
       <circle
          r="12.667324"
          cy="314.42844"
@@ -165,13 +171,13 @@
       <image
          sodipodi:absref="/home/joe/Eigene_Dokumente/Programmieren/flightpanel/hardware-faceplate/led_green.png"
          xlink:href="led_green.png"
-         width="29.19729"
-         height="29.60001"
-         preserveAspectRatio="none"
-         id="image5989"
-         x="-900.40729"
+         transform="matrix(0.86465479,-0.50236649,0.50236649,0.86465479,0,0)"
          y="-165.82326"
-         transform="matrix(0.86465479,-0.50236649,0.50236649,0.86465479,0,0)" />
+         x="-900.40729"
+         id="image5989"
+         preserveAspectRatio="none"
+         height="29.60001"
+         width="29.19729" />
     </g>
     <text
        xml:space="preserve"
@@ -186,7 +192,8 @@
          y="177.54007">3mm LED green in socket</tspan></text>
     <g
        id="g4918-8"
-       transform="matrix(0.86465479,0.50236649,-0.50236649,0.86465479,-104.5819,429.79403)">
+       transform="matrix(0.86465479,0.50236649,-0.50236649,0.86465479,-104.5819,429.79403)"
+       inkscape:label="#led">
       <circle
          r="12.667324"
          cy="314.42844"
@@ -214,13 +221,13 @@
       <image
          sodipodi:absref="/home/joe/Eigene_Dokumente/Programmieren/flightpanel/hardware-faceplate/led_yellow.png"
          xlink:href="led_yellow.png"
-         width="30.926805"
-         height="31.375019"
-         preserveAspectRatio="none"
-         id="image6051"
-         x="-901.48322"
+         transform="matrix(0.86465479,-0.50236649,0.50236649,0.86465479,0,0)"
          y="-166.39026"
-         transform="matrix(0.86465479,-0.50236649,0.50236649,0.86465479,0,0)" />
+         x="-901.48322"
+         id="image6051"
+         preserveAspectRatio="none"
+         height="31.375019"
+         width="30.926805" />
     </g>
     <text
        xml:space="preserve"
@@ -235,7 +242,8 @@
          y="252.56033">3mm LED yellow in socket</tspan></text>
     <g
        id="g4918-8-6"
-       transform="matrix(0.86465479,0.50236649,-0.50236649,0.86465479,-102.5819,503.43172)">
+       transform="matrix(0.86465479,0.50236649,-0.50236649,0.86465479,-102.5819,503.43172)"
+       inkscape:label="#led">
       <circle
          r="12.667324"
          cy="314.42844"
@@ -263,13 +271,13 @@
       <image
          sodipodi:absref="/home/joe/Eigene_Dokumente/Programmieren/flightpanel/hardware-faceplate/led_red.png"
          xlink:href="led_red.png"
-         width="29.825008"
-         height="29.825008"
-         preserveAspectRatio="none"
+         transform="matrix(0.86465479,-0.50236649,0.50236649,0.86465479,0,0)"
+         y="-166.00163"
+         x="-900.49011"
          id="image5411"
-         x="-900.99011"
-         y="-166.12663"
-         transform="matrix(0.86465479,-0.50236649,0.50236649,0.86465479,0,0)" />
+         preserveAspectRatio="none"
+         height="29.825008"
+         width="29.825008" />
     </g>
     <text
        xml:space="preserve"
@@ -284,7 +292,8 @@
          y="325.69803">3mm LED red in socket</tspan></text>
     <g
        id="g5454"
-       transform="translate(-29.155274,-3.0128091)">
+       transform="translate(-29.155274,-3.0128091)"
+       inkscape:label="#rotary">
       <g
          transform="translate(-354.30581,-669.32844)"
          id="g4309-2-6">
@@ -316,13 +325,13 @@
       <image
          sodipodi:absref="/home/joe/Eigene_Dokumente/Programmieren/flightpanel/hardware-faceplate/knob2.png"
          xlink:href="knob2.png"
-         y="203.07445"
-         x="-830.20453"
-         id="image5723"
-         preserveAspectRatio="none"
-         height="65.57209"
+         style="opacity:1"
          width="62.05481"
-         style="opacity:1" />
+         height="65.57209"
+         preserveAspectRatio="none"
+         id="image5723"
+         x="-830.20453"
+         y="203.07445" />
     </g>
     <text
        xml:space="preserve"
@@ -337,109 +346,145 @@
          y="197.01534">Rotary encoder</tspan></text>
     <g
        id="g5570"
-       transform="translate(-41.594381,1.9806849)">
+       transform="translate(14.405625,-3.0193156)"
+       inkscape:label="#lcd">
       <rect
          style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          id="rect4142"
-         width="104.27756"
-         height="98.608276"
+         width="97.190948"
+         height="98.076775"
          x="-677.72278"
-         y="168.27678" />
+         y="168.80827" />
       <rect
          style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          id="rect4146"
          width="95.064972"
          height="67.42717"
-         x="-672.90387"
+         x="-676.65979"
          y="184.04449" />
       <g
          transform="translate(41.59438,-1.9807219)"
          id="g4459">
         <g
            transform="translate(0.65988382,0)"
-           id="g4414">
-          <circle
-             style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.24999999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-             id="path4400"
-             cx="-713.86737"
-             cy="176.73189"
-             r="3.4183073" />
-          <path
-             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.20000002;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-             d="m -717.28923,180.15377 6.84375,-6.84375"
-             id="path4402"
-             inkscape:connector-curvature="0" />
-        </g>
+           id="g4414" />
         <g
            id="g4414-3"
            transform="translate(92.053441,0)">
-          <circle
-             style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.24999999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-             id="path4400-5"
-             cx="-713.86737"
-             cy="176.73189"
-             r="3.4183073" />
-          <path
-             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.20000002;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-             d="m -717.28923,180.15377 6.84375,-6.84375"
-             id="path4402-6"
-             inkscape:connector-curvature="0" />
+          <g
+             id="g4415">
+            <g
+               id="g4497">
+              <circle
+                 style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.24999999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+                 id="path4400-5"
+                 cx="-719.41321"
+                 cy="176.73189"
+                 r="3.4183073" />
+              <path
+                 style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.20000002;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+                 d="m -722.83508,180.15376 6.84375,-6.84375"
+                 id="path4402-6"
+                 inkscape:connector-curvature="0" />
+            </g>
+          </g>
         </g>
         <g
            id="g4414-2"
-           transform="translate(0.65988382,85.724152)">
-          <circle
-             style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.24999999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-             id="path4400-9"
-             cx="-713.86737"
-             cy="176.73189"
-             r="3.4183073" />
-          <path
-             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.20000002;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-             d="m -717.28923,180.15377 6.84375,-6.84375"
-             id="path4402-1"
-             inkscape:connector-curvature="0" />
-        </g>
+           transform="translate(0.65988382,85.724152)" />
         <g
            id="g4414-27"
-           transform="translate(92.053441,85.724152)">
-          <circle
-             style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.24999999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-             id="path4400-0"
-             cx="-713.86737"
-             cy="176.73189"
-             r="3.4183073" />
-          <path
-             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.20000002;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-             d="m -717.28923,180.15377 6.84375,-6.84375"
-             id="path4402-9"
-             inkscape:connector-curvature="0" />
-        </g>
+           transform="translate(92.053441,85.724152)" />
       </g>
       <image
          sodipodi:absref="/home/joe/Eigene_Dokumente/Programmieren/flightpanel/hardware-faceplate/display.png"
          xlink:href="display.png"
-         width="96.869789"
-         height="71.29789"
-         preserveAspectRatio="none"
+         y="182.34924"
+         x="-677.58643"
          id="image5289"
-         x="-674.32709"
-         y="181.14912" />
+         preserveAspectRatio="none"
+         height="71.29789"
+         width="96.869789" />
+      <g
+         transform="translate(49.082781,-2.55424)"
+         id="g4497-6">
+        <circle
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.24999999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           id="path4400-5-7"
+           cx="-720.76166"
+           cy="176.73189"
+           r="3.4183073" />
+        <path
+           style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.20000002;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m -723.82998,180.15376 6.84375,-6.84375"
+           id="path4402-6-5"
+           inkscape:connector-curvature="0" />
+      </g>
+      <g
+         transform="translate(49.436331,84.4199)"
+         id="g4497-3">
+        <circle
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.24999999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           id="path4400-5-5"
+           cx="-720.76166"
+           cy="176.73189"
+           r="3.4183073" />
+        <path
+           style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.20000002;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m -724.18353,180.15376 6.84375,-6.84375"
+           id="path4402-6-6"
+           inkscape:connector-curvature="0" />
+      </g>
+      <g
+         transform="translate(134.99626,85.30378)"
+         id="g4497-2">
+        <circle
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.24999999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           id="path4400-5-9"
+           cx="-720.76166"
+           cy="176.73189"
+           r="3.4183073" />
+        <path
+           style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.20000002;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m -724.18353,180.15376 6.84375,-6.84375"
+           id="path4402-6-1"
+           inkscape:connector-curvature="0" />
+      </g>
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m -673.05637,228.80169 87.85802,0"
+         id="path4542"
+         inkscape:connector-curvature="0" />
+      <g
+         id="g4561"
+         transform="translate(45.937141,-2.86458)"
+         style="stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m -666.64075,228.95403 4.24264,8.83883 6.98268,2.20971 -0.0884,8.75045 8.04334,0 0,2.56326"
+         id="path4695"
+         inkscape:connector-curvature="0" />
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m -591.6186,228.95403 -4.24264,8.83883 -6.98268,2.20971 0.0884,8.75045 -8.04334,0 0,2.56326"
+         id="path4695-7"
+         inkscape:connector-curvature="0" />
     </g>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;line-height:125%;font-family:Din17;-inkscape-font-specification:'Din17 Medium';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="-714.99414"
-       y="162.41273"
+       x="-658.99414"
+       y="157.41273"
        id="text5232-2-6"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan5234-0-1"
-         x="-714.99414"
-         y="162.41273">LCD 29.5 x 27.9mm</tspan></text>
+         x="-658.99414"
+         y="157.41273">LCD 27.5 x 27.75mm</tspan></text>
     <g
        id="g4364-7-6"
-       transform="translate(-258.24629,-559.0072)">
+       transform="translate(-258.24629,-559.0072)"
+       inkscape:label="#momentary">
       <circle
          r="10.504922"
          cy="875.20374"
@@ -456,12 +501,12 @@
       <image
          sodipodi:absref="/home/joe/Eigene_Dokumente/Programmieren/flightpanel/hardware-faceplate/button1.png"
          xlink:href="button1.png"
-         width="28.555439"
-         height="30.975391"
-         preserveAspectRatio="none"
-         id="image5769"
+         y="859.53888"
          x="-584.1438"
-         y="859.53888" />
+         id="image5769"
+         preserveAspectRatio="none"
+         height="30.975391"
+         width="28.555439" />
     </g>
     <text
        xml:space="preserve"
@@ -476,7 +521,8 @@
          y="299.1608">Momentary switch</tspan></text>
     <g
        id="g6108"
-       transform="translate(60.226476,-1.5996244)">
+       transform="translate(116.22648,-6.5996249)"
+       inkscape:label="#flip">
       <g
          transform="translate(-291.18301,-568.45)"
          id="g4309-2-6-3">
@@ -501,39 +547,41 @@
       <image
          sodipodi:absref="/home/joe/Eigene_Dokumente/Programmieren/flightpanel/hardware-faceplate/switch.png"
          xlink:href="switch.png"
-         width="41.596474"
-         height="45.830841"
-         preserveAspectRatio="none"
-         id="image5145"
+         y="303.63083"
          x="-748.15112"
-         y="303.63083" />
+         id="image5145"
+         preserveAspectRatio="none"
+         height="45.830841"
+         width="41.596474" />
     </g>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;line-height:125%;font-family:Din17;-inkscape-font-specification:'Din17 Medium';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="-695.60583"
-       y="293.99829"
+       x="-639.60583"
+       y="288.99829"
        id="text5232-2-8"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan5234-0-8"
-         x="-695.60583"
-         y="293.99829">Flip switch</tspan></text>
+         x="-639.60583"
+         y="288.99829">Flip switch</tspan></text>
     <g
        id="g4556"
-       transform="translate(-16.982737,-25.210003)">
+       transform="translate(-16.982737,-25.210003)"
+       inkscape:label="#mounting">
       <g
          id="g4531">
         <g
            id="g4364-7-6-3-9"
            transform="matrix(1.0059495,0,0,1.0077046,-584.12782,-632.79174)"
            style="fill:#bdc3c7">
-          <circle
-             cy="875.20374"
+          <ellipse
+             cy="875.22211"
              cx="-570.38367"
              id="path4389-7-61-9-3-7-2"
-             style="opacity:1;fill:#bdc3c7;fill-opacity:1;stroke:#000000;stroke-width:0.12415425;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-             r="10.504922" />
+             style="opacity:1;fill:#bdc3c7;fill-opacity:1;stroke:#000000;stroke-width:0.12415424;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+             rx="10.504922"
+             ry="10.486571" />
         </g>
         <g
            id="g4364-7-6-3"
@@ -571,32 +619,21 @@
          id="tspan5234-9"
          x="-1229.4139"
          y="201.81009">3mm drill countersunk</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;line-height:125%;font-family:Din17;-inkscape-font-specification:'Din17 Medium';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="-1210.2897"
-       y="276.73981"
-       id="text5232-28-7"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan5234-9-5"
-         x="-1210.2897"
-         y="276.73981">Retainer block</tspan></text>
     <image
        sodipodi:absref="/home/joe/Eigene_Dokumente/Programmieren/flightpanel/hardware-faceplate/button2.png"
        xlink:href="button2.png"
-       width="46.200008"
-       height="48.000008"
-       preserveAspectRatio="none"
+       y="298.00708"
+       x="-778.05634"
        id="image5831"
-       x="-846.05634"
-       y="346.00708" />
+       preserveAspectRatio="none"
+       height="48.000008"
+       width="46.200008" />
     <rect
-       style="fill:url(#pattern5865);stroke:none"
+       style="fill:url(#pattern5140);stroke:none"
        width="450.00003"
        height="450.00003"
-       x="-1871.3518"
-       y="298.40372"
+       x="-1343.3518"
+       y="1484.4038"
        id="rect5868" />
     <text
        xml:space="preserve"
@@ -726,7 +763,7 @@
        y="0"
        xlink:href="#g4918-8-6"
        id="use5425"
-       transform="translate(258.81636,630.91348)"
+       transform="translate(258.81636,628.91348)"
        width="100%"
        height="100%" />
     <use
@@ -779,7 +816,7 @@
       <use
          height="100%"
          width="100%"
-         transform="translate(-223.6651,272.31905)"
+         transform="translate(-279.66511,277.31905)"
          id="use5592"
          xlink:href="#g5570"
          y="0"
@@ -803,7 +840,7 @@
       <use
          height="100%"
          width="100%"
-         transform="translate(-47.405624,268.01933)"
+         transform="translate(-103.40563,273.01933)"
          id="use5674"
          xlink:href="#g5570"
          y="0"
@@ -826,7 +863,7 @@
       <use
          height="100%"
          width="100%"
-         transform="translate(-223.6651,378.31905)"
+         transform="translate(-279.66511,383.31905)"
          id="use5676"
          xlink:href="#g5570"
          y="0"
@@ -849,7 +886,7 @@
       <use
          height="100%"
          width="100%"
-         transform="translate(-52.405624,379.01933)"
+         transform="translate(-108.40563,384.01933)"
          id="use5678"
          xlink:href="#g5570"
          y="0"
@@ -872,7 +909,7 @@
       <use
          height="100%"
          width="100%"
-         transform="translate(-223.6651,487.31906)"
+         transform="translate(-279.66511,492.31906)"
          id="use5680"
          xlink:href="#g5570"
          y="0"
@@ -895,7 +932,7 @@
       <use
          height="100%"
          width="100%"
-         transform="translate(-48.405624,492.01934)"
+         transform="translate(-104.40563,497.01934)"
          id="use5682"
          xlink:href="#g5570"
          y="0"
@@ -918,7 +955,7 @@
       <use
          height="100%"
          width="100%"
-         transform="translate(-223.6651,595.5314)"
+         transform="translate(-279.66511,600.5314)"
          id="use5740"
          xlink:href="#g5570"
          y="0"
@@ -941,7 +978,7 @@
       <use
          height="100%"
          width="100%"
-         transform="translate(-51.74372,594.81747)"
+         transform="translate(-107.74373,599.81747)"
          id="use5742"
          xlink:href="#g5570"
          y="0"
@@ -964,7 +1001,7 @@
       <use
          height="100%"
          width="100%"
-         transform="translate(-223.6651,707.25428)"
+         transform="translate(-279.66511,712.25428)"
          id="use5744"
          xlink:href="#g5570"
          y="0"
@@ -987,7 +1024,7 @@
       <use
          height="100%"
          width="100%"
-         transform="translate(-223.6651,871.31908)"
+         transform="translate(-279.66511,876.31908)"
          id="use5746"
          xlink:href="#g5570"
          y="0"
@@ -1407,7 +1444,7 @@
        y="0"
        xlink:href="#g6108"
        id="use6114"
-       transform="translate(-264.1662,830.91121)"
+       transform="translate(-320.16621,835.91121)"
        width="100%"
        height="100%" />
     <use
@@ -1415,7 +1452,7 @@
        y="0"
        xlink:href="#g6108"
        id="use6116"
-       transform="translate(-209.33888,830.91121)"
+       transform="translate(-265.33889,835.91121)"
        width="100%"
        height="100%" />
     <use
@@ -1423,7 +1460,7 @@
        y="0"
        xlink:href="#g6108"
        id="use6118"
-       transform="translate(-154.51155,830.91121)"
+       transform="translate(-210.51156,835.91121)"
        width="100%"
        height="100%" />
     <use
@@ -1431,7 +1468,7 @@
        y="0"
        xlink:href="#g6108"
        id="use6120"
-       transform="translate(-99.684233,830.91121)"
+       transform="translate(-155.68424,835.91121)"
        width="100%"
        height="100%" />
     <use
@@ -1439,7 +1476,7 @@
        y="0"
        xlink:href="#g6108"
        id="use6122"
-       transform="translate(-44.856898,830.91121)"
+       transform="translate(-100.8569,835.91121)"
        width="100%"
        height="100%" />
     <text
@@ -1458,7 +1495,7 @@
        y="0"
        xlink:href="#g6108"
        id="use6122-2"
-       transform="translate(159.13011,830.91121)"
+       transform="translate(103.1301,835.91121)"
        width="100%"
        height="100%" />
     <g
@@ -1478,7 +1515,7 @@
       <use
          height="100%"
          width="100%"
-         transform="translate(-48.405624,492.01934)"
+         transform="translate(-104.40563,497.01934)"
          id="use5682-3"
          xlink:href="#g5570"
          y="0"
@@ -1501,7 +1538,7 @@
       <use
          height="100%"
          width="100%"
-         transform="translate(-48.405624,492.01934)"
+         transform="translate(-104.40563,497.01934)"
          id="use5682-3-9"
          xlink:href="#g5570"
          y="0"
