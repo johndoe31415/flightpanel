@@ -41,7 +41,7 @@ Then, simply "make" the ext-st/ and cube/ subdirectories and you should be able
 to build the firmware of flightpanel.
 
 
-Building the flight simulator backend 
+Building the flight simulator backend
 =====================================
 For this, you also need some external dependencies that I cannot include here.
 For FSX, you need the SimConnect SDK. This is included in the Deluxe version of
@@ -55,7 +55,7 @@ latest version (SDK v2).
 
 Links:
 
-	* [Microsoft FSX: SimConnect SDK](http://www.fsdeveloper.com/wiki/index.php?title=SDK_Installation_(FSX))
+	* [Microsoft FSX: SimConnect SDK](http://www.fsdeveloper.com/wiki/index.php?title=SDK_Installation_%28FSX%29)
 	* [X-Plane: XSquawkBox SDK](http://www.xsquawkbox.net/xpsdk/mediawiki/Download)
 
 Place the plugin files in the plugin/sdk-simconnect or plugin/xsquawkbox
