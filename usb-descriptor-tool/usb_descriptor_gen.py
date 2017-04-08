@@ -7,6 +7,9 @@ class USBHidReportDescriptor(object):
 	def __init__(self):
 		self._data = [ ]
 		self._offset = 0
+		self._last_report_count = None
+		self._last_report_size = None
+		self._report_length = 0
 
 	def _append(self, data):
 		if self._offset == 0:
@@ -57,14 +60,20 @@ class USBHidReportDescriptor(object):
 		return self
 
 	def add_report_count(self, report_count):
+		self._last_report_count = report_count
 		self._add_item(Item.ReportCount, report_count)
 		return self
 
 	def add_report_size(self, report_size):
+		if report_size > 1:
+			# Round up everything but buttons
+			report_size = (report_size + 7) // 8 * 8
+		self._last_report_size = report_size
 		self._add_item(Item.ReportSize, report_size)
 		return self
 
 	def add_input(self, input_flags):
+		self._report_length += self._last_report_count * self._last_report_size
 		self._add_item(Item.Input, input_flags)
 		return self
 
@@ -95,6 +104,10 @@ class USBHidReportDescriptor(object):
 		self.add_input(InputOutputFeatureFlags.Variable)
 		return self
 
+	@property
+	def report_length(self):
+		return self._report_length
+
 	def __bytes__(self):
 		return bytes(self._data)
 
@@ -107,49 +120,64 @@ collection = hid_report.add_collection(Collection.Application)
 
 collection.add_usage_page(UsagePage.SimulationControls)
 
-# VHF1, VHF2, NAV1, NAV2
-collection.add_usage(SimulationControls.FlightCommunication)
-collection.add_usage(SimulationControls.FlightCommunication)
-collection.add_usage(SimulationControls.FlightCommunication)
-collection.add_usage(SimulationControls.FlightCommunication)
-collection.add_usage(SimulationControls.FlightCommunication)
-collection.add_usage(SimulationControls.FlightCommunication)
-collection.add_usage(SimulationControls.FlightCommunication)
-collection.add_usage(SimulationControls.FlightCommunication)
-#collection.add_usage_minimum(0)
-#collection.add_usage_maximum(7)
-#collection.add_usage_minimum(SimulationControls.FlightCommunication)
-#collection.add_usage_maximum(SimulationControls.FlightCommunication)
+collection.add_usage(SimulationControls.FlightCommunication)	# VHF1
+collection.add_usage(SimulationControls.FlightCommunication)	# VHF1 STBY
+collection.add_usage(SimulationControls.FlightCommunication)	# VHF2
+collection.add_usage(SimulationControls.FlightCommunication)	# VHF2 STBY
+collection.add_usage(SimulationControls.FlightCommunication)	# NAV1
+collection.add_usage(SimulationControls.FlightCommunication)	# NAV1 STBY
+collection.add_usage(SimulationControls.FlightCommunication)	# NAV2
+collection.add_usage(SimulationControls.FlightCommunication)	# NAV2 STBY
 collection.add_logical_minimum(0)
 collection.add_logical_maximum(2047)
-collection.add_report_size(16)
+collection.add_report_size(10)
 collection.add_report_count(8)
-collection.add_unit_exponent(0)
-collection.add_unit(0)
+#collection.add_unit_exponent(0)
+#collection.add_unit(0)
 collection.add_input(InputOutputFeatureFlags.Variable | InputOutputFeatureFlags.Volatile)
 
-# Transponder
-collection.add_usage(SimulationControls.FlightCommunication)
+collection.add_usage(SimulationControls.FlightCommunication)	# NAV1 OBS
+collection.add_usage(SimulationControls.FlightCommunication)	# NAV2 OBS
+collection.add_usage(SimulationControls.FlightCommunication)	# ADF OBS
+collection.add_usage(SimulationControls.FlightCommunication)	# AP HDG
+collection.add_logical_minimum(0)
+collection.add_logical_maximum(359)
+collection.add_report_size(9)
+collection.add_report_count(4)
+#collection.add_unit_exponent(0)
+#collection.add_unit(0)
+collection.add_input(InputOutputFeatureFlags.Variable | InputOutputFeatureFlags.Volatile)
+
+collection.add_usage(SimulationControls.FlightCommunication)	# QNH
+collection.add_logical_minimum(880)
+collection.add_logical_maximum(1120)
+collection.add_report_size(8)
+collection.add_report_count(1)
+#collection.add_unit_exponent(0)
+#collection.add_unit(0)
+collection.add_input(InputOutputFeatureFlags.Variable | InputOutputFeatureFlags.Volatile)
+
+collection.add_usage(SimulationControls.FlightCommunication)	# XPDR Squawk
 collection.add_logical_minimum(0)
 collection.add_logical_maximum(4095)
 collection.add_report_size(16)
 collection.add_report_count(1)
-collection.add_unit_exponent(0)
-collection.add_unit(0)
+#collection.add_unit_exponent(0)
+#collection.add_unit(0)
 collection.add_input(InputOutputFeatureFlags.Variable | InputOutputFeatureFlags.Volatile)
 
 # Pushbuttons:
-# 4: VHF1, VHF2, NAV1, NAV2
-# 1: Transponder Charly
+# 7: AP Active, NAV; APR, REV, ALT, HDG, IAS
+# 2: Transponder Charly, Ident
 # 1: NAV/GPS
-# 1: AP enabled
-# 5: AP: NAV, HDG, APR, REV, ALT
 # 2: Trottle down/throttle up
-collection.add_pushbuttons(16)
+# 6: Lights
+# 6: Audio VHF1, VHF2, NAV1, NAV2, DME, ADF
+collection.add_pushbuttons(24)
 data = bytes(hid_report)
 print("// " + data.hex())
+print("// Report length %d bits = %d bytes" % (collection.report_length, (collection.report_length + 7) // 8))
 print()
 print("static uint8_t HIDReportDescriptor[] = {")
 DescriptorParser(base_indent = 1).dump(data)
 print("};")
-
