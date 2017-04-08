@@ -108,6 +108,8 @@ for item in svg.search("use"):
 	elif label == "#flip":
 		print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname))
 		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
+		print("var %s_mnt = new Line(\"%s_mnt\", 2).SetColor(engrave_no_color).SetTool(cutter_1_0mm);" % (cname, cname))
+		print("fp.AddElement(%s_mnt, %f, %f);" % (cname, x, y + (13 / 2)))
 	elif label == "#lcd":
 		print("var %s = new RectHole(\"%s\", 29.4, 12.3, 1);" % (cname, cname))
 		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
