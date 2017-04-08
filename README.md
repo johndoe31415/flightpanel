@@ -55,8 +55,8 @@ latest version (SDK v2).
 
 Links:
 
-	* [Microsoft FSX: SimConnect SDK](http://www.fsdeveloper.com/wiki/index.php?title=SDK_Installation_%28FSX%29)
-	* [X-Plane: XSquawkBox SDK](http://www.xsquawkbox.net/xpsdk/mediawiki/Download)
+  * [Microsoft FSX: SimConnect SDK](http://www.fsdeveloper.com/wiki/index.php?title=SDK_Installation_(FSX))
+  * [X-Plane: XSquawkBox SDK](http://www.xsquawkbox.net/xpsdk/mediawiki/Download)
 
 Place the plugin files in the plugin/sdk-simconnect or plugin/xsquawkbox
 subdirectory (depending if you want to build for FSX or for X-Plane). Then,
