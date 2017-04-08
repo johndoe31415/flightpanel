@@ -10,7 +10,6 @@
 #include "simconnect.hpp"
 #define DefaultConnection		SimConnectConnection
 
-
 #elif defined(VARIANT_LINUX)
 #include "emulator.hpp"
 #define DefaultConnection		EmulatedConnection
@@ -18,7 +17,7 @@
 
 int main(void) {
 	FSConnection *fs_connection = new DefaultConnection();
-	if (!fs_connection) {
+	if ((!fs_connection) || (!fs_connection->connected())) {
 		exit(EXIT_FAILURE);
 	}
 	fs_connection->event_loop();

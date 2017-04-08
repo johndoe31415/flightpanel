@@ -9,6 +9,7 @@ class FSConnection {
 		FSConnection() {
 		}
 
+		virtual bool connected(void) const = 0;
 		virtual void event_loop(void) = 0;
 
 		virtual ~FSConnection() {

@@ -15,7 +15,7 @@ GDB := $(PREFIX)gdb
 WINDRES := $(PREFIX)windres
 BUILDDIR := build/windows
 PLATFORM_CFLAGS := -Isdk-simconnect -DVARIANT_WINDOWS
-PLATFORM_LDFLAGS := -Lsdk-simconnect -lSimConnect -Lhidapi/windows/.libs -lhidapi
+PLATFORM_LDFLAGS := -Lsdk-simconnect -lSimConnect -Lbuild/windows -lhidapi
 PLATFORM_OBJS := $(WINDOWS_OBJS)
 else ifeq ($(VARIANT),linux)
 TARGET := $(LINUX_TARGET)
@@ -27,7 +27,7 @@ GDB := $(PREFIX)gdb
 WINDRES := $(PREFIX)windres
 BUILDDIR := build/linux
 PLATFORM_CFLAGS := -DVARIANT_LINUX
-PLATFORM_LDFLAGS := -Lhidapi/libusb/.libs -lhidapi-libusb
+PLATFORM_LDFLAGS := -Lbuild/linux -lhidapi-libusb
 PLATFORM_OBJS := $(LINUX_OBJS)
 else
 $(error The VARIANT environment variable needs to be either "linux" or "windows", not "$(VARIANT)")
@@ -48,7 +48,7 @@ clean:
 	rm -f $(LINUX_TARGET) $(LINUX_OBJS)
 
 test: all
-	LD_LIBRARY_PATH="`pwd`/hidapi/libusb/.libs" ./$(TARGET)
+	LD_LIBRARY_PATH="`pwd`/build/linux" ./$(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS)

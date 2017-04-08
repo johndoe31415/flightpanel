@@ -21,6 +21,9 @@ class EmulatedConnection : public FSConnection {
 
 	public:
 		EmulatedConnection();
+		bool connected(void) const {
+			return true;
+		}
 		void event_loop();
 		~EmulatedConnection();
 };

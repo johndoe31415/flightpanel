@@ -19,6 +19,9 @@ class SimConnectConnection : public FSConnection {
 		HANDLE get_simconnect_handle(void) const {
 			return _simconnect_handle;
 		}
+		bool connected(void) const {
+			return get_simconnect_handle() != NULL;
+		}
 		void set_quit() {
 			_loop_running = false;
 		}
