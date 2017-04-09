@@ -1,0 +1,33 @@
+#!/usr/bin/python3
+#
+#
+import collections
+import mako.lookup
+import re
+
+DataDef = collections.namedtuple("DataDef", [ "def_id", "datatype", "settable", "unit", "description", "symbol" ])
+
+def read_datadefs(filename):
+	datadefs = [ ]
+	split_re = re.compile("\t+")
+	with open(filename) as f:
+		for line in f:
+			line = line.rstrip("\r\n")
+			line = split_re.split(line)
+			if len(line) >= 5:
+				def_id = line[0]
+				datatype = line[1]
+				settable = line[2] == "y"
+				unit = line[3]
+				description = line[4]
+				symbol = def_id.replace("/", "_")
+				datadef = DataDef(def_id = def_id, datatype = datatype, settable = settable, unit = unit, description = description, symbol = symbol)
+				datadefs.append(datadef)
+	return datadefs
+
+datadefs = read_datadefs("used_datadefs.txt")
+lookup = mako.lookup.TemplateLookup([ "." ], strict_undefined = True)
+with open("../xplane-datadefs.cpp", "w") as f:
+	f.write(lookup.get_template("template_datadefs.cpp").render(datadefs = datadefs))
+with open("../xplane-datadefs.hpp", "w") as f:
+	f.write(lookup.get_template("template_datadefs.hpp").render(datadefs = datadefs))

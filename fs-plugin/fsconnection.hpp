@@ -58,6 +58,7 @@ struct ap_data_t {
 	uint32_t altitude_ft;
 	int16_t climbrate_ft_per_min;
 	uint16_t heading;
+	uint16_t speed_kts;
 	bool hdg_hold, nav_hold, alt_hold, rev_hold, apr_hold, ias_hold;
 };
 

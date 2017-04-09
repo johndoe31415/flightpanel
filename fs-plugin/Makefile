@@ -5,7 +5,7 @@ WINDOWS_FSX_OBJS := simconnect.o simconnect-events.o simconnect-datadefs.o fpcon
 LINUX_EMU_TARGET := fpconnect
 LINUX_EMU_OBJS := emulator.o
 LINUX_XPLANE_TARGET := fpconnect.so
-LINUX_XPLANE_OBJS := xsquawkbox.o
+LINUX_XPLANE_OBJS := xsquawkbox.o xplane-datadefs.o
 
 ifeq ($(VARIANT),windows-fsx)
 ifeq ($(wildcard sdk-simconnect),)

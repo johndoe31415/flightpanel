@@ -24,11 +24,11 @@ firmware/cube/stm32f4xx_hal_conf.h
 firmware/cube/usbd_conf.c
 firmware/cube/usbd_conf.h
 
-fsx-plugin/fpconnect
-fsx-plugin/fpconnect.exe
-fsx-plugin/fpconnect.res
-fsx-plugin/fpconnect.so
-fsx-plugin/build
-fsx-plugin/hidapi
-fsx-plugin/sdk-simconnect
+fs-plugin/fpconnect
+fs-plugin/fpconnect.exe
+fs-plugin/fpconnect.res
+fs-plugin/fpconnect.so
+fs-plugin/build
+fs-plugin/hidapi
+fs-plugin/sdk-simconnect
 
