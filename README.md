@@ -58,9 +58,9 @@ Links:
   * [Microsoft FSX: SimConnect SDK](http://www.fsdeveloper.com/wiki/index.php?title=SDK_Installation_(FSX))
   * [X-Plane: XSquawkBox SDK](http://www.xsquawkbox.net/xpsdk/mediawiki/Download)
 
-Place the plugin files in the plugin/sdk-simconnect or plugin/xsquawkbox
-subdirectory (depending if you want to build for FSX or for X-Plane). Then,
-bootstrap hidapi by calling
+Place the plugin SDK files in the fs-plugin/sdk-simconnect or
+fs-plugin/xsquawkbox subdirectory (depending if you want to build for FSX or
+for X-Plane). Then, bootstrap hidapi by calling
 
 ```
 $ ./bootstrap-hidapi.py
@@ -70,9 +70,10 @@ This will compile hidapi for Linux and also cross-compile the library for
 Windows (make sure you have the i686-w64-mingw32-gcc installed for this). It's
 used for USB communication with the flight panel. Then, decide for one variant:
 linux-xplane, linux-emulator and windows-fsx are the possible options.  Set the
-VARIANT environment variable appropriately. Also remember that if you want to
-build the FSX plugin to have the MinGW cross-compiler ready. Then, simply build
-using make:
+VARIANT environment variable appropriately. The linux-emulator mode is for
+debugging purposes (i.e., testing without a real flight sim). Also remember
+that if you want to build the FSX plugin to have the MinGW cross-compiler
+ready. Then, simply build using make:
 
 ```
 $ export VARIANT=linux-xplane
