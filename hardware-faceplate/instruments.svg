@@ -52,9 +52,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.9999999"
-     inkscape:cx="256.75826"
-     inkscape:cy="274.56717"
+     inkscape:zoom="0.99999995"
+     inkscape:cx="259.85172"
+     inkscape:cy="529.00985"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -98,6 +98,22 @@
        position="223.44575,127.63278"
        orientation="0,1"
        id="guide5339" />
+    <sodipodi:guide
+       position="215.50001,332.50001"
+       orientation="0,1"
+       id="guide4431" />
+    <sodipodi:guide
+       position="225.00001,444.00001"
+       orientation="0,1"
+       id="guide4433" />
+    <sodipodi:guide
+       position="451.13416,552.25041"
+       orientation="0,1"
+       id="guide4435" />
+    <sodipodi:guide
+       position="485.07528,634.98191"
+       orientation="1,0"
+       id="guide4437" />
   </sodipodi:namedview>
   <metadata
      id="metadata7">
@@ -722,7 +738,7 @@
        y="0"
        xlink:href="#g5454"
        id="use5538"
-       transform="translate(224.92108,454.42732)"
+       transform="translate(225.62819,446.64915)"
        width="100%"
        height="100%" />
     <use
@@ -730,7 +746,7 @@
        y="0"
        xlink:href="#g5454"
        id="use5540"
-       transform="translate(227.42108,563.16115)"
+       transform="translate(227.42108,555.38298)"
        width="100%"
        height="100%" />
     <g
@@ -1488,40 +1504,40 @@
        y="0"
        xlink:href="#g5454"
        id="use5536-6"
-       transform="translate(319.97552,563.66115)"
+       transform="translate(319.97552,555.88298)"
        width="100%"
        height="100%" />
     <text
        sodipodi:linespacing="125%"
        id="text4415-0-6-6-1-9-6-6-6-3"
-       y="763.10022"
+       y="755.32202"
        x="-536.0965"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:15.00000095px;line-height:125%;font-family:Din17;-inkscape-font-specification:'Din17 Medium';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        xml:space="preserve"><tspan
-         y="763.10022"
+         y="755.32202"
          x="-536.0965"
          id="tspan4417-6-1-1-2-3-2-75-2-5"
          sodipodi:role="line">DME/ADF</tspan></text>
     <text
        sodipodi:linespacing="125%"
        id="text4415-0-6-6-7-6-6-6"
-       y="763.35022"
+       y="755.57202"
        x="-615.47211"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:15.00000095px;line-height:125%;font-family:Din17;-inkscape-font-specification:'Din17 Medium';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        xml:space="preserve"><tspan
-         y="763.35022"
+         y="755.57202"
          x="-615.47211"
          id="tspan4417-6-1-1-0-0-1-2"
          sodipodi:role="line">NAV2</tspan></text>
     <text
        sodipodi:linespacing="125%"
        id="text4415-0-6-6-7-6-9"
-       y="655.48206"
-       x="-615.56464"
+       y="647.70386"
+       x="-614.85754"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:15.00000095px;line-height:125%;font-family:Din17;-inkscape-font-specification:'Din17 Medium';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        xml:space="preserve"><tspan
-         y="655.48206"
-         x="-615.56464"
+         y="647.70386"
+         x="-614.85754"
          id="tspan4417-6-1-1-0-0-12"
          sodipodi:role="line">NAV1</tspan></text>
     <use
@@ -1710,18 +1726,18 @@
        y="0"
        xlink:href="#g5454"
        id="use5536-6-6-7"
-       transform="translate(319.97552,454.92732)"
+       transform="translate(320.68263,447.14915)"
        width="100%"
        height="100%" />
     <text
        sodipodi:linespacing="125%"
        id="text4415-0-6-6-1-9-6-6-6-3-1-9"
-       y="655.98206"
-       x="-520.45862"
+       y="648.20386"
+       x="-519.75153"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:15.00000095px;line-height:125%;font-family:Din17;-inkscape-font-specification:'Din17 Medium';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        xml:space="preserve"><tspan
-         y="655.98206"
-         x="-520.45862"
+         y="648.20386"
+         x="-519.75153"
          id="tspan4417-6-1-1-2-3-2-75-2-5-8-2"
          sodipodi:role="line">OBS</tspan></text>
     <text
@@ -1787,5 +1803,14 @@
        transform="translate(710.73071,988.97721)"
        width="100%"
        height="100%" />
+    <rect
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4429"
+       width="94.752312"
+       height="44.547729"
+       x="-847.75763"
+       y="437.79138"
+       rx="10"
+       ry="10" />
   </g>
 </svg>

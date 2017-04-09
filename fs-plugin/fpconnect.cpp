@@ -6,7 +6,7 @@
 
 #include "fsconnection.hpp"
 
-#if defined(VARIANT_WINDOWS)
+#if defined(VARIANT_WINDOWS_FSX)
 #include "simconnect.hpp"
 #define FlightSimConnection		SimConnectConnection
 
