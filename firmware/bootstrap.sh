@@ -29,7 +29,8 @@ CUBE_ZIPFILE=`readlink -f "${CUBE_ZIPFILE}"`
 
 cd ext-st
 rm -fr "$PERIPH_SUBDIR"
-unzip "$PERIPH_ZIPFILE"
+echo "Unzipping ${PERIPH_ZIPFILE}..."
+unzip "$PERIPH_ZIPFILE" >/dev/null
 if [ ! -d "$PERIPH_SUBDIR" ]; then
 	echo "Extracted the standard peripheral library successfully, but it did not"
 	echo "create the expected subdirectory ${PERIPH_SUBDIR}. Please check the top"
@@ -49,7 +50,8 @@ ln -sf "${PERIPH_SUBDIR}/Libraries/CMSIS/Device/ST/STM32F4xx/Include" include-cm
 
 cd ../cube
 rm -fr "$CUBE_SUBDIR"
-unzip "$CUBE_ZIPFILE"
+echo "Unzipping ${CUBE_ZIPFILE}..."
+unzip "$CUBE_ZIPFILE" >/dev/null
 if [ ! -d "$CUBE_SUBDIR" ]; then
 	echo "Extracted the Cube library successfully, but it did not create the"
 	echo "expected subdirectory ${CUBE_SUBDIR}. Please check the top"
