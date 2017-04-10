@@ -30,7 +30,7 @@ if not os.path.isfile(cache_dir + "compiler.tar.gz"):
 else:
 	print("Not downloading cache, already present.")
 
-compiler_dir = os.getenv("HOME") + "/bin/gcc/arm-cm4-bare/bin"
+compiler_dir = os.getenv("HOME") + "/bin/gcc-cm4/bin"
 if not os.path.isdir(compiler_dir):
 	# Extract compiler from cache
 	subprocess.check_call([ "tar", "-x", "-v", "-z", "-C", os.getenv("HOME"), "-f", cache_dir + "compiler.tar.gz" ])
