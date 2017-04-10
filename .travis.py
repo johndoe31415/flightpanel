@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import sys
 import subprocess
 import os
 import shutil
@@ -39,14 +40,27 @@ else:
 
 os.environ["PATH"] = compiler_dir + ":" + os.getenv("PATH")
 
-with WorkDir("firmware"):
-	shutil.copy(cache_dir + "en.stm32cubef4.zip", "en.stm32cubef4.zip")
-	shutil.copy(cache_dir + "en.stm32f4_dsp_stdperiph_lib.zip", "en.stm32f4_dsp_stdperiph_lib.zip")
-	subprocess.check_call([ "./bootstrap.sh" ])
-	with WorkDir("ext-st"):
-		subprocess.check_call([ "make" ])
-	with WorkDir("cube"):
-		subprocess.check_call([ "make" ])
-	subprocess.check_call([ "make" ])
+def updated_env(update_dict):
+	env = dict(os.environ)
+	env.update(update_dict)
+	return env
 
+if (len(sys.argv) == 1) or ("f" in sys.argv[1]):
+	with WorkDir("firmware"):
+		shutil.copy(cache_dir + "en.stm32cubef4.zip", "en.stm32cubef4.zip")
+		shutil.copy(cache_dir + "en.stm32f4_dsp_stdperiph_lib.zip", "en.stm32f4_dsp_stdperiph_lib.zip")
+		subprocess.check_call([ "./bootstrap.sh" ])
+		with WorkDir("ext-st"):
+			subprocess.check_call([ "make" ])
+		with WorkDir("cube"):
+			subprocess.check_call([ "make" ])
+		subprocess.check_call([ "make" ])
+
+if (len(sys.argv) == 1) or ("p" in sys.argv[1]):
+	with WorkDir("fs-plugin"):
+		subprocess.check_call([ "tar", "xfvz", cache_dir + "sdk-simconnect.tar.gz" ])
+		subprocess.check_call([ "tar", "xfvz", cache_dir + "xsquawkbox.tar.gz" ])
+		subprocess.check_call([ "./bootstrap-hidapi.py" ])
+		for variant in [ "linux-emulator", "linux-xplane", "windows-fsx" ]:
+			subprocess.check_call([ "make", "clean", "all" ], env = updated_env({ "VARIANT": variant }))
 

@@ -1,2 +1,2 @@
-export PATH="${HOME}/bin/gcc/arm-cm4-bare/bin:`pwd`/../tools:${PATH}"
+export PATH="${HOME}/bin/gcc-cm4/bin:`pwd`/../tools:${PATH}"
 export PS1="(cm4) ${PS1}"

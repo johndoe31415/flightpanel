@@ -172,3 +172,7 @@ if (len(build_packages) == 0) or (installer.name in build_packages):
 		"-DSTLINK_UDEV_RULES_DIR:PATH=" + prefix_dir + "/etc/udev.d",
 	], cmake = True)
 
+# In the end, strip every binary and every library
+subprocess.call([ "find", prefix_dir, "-type", "f", "-perm", "700", "-exec", "strip", "{}", "+" ])
+subprocess.call([ "find", prefix_dir, "-type", "f", "-perm", "755", "-exec", "strip", "{}", "+" ])
+
