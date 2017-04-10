@@ -44,6 +44,7 @@ find "$PERIPH_SUBDIR" -type f -exec chmod 644 {} \+
 
 # Do some adaptions and create symlinks
 rm -f "${PERIPH_SUBDIR}/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_fmc.c"
+ln -sf "${PERIPH_SUBDIR}/Project/STM32F4xx_StdPeriph_Templates/SW4STM32/STM32F40_41xxx/STM32F417IGHx_FLASH.ld" stm32f407.ld
 ln -sf "${PERIPH_SUBDIR}/Libraries/STM32F4xx_StdPeriph_Driver/inc" include
 ln -sf "${PERIPH_SUBDIR}/Libraries/CMSIS/Include" include-cmsis
 ln -sf "${PERIPH_SUBDIR}/Libraries/CMSIS/Device/ST/STM32F4xx/Include" include-cmsis-dev
