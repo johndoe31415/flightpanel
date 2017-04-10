@@ -55,7 +55,7 @@ else
 $(error The VARIANT environment variable needs to be either "linux-xplane", "linux-emulator" or "windows-fsx", not "$(VARIANT)")
 endif
 
-SHARED_CFLAGS := $(PLATFORM_CFLAGS) -Ihidapi/hidapi -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -O3 -pthread -g
+SHARED_CFLAGS := $(PLATFORM_CFLAGS) -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -O3 -pthread -g
 CFLAGS := -std=c11 $(SHARED_CFLAGS)
 CXXFLAGS := -std=c++11 $(SHARED_CFLAGS)
 LDFLAGS := $(PLATFORM_LDFLAGS)

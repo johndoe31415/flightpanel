@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <hidapi.h>
+#include <hidapi/hidapi.h>
 #include "fpconnection.hpp"
 
 struct fpconnection_t* flightpanel_init(void) {
