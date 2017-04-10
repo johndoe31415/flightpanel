@@ -16,10 +16,10 @@ class WorkDir(object):
 		os.chdir(self._prevdir)
 
 cache_dir = os.getenv("HOME") + "/.cache/flightpanel/"
-if not os.path.isdir(cache_dir):
+if not os.path.isfile(cache_dir + "compiler.tar.gz"):
 	# Download and extract cache from upstream
-	subprocess.check_call([ "wget", "-O", "cache.tar.gz", os.getenv("CACHE_FILE_UPSTREAM_URI") ])
-	subprocess.check_call([ "tar", "xfvz", "cache.tar.gz" ])
+	subprocess.check_call([ "wget", "-O", "cache.tar", os.getenv("CACHE_FILE_UPSTREAM_URI") ])
+	subprocess.check_call([ "tar", "xfv", "cache.tar" ])
 else:
 	print("Not downloading cache, already present.")
 
