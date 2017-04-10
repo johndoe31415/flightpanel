@@ -15,8 +15,6 @@ class WorkDir(object):
 	def __exit__(self, *args):
 		os.chdir(self._prevdir)
 
-os.chdir(os.getenv("HOME"))
-
 cache_dir = os.getenv("HOME") + "/.cache/flightpanel/"
 if not os.path.isfile(cache_dir + "compiler.tar.gz"):
 	# Download and extract cache from upstream
@@ -28,14 +26,14 @@ if not os.path.isfile(cache_dir + "compiler.tar.gz"):
 		# Catch and exit so that stacktrace does not reveal URI in log
 		print("Call to wget failed.")
 		sys.exit(1)
-	subprocess.check_call([ "tar", "xfv", "cache.tar" ])
+	subprocess.check_call([ "tar", "-x", "-v", "-C", os.getenv("HOME"), "-f", "cache.tar" ])
 else:
 	print("Not downloading cache, already present.")
 
 compiler_dir = os.getenv("HOME") + "/bin/gcc/arm-cm4-bare/bin"
 if not os.path.isdir(compiler_dir):
 	# Extract compiler from cache
-	subprocess.check_call([ "tar", "xfvz", cache_dir + "compiler.tar.gz" ])
+	subprocess.check_call([ "tar", "-x", "-v", "-z", "-C", os.getenv("HOME"), "-f", cache_dir + "compiler.tar.gz" ])
 else:
 	print("Not extracting Cortex-M4 compiler, already present.")
 
