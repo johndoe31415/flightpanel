@@ -9,7 +9,7 @@ if not os.path.isdir("hidapi"):
 os.chdir("hidapi")
 
 for (host_params, src_dir, dst_dir) in [
-		([ ], "libusb/.libs/", "linux" ),
+		#([ ], "libusb/.libs/", "linux" ),
 		([ "--host=i686-w64-mingw32" ], "windows/.libs/", "windows" ),
 	]:
 	print("Building libhid for %s (configure parameters: %s)" % (dst_dir, str(host_params)))
