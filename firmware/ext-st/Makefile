@@ -9,7 +9,7 @@ CFLAGS += -I. -I$(LIBRARY_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/inc/ -I${LI
 LIBRARY_SRCS := $(wildcard $(LIBRARY_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/src/*.c)
 LIBRARY_OBJS := $(LIBRARY_SRCS:.c=.o)
 
-all: stdperiph.a init.o stm32f407.ld
+all: stdperiph.a init.o
 
 clean:
 	rm -f ${LIBRARY_OBJS}
