@@ -1,5 +1,5 @@
-flightpanel
-===========
+# flightpanel
+[![Build Status](https://travis-ci.org/johndoe31415/flightpanel.svg?branch=master)](https://travis-ci.org/johndoe31415/flightpanel)
 
 This project is a flight panel that I'm building. It's a USB device that's
 based on the STM32F4-DISCOVERY board (around $20) which features the
