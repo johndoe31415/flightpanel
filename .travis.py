@@ -18,7 +18,12 @@ class WorkDir(object):
 cache_dir = os.getenv("HOME") + "/.cache/flightpanel/"
 if not os.path.isfile(cache_dir + "compiler.tar.gz"):
 	# Download and extract cache from upstream
-	subprocess.check_call([ "wget", "-O", "cache.tar", os.getenv("CACHE_FILE_UPSTREAM_URI") ])
+	try:
+		subprocess.check_call([ "wget", "-O", "cache.tar", os.getenv("CACHE_FILE_UPSTREAM_URI") ])
+	except subprocess.CalledProcessError:
+		# Catch and exit so that stacktrace does not reveal URI in log
+		print("Call to wget failed.")
+		sys.exit(1)
 	subprocess.check_call([ "tar", "xfv", "cache.tar" ])
 else:
 	print("Not downloading cache, already present.")
