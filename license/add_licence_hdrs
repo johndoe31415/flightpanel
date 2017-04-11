@@ -1,0 +1,112 @@
+#!/usr/bin/python3
+import os
+import shutil
+import sys
+
+def detect_filetype(filename):
+	all_suffixes = {
+		"c":	[ ".c", ".h", ".cpp", ".hpp" ],
+		"bash":	[ ".sh" ],
+		"py":	[ ".py" ],
+	}
+	for (lang, suffixes) in all_suffixes.items():
+		if any(filename.endswith(suffix) for suffix in suffixes):
+			return lang
+
+	# Cannot determine from filename. Try shebang.
+	all_shebangs = {
+		"bash":	[ "#!/bin/sh", "#!/bin/bash" ],
+		"py":	[ "#!usr/bin/python", "#!/usr/bin/python3" ],
+	}
+	try:
+		with open(filename) as f:
+			try:
+				file_shebang = f.readline().strip("\r\n \t")
+			except UnicodeDecodeError:
+				return None
+	except FileNotFoundError:
+		return None
+	for (lang, shebangs) in all_shebangs.items():
+		if any(shebang == file_shebang for shebang in shebangs):
+			return lang
+
+def print_header(filetype, tag, seen_shebang, f):
+	if filetype == "c":
+		print("/**", file = f)
+	if (filetype in [ "bash", "py" ]) and seen_shebang:
+		print("#", file = f)
+	for line in tag:
+		if filetype == "c":
+			print((" *	%s" % (line).rstrip()), file = f)
+		elif filetype in [ "bash", "py" ]:
+			print(("#	%s" % (line)).rstrip(), file = f)
+	if filetype == "c":
+		print("**/", file = f)
+	print(file = f)
+
+def tag_file(filename, filetype, tag):
+	seen_shebang = False
+	header_written = False
+	with open(filename) as f, open("outfile.tmp", "w") as outf:
+		for (lineno, line) in enumerate(f, 1):
+			line = line.rstrip("\r\n")
+			if (lineno == 1) and line.startswith("#!"):
+				# Shebang
+				seen_shebang = True
+				print(line, file = outf)
+			elif (seen_shebang) and (lineno in [ 2, 3 ]) and (line.strip() == "#"):
+				# Just ignore this one
+				pass
+			else:
+				if not header_written:
+					print_header(filetype, tag, seen_shebang, outf)
+					header_written = True
+				print(line, file = outf)
+	shutil.move("outfile.tmp", filename)
+
+exclude_filenames = [
+	"/STM32Cube_FW_F4_V1.15.0/",
+	"/STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/",
+	"/STM32F4-Discovery_FW_V1.1.0/",
+	"/sdk-simconnect/",
+	"/xsquawkbox/",
+	"/fs-plugin/SampleCode/",
+	"/hidapi/",
+	"/.git/",
+]
+
+exclude_content = [
+	"COPYRIGHT STMicroelectronics",
+	"This file is part of ",
+]
+
+with open("license_hdr.txt") as f:
+	tag = f.read().rstrip("\r\n")
+tag = tag.split("\n")
+
+base_dir = "../"
+for (dirname, subdirs, files) in os.walk(base_dir):
+	for filename in files:
+		if dirname.endswith("/"):
+			filename = dirname + filename
+		else:
+			filename = dirname + "/" + filename
+		if any((excludestr in filename for excludestr in exclude_filenames)):
+			continue
+		filetype = detect_filetype(filename)
+		if filetype is None:
+			continue
+
+		# Check if already tagged
+		with open(filename) as f:
+			text = f.read()
+		if any(excludestr in text for excludestr in exclude_content):
+			continue
+
+		if filetype is not None:
+			if (len(sys.argv) != 2) or (sys.argv[1] != "-n"):
+				print("%4s %s" % (filetype, filename))
+				tag_file(filename, filetype, tag)
+			else:
+				print("%4s %s (dry-run)" % (filetype, filename))
+
