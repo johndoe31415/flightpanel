@@ -77,6 +77,7 @@ test: all
 	LD_LIBRARY_PATH="`pwd`/build/linux" ./$(TARGET)
 
 install:
+	mkdir -p $(BUILDDIR) >/dev/null 2>&1
 	cp $(TARGET) $(BUILDDIR)/$(VARIANT)_$(TARGET)
 	$(STRIP) -d $(BUILDDIR)/$(VARIANT)_$(TARGET)
 

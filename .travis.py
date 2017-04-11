@@ -248,7 +248,7 @@ if (len(sys.argv) == 1) or ("u" in sys.argv[1]):
 
 	release = release.json()
 	print("Editing release")
-	result = github.edit_release(release["id"], body = "Automatically build from Travis CI on %s UTC." % (now_utc.strftime("%Y-%m-%d %H:%M:%S")))
+	result = github.edit_release(release["id"], name = "Automatic release build", body = "Automatically built from Travis CI on %s UTC." % (now_utc.strftime("%Y-%m-%d %H:%M:%S")))
 	if result.status_code != 200:
 		raise Exception("Unexpected response when trying to edit_release: %s" % (result))
 
