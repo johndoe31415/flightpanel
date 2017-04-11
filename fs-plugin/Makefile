@@ -1,4 +1,4 @@
-.PHONY: all clean test install-xplane test-xplane
+.PHONY: all clean test install-xplane test-xplane install
 
 WINDOWS_FSX_TARGET := fpconnect.exe
 WINDOWS_FSX_OBJS := simconnect.o simconnect-events.o simconnect-datadefs.o fpconnect.res
@@ -17,6 +17,7 @@ CXX := $(PREFIX)g++
 CC := $(PREFIX)gcc
 AR := $(PREFIX)ar
 GDB := $(PREFIX)gdb
+STRIP := $(PREFIX)strip
 WINDRES := $(PREFIX)windres
 BUILDDIR := build/windows
 PLATFORM_CFLAGS := -Isdk-simconnect -DVARIANT_WINDOWS_FSX
@@ -30,6 +31,7 @@ CXX := $(PREFIX)g++
 CC := $(PREFIX)gcc
 AR := $(PREFIX)ar
 GDB := $(PREFIX)gdb
+STRIP := $(PREFIX)strip
 BUILDDIR := build/linux
 PLATFORM_CFLAGS := -DVARIANT_LINUX_EMU
 PLATFORM_LDFLAGS := -Lbuild/linux -lhidapi-libusb
@@ -45,6 +47,7 @@ CXX := $(PREFIX)g++
 CC := $(PREFIX)gcc
 AR := $(PREFIX)ar
 GDB := $(PREFIX)gdb
+STRIP := $(PREFIX)strip
 BUILDDIR := build/linux
 PLATFORM_CFLAGS := -fPIC -DLIN -DVARIANT_LINUX_XPLANE -Ixsquawkbox/CHeaders/XPLM/
 PLATFORM_LDFLAGS := -Wl,--version-script=fpconnect.ld -shared -Lbuild/linux -lhidapi-libusb
@@ -72,6 +75,10 @@ clean:
 
 test: all
 	LD_LIBRARY_PATH="`pwd`/build/linux" ./$(TARGET)
+
+install:
+	cp $(TARGET) $(BUILDDIR)/$(VARIANT)_$(TARGET)
+	$(STRIP) -d $(BUILDDIR)/$(VARIANT)_$(TARGET)
 
 install-xplane: all
 	mkdir -p $(XPLANE_PATH)/Resources/plugins/flightpanel/64/

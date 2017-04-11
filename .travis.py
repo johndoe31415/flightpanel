@@ -25,6 +25,9 @@ import sys
 import subprocess
 import os
 import shutil
+import datetime
+import requests
+import json
 
 class WorkDir(object):
 	def __init__(self, newdir):
@@ -37,6 +40,96 @@ class WorkDir(object):
 
 	def __exit__(self, *args):
 		os.chdir(self._prevdir)
+
+class GitHubAccessor(object):
+	def __init__(self, owner, repo, token):
+		assert(token is not None)
+		self._owner = owner
+		self._repo = repo
+		self._token = token
+		self._session = requests.Session()
+
+	@property
+	def headers(self):
+		return {
+			"Accept":			"application/vnd.github.v3+json",
+			"Content-Type":		"application/json; charset=utf-8",
+			"Authorization":	"token %s" % (self._token),
+		}
+
+	def _post(self, uri, data):
+		response = self._session.post("https://api.github.com" + uri, headers = self.headers, data = json.dumps(data))
+		return response
+
+	def _patch(self, uri, data):
+		response = self._session.patch("https://api.github.com" + uri, headers = self.headers, data = json.dumps(data))
+		return response
+
+	def _get(self, uri):
+		response = self._session.get("https://api.github.com" + uri, headers = self.headers)
+		return response
+
+	def _delete(self, uri):
+		response = self._session.delete("https://api.github.com" + uri, headers = self.headers)
+		return response
+
+	def create_ref(self, refname, sha):
+		uri = "/repos/%s/%s/git/refs" % (self._owner, self._repo)
+		data = {
+			"ref":	"refs/" + refname,
+			"sha":	sha,
+		}
+		return self._post(uri, data)
+
+	def update_ref(self, refname, sha, force = False):
+		ref = refname
+		uri = "/repos/%s/%s/git/refs/%s" % (self._owner, self._repo, ref)
+		data = {
+			"sha":	sha,
+			"force": force,
+		}
+		return self._patch(uri, data)
+
+	def list_releases(self):
+		uri = "/repos/%s/%s/releases" % (self._owner, self._repo)
+		return self._get(uri)
+
+	def create_release(self, tagname, prerelease = False):
+		uri = "/repos/%s/%s/releases" % (self._owner, self._repo)
+		data = {
+			"tag_name":		tagname,
+			"prerelease":	prerelease,
+		}
+		return self._post(uri, data)
+
+	def edit_release(self, release_id, tag_name = None, name = None, body = None, draft = None, prerelease = None):
+		uri = "/repos/%s/%s/releases/%s" % (self._owner, self._repo, release_id)
+		data = { }
+		if tag_name is not None:
+			data["tag_name"] = tag_name
+		if name is not None:
+			data["name"] = name
+		if body is not None:
+			data["body"] = body
+		if draft is not None:
+			data["draft"] = draft
+		if prerelease is not None:
+			data["prerelease"] = prerelease
+		return self._patch(uri, data)
+
+	def get_release_by_tagname(self, tagname):
+		uri = "/repos/%s/%s/releases/tags/%s" % (self._owner, self._repo, tagname)
+		return self._get(uri)
+
+	def release_upload_asset(self, upload_url, content_type, filename, data):
+		base_url = upload_url.split("{?")[0]
+		headers = self.headers
+		headers["Content-Type"] = content_type
+		response = self._session.post(base_url + "?name=%s" % (filename), headers = headers, data = data)
+		return response
+
+	def release_delete_asset(self, asset_id):
+		return self._delete("/repos/%s/%s/releases/assets/%s" % (self._owner, self._repo, asset_id))
 
 cache_dir = os.getenv("HOME") + "/.cache/flightpanel/"
 if not os.path.isfile(cache_dir + "compiler.tar.gz"):
@@ -68,6 +161,7 @@ def updated_env(update_dict):
 	return env
 
 if (len(sys.argv) == 1) or ("f" in sys.argv[1]):
+	# Build (f)irmware
 	with WorkDir("firmware"):
 		shutil.copy(cache_dir + "en.stm32cubef4.zip", "en.stm32cubef4.zip")
 		shutil.copy(cache_dir + "en.stm32f4_dsp_stdperiph_lib.zip", "en.stm32f4_dsp_stdperiph_lib.zip")
@@ -79,10 +173,95 @@ if (len(sys.argv) == 1) or ("f" in sys.argv[1]):
 		subprocess.check_call([ "make" ])
 
 if (len(sys.argv) == 1) or ("p" in sys.argv[1]):
+	# Build (p)lugin
 	with WorkDir("fs-plugin"):
 		subprocess.check_call([ "tar", "xfvz", cache_dir + "sdk-simconnect.tar.gz" ])
 		subprocess.check_call([ "tar", "xfvz", cache_dir + "xsquawkbox.tar.gz" ])
 		subprocess.check_call([ "./bootstrap-hidapi.py" ])
 		for variant in [ "linux-emulator", "linux-xplane", "windows-fsx" ]:
-			subprocess.check_call([ "make", "clean", "all" ], env = updated_env({ "VARIANT": variant }))
+			subprocess.check_call([ "make", "clean", "all", "install" ], env = updated_env({ "VARIANT": variant }))
 
+asset_filename = "flightpanel-devbuild.tar.gz"
+now_utc = datetime.datetime.utcnow()
+
+if (len(sys.argv) == 1) or ("a" in sys.argv[1]):
+	# Build (a)rtifact
+	dev_dir = "flightpanel-devbuild/"
+	try:
+		shutil.rmtree(dev_dir)
+	except FileNotFoundError:
+		pass
+	os.makedirs(dev_dir)
+	os.makedirs(dev_dir + "firmware")
+	os.makedirs(dev_dir + "windows-fsx")
+	os.makedirs(dev_dir + "linux-xplane/flightpanel/64")
+
+	git_rev = subprocess.check_output([ "git", "rev-parse", "HEAD" ]).decode("utf-8").rstrip("\r\n ")
+	with open(dev_dir + "version_info.txt", "w") as f:
+		print("Automatic build from %s UTC" % (now_utc.strftime("%Y-%m-%d %H:%M:%S")), file = f)
+		print("Built from commit %s" % (git_rev), file = f)
+		print(file = f)
+		print("More information and source code: https://github.com/johndoe31415/flightpanel", file = f)
+
+	shutil.copy("LICENSE", dev_dir)
+	shutil.copy("firmware/flightpanel.bin", dev_dir + "firmware")
+	shutil.copy("fs-plugin/build/windows/libhidapi-0.dll", dev_dir + "windows-fsx")
+	shutil.copy("fs-plugin/build/windows/windows-fsx_fpconnect.exe", dev_dir + "windows-fsx/fpconnect.exe")
+	shutil.copy("fs-plugin/build/linux/linux-xplane_fpconnect.so", dev_dir + "linux-xplane/flightpanel/64/lin.xpl")
+	for (basedir, subdirs, files) in os.walk(dev_dir):
+		for filename in files:
+			filename = basedir + "/" + filename
+			os.chmod(filename, 0o644)
+
+	subprocess.check_call([ "tar", "cfvz", asset_filename, dev_dir ])
+
+if (len(sys.argv) == 1) or ("u" in sys.argv[1]):
+	# (u)pload build artifact to GitHub
+	github = GitHubAccessor(owner = "johndoe31415", repo = "flightpanel", token = os.getenv("GITHUB_ACCESS_TOKEN"))
+	git_rev = subprocess.check_output([ "git", "rev-parse", "HEAD" ]).decode("utf-8").rstrip("\r\n ")
+
+	tagname = "devbuild"
+	asset_content_type = "application/x-gtar-compressed"
+	with open(asset_filename, "rb") as f:
+		asset_data = f.read()
+
+	print("Uploading asset for revision %s (%d bytes)" % (git_rev, len(asset_data)))
+	print("Updating ref of tag %s to %s" % (tagname, git_rev))
+	result = github.update_ref("tags/" + tagname, git_rev)
+	if result.status_code == 422:
+		# No reference yet, create
+		print("Creating reference for '%s'" % (tagname))
+		result = github.create_ref("tags/" + tagname, git_rev)
+		if result.status_code != 201:
+			raise Exception("Unexpected response when trying to create_ref: %s" % (result))
+	elif result.status_code != 200:
+		raise Exception("Unexpected response when trying to update_ref: %s" % (result))
+
+	print("Getting release by tagname %s" % (tagname))
+	release = github.get_release_by_tagname(tagname)
+	if release.status_code == 404:
+		# No release yet, create
+		print("Creating release for '%s'" % (tagname))
+		release = github.create_release(tagname, prerelease = True)
+		if release.status_code != 201:
+			raise Exception("Unexpected response when trying to create_release: %s" % (result))
+
+	release = release.json()
+	print("Editing release")
+	result = github.edit_release(release["id"], body = "Automatically build from Travis CI on %s UTC." % (now_utc.strftime("%Y-%m-%d %H:%M:%S")))
+	if result.status_code != 200:
+		raise Exception("Unexpected response when trying to edit_release: %s" % (result))
+
+	if "assets" in release:
+		for asset in release["assets"]:
+			if asset["name"] == asset_filename:
+				asset_id = asset["id"]
+				print("Deleting asset %s" % (asset_id))
+				result = github.release_delete_asset(asset_id)
+				if result.status_code != 204:
+					raise Exception("Unexpected response when trying to delete_release: %s" % (result))
+
+	print("Uploading asset")
+	result = github.release_upload_asset(release["upload_url"], asset_content_type, asset_filename, asset_data)
+	if result.status_code != 201:
+		raise Exception("Unexpected response when trying to upload_asset: %s" % (result))
