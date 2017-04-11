@@ -37,7 +37,7 @@ def print_header(filetype, tag, seen_shebang, f):
 		print("#", file = f)
 	for line in tag:
 		if filetype == "c":
-			print((" *	%s" % (line).rstrip()), file = f)
+			print((" *	%s" % (line)).rstrip(), file = f)
 		elif filetype in [ "bash", "py" ]:
 			print(("#	%s" % (line)).rstrip(), file = f)
 	if filetype == "c":
