@@ -62,6 +62,8 @@ def tag_file(filename, filetype, tag):
 					print_header(filetype, tag, seen_shebang, outf)
 					header_written = True
 				print(line, file = outf)
+	mode = os.stat(filename).st_mode
+	os.chmod("outfile.tmp", mode)
 	shutil.move("outfile.tmp", filename)
 
 exclude_filenames = [
