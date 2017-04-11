@@ -10,7 +10,7 @@ branches:
 before_install:
     - sudo apt-get install -y libhidapi-dev libhidapi-libusb0
     - sudo apt-get install -y g++-mingw-w64-i686 gcc-mingw-w64-i686
-    - sudo apt-get install -y python3-requests
+    - pip3 install requests
 
 cache:
     directories:
