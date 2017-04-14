@@ -83,7 +83,9 @@ svg = XMLParser().parsefile(sys.argv[1])
 
 width_mm = convert_unit(svg["width"])
 height_mm = convert_unit(svg["height"])
+cradius = 1
 print("var fp = new Frontpanel(\"instruments\", thick_2mm, %f, %f, alu_elox, elox_natural);" % (width_mm, height_mm))
+print("fp.SetCornerRadii(%f, %f, %f, %f);" % (cradius, cradius, cradius, cradius))
 print("AddFrontpanel(fp);")
 print()
 cnames = ComponentNames()
@@ -112,10 +114,9 @@ for item in svg.search("use"):
 	(label, master_matrix, master_refpt) = master_items[xlink]
 
 	item_matrix = get_matrix(item, skip = 1)
-	(x, y) = (master_matrix * item_matrix).apply(master_refpt[0], master_refpt[1])
+	(x_px, y_px) = (master_matrix * item_matrix).apply(master_refpt[0], master_refpt[1])
 
-	(x, y) = (px_to_mm(x), px_to_mm(y))
-	y = width_mm - y
+	(x, y) = (px_to_mm(x_px), height_mm - px_to_mm(y_px))
 	cname = cnames.get(label[1:])
 
 	if label in [ "#gled", "#yled", "#rled" ]:
@@ -130,8 +131,10 @@ for item in svg.search("use"):
 	elif label == "#flip":
 		print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname))
 		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
-		print("var %s_mnt = new Line(\"%s_mnt\", 2).SetColor(engrave_no_color).SetTool(cutter_1_0mm);" % (cname, cname))
-		print("fp.AddElement(%s_mnt, %f, %f);" % (cname, x, y + (13 / 2)))
+		engraving_diameter = 13
+		engraving_length = 2.5
+		print("var %s_mnt = new Line(\"%s_mnt\", %f).SetColor(engrave_no_color).SetTool(cutter_1_0mm);" % (cname, cname, engraving_length))
+		print("fp.AddElement(%s_mnt, %f, %f);" % (cname, x, y + (engraving_diameter / 2)))
 	elif label == "#lcd":
 		print("var %s = new RectHole(\"%s\", 29.4, 12.3, 1);" % (cname, cname))
 		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
@@ -144,14 +147,14 @@ for item in svg.search("use"):
 
 for item in svg.search("text"):
 	text = item.getcdata()
-	(x, y) = get_matrix(item).apply(float(item["x"]), float(item["y"]))
+	(x_px, y_px) = get_matrix(item).apply(float(item["x"]), float(item["y"]))
 	
-	(x, y) = (px_to_mm(x), px_to_mm(y))
-	y = width_mm - y
+	(x, y) = (px_to_mm(x_px), height_mm - px_to_mm(y_px))
 	y += 1.5
 
-	cname = cnames.get("text")
-	print("var %s = new TextEngraving(\"%s\", \"%s\");" % (cname, cname, text))
-	print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
-	print()
+	if (-10 < x < width_mm + 10) and (-10 < y < height_mm + 10):
+		cname = cnames.get("text")
+		print("var %s = new TextEngraving(\"%s\", \"%s\");" % (cname, cname, text))
+		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
+		print()
 

@@ -85,13 +85,6 @@ class TransformationMatrix(object):
 			self.b * x + self.d * y + self.f,
 		)
 
-	def extents(self, bounding_box):
-		(x0, y0) = self.apply(bounding_box[0], bounding_box[1])
-		(x1, y1) = self.apply(bounding_box[2], bounding_box[3])
-		(width, height) = (abs(x1 - x0), abs(y1 - y0))
-		(xoffset, yoffset) = (min(x0, x1), min(y0, y1))
-		return NativeImageExtents(x = xoffset, y = yoffset, width = width, height = height)
-
 	def __eq__(self, other):
 		abs_diff_sum = sum(abs(x - y) for (x, y) in zip(self.aslist, other.aslist))
 		return abs_diff_sum < 1e-6
