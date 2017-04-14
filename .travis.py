@@ -170,7 +170,8 @@ if (len(sys.argv) == 1) or ("f" in sys.argv[1]):
 			subprocess.check_call([ "make" ])
 		with WorkDir("cube"):
 			subprocess.check_call([ "make" ])
-		subprocess.check_call([ "make" ])
+		subprocess.check_call([ "make", "clean", "tests" ])
+		subprocess.check_call([ "make", "clean", "all" ])
 
 if (len(sys.argv) == 1) or ("p" in sys.argv[1]):
 	# Build (p)lugin

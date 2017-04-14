@@ -1,4 +1,4 @@
-.PHONY: all clean readflash program bindump gdb gdbserver console
+.PHONY: all clean readflash program bindump gdb gdbserver console tests
 
 TARGETS := flightpanel flightpanel.bin
 PROCESSOR := STM32F407VGT6
@@ -18,11 +18,15 @@ CFLAGS += -Icube -Icube/include-core -Icube/include-hid -Icube/include-hal -Icub
 LDFLAGS := -Text-st/stm32f407.ld -Wl,--gc-sections
 STATICLIBS := ext-st/init.o ext-st/stdperiph.a cube/cube.a
 
-OBJS := flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o configuration.o ssd1306.o displays.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o instruments.o iomux.o
+OBJS := flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o configuration.o ssd1306.o displays.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o instruments.o iomux.o frequencies.o
 
 all: $(TARGETS)
 
+tests:
+	make -C tests all test
+
 clean:
+	make -C tests clean
 	rm -f $(OBJS) $(TARGETS)
 
 readflash:
