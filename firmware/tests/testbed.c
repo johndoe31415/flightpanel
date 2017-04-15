@@ -7,6 +7,10 @@
 static const char *testname;
 static FILE *debug_log = NULL;
 
+bool test_verbose(void) {
+	return debug_log != NULL;
+}
+
 void debug(const char *msg, ...) {
 	if (debug_log != NULL) {
 		va_list ap;

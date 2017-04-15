@@ -81,23 +81,3 @@ void surface_dump(const struct surface_t *surface) {
 	}
 }
 
-#ifdef TEST_SURFACE
-// gcc -O2 -Wall -std=c11 -DTEST_SURFACE -o testsurface surface.c && ./testsurface
-int main(void) {
-	const struct surface_t surface = {
-		.width = 64,
-		.height = 32,
-		.data = (uint8_t[64 * 32 / 8]) { },
-	};
-	surface.data[0] = 0x01;
-	surface.data[1] = 0x02;
-	surface.data[2] = 0x04;
-	surface.data[3] = 0x08;
-	surface.data[4] = 0x10;
-	surface.data[5] = 0x20;
-	surface.data[6] = 0x40;
-	surface.data[7] = 0x80;
-	surface_dump(&surface);
-	return 0;
-}
-#endif
