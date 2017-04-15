@@ -14,3 +14,7 @@ uint32_t vhf_index_to_frequency_khz(int vhf_index) {
 	debug("%d -> %d %d %d -> %u\n", vhf_index, mhz, khz100, khz_index, result);
 	return result;
 }
+
+uint32_t nav_index_to_frequency_khz(int nav_index) {
+	return NAV_MIN_FREQUENCY_KHZ + (nav_index * 50);
+}

@@ -4,11 +4,14 @@ CFLAGS := -std=c11 -Wall -Wmissing-prototypes -Wstrict-prototypes -Werror=implic
 LDFLAGS :=
 
 TEST_COMMON_OBJS := testbed.o
-TEST_OBJS := test_frequency_conversion
+TEST_OBJS := \
+	test_vhf_frequency_conversion \
+	test_nav_frequency_conversion
 
 all: $(TEST_COMMON_OBJS) $(TEST_OBJS)
 
-test_frequency_conversion: ../frequencies.o
+test_vhf_frequency_conversion: ../frequencies.o
+test_nav_frequency_conversion: ../frequencies.o
 
 test: all
 	for testname in $(TEST_OBJS); do ./$$testname; done

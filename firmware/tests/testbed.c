@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 #include "testbed.h"
 
 static const char *testname;
@@ -18,6 +19,9 @@ void debug(const char *msg, ...) {
 void test_start(int argc, char **argv) {
 	const char *new_testname = argv[0];
 	fprintf(stderr, "Testing: %s\n", new_testname);
+	if ((argc == 2) && (!strcmp(argv[1], "-v"))) {
+		debug_log = stderr;
+	}
 	testname = new_testname;
 }
 
