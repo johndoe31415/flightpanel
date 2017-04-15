@@ -131,6 +131,11 @@ class GitHubAccessor(object):
 	def release_delete_asset(self, asset_id):
 		return self._delete("/repos/%s/%s/releases/assets/%s" % (self._owner, self._repo, asset_id))
 
+def updated_env(update_dict):
+	env = dict(os.environ)
+	env.update(update_dict)
+	return env
+
 cache_dir = os.getenv("HOME") + "/.cache/flightpanel/"
 if not os.path.isfile(cache_dir + "compiler.tar.gz"):
 	# Download and extract cache from upstream
@@ -155,11 +160,6 @@ else:
 
 os.environ["PATH"] = compiler_dir + ":" + os.getenv("PATH")
 
-def updated_env(update_dict):
-	env = dict(os.environ)
-	env.update(update_dict)
-	return env
-
 if (len(sys.argv) == 1) or ("f" in sys.argv[1]):
 	# Build (f)irmware
 	with WorkDir("firmware"):
@@ -167,11 +167,11 @@ if (len(sys.argv) == 1) or ("f" in sys.argv[1]):
 		shutil.copy(cache_dir + "en.stm32f4_dsp_stdperiph_lib.zip", "en.stm32f4_dsp_stdperiph_lib.zip")
 		subprocess.check_call([ "./bootstrap.sh" ])
 		with WorkDir("ext-st"):
-			subprocess.check_call([ "make" ])
+			subprocess.check_call([ "make" ], env = updated_env({ "CFLAGS": "-DRELEASE_BUILD" }))
 		with WorkDir("cube"):
-			subprocess.check_call([ "make" ])
+			subprocess.check_call([ "make" ], env = updated_env({ "CFLAGS": "-DRELEASE_BUILD" }))
 		subprocess.check_call([ "make", "clean", "tests" ])
-		subprocess.check_call([ "make", "clean", "all" ])
+		subprocess.check_call([ "make", "clean", "all" ], env = updated_env({ "CFLAGS": "-DRELEASE_BUILD" }))
 
 if (len(sys.argv) == 1) or ("p" in sys.argv[1]):
 	# Build (p)lugin
@@ -199,10 +199,15 @@ if (len(sys.argv) == 1) or ("a" in sys.argv[1]):
 
 	git_rev = subprocess.check_output([ "git", "rev-parse", "HEAD" ]).decode("utf-8").rstrip("\r\n ")
 	with open(dev_dir + "version_info.txt", "w") as f:
-		print("Automatic build from %s UTC" % (now_utc.strftime("%Y-%m-%d %H:%M:%S")), file = f)
+		print("Automatic development build", file = f)
+		print("===========================", file = f)
+		print(file = f)
+		print("Created at: %s UTC" % (now_utc.strftime("%A, %Y-%m-%d %H:%M:%S")), file = f)
 		print("Built from commit %s" % (git_rev), file = f)
 		print(file = f)
-		print("More information and source code: https://github.com/johndoe31415/flightpanel", file = f)
+		print("flightpanel is open source software and licensed under the GNU GPL-3", file = f)
+		print("More information and full source code:", file = f)
+		print("    https://github.com/johndoe31415/flightpanel", file = f)
 
 	shutil.copy("LICENSE", dev_dir)
 	shutil.copy("firmware/flightpanel.bin", dev_dir + "firmware")
@@ -249,7 +254,7 @@ if (len(sys.argv) == 1) or ("u" in sys.argv[1]):
 
 	release = release.json()
 	print("Editing release")
-	result = github.edit_release(release["id"], name = "Automatic release build", body = "Automatically built from Travis CI on %s UTC." % (now_utc.strftime("%Y-%m-%d %H:%M:%S")))
+	result = github.edit_release(release["id"], name = "Automatic release build", body = "Automatically built by Travis CI on %s UTC." % (now_utc.strftime("%A, %Y-%m-%d %H:%M:%S")))
 	if result.status_code != 200:
 		raise Exception("Unexpected response when trying to edit_release: %s" % (result))
 

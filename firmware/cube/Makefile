@@ -2,7 +2,7 @@
 
 LIBRARY_PATH := STM32Cube_FW_F4_V1.15.0
 PREFIX := arm-none-eabi-
-CFLAGS := -std=c11 -Wall -Os -mcpu=cortex-m4 -g
+CFLAGS := $(CFLAGS) -std=c11 -Wall -Os -mcpu=cortex-m4 -g
 CFLAGS += -include ../library_config.h -ffunction-sections -fdata-sections
 CFLAGS += -I. -I.. -I$(LIBRARY_PATH)/Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I$(LIBRARY_PATH)/Drivers/STM32F4xx_HAL_Driver/Inc -I$(LIBRARY_PATH)/Drivers/CMSIS/Device/ST/STM32F4xx/Include
 CFLAGS += -I../ext-st/include -I../ext-st/include-cmsis -I../ext-st/include-cmsis-dev
