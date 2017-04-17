@@ -22,7 +22,6 @@ void debug(const char *msg, ...) {
 
 void test_start(int argc, char **argv) {
 	const char *new_testname = argv[0];
-	fprintf(stderr, "Testing: %s\n", new_testname);
 	if ((argc == 2) && (!strcmp(argv[1], "-v"))) {
 		debug_log = stderr;
 	}
@@ -34,7 +33,24 @@ void test_success(void) {
 	exit(EXIT_SUCCESS);
 }
 
-void test_fail(const char *reason) {
-	fprintf(stderr, "FAIL: %s (%s)\n", testname, reason);
+void test_fail_ext(const char *file, int line, const char *reason, failfnc_t failfnc, const void *lhs, const void *rhs) {
+	fprintf(stderr, "FAILED %s:%d: %s (%s)\n", file, line, testname, reason);
+	if (failfnc != NULL) {
+		char *extended_reason = failfnc(lhs, rhs);
+		fprintf(stderr, "   %s\n", extended_reason);
+		free(extended_reason);
+	}
 	exit(EXIT_FAILURE);
+}
+
+void test_fail(const char *file, int line, const char *reason) {
+	test_fail_ext(file, line, reason, NULL, NULL, NULL);
+}
+
+char *testbed_failfnc_str(const void *vlhs, const void *vrhs) {
+	const char *lhs = (const char*)vlhs;
+	const char *rhs = (const char*)vrhs;
+	char *result = calloc(1, strlen(lhs) + strlen(rhs) + 32);
+	sprintf(result, "LHS = \"%s\", RHS = \"%s\"", lhs, rhs);
+	return result;
 }

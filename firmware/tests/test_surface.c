@@ -1,9 +1,7 @@
+#include <stdlib.h>
 #include "testbed.h"
+#include "helper_surface.h"
 #include <surface.h>
-
-struct pixel {
-	int x, y;
-};
 
 static void test_surface_read(void) {
 	const struct surface_t surface = {
@@ -25,42 +23,12 @@ static void test_surface_read(void) {
 		surface_dump(&surface);
 	}
 
-	const int max_pixel_cnt = 64;
-	struct pixel pixels[max_pixel_cnt];
-	int pixel_cnt = 0;
-	for (int y = 0; y < surface.height; y++) {
-		for (int x = 0; x < surface.width; x++) {
-			if (surface_getpixel(&surface, x, y) && (pixel_cnt < max_pixel_cnt)) {
-				pixels[pixel_cnt].x = x;
-				pixels[pixel_cnt].y = y;
-				pixel_cnt++;
-			}
-		}
-	}
 #ifdef SURFACE_ACCESSOR_LR_TB_COLBYTES
-	debug("%u pixels set:\n", pixel_cnt);
-	for (int i = 0; i < pixel_cnt; i++) {
-		debug("   %d: %3u, %3u\n", i, pixels[i].x, pixels[i].y);
-	}
-	test_fail_unless(pixel_cnt == 9);
-	test_fail_unless(pixels[0].x == 0);
-	test_fail_unless(pixels[0].y == 0);
-	test_fail_unless(pixels[1].x == 1);
-	test_fail_unless(pixels[1].y == 1);
-	test_fail_unless(pixels[2].x == 2);
-	test_fail_unless(pixels[2].y == 2);
-	test_fail_unless(pixels[3].x == 3);
-	test_fail_unless(pixels[3].y == 3);
-	test_fail_unless(pixels[4].x == 4);
-	test_fail_unless(pixels[4].y == 4);
-	test_fail_unless(pixels[5].x == 5);
-	test_fail_unless(pixels[5].y == 5);
-	test_fail_unless(pixels[6].x == 6);
-	test_fail_unless(pixels[6].y == 6);
-	test_fail_unless(pixels[7].x == 7);
-	test_fail_unless(pixels[7].y == 7);
-	test_fail_unless(pixels[8].x == 0);
-	test_fail_unless(pixels[8].y == 8);
+	struct pixel_list_t *pixel_list = enumerate_pixels(&surface);
+	char *pixel_string = pixel_list_to_str(pixel_list);
+	test_assert_str_eq(pixel_string, "0,0:1,1:2,2:3,3:4,4:5,5:6,6:7,7:0,8");
+	free(pixel_string);
+	free_pixel_list(pixel_list);
 #else
 	test_fail("No test define for this particular surface accessor function.");
 #endif

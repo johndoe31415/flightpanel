@@ -54,28 +54,3 @@ void blit_string_to_cursor(const struct font_t *font, const char *string, const 
 	}
 }
 
-#ifdef TEST_FONT
-// gcc -O2 -Wall -std=c11 -DTEST_FONT -o testfont font.c vcr-osd-mono-20.c surface.c && ./testfont
-
-#include "vcr-osd-mono-20.h"
-#include "surface.h"
-
-#define TEST_WIDTH		64
-#define TEST_HEIGHT		32
-
-static uint8_t surface_data[TEST_WIDTH * TEST_HEIGHT / 8];
-static const struct surface_t surface = {
-	.width = TEST_WIDTH,
-	.height = TEST_HEIGHT,
-	.data = surface_data,
-};
-
-int main(void) {
-	surface_clear(&surface);
-	struct cursor_t cursor = { 0, 20 };
-
-	blit_string_to_cursor(&font_vcr_osd_mono_20, "123.456", &surface, &cursor);
-	surface_dump(&surface);
-	return 0;
-}
-#endif

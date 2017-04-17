@@ -7,16 +7,18 @@ TEST_COMMON_OBJS := testbed.o
 TEST_OBJS := \
 	test_vhf_frequency_conversion \
 	test_nav_frequency_conversion \
-	test_surface
+	test_surface \
+	test_font
 
 all: $(TEST_COMMON_OBJS) $(TEST_OBJS)
 
 test_vhf_frequency_conversion: ../frequencies.o
 test_nav_frequency_conversion: ../frequencies.o
-test_surface: ../surface.o
+test_surface: ../surface.o helper_surface.o
+test_font: ../surface.o ../font.o ../vcr-osd-mono-20.o helper_surface.o
 
 test: all
-	for testname in $(TEST_OBJS); do ./$$testname; done
+	for testname in $(TEST_OBJS); do ./$$testname || exit 1; done
 
 clean:
 	rm -f $(TEST_COMMON_OBJS) $(TEST_OBJS) ../*.o
