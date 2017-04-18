@@ -30,7 +30,7 @@
 struct rotary_encoder_t {
 	/* These are configuration variables */
 	uint16_t value;
-	uint16_t max_value;
+	uint16_t detent_cnt;
 	bool wrap_around;
 
 	/* These are internal */

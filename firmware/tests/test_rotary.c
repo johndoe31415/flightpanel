@@ -16,38 +16,40 @@ static struct rotary_input_t inputs[] = {
 
 static void test_rotary_normal(void) {
 	struct rotary_encoder_t rotary = {
-		.max_value = 50,
+		.detent_cnt = 26,
 		.wrap_around = false,
 	};
 
-	int q = 0;
-	test_assert_int_eq(rotary.value, 0);
-	for (; q < rotary.max_value * 3; q++) {
-		const struct rotary_input_t *input = &inputs[q % 4];
-		for (int x = 0; x < 20; x++) {
-			rotary_encoder_update(&rotary, input->in1, input->in2);
+	for (int repeats = 1; repeats < 20; repeats += 1) {
+		int q = 0;
+		test_assert_int_eq(rotary.value, 0);
+		for (; q <= rotary.detent_cnt * 5; q++) {
+			const struct rotary_input_t *input = &inputs[q % 4];
+			for (int x = 0; x < repeats; x++) {
+				rotary_encoder_update(&rotary, input->in1, input->in2);
+			}
 		}
-	}
-	test_assert_int_eq(rotary.value, rotary.max_value);
+		test_assert_int_eq(rotary.value, rotary.detent_cnt - 1);
 
-	for (; q >= 0; q--) {
-		const struct rotary_input_t *input = &inputs[q % 4];
-		for (int x = 0; x < 20; x++) {
-			rotary_encoder_update(&rotary, input->in1, input->in2);
+		for (; q >= 0; q--) {
+			const struct rotary_input_t *input = &inputs[q % 4];
+			for (int x = 0; x < repeats; x++) {
+				rotary_encoder_update(&rotary, input->in1, input->in2);
+			}
 		}
+		test_assert_int_eq(rotary.value, 0);
 	}
-	test_assert_int_eq(rotary.value, 0);
 }
 
 static void test_rotary_glitch(void) {
 	struct rotary_encoder_t rotary = {
-		.max_value = 50,
+		.detent_cnt = 51,
 		.wrap_around = false,
 	};
 
 	int q = 0;
 	test_assert_int_eq(rotary.value, 0);
-	for (; q < rotary.max_value * 3; q++) {
+	for (; q < rotary.detent_cnt * 5; q++) {
 		const struct rotary_input_t *input = &inputs[q % 4];
 		bool changed_value = rotary_encoder_update(&rotary, input->in1, input->in2);
 		int expect_value = rotary.value;
@@ -66,23 +68,31 @@ static void test_rotary_glitch(void) {
 			test_assert_int_eq(rotary.value, expect_value);
 		}
 	}
-	test_assert_int_eq(rotary.value, rotary.max_value);
+	test_assert_int_eq(rotary.value, rotary.detent_cnt - 1);
 }
 
 static void test_rotary_wrap(void) {
 	const int expect_increment = 4;
 	struct rotary_encoder_t rotary = {
-		.max_value = 13,
+		.detent_cnt = 13,
 		.wrap_around = true,
 	};
 	int q = 0;
 	int expect_value = 0;
 	test_assert_int_eq(rotary.value, expect_value);
-	for (; q < rotary.max_value * 10; q++) {
+	for (; q <= rotary.detent_cnt * 10; q++) {
 		const struct rotary_input_t *input = &inputs[q % 4];
 		bool changed_value = rotary_encoder_update(&rotary, input->in1, input->in2);
 		if (changed_value) {
-			expect_value = (expect_value + expect_increment) % rotary.max_value;
+			expect_value = (expect_value + expect_increment) % rotary.detent_cnt;
+			test_assert_int_eq(rotary.value, expect_value);
+		}
+	}
+	for (; q >= 0; q--) {
+		const struct rotary_input_t *input = &inputs[q % 4];
+		bool changed_value = rotary_encoder_update(&rotary, input->in1, input->in2);
+		if (changed_value) {
+			expect_value = (expect_value - expect_increment + rotary.detent_cnt) % rotary.detent_cnt;
 			test_assert_int_eq(rotary.value, expect_value);
 		}
 	}

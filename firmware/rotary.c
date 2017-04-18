@@ -43,29 +43,47 @@ bool rotary_encoder_update(struct rotary_encoder_t *rotary, bool value1, bool va
 			if (!rotary->direction) {
 				/* Decrement */
 				if (rotary->value >= change_value) {
+					const uint16_t new_value = rotary->value - change_value;
+					debug("Rotary dec %d - %d [detent %d] -> %d\n", rotary->value, change_value, rotary->detent_cnt, new_value);
+					rotary->value = new_value;
 					changed = true;
-					rotary->value -= change_value;
 				} else {
 					if (rotary->wrap_around) {
-						rotary->value = rotary->max_value + 1 - change_value;
+						const uint16_t new_value = rotary->detent_cnt + rotary->value - change_value;
+						debug("Rotary dec wrap %d - %d [detent %d] -> %d\n", rotary->value, change_value, rotary->detent_cnt, new_value);
+						rotary->value = new_value;
 						changed = true;
 					} else if (rotary->value != 0) {
-						rotary->value = 0;
+						const uint16_t new_value = 0;
+						debug("Rotary dec clamp %d - %d [detent %d] -> %d\n", rotary->value, change_value, rotary->detent_cnt, new_value);
+						rotary->value = new_value;
 						changed = true;
+					} else {
+						debug("Rotary dec stalled %d - %d [detent %d]\n", rotary->value, change_value, rotary->detent_cnt);
+						rotary->time_since_last_change = 0;
 					}
 				}
 			} else {
 				/* Increment */
-				if (rotary->value <= (rotary->max_value - change_value)) {
+				if (rotary->value < (rotary->detent_cnt - change_value)) {
+					const uint16_t new_value = rotary->value + change_value;
+					debug("Rotary inc %d + %d [detent %d] -> %d\n", rotary->value, change_value, rotary->detent_cnt, new_value);
+					rotary->value = new_value;
 					changed = true;
-					rotary->value += change_value;
 				} else {
 					if (rotary->wrap_around) {
-						rotary->value = change_value - 1;
+						const uint16_t new_value = rotary->value + change_value - rotary->detent_cnt;
+						debug("Rotary inc wrap %d + %d [detent %d] -> %d\n", rotary->value, change_value, rotary->detent_cnt, new_value);
+						rotary->value = new_value;
 						changed = true;
-					} else if (rotary->value != rotary->max_value) {
-						rotary->value = rotary->max_value;
+					} else if (rotary->value != rotary->detent_cnt - 1) {
+						const uint16_t new_value = rotary->detent_cnt - 1;
+						debug("Rotary inc clamp %d + %d [detent %d] -> %d\n", rotary->value, change_value, rotary->detent_cnt, new_value);
+						rotary->value = new_value;
 						changed = true;
+					} else {
+						debug("Rotary inc stalled %d + %d [detent %d]\n", rotary->value, change_value, rotary->detent_cnt);
+						rotary->time_since_last_change = 0;
 					}
 				}
 			}
