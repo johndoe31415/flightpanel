@@ -69,10 +69,30 @@ static void test_rotary_glitch(void) {
 	test_assert_int_eq(rotary.value, rotary.max_value);
 }
 
+static void test_rotary_wrap(void) {
+	const int expect_increment = 4;
+	struct rotary_encoder_t rotary = {
+		.max_value = 13,
+		.wrap_around = true,
+	};
+	int q = 0;
+	int expect_value = 0;
+	test_assert_int_eq(rotary.value, expect_value);
+	for (; q < rotary.max_value * 10; q++) {
+		const struct rotary_input_t *input = &inputs[q % 4];
+		bool changed_value = rotary_encoder_update(&rotary, input->in1, input->in2);
+		if (changed_value) {
+			expect_value = (expect_value + expect_increment) % rotary.max_value;
+			test_assert_int_eq(rotary.value, expect_value);
+		}
+	}
+}
+
 int main(int argc, char **argv) {
 	test_start(argc, argv);
 	test_rotary_normal();
 	test_rotary_glitch();
+	test_rotary_wrap();
 	test_success();
 	return 0;
 }
