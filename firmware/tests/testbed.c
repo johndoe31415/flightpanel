@@ -144,7 +144,6 @@ void test_success(void) {
 
 void test_fail_ext(const char *file, int line, const char *reason, failfnc_t failfnc, const void *lhs, const void *rhs) {
 	fprintf(summary_file, "- FAILED %s:%d: %s (%s)\n", file, line, testname, reason);
-	fprintf(summary_file, "* %s 0\n", testname);
 	fprintf(stderr, "FAILED %s:%d: %s (%.80s)\n", file, line, testname, reason);
 	if (failfnc != NULL) {
 		char *extended_reason = failfnc(lhs, rhs);
@@ -152,12 +151,21 @@ void test_fail_ext(const char *file, int line, const char *reason, failfnc_t fai
 		fprintf(stderr, "   %.120s\n", extended_reason);
 		free(extended_reason);
 	}
+	fprintf(summary_file, "* %s 0\n", testname);
 	fclose(summary_file);
 	exit(EXIT_FAILURE);
 }
 
 void test_fail(const char *file, int line, const char *reason) {
 	test_fail_ext(file, line, reason, NULL, NULL, NULL);
+}
+
+char *testbed_failfnc_int(const void *vlhs, const void *vrhs) {
+	const int lhs = *((const int*)vlhs);
+	const int rhs = *((const int*)vrhs);
+	char *result = calloc(1, 64);
+	sprintf(result, "LHS = %d, RHS = %d", lhs, rhs);
+	return result;
 }
 
 char *testbed_failfnc_str(const void *vlhs, const void *vrhs) {

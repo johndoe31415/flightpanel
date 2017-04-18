@@ -49,6 +49,9 @@ bool rotary_encoder_update(struct rotary_encoder_t *rotary, bool value1, bool va
 					if (rotary->wrap_around) {
 						rotary->value = rotary->max_value + 1 - change_value;
 						changed = true;
+					} else if (rotary->value != 0) {
+						rotary->value = 0;
+						changed = true;
 					}
 				}
 			} else {
@@ -59,6 +62,9 @@ bool rotary_encoder_update(struct rotary_encoder_t *rotary, bool value1, bool va
 				} else {
 					if (rotary->wrap_around) {
 						rotary->value = change_value - 1;
+						changed = true;
+					} else if (rotary->value != rotary->max_value) {
+						rotary->value = rotary->max_value;
 						changed = true;
 					}
 				}
@@ -72,7 +78,7 @@ bool rotary_encoder_update(struct rotary_encoder_t *rotary, bool value1, bool va
 	}
 
 	if (changed) {
-		//printf("%d\n", rotary->time_since_last_change);
+		//debug("Change t = %d\n", rotary->time_since_last_change);
 		rotary->time_since_last_change = 0;
 	} else {
 		if (rotary->time_since_last_change != 0xffff) {

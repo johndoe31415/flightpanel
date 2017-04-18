@@ -8,7 +8,8 @@ TEST_OBJS := \
 	test_vhf_frequency_conversion \
 	test_nav_frequency_conversion \
 	test_surface \
-	test_font
+	test_font \
+	test_rotary
 
 all: $(TEST_COMMON_OBJS) $(TEST_OBJS)
 
@@ -16,6 +17,7 @@ test_vhf_frequency_conversion: $(TEST_COMMON_OBJS) ../frequencies.o
 test_nav_frequency_conversion: $(TEST_COMMON_OBJS) ../frequencies.o
 test_surface: $(TEST_COMMON_OBJS) ../surface.o helper_surface.o
 test_font: $(TEST_COMMON_OBJS) ../surface.o ../font.o ../vcr-osd-mono-20.o helper_surface.o
+test_rotary: $(TEST_COMMON_OBJS) ../rotary.o
 
 test: all
 	rm -f tests.log
@@ -24,6 +26,8 @@ test: all
 
 clean:
 	rm -f $(TEST_COMMON_OBJS) $(TEST_OBJS) ../*.o
+	rm -f helper_surface.o
+	rm -f tests.log
 
 .c:
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $+
