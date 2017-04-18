@@ -59,8 +59,8 @@ struct flight_data {
 
 static struct rotary_encoder_t rotary1 = {
 	.value = 0,
-//	.max_value = (19 * 40) - 1,		// VHF
-	.max_value = (10 * 20) - 1,		// NAV
+//	.detent_cnt = (19 * 40),		// VHF
+	.detent_cnt = (10 * 20),		// NAV
 	.wrap_around = true
 };
 
