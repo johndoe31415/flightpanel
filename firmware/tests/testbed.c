@@ -142,9 +142,9 @@ void test_success(void) {
 	exit(EXIT_SUCCESS);
 }
 
-void test_fail_ext(const char *file, int line, const char *reason, failfnc_t failfnc, const void *lhs, const void *rhs) {
-	fprintf(summary_file, "- FAILED %s:%d: %s (%s)\n", file, line, testname, reason);
-	fprintf(stderr, "FAILED %s:%d: %s (%.80s)\n", file, line, testname, reason);
+void test_fail_ext(const char *file, int line, const char *fncname, const char *reason, failfnc_t failfnc, const void *lhs, const void *rhs) {
+	fprintf(summary_file, "- FAILED %s:%d %s: %s (%s)\n", file, line, fncname, testname, reason);
+	fprintf(stderr, "FAILED %s:%d %s: %s (%.80s)\n", file, line, fncname, testname, reason);
 	if (failfnc != NULL) {
 		char *extended_reason = failfnc(lhs, rhs);
 		fprintf(summary_file, "- %s\n", extended_reason);
@@ -156,8 +156,8 @@ void test_fail_ext(const char *file, int line, const char *reason, failfnc_t fai
 	exit(EXIT_FAILURE);
 }
 
-void test_fail(const char *file, int line, const char *reason) {
-	test_fail_ext(file, line, reason, NULL, NULL, NULL);
+void test_fail(const char *file, int line, const char *fncname, const char *reason) {
+	test_fail_ext(file, line, fncname, reason, NULL, NULL, NULL);
 }
 
 char *testbed_failfnc_int(const void *vlhs, const void *vrhs) {
