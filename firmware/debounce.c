@@ -24,5 +24,39 @@
 #include "debounce.h"
 
 enum btnaction_t button_debounce(struct button_t *button, bool pressed) {
-	return BUTTON_NOACTION;
+	enum btnaction_t action = BUTTON_NOACTION;
+
+	if (pressed) {
+		if (button->counter < 0xffff) {
+			bool do_fire = false;
+			if (!button->fired) {
+				button->counter++;
+				if (button->long_threshold && (button->counter >= button->long_threshold)) {
+					button->armed = BUTTON_LONG_PRESS;
+					do_fire = true;
+				} else if (button->counter >= button->threshold) {
+					button->armed = BUTTON_PRESS;
+					do_fire = (button->long_threshold == 0);
+				}
+
+				if (do_fire) {
+					action = button->armed;
+					button->fired = true;
+					button->armed = BUTTON_NOACTION;
+				}
+			}
+		}
+
+	} else {
+		action = button->armed;
+		button->armed = BUTTON_NOACTION;
+		if (button->counter) {
+			button->counter--;
+			if (button->counter == 0) {
+				button->fired = false;
+			}
+		}
+	}
+
+	return action;
 }

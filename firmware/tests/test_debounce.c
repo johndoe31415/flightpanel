@@ -14,8 +14,10 @@ static void test_short_action(void) {
 	struct button_t button = {
 		.threshold = 20,
 	};
-	for (int i = 1; i <= 100; i++) {
-		test_assert_int_eq(button_debounce(&button, true), (i == 20) ? BUTTON_PRESS : BUTTON_NOACTION);
+	for (int j = 0; j < 10; j++) {
+		for (int i = 1; i <= 100; i++) {
+			test_assert_int_eq(button_debounce(&button, i <= 50), (i == 20) ? BUTTON_PRESS : BUTTON_NOACTION);
+		}
 	}
 }
 

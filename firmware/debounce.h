@@ -16,9 +16,10 @@ struct button_t {
 	uint16_t long_threshold;
 
 	/* These are for internal use */
-	uint16_t current_threshold;
+	uint16_t counter;
 	bool last_state;
 	bool fired;
+	enum btnaction_t armed;
 };
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
