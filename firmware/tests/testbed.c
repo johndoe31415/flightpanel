@@ -5,20 +5,12 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <libgen.h>
+#include <errno.h>
 #include "testbed.h"
 
 static const char *testname;
 static FILE *debug_log = NULL;
-
-static void write_summary_file(bool success) {
-	FILE *f = fopen("tests.log", "a");
-	if (!f) {
-		fprintf(stderr, "Failed to write summary file.\n");
-		exit(EXIT_FAILURE);
-	}
-	fprintf(f, "%s %d\n", testname, success ? 1 : 0);
-	fclose(f);
-}
+static FILE *summary_file = NULL;
 
 bool test_verbose(void) {
 	return debug_log != NULL;
@@ -29,6 +21,13 @@ void debug(const char *msg, ...) {
 		va_list ap;
 		va_start(ap, msg);
 		vfprintf(debug_log, msg, ap);
+		va_end(ap);
+	}
+	if (summary_file != NULL) {
+		fprintf(summary_file, "# ");
+		va_list ap;
+		va_start(ap, msg);
+		vfprintf(summary_file, msg, ap);
 		va_end(ap);
 	}
 }
@@ -58,7 +57,7 @@ static void print_headline(const char *text) {
 static int test_print_summary(void) {
 	FILE *f = fopen("tests.log", "r");
 	if (!f) {
-		fprintf(stderr, "Failed to read summary file.\n");
+		fprintf(stderr, "Failed to open summary file for reading: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 	int conducted_test_cnt = 0;
@@ -68,6 +67,9 @@ static int test_print_summary(void) {
 	while (fgets(line, sizeof(line) - 1, f)) {
 		line[sizeof(line) - 1] = 0;
 		int l = strlen(line);
+		if (l && (line[0] != '*')) {
+			continue;
+		}
 		if (l && (line[l - 1] == '\r')) {
 			line[--l] = 0;
 		}
@@ -75,7 +77,8 @@ static int test_print_summary(void) {
 			line[--l] = 0;
 		}
 
-		char *testname = strtok(line, " ");
+		strtok(line, " ");
+		char *testname = strtok(NULL, " ");
 		int test_success = atoi(strtok(NULL, " "));
 		conducted_test_cnt++;
 		if (!test_success) {
@@ -96,6 +99,12 @@ static int test_print_summary(void) {
 
 void test_start(int argc, char **argv) {
 	const char *new_testname = basename(argv[0]);
+
+	summary_file = fopen("tests.log", "a");
+	if (!summary_file) {
+		fprintf(stderr, "Failed to open summary file for writing: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 
 	struct option long_options[] = {
 		{"verbose", no_argument, 0, 'v' },
@@ -128,17 +137,22 @@ void test_start(int argc, char **argv) {
 
 void test_success(void) {
 	fprintf(stderr, "PASS: %s\n", testname);
-	write_summary_file(true);
+	fprintf(summary_file, "* %s 1\n", testname);
+	fclose(summary_file);
 	exit(EXIT_SUCCESS);
 }
 
 void test_fail_ext(const char *file, int line, const char *reason, failfnc_t failfnc, const void *lhs, const void *rhs) {
-	fprintf(stderr, "FAILED %s:%d: %s (%s)\n", file, line, testname, reason);
+	fprintf(summary_file, "- FAILED %s:%d: %s (%s)\n", file, line, testname, reason);
+	fprintf(summary_file, "* %s 0\n", testname);
+	fprintf(stderr, "FAILED %s:%d: %s (%.80s)\n", file, line, testname, reason);
 	if (failfnc != NULL) {
 		char *extended_reason = failfnc(lhs, rhs);
-		fprintf(stderr, "   %s\n", extended_reason);
+		fprintf(summary_file, "- %s\n", extended_reason);
+		fprintf(stderr, "   %.120s\n", extended_reason);
 		free(extended_reason);
 	}
+	fclose(summary_file);
 	exit(EXIT_FAILURE);
 }
 
@@ -151,7 +165,6 @@ char *testbed_failfnc_str(const void *vlhs, const void *vrhs) {
 	const char *rhs = (const char*)vrhs;
 	char *result = calloc(1, strlen(lhs) + strlen(rhs) + 32);
 	sprintf(result, "LHS = \"%s\", RHS = \"%s\"", lhs, rhs);
-	write_summary_file(false);
 	return result;
 }
 
