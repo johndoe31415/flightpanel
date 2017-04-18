@@ -12,19 +12,21 @@ TEST_OBJS := \
 
 all: $(TEST_COMMON_OBJS) $(TEST_OBJS)
 
-test_vhf_frequency_conversion: ../frequencies.o
-test_nav_frequency_conversion: ../frequencies.o
-test_surface: ../surface.o helper_surface.o
-test_font: ../surface.o ../font.o ../vcr-osd-mono-20.o helper_surface.o
+test_vhf_frequency_conversion: $(TEST_COMMON_OBJS) ../frequencies.o
+test_nav_frequency_conversion: $(TEST_COMMON_OBJS) ../frequencies.o
+test_surface: $(TEST_COMMON_OBJS) ../surface.o helper_surface.o
+test_font: $(TEST_COMMON_OBJS) ../surface.o ../font.o ../vcr-osd-mono-20.o helper_surface.o
 
 test: all
-	for testname in $(TEST_OBJS); do ./$$testname || exit 1; done
+	rm -f tests.log
+	for testname in $(TEST_OBJS); do ./$$testname; done
+	@./$(firstword $(TEST_OBJS)) --summary
 
 clean:
 	rm -f $(TEST_COMMON_OBJS) $(TEST_OBJS) ../*.o
 
 .c:
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $+ $(TEST_COMMON_OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $+
 
 .c.o:
 	$(CC) $(CFLAGS) -include testbed.h -c -o $@ $<

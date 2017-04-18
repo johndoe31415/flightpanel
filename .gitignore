@@ -14,6 +14,12 @@ firmware/ext-st/include-cmsis
 firmware/ext-st/include-cmsis-dev
 firmware/ext-st/stm32f407.ld
 
+firmware/tests/tests.log
+firmware/tests/test_font
+firmware/tests/test_surface
+firmware/tests/test_vhf_frequency_conversion
+firmware/tests/test_nav_frequency_conversion
+
 en.stm32cubef4.zip
 firmware/cube/cube.a
 firmware/cube/STM32Cube_FW_F4_V1.15.0/
