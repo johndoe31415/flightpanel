@@ -20,6 +20,7 @@ firmware/tests/test_surface
 firmware/tests/test_vhf_frequency_conversion
 firmware/tests/test_nav_frequency_conversion
 firmware/tests/test_rotary
+firmware/tests/test_debounce
 
 en.stm32cubef4.zip
 firmware/cube/cube.a
