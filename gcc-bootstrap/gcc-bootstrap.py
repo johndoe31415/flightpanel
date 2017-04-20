@@ -177,6 +177,11 @@ if (len(build_packages) == 0) or (installer.name in build_packages):
 		"--enable-newlib-nano-formatted-io",
 		"--disable-newlib-multithread",
 		"--enable-lite-exit",
+		"--disable-newlib-wide-orient",
+		"--disable-newlib-fvwrite-in-streamio",
+		"--disable-newlib-atexit-dynamic-alloc",
+		"--disable-newlib-io-float",
+		"--enable-lite-exit",
 	])
 
 installer = Installer("gcc", packages["gcc"], prefix_dir)
