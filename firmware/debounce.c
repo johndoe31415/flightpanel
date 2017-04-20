@@ -26,30 +26,13 @@
 enum btnaction_t button_debounce(struct button_t *button, bool pressed) {
 	enum btnaction_t action = BUTTON_NOACTION;
 
+	debug("Button [In %d] Ctr %d, Thresholds %d / %d, Armed %d, Fired %d", pressed, button->counter, button->threshold, button->long_threshold, button->armed, button->fired);
+
 	if (pressed) {
 		if (button->counter < 0xffff) {
-			bool do_fire = false;
-			if (!button->fired) {
-				button->counter++;
-				if (button->long_threshold && (button->counter >= button->long_threshold)) {
-					button->armed = BUTTON_LONG_PRESS;
-					do_fire = true;
-				} else if (button->counter >= button->threshold) {
-					button->armed = BUTTON_PRESS;
-					do_fire = (button->long_threshold == 0);
-				}
-
-				if (do_fire) {
-					action = button->armed;
-					button->fired = true;
-					button->armed = BUTTON_NOACTION;
-				}
-			}
+			button->counter++;
 		}
-
 	} else {
-		action = button->armed;
-		button->armed = BUTTON_NOACTION;
 		if (button->counter) {
 			button->counter--;
 			if (button->counter == 0) {
@@ -58,5 +41,27 @@ enum btnaction_t button_debounce(struct button_t *button, bool pressed) {
 		}
 	}
 
+	bool do_fire = false;
+	if (!button->fired) {
+		if (button->long_threshold && (button->counter >= button->long_threshold)) {
+			button->armed = BUTTON_LONG_PRESS;
+			do_fire = true;
+		} else if (button->counter >= button->threshold) {
+			button->armed = BUTTON_PRESS;
+			do_fire = (button->long_threshold == 0);
+		}
+
+		if ((button->armed != BUTTON_NOACTION) && (!pressed)) {
+			do_fire = true;
+		}
+	}
+
+	if (do_fire) {
+		button->fired = true;
+		action = button->armed;
+		button->armed = BUTTON_NOACTION;
+	}
+
+	debug(" -> %d\n", action);
 	return action;
 }
