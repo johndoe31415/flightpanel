@@ -52,6 +52,14 @@ void iomux_trigger(void) {
 	spi_tx_rx_data_dma(IOMuxSPI_SPI, IOMuxSPI_DMAStream_TX, outputs, IOMuxSPI_DMAStream_RX, inputs, sizeof(outputs));
 }
 
+void iomux_dma_finished(void) {
+	read_new_data = true;
+	IOMux_Out_STCP_SetHIGH();
+	for (volatile int i = 0; i < 5; i++);
+	IOMux_Out_STCP_SetLOW();
+	IOMux_Out_OE_SetLOW();
+}
+
 static void iomux_dump_array(const uint8_t *array, int length) {
 	for (int i = 0; i < length; i++) {
 		for (int j = 7; j >= 0; j--) {
@@ -105,9 +113,5 @@ void iomux_dump_iochange(void) {
 		printf("\n");
 		memcpy(last_inputs, inputs, BYTECOUNT);
 	}
-}
-
-void iomux_dma_finished(void) {
-	read_new_data = true;
 }
 
