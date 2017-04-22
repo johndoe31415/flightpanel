@@ -1,26 +1,3 @@
-/**
- *	flightpanel - A Cortex-M4 based USB flight panel for flight simulators.
- *	Copyright (C) 2017-2017 Johannes Bauer
- *
- *	This file is part of flightpanel.
- *
- *	flightpanel is free software; you can redistribute it and/or modify
- *	it under the terms of the GNU General Public License as published by
- *	the Free Software Foundation; this program is ONLY licensed under
- *	version 3 of the License, later versions are explicitly excluded.
- *
- *	flightpanel is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU General Public License for more details.
- *
- *	You should have received a copy of the GNU General Public License
- *	along with flightpanel; if not, write to the Free Software
- *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *	Johannes Bauer <JohannesBauer@gmx.de>
-**/
-
 #ifndef __PINMAP_H__
 #define __PINMAP_H__
 
@@ -222,6 +199,29 @@
 #define USB_PowerSwitchOn_SetHIGH() USB_PowerSwitchOn_GPIO->BSRRL = USB_PowerSwitchOn_Pin
 #define USB_PowerSwitchOn_SetLOW() USB_PowerSwitchOn_GPIO->BSRRH = USB_PowerSwitchOn_Pin
 #define USB_PowerSwitchOn_SetTo(value) if (value) { USB_PowerSwitchOn_SetHIGH(); } else { USB_PowerSwitchOn_SetLOW(); }
+// PC0: IOMux_In_PE (OUT)
+#define IOMux_In_PE_GPIO GPIOC
+#define IOMux_In_PE_PinSource GPIO_PinSource0
+#define IOMux_In_PE_Pin GPIO_Pin_0
+#define IOMux_In_PE_SetHIGH() IOMux_In_PE_GPIO->BSRRL = IOMux_In_PE_Pin
+#define IOMux_In_PE_SetLOW() IOMux_In_PE_GPIO->BSRRH = IOMux_In_PE_Pin
+#define IOMux_In_PE_SetTo(value) if (value) { IOMux_In_PE_SetHIGH(); } else { IOMux_In_PE_SetLOW(); }
+
+// PC1: IOMux_Out_OE (OUT)
+#define IOMux_Out_OE_GPIO GPIOC
+#define IOMux_Out_OE_PinSource GPIO_PinSource1
+#define IOMux_Out_OE_Pin GPIO_Pin_1
+#define IOMux_Out_OE_SetHIGH() IOMux_Out_OE_GPIO->BSRRL = IOMux_Out_OE_Pin
+#define IOMux_Out_OE_SetLOW() IOMux_Out_OE_GPIO->BSRRH = IOMux_Out_OE_Pin
+#define IOMux_Out_OE_SetTo(value) if (value) { IOMux_Out_OE_SetHIGH(); } else { IOMux_Out_OE_SetLOW(); }
+
+// PC2: IOMux_Out_STCP (OUT)
+#define IOMux_Out_STCP_GPIO GPIOC
+#define IOMux_Out_STCP_PinSource GPIO_PinSource2
+#define IOMux_Out_STCP_Pin GPIO_Pin_2
+#define IOMux_Out_STCP_SetHIGH() IOMux_Out_STCP_GPIO->BSRRL = IOMux_Out_STCP_Pin
+#define IOMux_Out_STCP_SetLOW() IOMux_Out_STCP_GPIO->BSRRH = IOMux_Out_STCP_Pin
+#define IOMux_Out_STCP_SetTo(value) if (value) { IOMux_Out_STCP_SetHIGH(); } else { IOMux_Out_STCP_SetLOW(); }
 
 // PC3: AudioPDM_OUT (IN)
 #define AudioPDM_OUT_GPIO GPIOC

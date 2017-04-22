@@ -28,16 +28,28 @@
 #include "iomux.h"
 #include "fncmap.h"
 #include "spi.h"
+#include "pinmap.h"
+#include "init.h"
 
-#define BYTECOUNT		8
-static uint8_t outputs[BYTECOUNT];
+#define BYTECOUNT		7
+static uint8_t outputs[BYTECOUNT] = { 1, 3, 7, 10 };
 static uint8_t inputs[BYTECOUNT];
 static uint8_t last_inputs[BYTECOUNT];
+static volatile bool read_new_data;
 
 /* Trigger IOMux transfer */
 void iomux_trigger(void) {
-	spi_tx_rx_data_dma(IOMuxSPI_SPI, IOMuxSPI_DMAStream_TX, outputs, IOMuxSPI_DMAStream_RX, inputs, sizeof(outputs));
+	//spi_tx_data(IOMuxSPI_SPI, outputs, sizeof(outputs));
 	//spi_tx_data_dma(IOMuxSPI_SPI, IOMuxSPI_DMAStream_TX, outputs, sizeof(outputs));
+	IOMux_In_PE_SetLOW();
+	reinit_iomux_spi_sck_AF(false);
+	IOMux_SCK_SetHIGH();
+	for (volatile int i = 0; i < 5; i++);
+	IOMux_SCK_SetLOW();
+	reinit_iomux_spi_sck_AF(true);
+	IOMux_In_PE_SetHIGH();
+
+	spi_tx_rx_data_dma(IOMuxSPI_SPI, IOMuxSPI_DMAStream_TX, outputs, IOMuxSPI_DMAStream_RX, inputs, sizeof(outputs));
 }
 
 static void iomux_dump_array(const uint8_t *array, int length) {
@@ -67,7 +79,7 @@ static void iomux_diff_array(const uint8_t *array1, const uint8_t *array2, int l
 			bool bit2 = (array2[i] >> j) & 1;
 			if (bit1 != bit2) {
 				int pin_id = (8 * i) + j;
-				printf("%d ", pin_id);
+				printf("%c%d ", bit2 ? '+' : '-', pin_id);
 			}
 		}
 	}
@@ -80,20 +92,22 @@ static void iomux_dump(void) {
 	iomux_dump_array(outputs, BYTECOUNT);
 }
 
-void iomux_dma_finished(void) {
-	if (!memcmp(last_inputs, inputs, BYTECOUNT)) {
+void iomux_dump_iochange(void) {
+	if (!read_new_data) {
+		return;
+	}
+	read_new_data = false;
+	if (memcmp(last_inputs, inputs, BYTECOUNT)) {
 		/* Some input has changed. Dump! */
 		iomux_dump();
 		printf("  ");
-		iomux_diff_array(inputs, last_inputs, BYTECOUNT);
+		iomux_diff_array(last_inputs, inputs, BYTECOUNT);
 		printf("\n");
 		memcpy(last_inputs, inputs, BYTECOUNT);
 	}
-
-#if 0
-	for (int i = 0; i < sizeof(inputs); i++) {
-		printf("%02x ", inputs[i]);
-	}
-	printf("\n");
-#endif
 }
+
+void iomux_dma_finished(void) {
+	read_new_data = true;
+}
+

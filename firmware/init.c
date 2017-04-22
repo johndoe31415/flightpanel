@@ -31,6 +31,7 @@
 #include <stm32f4xx_i2c.h>
 #include <misc.h>
 #include "pinmap.h"
+#include "init.h"
 
 #define PLL_M					8
 #define PLL_N					336
@@ -237,6 +238,8 @@ static void init_display_spi(void) {
 			.GPIO_Speed = GPIO_Speed_2MHz,
 			.GPIO_PuPd = GPIO_PuPd_NOPULL,
 		};
+		GPIO_Init(GPIOB, &GPIO_InitStructure);
+	}
 	{
 		GPIO_InitTypeDef GPIO_InitStructure = {
 			.GPIO_Pin = GPIO_Pin_1,
@@ -245,8 +248,6 @@ static void init_display_spi(void) {
 			.GPIO_Speed = GPIO_Speed_25MHz,
 			.GPIO_PuPd = GPIO_PuPd_NOPULL,
 		};
-		GPIO_Init(GPIOB, &GPIO_InitStructure);
-	}
 		GPIO_Init(GPIOB, &GPIO_InitStructure);
 	}
 
@@ -348,6 +349,17 @@ static void init_iomux_spi(void) {
 	SPI_Cmd(SPI3, ENABLE);
 }
 
+void reinit_iomux_spi_sck_AF(bool use_af) {
+	GPIO_InitTypeDef GPIO_InitStructure = {
+		.GPIO_Pin = GPIO_Pin_10,
+		.GPIO_Mode = use_af ? GPIO_Mode_AF : GPIO_Mode_OUT,
+		.GPIO_OType = GPIO_OType_PP,
+		.GPIO_Speed = GPIO_Speed_25MHz,
+		.GPIO_PuPd = GPIO_PuPd_NOPULL,
+	};
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+}
+
 static void init_iomux_spi_dma(void) {
 	/* DMA1 Stream5 Channel 0: SPI3 TX */
 	/* DMA1 Stream2 Channel 0: SPI3 RX */
@@ -414,6 +426,18 @@ static void init_iomux_spi_dma(void) {
 	NVIC_Init(&NVIC_InitStructure2);
 	DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE);
 	DMA_ITConfig(DMA1_Stream2, DMA_IT_TC, ENABLE);
+}
+
+static void init_iomux_ctl(void) {
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+	GPIO_InitTypeDef GPIO_InitStructure = {
+		.GPIO_Pin = IOMux_In_PE_Pin | IOMux_Out_OE_Pin | IOMux_Out_STCP_Pin,
+		.GPIO_Mode = GPIO_Mode_OUT,
+		.GPIO_OType = GPIO_OType_PP,
+		.GPIO_Speed = GPIO_Speed_25MHz,
+		.GPIO_PuPd = GPIO_PuPd_NOPULL,
+	};
+	GPIO_Init(IOMux_In_PE_GPIO, &GPIO_InitStructure);
 }
 
 #if 0
@@ -536,7 +560,7 @@ static void init_debug(void) {
 	GPIO_Init(Dbg1_GPIO, &GPIO_InitStructure);
 }
 
-void SystemInit() {
+void SystemInit(void) {
 	__disable_irq();
 	init_clock();
 	init_gpio();
@@ -544,6 +568,7 @@ void SystemInit() {
 	init_rotary_encoders();
 	init_display_spi();
 	init_display_spi_dma();
+	init_iomux_ctl();
 	init_iomux_spi();
 	init_iomux_spi_dma();
 	init_i2c();

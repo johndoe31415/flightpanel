@@ -44,6 +44,8 @@
 #include "usb.h"
 #include "displays.h"
 #include "instruments.h"
+#include "iomux.h"
+#include "pinmap.h"
 
 #if 0
 uint32_t x32 = 314159265;
@@ -61,16 +63,17 @@ int main(void) {
 	init_usb_late();
 	printf("USB initialized.\n");
 
+
 	init_displays();
+
+	while (true) {
+		iomux_dump_iochange();
+		delay_millis(100);
+	}
+
 	instruments_idle_loop();
 
 
-#if 0
-	while (true) {
-		i2c_scanbus(I2C1);
-		delay_millis(1000);
-	}
-#endif
 #if 0
 	while (true) {
 		xorshift32();

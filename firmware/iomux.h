@@ -29,6 +29,7 @@
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void iomux_trigger(void);
 void iomux_output_set(int pin_id, bool value);
+void iomux_dump_iochange(void);
 void iomux_dma_finished(void);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
