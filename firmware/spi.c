@@ -88,6 +88,10 @@ void spi_tx_data_dma(SPI_TypeDef *SPIx, DMA_Stream_TypeDef *DMAy_Streamx, const 
 	SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Tx, ENABLE);
 }
 
+bool spi_dma_tx_rx_ready(DMA_Stream_TypeDef *DMAy_Streamx_TX, DMA_Stream_TypeDef *DMAy_Streamx_RX) {
+	return ((DMA_GetCmdStatus(DMAy_Streamx_TX) != ENABLE) && (DMA_GetCmdStatus(DMAy_Streamx_RX) != ENABLE));
+}
+
 void spi_tx_rx_data_dma(SPI_TypeDef *SPIx, DMA_Stream_TypeDef *DMAy_Streamx_TX, const void *tx_data, DMA_Stream_TypeDef *DMAy_Streamx_RX, void *rx_data, int length) {
 	if ((DMA_GetCmdStatus(DMAy_Streamx_TX) == ENABLE) || (DMA_GetCmdStatus(DMAy_Streamx_RX) == ENABLE)) {
 		/* Transmission still in progress. */

@@ -341,7 +341,7 @@ static void init_iomux_spi(void) {
 		.SPI_CPOL = SPI_CPOL_Low,
 		.SPI_CPHA = SPI_CPHA_1Edge,
 		.SPI_NSS = SPI_NSS_Soft,
-		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64,
+		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32,
 		.SPI_FirstBit = SPI_FirstBit_MSB,
 		.SPI_CRCPolynomial = 1,
 	};

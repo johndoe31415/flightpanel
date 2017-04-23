@@ -32,10 +32,9 @@
 #include "init.h"
 
 #define BYTECOUNT		7
-static uint8_t outputs[BYTECOUNT] = { 1, 3, 7, 10 };
+static uint8_t outputs[BYTECOUNT];
 static uint8_t inputs[BYTECOUNT];
 static uint8_t last_inputs[BYTECOUNT];
-static volatile bool read_new_data;
 
 static uint8_t testpattern_index = 0;
 static const uint8_t output_testpattern[10][BYTECOUNT] = {
@@ -53,13 +52,25 @@ static const uint8_t output_testpattern[10][BYTECOUNT] = {
 
 /* Trigger IOMux transfer */
 void iomux_trigger(void) {
-	//spi_tx_data(IOMuxSPI_SPI, outputs, sizeof(outputs));
-	//spi_tx_data_dma(IOMuxSPI_SPI, IOMuxSPI_DMAStream_TX, outputs, sizeof(outputs));
+	if (!spi_dma_tx_rx_ready(IOMuxSPI_DMAStream_TX, IOMuxSPI_DMAStream_RX)) {
+		/* Last handling was lasting longer than expected, do silently discard
+		 * this round. */
+		return;
+	}
+
+	Dbg1_SetHIGH();
+
+	/* Change SCK to GPIO from AF */
 	reinit_iomux_spi_sck_AF(false);
+
+	/* Then issue a SCK pulse when PE is load, effectively parallel loading the
+	 * HC166 chains */
 	IOMux_In_PE_SetLOW();
 	delay_loopcnt(LOOPCOUNT_50NS);
 	IOMux_SCK_Pulse();
 	IOMux_In_PE_SetHIGH();
+
+	/* Switch back SCK to its original function */
 	reinit_iomux_spi_sck_AF(true);
 
 	testpattern_index++;
@@ -69,13 +80,15 @@ void iomux_trigger(void) {
 		memset(outputs, 0xff, BYTECOUNT);
 	}
 
+	/* Start the DMA transfer */
 	spi_tx_rx_data_dma(IOMuxSPI_SPI, IOMuxSPI_DMAStream_TX, outputs, IOMuxSPI_DMAStream_RX, inputs, sizeof(outputs));
 }
 
 void iomux_dma_finished(void) {
-	read_new_data = true;
 	IOMux_Out_STCP_Pulse();
 	IOMux_Out_OE_SetLOW();
+	Dbg1_SetLOW();
+	iomux_dump_iochange();
 }
 
 static void iomux_dump_array(const uint8_t *array, int length) {
@@ -119,10 +132,6 @@ static void iomux_dump(void) {
 }
 
 void iomux_dump_iochange(void) {
-	if (!read_new_data) {
-		return;
-	}
-	read_new_data = false;
 	if (memcmp(last_inputs, inputs, BYTECOUNT)) {
 		/* Some input has changed. Dump! */
 		iomux_dump();
