@@ -46,6 +46,7 @@
 #include "instruments.h"
 #include "iomux.h"
 #include "pinmap.h"
+#include "stm32f4xx_devid.h"
 
 #if 0
 uint32_t x32 = 314159265;
@@ -63,6 +64,10 @@ int main(void) {
 	init_usb_late();
 	printf("USB initialized.\n");
 
+	char ascii_device_id[32];
+	stm32fxx_get_ascii_devid(ascii_device_id);
+	printf("STM32 Device ID: %s\n", ascii_device_id);
+	printf("Compiled with: gcc " __VERSION__ " newlib " _NEWLIB_VERSION " on " BUILD_TIMESTAMP_UTC " UTC\n");
 
 	init_displays();
 
