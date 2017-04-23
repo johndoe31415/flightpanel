@@ -24,6 +24,22 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
+#define LOOPCOUNT_35NS			0
+#define LOOPCOUNT_50NS			1
+#define LOOPCOUNT_80NS			2
+#define LOOPCOUNT_110NS			3
+
+#define delay_loopcnt(nopcnt) { int _nopcnt = nopcnt; \
+	__asm__ __volatile__(		\
+		"0:"						"\n\t"				\
+		"cbz %0, 1f"				"\n\t"				\
+		"subs %0, #1"				"\n\t"				\
+		"b 0b"						"\n\t"				\
+		"1:"						"\n\t"				\
+		: "+r"(_nopcnt)									\
+	);													\
+	}
+
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void delay_millis(uint32_t millisecs);
 void TIM3_IRQHandler(void);

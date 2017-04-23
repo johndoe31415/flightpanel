@@ -21,6 +21,7 @@
 #
 #	Johannes Bauer <JohannesBauer@gmx.de>
 
+import os
 import re
 import collections
 
@@ -63,13 +64,25 @@ class PinmapGenerator(object):
 
 	@staticmethod
 	def _print_cols(left_col, right_col, file):
-		print("%s %s" % (left_col, right_col), file = file)
+		tab_width = 4
+		get_to_tabcol = 12
+		left_len = len(left_col)
+		tab_count = get_to_tabcol - (left_len // tab_width)
+
+		if tab_count < 1:
+			tab_count = 1
+		tab_spacing = "\t" * tab_count
+		print("%s%s%s" % (left_col, tab_spacing, right_col), file = file)
 
 	def _write(self, f):
+		if os.path.isfile("pinmap_header.h"):
+			with open("pinmap_header.h") as hdrf:
+				f.write(hdrf.read())
 		print("#ifndef __PINMAP_H__", file = f)
 		print("#define __PINMAP_H__", file = f)
 		print(file = f)
 		print("#include <stm32f4xx_gpio.h>", file = f)
+		print("#include \"timer.h\"", file = f)
 		print(file = f)
 		for pins in sorted(self._pins.values()):
 			for pin in pins:
@@ -79,6 +92,8 @@ class PinmapGenerator(object):
 				self._print_cols("#define %s_Pin" % (pin.name), "GPIO_Pin_%d" % (pin.pin), file = f)
 				self._print_cols("#define %s_SetHIGH()" % (pin.name), "%s_GPIO->BSRRL = %s_Pin" % (pin.name, pin.name), file = f)
 				self._print_cols("#define %s_SetLOW()" % (pin.name), "%s_GPIO->BSRRH = %s_Pin" % (pin.name, pin.name), file = f)
+				self._print_cols("#define %s_Pulse()" % (pin.name), "do { %s_SetHIGH(); delay_loopcnt(LOOPCOUNT_50NS); %s_SetLOW(); } while (0)" % (pin.name, pin.name), file = f)
+				self._print_cols("#define %s_InvPulse()" % (pin.name), "do { %s_SetLOW(); delay_loopcnt(LOOPCOUNT_50NS); %s_SetHIGH(); } while (0)" % (pin.name, pin.name), file = f)
 				self._print_cols("#define %s_SetTo(value)" % (pin.name), "if (value) { %s_SetHIGH(); } else { %s_SetLOW(); }" % (pin.name, pin.name), file = f)
 			print(file = f)
 

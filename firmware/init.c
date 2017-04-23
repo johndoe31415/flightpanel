@@ -554,7 +554,7 @@ static void init_debug(void) {
 		.GPIO_Pin = Dbg1_Pin | Dbg2_Pin | Dbg3_Pin | Dbg4_Pin,
 		.GPIO_Mode = GPIO_Mode_OUT,
 		.GPIO_OType = GPIO_OType_PP,
-		.GPIO_Speed = GPIO_Speed_2MHz,
+		.GPIO_Speed = GPIO_Speed_100MHz,
 		.GPIO_PuPd = GPIO_PuPd_NOPULL,
 	};
 	GPIO_Init(Dbg1_GPIO, &GPIO_InitStructure);

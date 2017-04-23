@@ -55,13 +55,12 @@ static const uint8_t output_testpattern[10][BYTECOUNT] = {
 void iomux_trigger(void) {
 	//spi_tx_data(IOMuxSPI_SPI, outputs, sizeof(outputs));
 	//spi_tx_data_dma(IOMuxSPI_SPI, IOMuxSPI_DMAStream_TX, outputs, sizeof(outputs));
-	IOMux_In_PE_SetLOW();
 	reinit_iomux_spi_sck_AF(false);
-	IOMux_SCK_SetHIGH();
-	for (volatile int i = 0; i < 5; i++);
-	IOMux_SCK_SetLOW();
-	reinit_iomux_spi_sck_AF(true);
+	IOMux_In_PE_SetLOW();
+	delay_loopcnt(LOOPCOUNT_50NS);
+	IOMux_SCK_Pulse();
 	IOMux_In_PE_SetHIGH();
+	reinit_iomux_spi_sck_AF(true);
 
 	testpattern_index++;
 	if (testpattern_index < 10) {
@@ -75,9 +74,7 @@ void iomux_trigger(void) {
 
 void iomux_dma_finished(void) {
 	read_new_data = true;
-	IOMux_Out_STCP_SetHIGH();
-	for (volatile int i = 0; i < 5; i++);
-	IOMux_Out_STCP_SetLOW();
+	IOMux_Out_STCP_Pulse();
 	IOMux_Out_OE_SetLOW();
 }
 
