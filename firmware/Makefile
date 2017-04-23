@@ -12,7 +12,7 @@ GDB := $(PREFIX)gdb
 STFLASH := st-flash
 BUILD_TIMESTAMP_UTC := $(shell /bin/date +'%Y-%m-%d %H:%M:%S')
 
-CFLAGS := $(CFLAGS) -std=c11 -Wall -Wmissing-prototypes -Wstrict-prototypes -Werror=implicit-function-declaration -Os -g3 -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb -include library_config.h -Iext-st/include -Iext-st/include-cmsis -Iext-st/include-cmsis-dev -DBUILD_TIMESTAMP_UTC='"$(BUILD_TIMESTAMP_UTC)"'
+CFLAGS := $(CFLAGS) -std=c11 -Wall -Wmissing-prototypes -Wstrict-prototypes -Werror=implicit-function-declaration -Werror=format -Os -g3 -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb -include library_config.h -Iext-st/include -Iext-st/include-cmsis -Iext-st/include-cmsis-dev -DBUILD_TIMESTAMP_UTC='"$(BUILD_TIMESTAMP_UTC)"'
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -Icube -Icube/include-core -Icube/include-hid -Icube/include-hal -Icube/include-cmsis
 #CFLAGS += -specs=nano.specs -specs=rdimon.specs

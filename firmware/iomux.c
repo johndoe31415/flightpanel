@@ -30,12 +30,33 @@
 #include "spi.h"
 #include "pinmap.h"
 #include "init.h"
+#include "instruments.h"
 
 #define BYTECOUNT		7
 static uint8_t outputs[BYTECOUNT];
 static uint8_t inputs[BYTECOUNT];
 static uint8_t last_inputs[BYTECOUNT];
 
+/*
+static const struct iomux_callback_single_pin_t iomux_callbacks_single[] = {
+	{
+		.pin = 49,
+		.callback = input_callback_rotary_button,
+		.argument = 1,
+	}
+};
+
+static const struct iomux_callback_dual_pin_t iomux_callbacks_dual[] = {
+	{
+		.pin1 = 55,
+		.pin2 = 48,
+		.callback = input_callback_rotary,
+		.argument = 1,
+	}
+};
+*/
+
+#if 0
 static uint8_t testpattern_index = 0;
 static const uint8_t output_testpattern[10][BYTECOUNT] = {
 	{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
@@ -49,6 +70,7 @@ static const uint8_t output_testpattern[10][BYTECOUNT] = {
 	{ 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa },
 	{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
 };
+#endif
 
 /* Trigger IOMux transfer */
 void iomux_trigger(void) {
@@ -58,7 +80,7 @@ void iomux_trigger(void) {
 		return;
 	}
 
-	Dbg1_SetHIGH();
+//	Dbg1_SetHIGH();
 
 	/* Change SCK to GPIO from AF */
 	reinit_iomux_spi_sck_AF(false);
@@ -73,12 +95,14 @@ void iomux_trigger(void) {
 	/* Switch back SCK to its original function */
 	reinit_iomux_spi_sck_AF(true);
 
+	/*
 	testpattern_index++;
 	if (testpattern_index < 10) {
 		memcpy(outputs, output_testpattern[testpattern_index], BYTECOUNT);
 	} else {
 		memset(outputs, 0xff, BYTECOUNT);
 	}
+	*/
 
 	/* Start the DMA transfer */
 	spi_tx_rx_data_dma(IOMuxSPI_SPI, IOMuxSPI_DMAStream_TX, outputs, IOMuxSPI_DMAStream_RX, inputs, sizeof(outputs));
@@ -87,8 +111,9 @@ void iomux_trigger(void) {
 void iomux_dma_finished(void) {
 	IOMux_Out_STCP_Pulse();
 	IOMux_Out_OE_SetLOW();
-	Dbg1_SetLOW();
-	iomux_dump_iochange();
+	instruments_handle_inputs();
+//	Dbg1_SetLOW();
+//	iomux_dump_iochange();
 }
 
 static void iomux_dump_array(const uint8_t *array, int length) {
@@ -99,6 +124,12 @@ static void iomux_dump_array(const uint8_t *array, int length) {
 		}
 		printf(" ");
 	}
+}
+
+bool iomux_get_input(int pin_id) {
+	int byteno = pin_id / 8;
+	int bitno = pin_id % 8;
+	return ((inputs[byteno] >> bitno) & 1) != 0;
 }
 
 void iomux_output_set(int pin_id, bool value) {

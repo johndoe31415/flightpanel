@@ -24,13 +24,15 @@
 #ifndef __IOMUX_H__
 #define __IOMUX_H__
 
+#include <stdint.h>
 #include <stdbool.h>
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void iomux_trigger(void);
+void iomux_dma_finished(void);
+bool iomux_get_input(int pin_id);
 void iomux_output_set(int pin_id, bool value);
 void iomux_dump_iochange(void);
-void iomux_dma_finished(void);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

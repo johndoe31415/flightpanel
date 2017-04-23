@@ -71,10 +71,12 @@ int main(void) {
 
 	init_displays();
 
+	/*
 	while (true) {
 		iomux_dump_iochange();
-		delay_millis(100);
+		delay_millis(10);
 	}
+	*/
 
 	instruments_idle_loop();
 

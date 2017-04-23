@@ -34,6 +34,8 @@
 #include "vcr-osd-mono-30.h"
 #include "timer.h"
 #include "pinmap.h"
+#include "debounce.h"
+#include "iomux.h"
 
 struct instrument_state {
 	uint16_t vhf1, vhf2;
@@ -64,14 +66,45 @@ static struct rotary_encoder_t rotary1 = {
 	.wrap_around = true
 };
 
+static struct button_t rotary1_button = {
+	.threshold = 50,
+};
+
+static int button_cnt;
+
 static volatile bool change;
 
 /* Called every 8 ms */
 void hid_tick(void) {
+	/*
 	if (rotary_encoder_update(&rotary1, (GPIOD->IDR & GPIO_Pin_10), (GPIOD->IDR & GPIO_Pin_11))) {
 		change = true;
 	}
+	*/
 }
+
+void instruments_handle_inputs(void) {
+	if (rotary_encoder_update(&rotary1, iomux_get_input(55), iomux_get_input(48))) {
+//		printf("rotary %d\n", rotary1.value);
+		change = true;
+	}
+	enum btnaction_t action = button_debounce(&rotary1_button, !iomux_get_input(49));
+	if (action != BUTTON_NOACTION) {
+		button_cnt++;
+//		printf("rotary btn %d\n", action);
+		change = true;
+	}
+}
+
+/*
+void input_callback_rotary_button(int rotary_id, bool value) {
+
+}
+
+void input_callback_rotary(int rotary_id, bool value1, bool value2) {
+
+}
+*/
 
 void instruments_idle_loop(void) {
 	/* VHF */
@@ -90,6 +123,7 @@ void instruments_idle_loop(void) {
 			int frequency = (rotary1.value * raster) + base_freq;
 			int mhz = frequency / 1000;
 			int khz = frequency % 1000;
+			printf("%d %d\n", rotary1.value, button_cnt);
 			sprintf(text, "%3d.%03d", mhz, khz);
 //			printf("%4d %+d %s\n", rotary1.value, last - rotary1.value, text);
 

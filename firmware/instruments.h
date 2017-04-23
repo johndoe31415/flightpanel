@@ -33,9 +33,10 @@
 #define NAV_BANDWIDTH_DETENTS		(10 * 20)
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
-struct instrument_state;
-struct flight_data;
 void hid_tick(void);
+void instruments_handle_inputs(void);
+void input_callback_rotary_button(int rotary_id, bool value);
+void input_callback_rotary(int rotary_id, bool value1, bool value2);
 void instruments_idle_loop(void);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
