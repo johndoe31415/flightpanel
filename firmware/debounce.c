@@ -40,6 +40,9 @@ enum btnaction_t button_debounce(struct button_t *button, bool pressed) {
 			}
 		}
 	}
+	if (button->fired && (button->counter > BUTTON_FIRED_THRESHOLD)) {
+		button->counter = BUTTON_FIRED_THRESHOLD;
+	}
 
 	bool do_fire = false;
 	if (!button->fired) {

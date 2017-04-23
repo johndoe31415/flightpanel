@@ -68,6 +68,7 @@ static struct rotary_encoder_t rotary1 = {
 
 static struct button_t rotary1_button = {
 	.threshold = 50,
+	.long_threshold = 500,
 };
 
 static int button_cnt;
@@ -90,7 +91,11 @@ void instruments_handle_inputs(void) {
 	}
 	enum btnaction_t action = button_debounce(&rotary1_button, !iomux_get_input(49));
 	if (action != BUTTON_NOACTION) {
-		button_cnt++;
+		if (action == BUTTON_PRESS) {
+			button_cnt++;
+		} else {
+			button_cnt += 10;
+		}
 //		printf("rotary btn %d\n", action);
 		change = true;
 	}
