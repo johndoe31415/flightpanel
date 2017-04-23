@@ -78,7 +78,7 @@ void spi_tx_data(SPI_TypeDef *SPIx, const uint8_t *data, int length) {
 void spi_tx_data_dma(SPI_TypeDef *SPIx, DMA_Stream_TypeDef *DMAy_Streamx, const void *data, int length) {
 	if (DMA_GetCmdStatus(DMAy_Streamx) == ENABLE) {
 		/* Transmission still in progress. */
-		printf("rejecting SPI transfer, DMA still ongoing\n");
+		printf("rejecting SPI transfer, DMA of SPI %p still ongoing (TX %d)\n", SPIx, DMA_GetCmdStatus(DMAy_Streamx));
 		return;
 	}
 
