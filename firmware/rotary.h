@@ -33,6 +33,9 @@ struct rotary_encoder_t {
 	uint16_t detent_cnt;
 	bool wrap_around;
 
+	/* These are output/input */
+	bool changed;
+
 	/* These are internal */
 	uint8_t time_since_last_change;
 	bool origin;

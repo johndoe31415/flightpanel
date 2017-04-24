@@ -45,6 +45,15 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 			.data = (uint8_t[128 * 64 / 8]) { },
 		},
 	},
+	[1] = {
+		.nSS_GPIO = Display2_nSS_GPIO,
+		.nSS_Pin = Display2_nSS_Pin,
+		.surface = &(const struct surface_t) {
+			.width = 128,
+			.height = 64,
+			.data = (uint8_t[128 * 64 / 8]) { },
+		},
+	},
 };
 static bool surface_dirty[DISPLAY_COUNT];
 

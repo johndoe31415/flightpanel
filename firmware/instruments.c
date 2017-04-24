@@ -36,107 +36,117 @@
 #include "pinmap.h"
 #include "debounce.h"
 #include "iomux.h"
+#include "instruments.h"
+#include "frequencies.h"
 
-struct instrument_state {
-	uint16_t vhf1, vhf2;
-	uint16_t nav1, nav2;
-	uint16_t ap_altitude;
-	uint16_t ap_climbrate;
-	uint16_t ap_ias;
-	uint16_t squawk;
-	bool transponder_charly;
-	uint16_t qnh;
-	bool ap_active;
-	bool ap_hold_altitude;
-	bool ap_hold_navigation;
-	bool ap_hold_reverse;
-	bool ap_hold_approach;
-	bool gps_nav;
+static struct instrument_state instrument_state;
+
+static struct rotary_encoder_with_button_t rotary_com = {
+	.rotary = {
+		.value = 0,
+		.detent_cnt = VHF_DIVISIONS,
+		.wrap_around = true,
+	},
+	.button = {
+		.threshold = 50,
+		.deadtime = 50,
+	}
 };
 
-struct flight_data {
-	uint16_t ias;
-	uint16_t altitude;
+static struct rotary_encoder_with_button_t rotary_nav = {
+	.rotary = {
+		.value = 0,
+		.detent_cnt = NAV_DIVISIONS,
+		.wrap_around = true,
+	},
+	.button = {
+		.threshold = 50,
+		.deadtime = 50,
+	}
 };
 
-static struct rotary_encoder_t rotary1 = {
-	.value = 0,
-//	.detent_cnt = (19 * 40),		// VHF
-	.detent_cnt = (10 * 20),		// NAV
-	.wrap_around = true
+static const struct rotary_input_t rotary_inputs[] = {
+	{
+		.target = &rotary_com.rotary,
+		.pin1 = 55,
+		.pin2 = 48,
+	},
+	{
+		.target = &rotary_nav.rotary,
+		.pin1 = 111,
+		.pin2 = 111,
+	},
 };
 
-static struct button_t rotary1_button = {
-	.threshold = 50,
-	.long_threshold = 500,
+static const struct button_input_t button_inputs[] = {
+	{
+		.target = &rotary_com.button,
+		.pin = 49,
+	},
+	{
+		.target = &rotary_nav.button,
+		.pin = 111,
+	},
 };
-
-static int button_cnt;
-
-static volatile bool change;
 
 /* Called every 8 ms */
 void hid_tick(void) {
-	/*
-	if (rotary_encoder_update(&rotary1, (GPIOD->IDR & GPIO_Pin_10), (GPIOD->IDR & GPIO_Pin_11))) {
-		change = true;
-	}
-	*/
+}
+
+static void swap_uint16(uint16_t *a, uint16_t *b) {
+	uint16_t tmp = *a;
+	*a = *b;
+	*b = tmp;
 }
 
 void instruments_handle_inputs(void) {
-	if (rotary_encoder_update(&rotary1, iomux_get_input(55), iomux_get_input(48))) {
-//		printf("rotary %d\n", rotary1.value);
-		change = true;
+	for (int i = 0; i < sizeof(rotary_inputs) / sizeof(struct rotary_input_t); i++) {
+		rotary_encoder_update(rotary_inputs[i].target, iomux_get_input(rotary_inputs[i].pin1), iomux_get_input(rotary_inputs[i].pin2));
 	}
-	enum btnaction_t action = button_debounce(&rotary1_button, !iomux_get_input(49));
-	if (action != BUTTON_NOACTION) {
-		if (action == BUTTON_PRESS) {
-			button_cnt++;
-		} else {
-			button_cnt += 10;
-		}
-//		printf("rotary btn %d\n", action);
-		change = true;
+
+	for (int i = 0; i < sizeof(button_inputs) / sizeof(struct button_input_t); i++) {
+		button_debounce(button_inputs[i].target, !iomux_get_input(button_inputs[i].pin));
 	}
 }
 
-/*
-void input_callback_rotary_button(int rotary_id, bool value) {
-
+static void redraw_frequency(int surface_index, int frequency_khz) {
+	const struct surface_t *surface = displays_get_surface(surface_index);
+	char text[16];
+	int mhz = frequency_khz / 1000;
+	int khz = frequency_khz % 1000;
+	sprintf(text, "%3d.%03d", mhz, khz);
+	struct cursor_t cursor = { 0, 35 };
+	surface_clear(surface);
+	blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor);
+	display_mark_surface_dirty(surface_index);
+	printf("%d: %s\n", surface_index, text);
 }
-
-void input_callback_rotary(int rotary_id, bool value1, bool value2) {
-
-}
-*/
 
 void instruments_idle_loop(void) {
-	/* VHF */
-//	const int raster = 25;
-//	const int base_freq = 118000;
+	bool redraw_com1_active = true;
+	bool redraw_com1_standby = true;
 
-	/* NAV */
-	const int raster = 50;
-	const int base_freq = 108000;
-
-	change = true;
 	while (true) {
-		if (change) {
-			change = false;
-			char text[16];
-			int frequency = (rotary1.value * raster) + base_freq;
-			int mhz = frequency / 1000;
-			int khz = frequency % 1000;
-			printf("%d %d\n", rotary1.value, button_cnt);
-			sprintf(text, "%3d.%03d", mhz, khz);
-//			printf("%4d %+d %s\n", rotary1.value, last - rotary1.value, text);
+		if (rotary_com.rotary.changed) {
+			rotary_com.rotary.changed = false;
+			redraw_com1_standby = true;
+		}
 
-			const struct surface_t* surface = displays_get_surface(0);
-			struct cursor_t cursor = { 0, 35 };
-			surface_clear(surface);
-			blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor);
-			display_mark_surface_dirty(0);
+		if (rotary_com.button.lastpress != BUTTON_NOACTION) {
+			rotary_com.button.lastpress = BUTTON_NOACTION;
+			swap_uint16(&rotary_com.rotary.value, &instrument_state.com1_active_index);
+			redraw_com1_active = true;
+			redraw_com1_standby = true;
+		}
+
+		if (redraw_com1_active) {
+			redraw_frequency(0, vhf_index_to_frequency_khz(instrument_state.com1_active_index));
+			redraw_com1_active = false;
+		}
+
+		if (redraw_com1_standby) {
+			redraw_frequency(1, vhf_index_to_frequency_khz(rotary_com.rotary.value));
+			redraw_com1_standby = false;
 		}
 	}
 }

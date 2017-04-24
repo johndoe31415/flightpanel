@@ -24,6 +24,11 @@
 #ifndef __INSTRUMENTS_H__
 #define __INSTRUMENTS_H__
 
+#include <stdint.h>
+#include <stdbool.h>
+#include "rotary.h"
+#include "debounce.h"
+
 #define VHF_BASE_FREQUENCY			118000
 #define VHF_DETENT					25
 #define VHF_BANDWIDTH_DETENTS		(19 * 40)
@@ -31,6 +36,45 @@
 #define NAV_BASE_FREQUENCY			108000
 #define NAV_DETENT					50
 #define NAV_BANDWIDTH_DETENTS		(10 * 20)
+
+struct rotary_encoder_with_button_t {
+	struct rotary_encoder_t rotary;
+	struct button_t button;
+};
+
+struct rotary_input_t {
+	struct rotary_encoder_t *target;
+	uint8_t pin1, pin2;
+	bool *notify;
+};
+
+struct button_input_t {
+	struct button_t *target;
+	uint8_t pin;
+	enum btnaction_t *notify;
+};
+
+struct instrument_state {
+	uint16_t com1_active_index, com2_active_index;
+	uint16_t nav1_active_index, nav2_active_index;
+	uint16_t ap_altitude;
+	uint16_t ap_climbrate;
+	uint16_t ap_ias;
+	uint16_t squawk;
+	bool transponder_charly;
+	uint16_t qnh;
+	bool ap_active;
+	bool ap_hold_altitude;
+	bool ap_hold_navigation;
+	bool ap_hold_reverse;
+	bool ap_hold_approach;
+	bool gps_nav;
+};
+
+struct flight_data {
+	uint16_t ias;
+	uint16_t altitude;
+};
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void hid_tick(void);

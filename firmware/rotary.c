@@ -98,6 +98,7 @@ bool rotary_encoder_update(struct rotary_encoder_t *rotary, bool value1, bool va
 	if (changed) {
 		//debug("Change t = %d\n", rotary->time_since_last_change);
 		rotary->time_since_last_change = 0;
+		rotary->changed = true;
 	} else {
 		if (rotary->time_since_last_change != 0xffff) {
 			rotary->time_since_last_change++;

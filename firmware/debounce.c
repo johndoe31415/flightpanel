@@ -62,6 +62,7 @@ enum btnaction_t button_debounce(struct button_t *button, bool pressed) {
 	if (do_fire) {
 		button->fired = true;
 		action = button->armed;
+		button->lastpress = button->armed;
 		button->armed = BUTTON_NOACTION;
 		button->counter = button->deadtime;
 	}

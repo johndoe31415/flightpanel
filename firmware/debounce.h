@@ -39,6 +39,9 @@ struct button_t {
 	uint16_t long_threshold;		// Threshold for invocation of "long" press
 	uint16_t deadtime;				// Deadtime after which button becomes responsive again
 
+	/* This is input/output */
+	enum btnaction_t lastpress;
+
 	/* These are for internal use */
 	uint16_t counter;
 	bool last_state;

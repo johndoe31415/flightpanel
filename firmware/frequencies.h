@@ -34,6 +34,7 @@
 
 #define NAV_MIN_FREQUENCY_KHZ		108000
 #define NAV_BANDWIDTH_MHZ			10
+#define NAV_DIVISIONS				999 // TODO
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 uint32_t vhf_index_to_frequency_khz(int vhf_index);
