@@ -27,9 +27,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/* Deadtime after button press at which the button will become active again */
-#define BUTTON_FIRED_THRESHOLD			50
-
 enum btnaction_t {
 	BUTTON_NOACTION,
 	BUTTON_PRESS,
@@ -38,8 +35,9 @@ enum btnaction_t {
 
 struct button_t {
 	/* This is configuration */
-	uint16_t threshold;
-	uint16_t long_threshold;
+	uint16_t threshold;				// Threshold for invocation of "short" press
+	uint16_t long_threshold;		// Threshold for invocation of "long" press
+	uint16_t deadtime;				// Deadtime after which button becomes responsive again
 
 	/* These are for internal use */
 	uint16_t counter;
