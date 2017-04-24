@@ -9,16 +9,16 @@ CFLAGS += -I. -I$(LIBRARY_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/inc/ -I${LI
 LIBRARY_SRCS := $(wildcard $(LIBRARY_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/src/*.c)
 LIBRARY_OBJS := $(LIBRARY_SRCS:.c=.o)
 
-all: stdperiph.a init.o
+all: stdperiph.a reset.o
 
 clean:
 	rm -f ${LIBRARY_OBJS}
-	rm -f init.o stdperiph.a
+	rm -f reset.o stdperiph.a
 
 stdperiph.a: $(LIBRARY_OBJS)
 	${PREFIX}ar r $@ $(LIBRARY_OBJS)
 
-init.o: $(LIBRARY_PATH)/Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc_ride7/startup_stm32f40_41xxx.s
+reset.o: reset.s
 	${PREFIX}gcc -c ${CFLAGS} -o $@ $<
 
 .c.o:

@@ -13,6 +13,7 @@ firmware/ext-st/include
 firmware/ext-st/include-cmsis
 firmware/ext-st/include-cmsis-dev
 firmware/ext-st/stm32f407.ld
+firmware/ext-st/reset.s
 
 firmware/tests/tests.log
 firmware/tests/test_font

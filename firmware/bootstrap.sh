@@ -68,6 +68,14 @@ ln -sf "${PERIPH_SUBDIR}/Project/STM32F4xx_StdPeriph_Templates/SW4STM32/STM32F40
 ln -sf "${PERIPH_SUBDIR}/Libraries/STM32F4xx_StdPeriph_Driver/inc" include
 ln -sf "${PERIPH_SUBDIR}/Libraries/CMSIS/Include" include-cmsis
 ln -sf "${PERIPH_SUBDIR}/Libraries/CMSIS/Device/ST/STM32F4xx/Include" include-cmsis-dev
+if [ ! -f reset.s ]; then
+	RESET_SRC="${PERIPH_SUBDIR}//Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc_ride7/startup_stm32f40_41xxx.s"
+	RESET_LINENO=`grep -n "Reset_Handler:" "$RESET_SRC" | cut -f1 -d:`
+	echo "Patching reset handler with stackpainting at line ${RESET_LINENO}"
+	head -n "$RESET_LINENO" "$RESET_SRC" >reset.s
+	cat stackpaint.s >>reset.s
+	tail -n "+$((${RESET_LINENO}+1))" "$RESET_SRC" >>reset.s
+fi
 
 cd ../cube
 rm -fr "$CUBE_SUBDIR"

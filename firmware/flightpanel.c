@@ -47,6 +47,7 @@
 #include "iomux.h"
 #include "pinmap.h"
 #include "stm32f4xx_devid.h"
+#include "stm32f4xx_stackpaint.h"
 
 #if 0
 uint32_t x32 = 314159265;
@@ -68,6 +69,9 @@ int main(void) {
 	stm32fxx_get_ascii_devid(ascii_device_id);
 	printf("STM32 Device ID: %s\n", ascii_device_id);
 	printf("Compiled with: gcc " __VERSION__ " newlib " _NEWLIB_VERSION " on " BUILD_TIMESTAMP_UTC " UTC\n");
+
+	struct stackpaint_result_t stackpaint = stm32fxx_get_stackpaint();
+	printf("%d bytes of heap used, %d bytes of stack used.\n", stackpaint.heap_used, stackpaint.stack_used);
 
 	init_displays();
 
