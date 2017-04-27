@@ -16,10 +16,11 @@ CFLAGS := $(CFLAGS) -std=c11 -Wall -Wmissing-prototypes -Wstrict-prototypes -Wer
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -Icube -Icube/include-core -Icube/include-hid -Icube/include-hal -Icube/include-cmsis
 #CFLAGS += -specs=nano.specs -specs=rdimon.specs
-LDFLAGS := -Text-st/stm32f407.ld -Wl,--gc-sections
-STATICLIBS := ext-st/reset.o ext-st/stdperiph.a cube/cube.a
+LDFLAGS := -Tstm32f407.ld
+LDFLAGS += -Wl,--gc-sections
+STATICLIBS := ext-st/stdperiph.a cube/cube.a
 
-OBJS := flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o configuration.o ssd1306.o displays.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o instruments.o iomux.o frequencies.o debounce.o stm32f4xx_devid.o stm32f4xx_stackpaint.o
+OBJS := ivt.o flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o configuration.o ssd1306.o displays.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o instruments.o iomux.o frequencies.o debounce.o stm32f4xx_devid.o stm32f4xx_stackpaint.o
 
 all: $(TARGETS)
 
