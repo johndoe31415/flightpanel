@@ -26,6 +26,7 @@
 #include <stdbool.h>
 
 #include "rotary.h"
+#include "debug.h"
 
 bool rotary_encoder_update(struct rotary_encoder_t *rotary, bool value1, bool value2) {
 	bool changed = false;

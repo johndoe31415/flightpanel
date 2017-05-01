@@ -24,8 +24,14 @@
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
+#if defined(__ARM_ARCH)
+
+#define debug(msg, ...)
+
 #define emit(value)			__asm__ __volatile__(".word " #value)
 
 #define bkpt(value)			__asm__ __volatile__("bkpt #" #value)
+
+#endif
 
 #endif

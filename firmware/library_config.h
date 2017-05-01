@@ -28,7 +28,6 @@
 #define HAL_PCD_MODULE_ENABLED
 #define STM32F407xx
 #define HSE_VALUE			((uint32_t)8000000)
-#define debug(x, ...)
 
 #ifdef RELEASE_BUILD
 

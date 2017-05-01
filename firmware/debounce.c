@@ -22,6 +22,7 @@
 **/
 
 #include "debounce.h"
+#include "debug.h"
 
 enum btnaction_t button_debounce(struct button_t *button, bool pressed) {
 	enum btnaction_t action = BUTTON_NOACTION;

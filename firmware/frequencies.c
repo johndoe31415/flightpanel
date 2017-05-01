@@ -22,6 +22,7 @@
 **/
 
 #include "frequencies.h"
+#include "debug.h"
 
 static const uint8_t com_frequency_100khz_divisions[COM_DIVISIONS_PER_100_KHZ] = {
 	0, 5, 10, 15, 25, 30, 35, 40, 50, 55, 60, 65, 75, 80, 85, 90

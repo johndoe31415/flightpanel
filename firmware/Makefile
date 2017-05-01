@@ -53,6 +53,9 @@ flightpanel: $(OBJS)
 flightpanel.bin: flightpanel
 	$(OBJCOPY) -O binary $< $@
 
+flightpanel.sym: flightpanel.c
+	$(CC) $(CFLAGS) -E -dM -o $@ $<
+
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
 
