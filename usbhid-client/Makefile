@@ -1,7 +1,7 @@
 .PHONY: all clean test
 
-CFLAGS := -std=c11 -Wall -Wmissing-prototypes -Wstrict-prototypes -Os -g3 -I../hidapi/hidapi
-LDFLAGS := -lhidapi-libusb -L../hidapi/libusb/.libs
+CFLAGS := -std=c11 -Wall -Wmissing-prototypes -Wstrict-prototypes -Os -g3 `pkg-config --cflags hidapi-libusb`
+LDFLAGS := `pkg-config --libs hidapi-libusb`
 
 OBJS := client.o
 

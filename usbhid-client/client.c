@@ -25,7 +25,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <hidapi.h>
+#include <string.h>
+#include <hidapi/hidapi.h>
 
 int main(void) {
 	if (hid_init()) {
