@@ -47,7 +47,7 @@ static uint8_t usb_report_time_tick;
 static struct rotary_encoder_with_button_t rotary_com1 = {
 	.rotary = {
 		.value = 0,
-		.detent_cnt = VHF_DIVISIONS,
+		.detent_cnt = COM_DIVISIONS,
 		.wrap_around = true,
 	},
 	.button = {
@@ -159,12 +159,12 @@ void instruments_idle_loop(void) {
 		}
 
 		if (redraw_com1_active) {
-			redraw_frequency(0, vhf_index_to_frequency_khz(instrument_state.com1_active_index));
+			redraw_frequency(0, com_index_to_frequency_khz(instrument_state.com1_active_index));
 			redraw_com1_active = false;
 		}
 
 		if (redraw_com1_standby) {
-			redraw_frequency(1, vhf_index_to_frequency_khz(rotary_com1.rotary.value));
+			redraw_frequency(1, com_index_to_frequency_khz(rotary_com1.rotary.value));
 			redraw_com1_standby = false;
 		}
 	}
