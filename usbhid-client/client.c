@@ -64,12 +64,14 @@ int main(void) {
 			fprintf(stderr, "%02x ", data[i]);
 		}
 		fprintf(stderr, "\n");
+		/*
 		if ((bytes_read > 0) && ((data[0] % 30) == 0x0)) {
 			memset(data, 0, sizeof(data));
 			data[1] = 0xab;
 			int written = hid_write(device, data, 2);
 			fprintf(stderr, "Write: %d\n", written);
 		}
+		*/
 	}
 
 	return 0;

@@ -35,6 +35,7 @@ typedef struct anon USB_OTG_GlobalTypeDef;
 
 extern PCD_HandleTypeDef hpcd;
 static USBD_HandleTypeDef USBD_Device;
+static struct hid_report_t send_report;
 
 void OTG_FS_WKUP_IRQHandler(void) {
 	printf("Unhandled: OTG FS Wakeup IRQ\n");
@@ -56,8 +57,11 @@ void init_usb_late(void) {
 	USBD_Start(&USBD_Device);
 }
 
+/* Make a copy of the incoming report (so the caller can allocate it on the
+ * stack) */
 void usb_submit_report(const struct hid_report_t *report) {
-	USBD_HID_SendReport(&USBD_Device, report);
+	memcpy(&send_report, report, sizeof(struct hid_report_t));
+	USBD_HID_SendReport(&USBD_Device, &send_report);
 }
 #if 0
 	struct hid_report_t report = { 0 };

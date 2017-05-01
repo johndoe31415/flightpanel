@@ -35,7 +35,7 @@ PB9		IO		Audio_SDA
 PB10	OUT		Audio_CLK_IN
 
 ########### My additions
-# LCD Display
+# LCD Display (D0 = SCK, D1 = MOSI)
 PB13	OUT		Display_SCK
 PB14	IN		Display_MISO
 PB15	OUT		Display_MOSI

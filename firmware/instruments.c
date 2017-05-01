@@ -39,9 +39,12 @@
 #include "instruments.h"
 #include "frequencies.h"
 
-static struct instrument_state instrument_state;
+#define USB_REPORT_INTERVAL_MS		25
 
-static struct rotary_encoder_with_button_t rotary_com = {
+static struct instrument_state instrument_state;
+static uint8_t usb_report_time_tick;
+
+static struct rotary_encoder_with_button_t rotary_com1 = {
 	.rotary = {
 		.value = 0,
 		.detent_cnt = VHF_DIVISIONS,
@@ -67,7 +70,7 @@ static struct rotary_encoder_with_button_t rotary_nav = {
 
 static const struct rotary_input_t rotary_inputs[] = {
 	{
-		.target = &rotary_com.rotary,
+		.target = &rotary_com1.rotary,
 		.pin1 = 55,
 		.pin2 = 48,
 	},
@@ -80,7 +83,7 @@ static const struct rotary_input_t rotary_inputs[] = {
 
 static const struct button_input_t button_inputs[] = {
 	{
-		.target = &rotary_com.button,
+		.target = &rotary_com1.button,
 		.pin = 49,
 	},
 	{
@@ -89,8 +92,21 @@ static const struct button_input_t button_inputs[] = {
 	},
 };
 
-/* Called every 8 ms */
+static void instruments_send_usb_hid_report(void) {
+	usb_report_time_tick = USB_REPORT_INTERVAL_MS;
+	struct hid_report_t hid_report = {
+		.com1_active = instrument_state.com1_active_index,
+		.com1_standby = rotary_com1.rotary.value,
+	};
+	usb_submit_report(&hid_report);
+}
+
 void hid_tick(void) {
+	if (!usb_report_time_tick) {
+		instruments_send_usb_hid_report();
+	} else {
+		usb_report_time_tick--;
+	}
 }
 
 static void swap_uint16(uint16_t *a, uint16_t *b) {
@@ -126,15 +142,18 @@ void instruments_idle_loop(void) {
 	bool redraw_com1_active = true;
 	bool redraw_com1_standby = true;
 
+	rotary_com1.rotary.changed = true;
+	rotary_com1.rotary.value = 0x123;
+
 	while (true) {
-		if (rotary_com.rotary.changed) {
-			rotary_com.rotary.changed = false;
+		if (rotary_com1.rotary.changed) {
+			rotary_com1.rotary.changed = false;
 			redraw_com1_standby = true;
 		}
 
-		if (rotary_com.button.lastpress != BUTTON_NOACTION) {
-			rotary_com.button.lastpress = BUTTON_NOACTION;
-			swap_uint16(&rotary_com.rotary.value, &instrument_state.com1_active_index);
+		if (rotary_com1.button.lastpress != BUTTON_NOACTION) {
+			rotary_com1.button.lastpress = BUTTON_NOACTION;
+			swap_uint16(&rotary_com1.rotary.value, &instrument_state.com1_active_index);
 			redraw_com1_active = true;
 			redraw_com1_standby = true;
 		}
@@ -145,7 +164,7 @@ void instruments_idle_loop(void) {
 		}
 
 		if (redraw_com1_standby) {
-			redraw_frequency(1, vhf_index_to_frequency_khz(rotary_com.rotary.value));
+			redraw_frequency(1, vhf_index_to_frequency_khz(rotary_com1.rotary.value));
 			redraw_com1_standby = false;
 		}
 	}
