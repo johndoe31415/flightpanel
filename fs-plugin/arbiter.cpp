@@ -21,37 +21,27 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __EMULATOR_HPP__
-#define __EMULATOR_HPP__
+#include <stdio.h>
+#include <unistd.h>
 
-#include <stdbool.h>
-#include <pthread.h>
-#include "fsconnection.hpp"
+#include "arbiter.hpp"
 
-class EmulatedConnection : public FSConnection {
-	private:
-		pthread_t _polling_thread;
-		bool _loop_running;
+Arbiter::Arbiter(FSConnection *fs_connection, FPConnection *fp_connection) {
+	_fs_connection = fs_connection;
+	_fp_connection = fp_connection;
+}
 
-		struct instrument_data_t _instrument_data;
+void Arbiter::run() {
+	fprintf(stderr, "Arbiter started FS %p, FP %p\n", _fs_connection, _fp_connection);
+	while (true) {
+		struct instrument_data_t fs_data;
+		_fs_connection->get_data(&fs_data);
 
-	private:
-		void randomize(struct vhf_data_t &vhf);
-		void randomize(struct nav_data_t &nav);
-		void randomize(struct adf_data_t &adf);
-		void randomize(struct dme_data_t &dme);
-		void randomize(struct light_data_t &lights);
-		void randomize(struct ap_data_t &ap);
-		void randomize(struct transponder_data_t &xpdr);
-		void randomize(struct misc_data_t &misc);
+		struct instrument_data_t fp_data;
+		_fp_connection->get_data(&fp_data);
 
-	public:
-		EmulatedConnection();
-		bool connected(void) const {
-			return true;
-		}
-		void get_data(struct instrument_data_t *data);
-		~EmulatedConnection();
-};
+//		_fp_connection->put_data(&fs_data);
 
-#endif
+		sleep(1);
+	}
+}

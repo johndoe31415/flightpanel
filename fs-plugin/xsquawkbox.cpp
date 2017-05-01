@@ -39,30 +39,28 @@ XSquawkBoxConnection *xsquawkbox_connection;
 
 static void* event_loop_thread(void *ctx) {
 	XSquawkBoxConnection *connection = (XSquawkBoxConnection*)ctx;
+	connection->event_loop();
+	return NULL;
+}
 
+void XSquawkBoxConnection::event_loop() {
 	xplane_datadef_refs_t refs;
 	xplane_datadef_data_t old_data;
 	memset(&refs, 0, sizeof(refs));
 	memset(&old_data, 0, sizeof(old_data));
 	xplane_resolve_refs(refs);
-	while (connection->is_loop_running()) {
-#if 1
+	while (_loop_running) {
+#if 0
 		xplane_datadef_data_t new_data;
 		memset(&new_data, 0, sizeof(new_data));
 		xplane_get_data(refs, new_data);
 		xplane_print_new(old_data, new_data);
 		memcpy(&old_data, &new_data, sizeof(old_data));
 #else
-		connection->poll_data();
+		poll_data();
 #endif
 		sleep(1);
 	}
-	return NULL;
-}
-
-void XSquawkBoxConnection::event_loop() {
-	_loop_running = true;
-	pthread_create(&_periodic_query_thread, NULL, event_loop_thread, this);
 }
 
 static double inhg_to_millibar(double pressure_inhg) {
@@ -70,72 +68,69 @@ static double inhg_to_millibar(double pressure_inhg) {
 }
 
 void XSquawkBoxConnection::poll_data() {
-	struct instrument_data_t data;
-	memset(&data, 0, sizeof(data));
-	data.vhf1.freq_active_khz = XPLMGetDatai(_datarefs.vhf1.frequency_active) * 10;
-	data.vhf1.freq_standby_khz = XPLMGetDatai(_datarefs.vhf1.frequency_standby) * 10;
-	data.vhf1.rx = XPLMGetDatai(_datarefs.vhf1.rx);
+	_instrument_data.vhf1.freq_active_khz = XPLMGetDatai(_datarefs.vhf1.frequency_active) * 10;
+	_instrument_data.vhf1.freq_standby_khz = XPLMGetDatai(_datarefs.vhf1.frequency_standby) * 10;
+	_instrument_data.vhf1.rx = XPLMGetDatai(_datarefs.vhf1.rx);
 
-	data.vhf2.freq_active_khz = XPLMGetDatai(_datarefs.vhf2.frequency_active) * 10;
-	data.vhf2.freq_standby_khz = XPLMGetDatai(_datarefs.vhf2.frequency_standby) * 10;
-	data.vhf2.rx = XPLMGetDatai(_datarefs.vhf2.rx);
+	_instrument_data.vhf2.freq_active_khz = XPLMGetDatai(_datarefs.vhf2.frequency_active) * 10;
+	_instrument_data.vhf2.freq_standby_khz = XPLMGetDatai(_datarefs.vhf2.frequency_standby) * 10;
+	_instrument_data.vhf2.rx = XPLMGetDatai(_datarefs.vhf2.rx);
 
-	if (data.vhf1.rx) {
-		data.vhf1.tx = true;
-		data.vhf2.tx = false;
+	if (_instrument_data.vhf1.rx) {
+		_instrument_data.vhf1.tx = true;
+		_instrument_data.vhf2.tx = false;
 	} else {
-		data.vhf1.tx = false;
-		data.vhf2.tx = data.vhf2.rx;
+		_instrument_data.vhf1.tx = false;
+		_instrument_data.vhf2.tx = _instrument_data.vhf2.rx;
 	}
 
-	data.nav1.freq_active_khz = XPLMGetDatai(_datarefs.nav1.frequency_active) * 10;
-	data.nav1.freq_standby_khz = XPLMGetDatai(_datarefs.nav1.frequency_standby) * 10;
-	data.nav1.obs = round(XPLMGetDataf(_datarefs.nav1.obs));
-	XPLMGetDatab(_datarefs.nav1.ident, data.nav1.ident, 0, 8);
-	data.nav1.sound = XPLMGetDatai(_datarefs.nav1.sound);
+	_instrument_data.nav1.freq_active_khz = XPLMGetDatai(_datarefs.nav1.frequency_active) * 10;
+	_instrument_data.nav1.freq_standby_khz = XPLMGetDatai(_datarefs.nav1.frequency_standby) * 10;
+	_instrument_data.nav1.obs = round(XPLMGetDataf(_datarefs.nav1.obs));
+	XPLMGetDatab(_datarefs.nav1.ident, _instrument_data.nav1.ident, 0, 8);
+	_instrument_data.nav1.sound = XPLMGetDatai(_datarefs.nav1.sound);
 
-	data.nav2.freq_active_khz = XPLMGetDatai(_datarefs.nav2.frequency_active) * 10;
-	data.nav2.freq_standby_khz = XPLMGetDatai(_datarefs.nav2.frequency_standby) * 10;
-	data.nav2.obs = round(XPLMGetDataf(_datarefs.nav2.obs));
-	XPLMGetDatab(_datarefs.nav2.ident, data.nav2.ident, 0, 8);
-	data.nav2.sound = XPLMGetDatai(_datarefs.nav2.sound);
+	_instrument_data.nav2.freq_active_khz = XPLMGetDatai(_datarefs.nav2.frequency_active) * 10;
+	_instrument_data.nav2.freq_standby_khz = XPLMGetDatai(_datarefs.nav2.frequency_standby) * 10;
+	_instrument_data.nav2.obs = round(XPLMGetDataf(_datarefs.nav2.obs));
+	XPLMGetDatab(_datarefs.nav2.ident, _instrument_data.nav2.ident, 0, 8);
+	_instrument_data.nav2.sound = XPLMGetDatai(_datarefs.nav2.sound);
 
-	data.adf.freq_hz = XPLMGetDatai(_datarefs.adf.frequency) * 1000;
-	XPLMGetDatab(_datarefs.adf.ident, data.adf.ident, 0, 8);
-	data.adf.compass_rose = round(XPLMGetDataf(_datarefs.adf.compass_rose));
-	data.adf.sound = XPLMGetDatai(_datarefs.adf.sound);
+	_instrument_data.adf.freq_hz = XPLMGetDatai(_datarefs.adf.frequency) * 1000;
+	XPLMGetDatab(_datarefs.adf.ident, _instrument_data.adf.ident, 0, 8);
+	_instrument_data.adf.compass_rose = round(XPLMGetDataf(_datarefs.adf.compass_rose));
+	_instrument_data.adf.sound = XPLMGetDatai(_datarefs.adf.sound);
 
-	data.dme.available = XPLMGetDatai(_datarefs.dme.available);
-	data.dme.nav_id = 1;
-	data.dme.distance_nm_tenths = round(XPLMGetDataf(_datarefs.dme.distance) * 10);
-	data.dme.speed_kt = round(XPLMGetDataf(_datarefs.dme.speed));
-	data.dme.sound = XPLMGetDatai(_datarefs.dme.sound);
+	_instrument_data.dme.available = XPLMGetDatai(_datarefs.dme.available);
+	_instrument_data.dme.nav_id = 1;
+	_instrument_data.dme.distance_nm_tenths = round(XPLMGetDataf(_datarefs.dme.distance) * 10);
+	_instrument_data.dme.speed_kt = round(XPLMGetDataf(_datarefs.dme.speed));
+	_instrument_data.dme.sound = XPLMGetDatai(_datarefs.dme.sound);
 
-	data.lights.beacon = XPLMGetDatai(_datarefs.lights.beacon);
-	data.lights.landing = XPLMGetDatai(_datarefs.lights.landing);
-	data.lights.taxi = XPLMGetDatai(_datarefs.lights.taxi);
-	data.lights.nav = XPLMGetDatai(_datarefs.lights.nav);
-	data.lights.strobe = XPLMGetDatai(_datarefs.lights.strobe);
+	_instrument_data.lights.beacon = XPLMGetDatai(_datarefs.lights.beacon);
+	_instrument_data.lights.landing = XPLMGetDatai(_datarefs.lights.landing);
+	_instrument_data.lights.taxi = XPLMGetDatai(_datarefs.lights.taxi);
+	_instrument_data.lights.nav = XPLMGetDatai(_datarefs.lights.nav);
+	_instrument_data.lights.strobe = XPLMGetDatai(_datarefs.lights.strobe);
 
-	data.ap.active = XPLMGetDatai(_datarefs.ap.active) >= 2;
-	data.ap.altitude_ft = round(XPLMGetDataf(_datarefs.ap.altitude));
-	data.ap.climbrate_ft_per_min = round(XPLMGetDataf(_datarefs.ap.climbrate));
-	data.ap.heading = round(XPLMGetDataf(_datarefs.ap.heading));
-	data.ap.speed_kts = round(XPLMGetDataf(_datarefs.ap.airspeed));
-	data.ap.hdg_hold = XPLMGetDatai(_datarefs.ap.hdg_hold);
-	data.ap.nav_hold = XPLMGetDatai(_datarefs.ap.nav_hold);
-	data.ap.alt_hold = XPLMGetDatai(_datarefs.ap.alt_hold) == 2;		// Alt Mode captured (0 = off, 1 = armed)
-	data.ap.rev_hold = XPLMGetDatai(_datarefs.ap.rev_hold);
-	data.ap.apr_hold = XPLMGetDatai(_datarefs.ap.apr_hold);
-	data.ap.ias_hold = XPLMGetDatai(_datarefs.ap.ias_hold) == 2;		// Speed Mode captured (0 = off, 1 = armed)
+	_instrument_data.ap.active = XPLMGetDatai(_datarefs.ap.active) >= 2;
+	_instrument_data.ap.altitude_ft = round(XPLMGetDataf(_datarefs.ap.altitude));
+	_instrument_data.ap.climbrate_ft_per_min = round(XPLMGetDataf(_datarefs.ap.climbrate));
+	_instrument_data.ap.heading = round(XPLMGetDataf(_datarefs.ap.heading));
+	_instrument_data.ap.speed_kts = round(XPLMGetDataf(_datarefs.ap.airspeed));
+	_instrument_data.ap.hdg_hold = XPLMGetDatai(_datarefs.ap.hdg_hold);
+	_instrument_data.ap.nav_hold = XPLMGetDatai(_datarefs.ap.nav_hold);
+	_instrument_data.ap.alt_hold = XPLMGetDatai(_datarefs.ap.alt_hold) == 2;		// Alt Mode captured (0 = off, 1 = armed)
+	_instrument_data.ap.rev_hold = XPLMGetDatai(_datarefs.ap.rev_hold);
+	_instrument_data.ap.apr_hold = XPLMGetDatai(_datarefs.ap.apr_hold);
+	_instrument_data.ap.ias_hold = XPLMGetDatai(_datarefs.ap.ias_hold) == 2;		// Speed Mode captured (0 = off, 1 = armed)
 
-	data.xpdr.squawk = XPLMGetDatai(_datarefs.xpdr.squawk);
+	_instrument_data.xpdr.squawk = XPLMGetDatai(_datarefs.xpdr.squawk);
 
-	data.misc.ias_kt = XPLMGetDataf(_datarefs.misc.ias);
-	data.misc.indicated_alt_ft = XPLMGetDataf(_datarefs.misc.altitude);
-	data.misc.qnh_millibar = round(inhg_to_millibar(XPLMGetDataf(_datarefs.misc.barometer_setting)));
-	data.misc.guide_gps = XPLMGetDatai(_datarefs.misc.hsi_selector) == 2; 		// 0 = NAV, 2 = GPS (HSI_selector_2: 1 = NAV, 3 = GPS)
-	fsconnection_incoming_data(&data);
+	_instrument_data.misc.ias_kt = XPLMGetDataf(_datarefs.misc.ias);
+	_instrument_data.misc.indicated_alt_ft = XPLMGetDataf(_datarefs.misc.altitude);
+	_instrument_data.misc.qnh_millibar = round(inhg_to_millibar(XPLMGetDataf(_datarefs.misc.barometer_setting)));
+	_instrument_data.misc.guide_gps = XPLMGetDatai(_datarefs.misc.hsi_selector) == 2; 		// 0 = NAV, 2 = GPS (HSI_selector_2: 1 = NAV, 3 = GPS)
 }
 
 XSquawkBoxConnection::XSquawkBoxConnection() {
@@ -195,6 +190,9 @@ XSquawkBoxConnection::XSquawkBoxConnection() {
 	_datarefs.misc.altitude = XPLMFindDataRef("sim/flightmodel/misc/h_ind");
 	_datarefs.misc.ias = XPLMFindDataRef("sim/flightmodel/position/indicated_airspeed");
 	_datarefs.misc.hsi_selector = XPLMFindDataRef("sim/cockpit/switches/HSI_selector");
+
+	memset(&_instrument_data, 0, sizeof(struct instrument_data_t));
+	pthread_create(&_periodic_query_thread, NULL, event_loop_thread, this);
 }
 
 XSquawkBoxConnection::~XSquawkBoxConnection() {
@@ -212,7 +210,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
 
 PLUGIN_API void XPluginStop(void) {
 	fprintf(stderr, "X-Plane plugin stop.\n");
-	xsquawkbox_connection->set_quit();
+//	xsquawkbox_connection->set_quit();
 }
 
 PLUGIN_API int XPluginEnable(void) {
@@ -222,7 +220,7 @@ PLUGIN_API int XPluginEnable(void) {
 
 PLUGIN_API void XPluginDisable(void) {
 	fprintf(stderr, "X-Plane plugin disable.\n");
-	xsquawkbox_connection->set_quit();
+//	xsquawkbox_connection->set_quit();
 }
 
 PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, void *inParam) {

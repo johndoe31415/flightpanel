@@ -24,11 +24,24 @@
 #ifndef __FPCONNECTION_HPP__
 #define __FPCONNECTION_HPP__
 
+#include <pthread.h>
+#include <hidapi/hidapi.h>
+#include "fsconnection.hpp"
+
 #define USB_VID		0x0483
 #define USB_PID		0x572b
 
-struct fpconnection_t {
-	bool running;
+class FPConnection {
+	private:
+		hid_device *_device;
+
+	public:
+		FPConnection();
+		bool connected() const {
+			return _device != NULL;
+		}
+		void get_data(struct instrument_data_t *data);
+		~FPConnection();
 };
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/

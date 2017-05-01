@@ -21,6 +21,7 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -141,18 +142,22 @@ enum data_request_t {
 	REQUEST_DATADEF_INSTRUMENTS
 };
 
-static void CALLBACK simconnect_callback(SIMCONNECT_RECV* pData, DWORD cbData, void *vcontext) {
+static void CALLBACK simconnect_callback_wrapper(SIMCONNECT_RECV* pData, DWORD cbData, void *vcontext) {
 	SimConnectConnection *conn = (SimConnectConnection*)vcontext;
+	conn->simconnect_callback(pData, cbData);
+}
+
+void SimConnectConnection::simconnect_callback(SIMCONNECT_RECV *pData, DWORD cbData) {
 	if (pData->dwID == SIMCONNECT_RECV_ID_EVENT) {
 		SIMCONNECT_RECV_EVENT *evt = (SIMCONNECT_RECV_EVENT*)pData;
 		enum simconnect_event_t event_id = (enum simconnect_event_t)evt->uEventID;
 		if (event_id == EVENT_SIM_START) {
 			printf("Simulation started.\n");
-			SimConnect_RequestDataOnSimObjectType(conn->get_simconnect_handle(), REQUEST_DATADEF_INFO, DATADEF_INFO, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
-			SimConnect_RequestDataOnSimObjectType(conn->get_simconnect_handle(), REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
+			SimConnect_RequestDataOnSimObjectType(_simconnect_handle, REQUEST_DATADEF_INFO, DATADEF_INFO, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
+			SimConnect_RequestDataOnSimObjectType(_simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 		} else if (evt->uGroupID == EVENTGROUP_INSTRUMENT_CHANGED) {
 			//printf("Instrument changed: %s\n", get_event_enum_name(event_id));
-			SimConnect_RequestDataOnSimObjectType(conn->get_simconnect_handle(), REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
+			SimConnect_RequestDataOnSimObjectType(_simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 		} else {
 			printf("Unhandled event received: 0x%lx\n", evt->uEventID);
 		}
@@ -170,25 +175,25 @@ static void CALLBACK simconnect_callback(SIMCONNECT_RECV* pData, DWORD cbData, v
 			}
 			struct instrument_data_t abstract_data;
 			memset(&abstract_data, 0, sizeof(abstract_data));
-			simconnect_instrument_to_abstract(simconnect_data, &abstract_data);
-			fsconnection_incoming_data(&abstract_data);
+			simconnect_instrument_to_abstract(simconnect_data, &_instrument_data);
 		} else {
 			printf("Recevied unhandled data for request 0x%lx\n", pObjData->dwRequestID);
 		}
 	} else if (pData->dwID == SIMCONNECT_RECV_ID_QUIT) {
-		conn->set_quit();
+		_loop_running = false;
 		printf("Received termination signal.\n");
 	} else {
 		printf("Unhandled callback dwID 0x%lx\n", pData->dwID);
 	}
 }
 
-static void* simconnect_periodic_query_thread(void *vcontext) {
-	SimConnectConnection *conn = (SimConnectConnection*)vcontext;
-	while (conn->is_loop_running()) {
-		Sleep(1000);
-		SimConnect_RequestDataOnSimObjectType(conn->get_simconnect_handle(), REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
-	}
+void SimConnectConnection::get_data(struct instrument_data_t *data) {
+	memcpy(data, &_instrument_data, sizeof(struct instrument_data_t));
+}
+
+static void* event_loop_thread(void *ctx) {
+	SimConnectConnection *connection = (SimConnectConnection*)ctx;
+	connection->event_loop();
 	return NULL;
 }
 
@@ -197,16 +202,15 @@ void SimConnectConnection::event_loop() {
 	SimConnect_RequestDataOnSimObjectType(_simconnect_handle, REQUEST_DATADEF_INFO, DATADEF_INFO, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 	SimConnect_RequestDataOnSimObjectType(_simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 
-	/* Create thread that polls the status every second */
-	pthread_create(&_periodic_query_thread, NULL, simconnect_periodic_query_thread, this);
 
 	while (_loop_running) {
-		SimConnect_CallDispatch(_simconnect_handle, simconnect_callback, this);
+		SimConnect_RequestDataOnSimObjectType(_simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
+		SimConnect_CallDispatch(_simconnect_handle, simconnect_callback_wrapper, this);
 		Sleep(10);
 	}
 
 	/* Clean up loop thread */
-	pthread_join(_periodic_query_thread, NULL);
+//	pthread_join(_periodic_query_thread, NULL);
 }
 
 SimConnectConnection::SimConnectConnection() {
@@ -232,9 +236,11 @@ SimConnectConnection::SimConnectConnection() {
 			event_enum++;
 		}
 	} else {
-		fprintf(stderr, "Connection to flight simulator via SimConnect failed.\n");
-		_simconnect_handle = NULL;
+		throw std::runtime_error("Connection to flight simulator via SimConnect failed.");
 	}
+
+	/* Create thread that polls the status every second */
+	pthread_create(&_periodic_query_thread, NULL, event_loop_thread, this);
 }
 
 SimConnectConnection::~SimConnectConnection() {

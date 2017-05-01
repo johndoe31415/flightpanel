@@ -28,6 +28,8 @@
 #include <math.h>
 
 #include "fsconnection.hpp"
+#include "fpconnection.hpp"
+#include "arbiter.hpp"
 
 #if defined(VARIANT_WINDOWS_FSX)
 #include "simconnect.hpp"
@@ -49,10 +51,14 @@
 
 int main(void) {
 	FSConnection *fs_connection = new FlightSimConnection();
-	if ((!fs_connection) || (!fs_connection->connected())) {
-		exit(EXIT_FAILURE);
-	}
-	fs_connection->event_loop();
+	FPConnection *fp_connection = new FPConnection();
+
+	//fs_connection->event_loop();
+	//fp_connection->event_loop();
+
+	Arbiter arbiter(fs_connection, fp_connection);
+	arbiter.run();
+
 	delete fs_connection;
 	return 0;
 }

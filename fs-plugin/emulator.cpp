@@ -31,12 +31,8 @@
 #include <string.h>
 #include "emulator.hpp"
 
-void EmulatedConnection::event_loop() {
-	_loop_running = true;
-	while (_loop_running) {
-		fsconnection_incoming_data(&_instr);
-		sleep(1);
-	}
+void EmulatedConnection::get_data(struct instrument_data_t *data) {
+	memcpy(data, &_instrument_data, sizeof(struct instrument_data_t));
 }
 
 static int rand_value(int maxvalue) {
@@ -128,22 +124,22 @@ void EmulatedConnection::randomize(struct misc_data_t &misc) {
 EmulatedConnection::EmulatedConnection() {
 	_loop_running = false;
 	srand(time(NULL));
-	memset(&_instr, 0, sizeof(_instr));
-	randomize(_instr.vhf1);
-	randomize(_instr.vhf2);
+	memset(&_instrument_data, 0, sizeof(_instrument_data));
+	randomize(_instrument_data.vhf1);
+	randomize(_instrument_data.vhf2);
 	if (rand_value(2)) {
-		_instr.vhf1.tx = true;
+		_instrument_data.vhf1.tx = true;
 	} else {
-		_instr.vhf1.tx = true;
+		_instrument_data.vhf1.tx = true;
 	}
-	randomize(_instr.nav1);
-	randomize(_instr.nav2);
-	randomize(_instr.adf);
-	randomize(_instr.dme);
-	randomize(_instr.lights);
-	randomize(_instr.ap);
-	randomize(_instr.xpdr);
-	randomize(_instr.misc);
+	randomize(_instrument_data.nav1);
+	randomize(_instrument_data.nav2);
+	randomize(_instrument_data.adf);
+	randomize(_instrument_data.dme);
+	randomize(_instrument_data.lights);
+	randomize(_instrument_data.ap);
+	randomize(_instrument_data.xpdr);
+	randomize(_instrument_data.misc);
 }
 
 EmulatedConnection::~EmulatedConnection() {

@@ -32,26 +32,17 @@
 
 class SimConnectConnection : public FSConnection {
 	private:
-		HANDLE _simconnect_handle;
 		bool _loop_running;
 		pthread_t _periodic_query_thread;
+		HANDLE _simconnect_handle;
+		struct instrument_data_t _instrument_data;
 
 	public:
 		SimConnectConnection();
+		virtual void get_data(struct instrument_data_t *data);
 		void event_loop();
-		HANDLE get_simconnect_handle(void) const {
-			return _simconnect_handle;
-		}
-		bool connected(void) const {
-			return get_simconnect_handle() != NULL;
-		}
-		void set_quit() {
-			_loop_running = false;
-		}
-		bool is_loop_running() const {
-			return _loop_running;
-		}
-		~SimConnectConnection();
+		void simconnect_callback(SIMCONNECT_RECV *pData, DWORD cbData);
+		virtual ~SimConnectConnection();
 };
 
 #endif

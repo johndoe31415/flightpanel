@@ -99,19 +99,14 @@ class XSquawkBoxConnection : public FSConnection {
 		bool _loop_running;
 		pthread_t _periodic_query_thread;
 		struct datarefs_t _datarefs;
+		struct instrument_data_t _instrument_data;
+
+		void poll_data();
+
 	public:
 		XSquawkBoxConnection();
+		virtual void get_data(struct instrument_data_t *data);
 		void event_loop();
-		void poll_data();
-		bool connected(void) const {
-			return true;
-		}
-		void set_quit() {
-			_loop_running = false;
-		}
-		bool is_loop_running() const {
-			return _loop_running;
-		}
 		~XSquawkBoxConnection();
 };
 

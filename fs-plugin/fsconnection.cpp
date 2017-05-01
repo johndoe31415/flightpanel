@@ -54,6 +54,6 @@ void dump_instrument_data(FILE *f, const struct instrument_data_t *data) {
 	fprintf(f, "IAS %d kt, IALT %d ft, QNH %d mBar, Guide %s\n", data->misc.ias_kt, data->misc.indicated_alt_ft, data->misc.qnh_millibar, data->misc.guide_gps ? "GPS" : "NAV");
 }
 
-void fsconnection_incoming_data(const struct instrument_data_t *data) {
-	dump_instrument_data(stdout, data);
-}
+//void fsconnection_incoming_data(const struct instrument_data_t *data) {
+//	dump_instrument_data(stdout, data);
+//}

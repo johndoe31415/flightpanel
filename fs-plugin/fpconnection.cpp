@@ -21,22 +21,16 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
 #include <hidapi/hidapi.h>
 #include "fpconnection.hpp"
 
-struct fpconnection_t* flightpanel_init(void) {
-	struct fpconnection_t *context = (struct fpconnection_t*)calloc(1, sizeof(*context));
-	if (!context) {
-		return NULL;
-	}
-
+FPConnection::FPConnection() {
 	struct hid_device_info *info = hid_enumerate(USB_VID, USB_PID);
 	if (!info) {
-		fprintf(stderr, "Failed to hid_enumerate().\n");
-		free(context);
-		return NULL;
+		throw std::runtime_error("Failed to hid_enumerate().");
 	}
 
 	struct hid_device_info *current = info;
@@ -48,19 +42,17 @@ struct fpconnection_t* flightpanel_init(void) {
 		current = current->next;
 	}
 
-	hid_device *device = hid_open(info->vendor_id, info->product_id, info->serial_number);
-	if (!device) {
-		fprintf(stderr, "Failed to hid_open().\n");
-		exit(EXIT_FAILURE);
-	}
+	_device = hid_open(info->vendor_id, info->product_id, info->serial_number);
 	hid_free_enumeration(info);
-
-	return context;
+	if (!_device) {
+		throw std::runtime_error("Failed to hid_open().");
+	}
 }
 
-void flightpanel_loop(struct fpconnection_t *context) {
+void FPConnection::get_data(struct instrument_data_t *data) {
 }
 
-void flightpanel_close(struct fpconnection_t* context) {
-	free(context);
+FPConnection::~FPConnection() {
+	hid_close(_device);
 }
+

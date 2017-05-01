@@ -27,18 +27,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-class FSConnection {
-	public:
-		FSConnection() {
-		}
-
-		virtual bool connected(void) const = 0;
-		virtual void event_loop(void) = 0;
-
-		virtual ~FSConnection() {
-		}
-};
-
 struct vhf_data_t {
 	uint32_t freq_active_khz;
 	uint32_t freq_standby_khz;
@@ -106,6 +94,16 @@ struct instrument_data_t {
 	struct transponder_data_t xpdr;
 	struct misc_data_t misc;
 };
+
+class FSConnection {
+	public:
+		FSConnection() {
+		}
+		virtual void get_data(struct instrument_data_t *data) = 0;
+		virtual ~FSConnection() {
+		}
+};
+
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void dump_instrument_data(const struct instrument_data_t *data);
