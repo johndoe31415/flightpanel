@@ -1,0 +1,2 @@
+# ID 0483:572b flightpanel
+ATTRS{idVendor}=="0483", ATTRS{idProduct}=="572b", MODE="0660", GROUP="users"
