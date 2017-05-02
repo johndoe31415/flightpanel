@@ -34,13 +34,17 @@
 class FPConnection {
 	private:
 		hid_device *_device;
+		pthread_t _periodic_query_thread;
+		struct instrument_data_t _instrument_data;
 
 	public:
 		FPConnection();
 		bool connected() const {
 			return _device != NULL;
 		}
+		void event_loop();
 		void get_data(struct instrument_data_t *data);
+		void put_data(const struct instrument_data_t *data, const struct component_selection_t *selection);
 		~FPConnection();
 };
 

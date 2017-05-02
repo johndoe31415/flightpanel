@@ -29,7 +29,7 @@
 #include <XPLMDataAccess.h>
 #include "fsconnection.hpp"
 
-struct vhf_dataref_t {
+struct com_dataref_t {
 	XPLMDataRef frequency_active, frequency_standby;
 	XPLMDataRef rx;
 };
@@ -84,7 +84,7 @@ struct misc_dataref_t {
 };
 
 struct datarefs_t {
-	struct vhf_dataref_t vhf1, vhf2;
+	struct com_dataref_t com1, com2;
 	struct nav_dataref_t nav1, nav2;
 	struct adf_dataref_t adf;
 	struct dme_dataref_t dme;
@@ -106,6 +106,7 @@ class XSquawkBoxConnection : public FSConnection {
 	public:
 		XSquawkBoxConnection();
 		virtual void get_data(struct instrument_data_t *data);
+		virtual void put_data(const struct instrument_data_t *data, const struct component_selection_t *selection);
 		void event_loop();
 		~XSquawkBoxConnection();
 };

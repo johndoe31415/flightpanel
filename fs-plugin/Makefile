@@ -58,12 +58,12 @@ else
 $(error The VARIANT environment variable needs to be either "linux-xplane", "linux-emulator" or "windows-fsx", not "$(VARIANT)")
 endif
 
-SHARED_CFLAGS := $(PLATFORM_CFLAGS) -Ihidapi -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -O3 -pthread -g
+SHARED_CFLAGS := $(PLATFORM_CFLAGS) -I.. -Ihidapi -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -O3 -pthread -g -DDISABLE_FIRMWARE_DEBUG
 CFLAGS := -std=c11 $(SHARED_CFLAGS)
 CXXFLAGS := -std=c++11 $(SHARED_CFLAGS)
 LDFLAGS := $(PLATFORM_LDFLAGS)
 
-OBJS := fpconnect.o fsconnection.o fpconnection.o arbiter.o $(PLATFORM_OBJS)
+OBJS := fpconnect.o fsconnection.o fpconnection.o arbiter.o ../firmware/frequencies.o $(PLATFORM_OBJS)
 
 all: $(TARGET)
 

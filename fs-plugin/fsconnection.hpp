@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-struct vhf_data_t {
+struct com_data_t {
 	uint32_t freq_active_khz;
 	uint32_t freq_standby_khz;
 	bool rx, tx;
@@ -85,7 +85,7 @@ struct misc_data_t {
 };
 
 struct instrument_data_t {
-	struct vhf_data_t vhf1, vhf2;
+	struct com_data_t com1, com2;
 	struct nav_data_t nav1, nav2;
 	struct adf_data_t adf;
 	struct dme_data_t dme;
@@ -95,11 +95,20 @@ struct instrument_data_t {
 	struct misc_data_t misc;
 };
 
+struct component_selection_t {
+	bool com1_active;
+	bool com1_standby;
+	bool com2_active;
+	bool com2_standby;
+	bool com_rxtx;
+};
+
 class FSConnection {
 	public:
 		FSConnection() {
 		}
 		virtual void get_data(struct instrument_data_t *data) = 0;
+		virtual void put_data(const struct instrument_data_t *data, const struct component_selection_t *selection) = 0;
 		virtual ~FSConnection() {
 		}
 };

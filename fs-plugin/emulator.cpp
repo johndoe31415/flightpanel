@@ -35,15 +35,40 @@ void EmulatedConnection::get_data(struct instrument_data_t *data) {
 	memcpy(data, &_instrument_data, sizeof(struct instrument_data_t));
 }
 
+void EmulatedConnection::put_data(const struct instrument_data_t *data, const struct component_selection_t *selection) {
+	if (!selection || selection->com1_active) {
+		_instrument_data.com1.freq_active_khz = data->com1.freq_active_khz;
+	}
+	if (!selection || selection->com1_standby) {
+		_instrument_data.com1.freq_standby_khz = data->com1.freq_standby_khz;
+	}
+	if (!selection || selection->com2_active) {
+		_instrument_data.com2.freq_active_khz = data->com2.freq_active_khz;
+	}
+	if (!selection || selection->com2_standby) {
+		_instrument_data.com2.freq_standby_khz = data->com2.freq_standby_khz;
+	}
+	if (!selection || selection->com_rxtx) {
+		_instrument_data.com1.rx = data->com1.rx;
+		_instrument_data.com1.tx = data->com1.tx;
+		_instrument_data.com2.rx = data->com2.rx;
+		_instrument_data.com2.tx = data->com2.tx;
+	}
+}
+
 static int rand_value(int maxvalue) {
 	return rand() % maxvalue;
 }
 
-void EmulatedConnection::randomize(struct vhf_data_t &vhf) {
-	vhf.freq_active_khz = 118000 + (25 * rand_value(19 * 40));
-	vhf.freq_standby_khz = 118000 + (25 * rand_value(19 * 40));
-	vhf.rx = true;
-	vhf.tx = false;
+static int rand_value(int minvalue, int maxvalue) {
+	return rand_value(maxvalue - minvalue) + minvalue;
+}
+
+void EmulatedConnection::randomize(struct com_data_t &com) {
+	com.freq_active_khz = 118000 + (25 * rand_value(19 * 40));
+	com.freq_standby_khz = 118000 + (25 * rand_value(19 * 40));
+	com.rx = true;
+	com.tx = false;
 }
 
 void EmulatedConnection::randomize(struct nav_data_t &nav) {
@@ -115,9 +140,9 @@ void EmulatedConnection::randomize(struct transponder_data_t &xpdr) {
 }
 
 void EmulatedConnection::randomize(struct misc_data_t &misc) {
-	misc.ias_kt = 60 + rand_value(70);
-	misc.indicated_alt_ft = 1200 + rand_value(7000);
-	misc.qnh_millibar = 970 + rand_value(60);
+	misc.ias_kt = rand_value(60, 140);
+	misc.indicated_alt_ft = rand_value(800, 8000);
+	misc.qnh_millibar = rand_value(970, 1030);
 	misc.guide_gps = rand_value(2);
 }
 
@@ -125,12 +150,12 @@ EmulatedConnection::EmulatedConnection() {
 	_loop_running = false;
 	srand(time(NULL));
 	memset(&_instrument_data, 0, sizeof(_instrument_data));
-	randomize(_instrument_data.vhf1);
-	randomize(_instrument_data.vhf2);
+	randomize(_instrument_data.com1);
+	randomize(_instrument_data.com2);
 	if (rand_value(2)) {
-		_instrument_data.vhf1.tx = true;
+		_instrument_data.com1.tx = true;
 	} else {
-		_instrument_data.vhf1.tx = true;
+		_instrument_data.com1.tx = true;
 	}
 	randomize(_instrument_data.nav1);
 	randomize(_instrument_data.nav2);

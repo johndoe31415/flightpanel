@@ -66,18 +66,18 @@ static uint32_t adf_frequency_bcd32_to_hz(uint32_t bcd32_value) {
 }
 
 static void simconnect_instrument_to_abstract(const struct simconnect_datatype_instruments_t *in, struct instrument_data_t *out) {
-	out->vhf1.freq_active_khz = frequency_bcd32_to_khz(in->vhf1_freq_active);
-	out->vhf1.freq_standby_khz = frequency_bcd32_to_khz(in->vhf1_freq_standby);
-	out->vhf1.tx = in->vhf1_tx;
-	out->vhf2.freq_active_khz = frequency_bcd32_to_khz(in->vhf2_freq_active);
-	out->vhf2.freq_standby_khz = frequency_bcd32_to_khz(in->vhf2_freq_standby);
-	out->vhf2.tx = in->vhf2_tx;
-	if (in->vhf_all_rx) {
-		out->vhf1.rx = true;
-		out->vhf2.rx = true;
+	out->com1.freq_active_khz = frequency_bcd32_to_khz(in->com1_freq_active);
+	out->com1.freq_standby_khz = frequency_bcd32_to_khz(in->com1_freq_standby);
+	out->com1.tx = in->com1_tx;
+	out->com2.freq_active_khz = frequency_bcd32_to_khz(in->com2_freq_active);
+	out->com2.freq_standby_khz = frequency_bcd32_to_khz(in->com2_freq_standby);
+	out->com2.tx = in->com2_tx;
+	if (in->com_all_rx) {
+		out->com1.rx = true;
+		out->com2.rx = true;
 	} else {
-		out->vhf1.rx = out->vhf1.tx;
-		out->vhf2.rx = out->vhf2.tx;
+		out->com1.rx = out->com1.tx;
+		out->com2.rx = out->com2.tx;
 	}
 
 	out->nav1.freq_active_khz = frequency_bcd32_to_khz(in->nav1_freq_active);
@@ -189,6 +189,9 @@ void SimConnectConnection::simconnect_callback(SIMCONNECT_RECV *pData, DWORD cbD
 
 void SimConnectConnection::get_data(struct instrument_data_t *data) {
 	memcpy(data, &_instrument_data, sizeof(struct instrument_data_t));
+}
+
+void SimConnectConnection::put_data(const struct instrument_data_t *data, const struct component_selection_t *selection) {
 }
 
 static void* event_loop_thread(void *ctx) {

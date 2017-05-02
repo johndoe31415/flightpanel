@@ -36,7 +36,7 @@ class EmulatedConnection : public FSConnection {
 		struct instrument_data_t _instrument_data;
 
 	private:
-		void randomize(struct vhf_data_t &vhf);
+		void randomize(struct com_data_t &com);
 		void randomize(struct nav_data_t &nav);
 		void randomize(struct adf_data_t &adf);
 		void randomize(struct dme_data_t &dme);
@@ -50,7 +50,8 @@ class EmulatedConnection : public FSConnection {
 		bool connected(void) const {
 			return true;
 		}
-		void get_data(struct instrument_data_t *data);
+		virtual void get_data(struct instrument_data_t *data);
+		virtual void put_data(const struct instrument_data_t *data, const struct component_selection_t *selection);
 		~EmulatedConnection();
 };
 

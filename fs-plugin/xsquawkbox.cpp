@@ -68,20 +68,20 @@ static double inhg_to_millibar(double pressure_inhg) {
 }
 
 void XSquawkBoxConnection::poll_data() {
-	_instrument_data.vhf1.freq_active_khz = XPLMGetDatai(_datarefs.vhf1.frequency_active) * 10;
-	_instrument_data.vhf1.freq_standby_khz = XPLMGetDatai(_datarefs.vhf1.frequency_standby) * 10;
-	_instrument_data.vhf1.rx = XPLMGetDatai(_datarefs.vhf1.rx);
+	_instrument_data.com1.freq_active_khz = XPLMGetDatai(_datarefs.com1.frequency_active) * 10;
+	_instrument_data.com1.freq_standby_khz = XPLMGetDatai(_datarefs.com1.frequency_standby) * 10;
+	_instrument_data.com1.rx = XPLMGetDatai(_datarefs.com1.rx);
 
-	_instrument_data.vhf2.freq_active_khz = XPLMGetDatai(_datarefs.vhf2.frequency_active) * 10;
-	_instrument_data.vhf2.freq_standby_khz = XPLMGetDatai(_datarefs.vhf2.frequency_standby) * 10;
-	_instrument_data.vhf2.rx = XPLMGetDatai(_datarefs.vhf2.rx);
+	_instrument_data.com2.freq_active_khz = XPLMGetDatai(_datarefs.com2.frequency_active) * 10;
+	_instrument_data.com2.freq_standby_khz = XPLMGetDatai(_datarefs.com2.frequency_standby) * 10;
+	_instrument_data.com2.rx = XPLMGetDatai(_datarefs.com2.rx);
 
-	if (_instrument_data.vhf1.rx) {
-		_instrument_data.vhf1.tx = true;
-		_instrument_data.vhf2.tx = false;
+	if (_instrument_data.com1.rx) {
+		_instrument_data.com1.tx = true;
+		_instrument_data.com2.tx = false;
 	} else {
-		_instrument_data.vhf1.tx = false;
-		_instrument_data.vhf2.tx = _instrument_data.vhf2.rx;
+		_instrument_data.com1.tx = false;
+		_instrument_data.com2.tx = _instrument_data.com2.rx;
 	}
 
 	_instrument_data.nav1.freq_active_khz = XPLMGetDatai(_datarefs.nav1.frequency_active) * 10;
@@ -136,13 +136,13 @@ void XSquawkBoxConnection::poll_data() {
 XSquawkBoxConnection::XSquawkBoxConnection() {
 	_loop_running = false;
 	memset(&_datarefs, 0, sizeof(_datarefs));
-	_datarefs.vhf1.frequency_active = XPLMFindDataRef("sim/cockpit/radios/com1_freq_hz");
-	_datarefs.vhf1.frequency_standby = XPLMFindDataRef("sim/cockpit/radios/com1_stdby_freq_hz");
-	_datarefs.vhf1.rx = XPLMFindDataRef("sim/cockpit2/radios/actuators/audio_selection_com1");
+	_datarefs.com1.frequency_active = XPLMFindDataRef("sim/cockpit/radios/com1_freq_hz");
+	_datarefs.com1.frequency_standby = XPLMFindDataRef("sim/cockpit/radios/com1_stdby_freq_hz");
+	_datarefs.com1.rx = XPLMFindDataRef("sim/cockpit2/radios/actuators/audio_selection_com1");
 
-	_datarefs.vhf2.frequency_active = XPLMFindDataRef("sim/cockpit/radios/com2_freq_hz");
-	_datarefs.vhf2.frequency_standby = XPLMFindDataRef("sim/cockpit/radios/com2_stdby_freq_hz");
-	_datarefs.vhf2.rx = XPLMFindDataRef("sim/cockpit2/radios/actuators/audio_selection_com2");
+	_datarefs.com2.frequency_active = XPLMFindDataRef("sim/cockpit/radios/com2_freq_hz");
+	_datarefs.com2.frequency_standby = XPLMFindDataRef("sim/cockpit/radios/com2_stdby_freq_hz");
+	_datarefs.com2.rx = XPLMFindDataRef("sim/cockpit2/radios/actuators/audio_selection_com2");
 
 	_datarefs.nav1.frequency_active = XPLMFindDataRef("sim/cockpit/radios/nav1_freq_hz");
 	_datarefs.nav1.frequency_standby = XPLMFindDataRef("sim/cockpit/radios/nav1_stdby_freq_hz");
