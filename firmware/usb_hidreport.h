@@ -21,17 +21,23 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __DEBUG_H__
-#define __DEBUG_H__
+#ifndef __USB_HIDREPORT_H__
+#define __USB_HIDREPORT_H__
 
-#if defined(__ARM_ARCH) || defined(DISABLE_FIRMWARE_DEBUG)
+#include <stdint.h>
 
-#define debug(msg, ...)
+struct hid_report_t {
+	uint16_t com1_active, com1_standby;
+	uint16_t com2_active, com2_standby;
+	uint16_t nav1_active, nav1_standby;
+	uint16_t nav2_active, nav2_standby;
+	uint16_t squawk;
+	uint16_t buttons;
+} __attribute__ ((packed));
 
-#define emit(value)			__asm__ __volatile__(".word " #value)
-
-#define bkpt(value)			__asm__ __volatile__("bkpt #" #value)
-
-#endif
+struct hid_set_report_t {
+	uint8_t report_id;
+	uint16_t com1_active, com1_standby;
+} __attribute__ ((packed));
 
 #endif

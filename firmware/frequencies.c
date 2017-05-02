@@ -39,6 +39,28 @@ uint32_t com_index_to_frequency_khz(int com_index) {
 	return result;
 }
 
+uint16_t com_frequency_khz_to_index(uint32_t frequency_khz) {
+	uint32_t remainder_frequency = frequency_khz;
+	remainder_frequency = remainder_frequency - COM_MIN_FREQUENCY_KHZ;
+	int mhz = remainder_frequency / 1000;
+	remainder_frequency = remainder_frequency % 1000;
+	int khz100 = remainder_frequency / 100;
+	remainder_frequency = remainder_frequency % 100;
+	int remainder = 0;
+	for (int i = 0; i < COM_DIVISIONS_PER_100_KHZ; i++) {
+		if (com_frequency_100khz_divisions[i] == remainder_frequency) {
+			remainder = i;
+			break;
+		}
+	}
+	debug("%d kHz -> BASE + %d MHz + %d * 100kHz + Index[%d]\n", frequency_khz, mhz, khz100, remainder);
+	return (mhz * COM_DIVISIONS_PER_MHZ) + (khz100 * COM_DIVISIONS_PER_100_KHZ) + remainder;
+}
+
 uint32_t nav_index_to_frequency_khz(int nav_index) {
-	return NAV_MIN_FREQUENCY_KHZ + (nav_index * 50);
+	return NAV_MIN_FREQUENCY_KHZ + (nav_index * NAV_KHZ_PER_DIVISION);
+}
+
+uint16_t nav_frequency_khz_to_index(uint32_t frequency_khz) {
+	return (frequency_khz - NAV_MIN_FREQUENCY_KHZ) / NAV_KHZ_PER_DIVISION;
 }

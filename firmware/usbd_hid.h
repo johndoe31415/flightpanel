@@ -25,15 +25,7 @@
 #define __USBD_HID_H__
 
 #include "usbd_def.h"
-
-struct hid_report_t {
-	uint16_t com1_active, com1_standby;
-	uint16_t com2_active, com2_standby;
-	uint16_t nav1_active, nav1_standby;
-	uint16_t nav2_active, nav2_standby;
-	uint16_t squawk;
-	uint16_t buttons;
-} __attribute__ ((packed));
+#include "usb_hidreport.h"
 
 #define UINT16(x)											((x) >> 0) & 0xff, ((x) >> 8) & 0xff
 

@@ -35,11 +35,20 @@
 #define NAV_MIN_FREQUENCY_KHZ		108000
 #define NAV_BANDWIDTH_MHZ			10
 #define NAV_DIVISIONS_PER_MHZ		20
+#define NAV_KHZ_PER_DIVISION		(1000 / NAV_DIVISIONS_PER_MHZ)
 #define NAV_DIVISIONS				(NAV_BANDWIDTH_MHZ * NAV_DIVISIONS_PER_MHZ)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 uint32_t com_index_to_frequency_khz(int com_index);
+uint16_t com_frequency_khz_to_index(uint32_t frequency_khz);
 uint32_t nav_index_to_frequency_khz(int nav_index);
+uint16_t nav_frequency_khz_to_index(uint32_t frequency_khz);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
+#ifdef __cplusplus
+}
+#endif
 
 #endif
