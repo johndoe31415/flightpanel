@@ -28,6 +28,7 @@
 #include <stdbool.h>
 #include "rotary.h"
 #include "debounce.h"
+#include "usb_hidreport.h"
 
 struct rotary_encoder_with_button_t {
 	struct rotary_encoder_t rotary;
@@ -71,9 +72,8 @@ struct flight_data {
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void hid_tick(void);
 void instruments_handle_inputs(void);
-void input_callback_rotary_button(int rotary_id, bool value);
-void input_callback_rotary(int rotary_id, bool value1, bool value2);
 void instruments_idle_loop(void);
+void instruments_set_by_host(const struct hid_set_report_t *report);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

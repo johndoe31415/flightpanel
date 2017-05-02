@@ -138,9 +138,10 @@ static void redraw_frequency(int surface_index, int frequency_khz) {
 	printf("%d: %s\n", surface_index, text);
 }
 
+static bool redraw_com1_active = true;
+static bool redraw_com1_standby = true;
+
 void instruments_idle_loop(void) {
-	bool redraw_com1_active = true;
-	bool redraw_com1_standby = true;
 
 	rotary_com1.rotary.changed = true;
 	rotary_com1.rotary.value = 0x123;
@@ -168,4 +169,13 @@ void instruments_idle_loop(void) {
 			redraw_com1_standby = false;
 		}
 	}
+}
+
+void instruments_set_by_host(const struct hid_set_report_t *report) {
+	printf("set %d %d\n", report->com1_active, report->com1_standby);
+	instrument_state.com1_active_index = report->com1_active;
+	rotary_com1.rotary.value = report->com1_standby;
+	redraw_com1_active = true;
+	redraw_com1_standby = true;
+
 }

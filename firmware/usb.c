@@ -63,16 +63,3 @@ void usb_submit_report(const struct hid_report_t *report) {
 	memcpy(&send_report, report, sizeof(struct hid_report_t));
 	USBD_HID_SendReport(&USBD_Device, &send_report);
 }
-#if 0
-	struct hid_report_t report = { 0 };
-	while (false) {
-		report.value++;
-		if (report.value == 101) {
-			report.value = 0;
-		}
-
-		for (volatile int i = 0; i < 1000000; i++) { }
-		printf("Report %d\n", report.value);
-	}
-#endif
-

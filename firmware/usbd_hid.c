@@ -27,6 +27,8 @@
 #include "usbd_ctlreq.h"
 #include "usbd_def.h"
 #include "usbd_hid.h"
+#include "usb_hidreport.h"
+#include "instruments.h"
 
 #define USBD_VID											0x0483
 #define USBD_PID											0x572B
@@ -281,8 +283,8 @@ static uint8_t USBD_HID_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum) {
 
 static uint8_t USBD_HID_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum) {
 	USBD_HID_HandleTypeDef *hhid = (USBD_HID_HandleTypeDef*)pdev->pClassData;
-	printf("DataOut! %02x %02x\n", hhid->out_buffer[0], hhid->out_buffer[1]);
-	USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR , hhid->out_buffer, HID_EPOUT_SIZE);
+	instruments_set_by_host((const struct hid_set_report_t*)hhid->out_buffer);
+	USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR, hhid->out_buffer, HID_EPOUT_SIZE);
 	return USBD_OK;
 }
 
