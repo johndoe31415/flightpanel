@@ -43,7 +43,4 @@ class Arbiter {
 		void run();
 };
 
-/*************** AUTO GENERATED SECTION FOLLOWS ***************/
-/***************  AUTO GENERATED SECTION ENDS   ***************/
-
 #endif
