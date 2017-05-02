@@ -75,6 +75,7 @@ exclude_filenames = [
 	"/fs-plugin/SampleCode/",
 	"/hidapi/",
 	"/.git/",
+	"/gcc-bootstrap/work/",
 ]
 
 exclude_content = [
