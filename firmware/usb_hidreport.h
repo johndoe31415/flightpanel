@@ -38,6 +38,9 @@ struct hid_report_t {
 struct hid_set_report_t {
 	uint8_t report_id;
 	uint16_t com1_active, com1_standby;
+	uint16_t com2_active, com2_standby;
+	uint16_t nav1_active, nav1_standby;
+	uint16_t nav2_active, nav2_standby;
 } __attribute__ ((packed));
 
 #endif
