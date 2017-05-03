@@ -1,0 +1,16 @@
+#!/bin/bash -e
+#
+#
+
+if [ ! -f .build_variant ]; then
+	VARIANTS="linux-emulator linux-xplane windows-fsx"
+else
+	VARIANTS=`cat .build_variant`
+fi
+
+for VARIANT in $VARIANTS; do
+	echo "$VARIANT" >.build_variant
+	export VARIANT
+	make clean all
+	rm -f .build_variant
+done

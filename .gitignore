@@ -33,6 +33,7 @@ firmware/cube/stm32f4xx_hal_conf.h
 firmware/cube/usbd_conf.c
 firmware/cube/usbd_conf.h
 
+fs-plugin/.build_variant
 fs-plugin/fpconnect
 fs-plugin/fpconnect.exe
 fs-plugin/fpconnect.res
