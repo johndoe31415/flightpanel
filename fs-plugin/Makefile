@@ -1,5 +1,7 @@
 .PHONY: all clean test install-xplane test-xplane install
 
+vpath %.c ../firmware
+
 WINDOWS_FSX_TARGET := fpconnect.exe
 WINDOWS_FSX_OBJS := simconnect.o simconnect-events.o simconnect-datadefs.o fpconnect.res
 LINUX_EMU_TARGET := fpconnect
@@ -63,7 +65,7 @@ CFLAGS := -std=c11 $(SHARED_CFLAGS)
 CXXFLAGS := -std=c++11 $(SHARED_CFLAGS)
 LDFLAGS := $(PLATFORM_LDFLAGS)
 
-OBJS := fpconnect.o fsconnection.o fpconnection.o arbiter.o ../firmware/frequencies.o $(PLATFORM_OBJS)
+OBJS := fpconnect.o fsconnection.o fpconnection.o arbiter.o frequencies.o $(PLATFORM_OBJS)
 
 all: $(TARGET)
 

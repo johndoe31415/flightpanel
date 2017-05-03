@@ -1,5 +1,7 @@
 .PHONY: all test
 
+vpath %.c ..
+
 CFLAGS := -std=c11 -Wall -Wmissing-prototypes -Wstrict-prototypes -Werror=implicit-function-declaration -O3 -I..
 LDFLAGS :=
 
@@ -14,12 +16,12 @@ TEST_OBJS := \
 
 all: $(TEST_COMMON_OBJS) $(TEST_OBJS)
 
-test_com_frequency_conversion: $(TEST_COMMON_OBJS) ../frequencies.o
-test_nav_frequency_conversion: $(TEST_COMMON_OBJS) ../frequencies.o
-test_surface: $(TEST_COMMON_OBJS) ../surface.o helper_surface.o
-test_font: $(TEST_COMMON_OBJS) ../surface.o ../font.o ../vcr-osd-mono-20.o helper_surface.o
-test_rotary: $(TEST_COMMON_OBJS) ../rotary.o
-test_debounce: $(TEST_COMMON_OBJS) ../debounce.o
+test_com_frequency_conversion: $(TEST_COMMON_OBJS) frequencies.o
+test_nav_frequency_conversion: $(TEST_COMMON_OBJS) frequencies.o
+test_surface: $(TEST_COMMON_OBJS) surface.o helper_surface.o
+test_font: $(TEST_COMMON_OBJS) surface.o font.o vcr-osd-mono-20.o helper_surface.o
+test_rotary: $(TEST_COMMON_OBJS) rotary.o
+test_debounce: $(TEST_COMMON_OBJS) debounce.o
 
 test: all
 	rm -f tests.log
