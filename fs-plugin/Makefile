@@ -1,4 +1,4 @@
-.PHONY: all clean test install-xplane test-xplane install
+.PHONY: all clean test install-xplane test-xplane install gdb valgrind
 
 vpath %.c ../firmware
 
@@ -60,7 +60,7 @@ else
 $(error The VARIANT environment variable needs to be either "linux-xplane", "linux-emulator" or "windows-fsx", not "$(VARIANT)")
 endif
 
-SHARED_CFLAGS := $(PLATFORM_CFLAGS) -I.. -Ihidapi -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -O3 -pthread -g -DDISABLE_FIRMWARE_DEBUG
+SHARED_CFLAGS := $(PLATFORM_CFLAGS) -I.. -Ihidapi -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -Wuninitialized -O3 -pthread -g -DDISABLE_FIRMWARE_DEBUG
 CFLAGS := -std=c11 $(SHARED_CFLAGS)
 CXXFLAGS := -std=c++11 $(SHARED_CFLAGS)
 LDFLAGS := $(PLATFORM_LDFLAGS)
@@ -93,6 +93,12 @@ test-xplane: install-xplane
 
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS)
+
+gdb: $(TARGET)
+	gdb $(TARGET)
+
+valgrind: $(TARGET)
+	valgrind ./$(TARGET)
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c -o $@ $<

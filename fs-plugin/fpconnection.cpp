@@ -22,13 +22,17 @@
 **/
 
 #include <stdexcept>
+#include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <hidapi/hidapi.h>
 #include <firmware/usb_hidreport.h>
 #include <firmware/frequencies.h>
 #include "fpconnection.hpp"
+
+#define NO_REAL_DEVICE
 
 static void* event_loop_thread(void *ctx) {
 	FPConnection *connection = (FPConnection*)ctx;
@@ -36,7 +40,8 @@ static void* event_loop_thread(void *ctx) {
 	return NULL;
 }
 
-FPConnection::FPConnection() {
+FPConnection::FPConnection() : _device(NULL) {
+#ifndef NO_REAL_DEVICE
 	struct hid_device_info *info = hid_enumerate(USB_VID, USB_PID);
 	if (!info) {
 		throw std::runtime_error("Failed to hid_enumerate(): No such VID/PID.");
@@ -56,18 +61,30 @@ FPConnection::FPConnection() {
 	if (!_device) {
 		throw std::runtime_error("Failed to hid_open().");
 	}
+#endif
 
-	memset(&_instrument_data, 0, sizeof(struct instrument_data_t));
+	std::memset(&_instrument_data, 0, sizeof(struct instrument_data_t));
 	pthread_create(&_periodic_query_thread, NULL, event_loop_thread, this);
 }
 
 void FPConnection::event_loop() {
-	while (true) {
+	_run_event_loop = true;
+	while (_run_event_loop) {
 		struct hid_report_t hid_report;
+#ifdef NO_REAL_DEVICE
+		usleep(100 * 1000);
+		continue;
+#endif
 		int bytes_read = hid_read(_device, (uint8_t*)&hid_report, sizeof(hid_report));
 		if (bytes_read == sizeof(hid_report)) {
 			_instrument_data.com1.freq_active_khz = com_index_to_frequency_khz(hid_report.com1_active);
 			_instrument_data.com1.freq_standby_khz = com_index_to_frequency_khz(hid_report.com1_standby);
+			_instrument_data.com2.freq_active_khz = com_index_to_frequency_khz(hid_report.com2_active);
+			_instrument_data.com2.freq_standby_khz = com_index_to_frequency_khz(hid_report.com2_standby);
+			_instrument_data.nav1.freq_active_khz = nav_index_to_frequency_khz(hid_report.nav1_active);
+			_instrument_data.nav1.freq_standby_khz = nav_index_to_frequency_khz(hid_report.nav1_standby);
+			_instrument_data.nav2.freq_active_khz = nav_index_to_frequency_khz(hid_report.nav2_active);
+			_instrument_data.nav2.freq_standby_khz = nav_index_to_frequency_khz(hid_report.nav2_standby);
 		} else {
 			fprintf(stderr, "Short read (%d of %zd), could not get full HID report.\n", bytes_read, sizeof(hid_report));
 		}
@@ -75,23 +92,34 @@ void FPConnection::event_loop() {
 }
 
 void FPConnection::get_data(struct instrument_data_t *data) {
-	memcpy(data, &_instrument_data, sizeof(struct instrument_data_t));
+	memcpy(data, &_instrument_data, sizeof(*data));
 }
 
 void FPConnection::put_data(const struct instrument_data_t *data, const struct component_selection_t *selection) {
 	struct hid_set_report_t hid_set_report;
-	memset(&hid_set_report, 0, sizeof(hid_set_report));
+	std::memset(&hid_set_report, 0, sizeof(hid_set_report));
 	hid_set_report.report_id = 1;
 	hid_set_report.com1_active = com_frequency_khz_to_index(data->com1.freq_active_khz);
 	hid_set_report.com1_standby = com_frequency_khz_to_index(data->com1.freq_standby_khz);
-
+	hid_set_report.com2_active = com_frequency_khz_to_index(data->com2.freq_active_khz);
+	hid_set_report.com2_standby = com_frequency_khz_to_index(data->com2.freq_standby_khz);
+	hid_set_report.nav1_active = nav_frequency_khz_to_index(data->nav1.freq_active_khz);
+	hid_set_report.nav1_standby = nav_frequency_khz_to_index(data->nav1.freq_standby_khz);
+	hid_set_report.nav2_active = nav_frequency_khz_to_index(data->nav2.freq_active_khz);
+	hid_set_report.nav2_standby = nav_frequency_khz_to_index(data->nav2.freq_standby_khz);
+#ifndef NO_REAL_DEVICE
 	int bytes_written = hid_write(_device, (const uint8_t*)&hid_set_report, sizeof(hid_set_report));
+#else
+	int bytes_written = sizeof(hid_set_report);
+#endif
 	if (bytes_written != sizeof(hid_set_report)) {
 		fprintf(stderr, "Sending HID report error: tried sending %zd bytes, but %d went through.\n", sizeof(hid_set_report), bytes_written);
 	}
 }
 
 FPConnection::~FPConnection() {
+	_run_event_loop = false;
+	pthread_join(_periodic_query_thread, NULL);
 	hid_close(_device);
 }
 

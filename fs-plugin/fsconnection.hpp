@@ -93,6 +93,16 @@ struct instrument_data_t {
 	struct ap_data_t ap;
 	struct transponder_data_t xpdr;
 	struct misc_data_t misc;
+
+	template<typename T> void set_value(int at_offset, const T &new_value) const {
+		T* ptr = (T*)(((const uint8_t*)this) + at_offset);
+		*ptr = new_value;
+	}
+
+	template<typename T> T get_value(int at_offset) const {
+		const T* ptr = (const T*)(((const uint8_t*)this) + at_offset);
+		return *ptr;
+	}
 };
 
 struct component_selection_t {
@@ -101,6 +111,21 @@ struct component_selection_t {
 	bool com2_active;
 	bool com2_standby;
 	bool com_rxtx;
+
+	bool nav1_active;
+	bool nav1_standby;
+	bool nav2_active;
+	bool nav2_standby;
+
+	bool is_any_set() const {
+		return com1_active || com1_standby || com2_active || com2_standby || com_rxtx
+				|| nav1_active || nav1_standby || nav2_active || nav2_standby;
+	}
+
+	void set_flag(int at_offset) {
+		bool *ptr = (bool*)(((const uint8_t*)this) + at_offset);
+		*ptr = true;
+	}
 };
 
 class FSConnection {

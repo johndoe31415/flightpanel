@@ -35,6 +35,7 @@ class FPConnection {
 	private:
 		hid_device *_device;
 		pthread_t _periodic_query_thread;
+		bool _run_event_loop;
 		struct instrument_data_t _instrument_data;
 
 	public:
