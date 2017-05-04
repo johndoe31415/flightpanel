@@ -102,7 +102,7 @@ Reset_Handler:
 
 .section .text, "ax", %progbits
 Default_Handler:
-	b Default_Handler
+       b default_fault_handler
 .size Default_Handler, .-Default_Handler
 .global Default_Handler
 

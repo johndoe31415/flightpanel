@@ -25,54 +25,113 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-//#include <stm32f4xx_irq.h>
 #include <misc.h>
 #include <core_cm4.h>
+#include <stm32f4xx_pwr.h>
 #include "fault.h"
 
-static uint32_t* get_sp(void) {
-  register uint32_t sp __asm__ ("sp");
-  return (uint32_t*)sp;
-}
-
-static uint32_t* get_lr(void) {
-  register uint32_t lr __asm__ ("lr");
-  return (uint32_t*)lr;
-}
+static const char *exception_names[] = {
+	"Illegal",
+	"Reset",
+	"NMI",
+	"Hard Fault",
+	"Mem Manage Fault",
+	"Bus Fault",
+	"Usage Fault",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"Reserved",
+	"SVC",
+	"Debug Monitor",
+};
 
 void fail_assertion(const char *assertion, const char *filename, int lineno) {
 	printf("Assertion failed: %s (%s:%d)\n", assertion, filename, lineno);
 	while (true);
 }
 
-void HardFault_Handler(void) {
-	uint32_t *sp = get_sp();
-	uint32_t *lr = get_lr();
-	printf("\n--> Device hard fault, SP = %p, LR = %p\n", sp, lr);
-	for (int i = 0; i < 8; i++) {
-		printf("IABR%u %08lx\n", i, NVIC->IABR[i]);
+void generic_fault_handler(uint32_t fault_id, const struct fault_stack_layout_t *stack_layout) {
+	int exception_no = stack_layout->psr & 0x3f;
+	if (fault_id) {
+		printf("~~~~~~~~~~~~~ Fault ID %lu: Exception %u (%s) ~~~~~~~~~~~~~\n", fault_id, exception_no, (exception_no < 13) ? exception_names[exception_no] : "?");
+	} else {
+		printf("~~~~~~~~~~~~~ Fault %u (%s) ~~~~~~~~~~~~~\n", exception_no, (exception_no < 13) ? exception_names[exception_no] : "?");
 	}
-	for (int i = 0; i < 32; i += 4) {
-		printf("%p ", sp + i);
-		for (int j = 0; j < 4; j++) {
-			printf("%08lx ", sp[i + j]);
+#if 0
+	for (int i = 0; i <= 26; i++) {
+		printf("X%-2d = %8lx\n", i, ((uint32_t*)stack_layout)[i]);
+	}
+	printf("\n");
+	printf("\n");
+	printf("\n");
+#endif
+	for (int i = 0; i < 4; i++) {
+		printf("r%-2d = %8lx   ", i, stack_layout->r0[i]);
+	}
+	printf("\n");
+	for (int i = 0; i < 8; i++) {
+		printf("r%-2d = %8lx   ", 4 + i, stack_layout->r4[i]);
+		if (i == 3) {
+			printf("\n");
 		}
+	}
+	printf("\n");
+	printf("r12 = %8lx   ", stack_layout->r12);
+	printf("sp  = %8lx   ", (uint32_t)stack_layout + sizeof(struct fault_stack_layout_t));
+	printf("lr  = %8lx   ", stack_layout->r14);
+	printf("pc  = %8lx   ", stack_layout->pc);
+	printf("\n");
+	printf("xPSR= %8lx   ", stack_layout->xpsr);
+	printf("PSR = %8lx   ", stack_layout->psr);
+	printf("FAM = %8lx   ", stack_layout->faultmask);
+	printf("CC  = [");
+	printf("%c", (stack_layout->psr >> 31) & 0x1 ? 'N' : ' ');
+	printf("%c", (stack_layout->psr >> 30) & 0x1 ? 'Z' : ' ');
+	printf("%c", (stack_layout->psr >> 29) & 0x1 ? 'C' : ' ');
+	printf("%c", (stack_layout->psr >> 28) & 0x1 ? 'V' : ' ');
+	printf("]");
+	printf("\n");
+	{
+		uint32_t hfsr = SCB->HFSR;
+		printf("HFSR: ");
+		printf("%s", ((hfsr >> 1) & 0x01) ? "VECTTBL ": "");
+		printf("%s", ((hfsr >> 30) & 0x01) ? "FORCED ": "");
+		printf("%s", ((hfsr >> 31) & 0x01) ? "DEBUGEVT ": "");
 		printf("\n");
 	}
+	{
+		uint32_t cfsr = SCB->CFSR;
+		printf("BFSR: ");
+		printf("%s", ((cfsr >> (8 + 0)) & 0x01) ? "IBUSERR ": "");
+		printf("%s", ((cfsr >> (8 + 1)) & 0x01) ? "PRECISERR ": "");
+		printf("%s", ((cfsr >> (8 + 2)) & 0x01) ? "IMPRECISERR ": "");
+		printf("%s", ((cfsr >> (8 + 3)) & 0x01) ? "UNSTKERR ": "");
+		printf("%s", ((cfsr >> (8 + 4)) & 0x01) ? "STKERR ": "");
+		printf("%s", ((cfsr >> (8 + 7)) & 0x01) ? "BFARVALID ": "");
+		printf("   ");
+		printf("UFSR: ");
+		printf("%s", ((cfsr >> (16 + 0)) & 0x01) ? "UNDEFINSTR ": "");
+		printf("%s", ((cfsr >> (16 + 1)) & 0x01) ? "INVSTATE ": "");
+		printf("%s", ((cfsr >> (16 + 2)) & 0x01) ? "INVPC ": "");
+		printf("%s", ((cfsr >> (16 + 3)) & 0x01) ? "NOCP ": "");
+		printf("%s", ((cfsr >> (16 + 8)) & 0x01) ? "UNALIGNED ": "");
+		printf("%s", ((cfsr >> (16 + 9)) & 0x01) ? "DIVBYZERO ": "");
+		printf("\n");
+	}
+	printf("IABR: ");
+	for (int i = 0; i < 8; i++) {
+		uint32_t iabr = NVIC->IABR[i];
+		for (int j = 0; j < 32; j++) {
+			if ((iabr >> j) & 0x1) {
+				printf("IABR%d.%d ", i, j);
+			}
+		}
+	}
+	printf("\n");
+	printf("~~~~~~~~~~~~~ Device stopped ~~~~~~~~~~~~~\n");
+	for (volatile int i = 0; i < 100000; i++);
+	PWR_EnterSTANDBYMode();
 	while (true);
 }
 
-void BusFault_Handler(void) {
-//      printf("Device hard fault, stopped: Vecttbl=%d Force=%d Dbg=%d\r\n", uSYSCTL.HFSR().VECTTBL() ? 1 : 0, uSYSCTL.HFSR().FORCED() ? 1 : 0, uSYSCTL.HFSR().DEBUGEVT() ? 1 : 0);
-        while (true);
-}
-
-void MPUFault_Handler(void) {
-//      printf("Device MPU fault, stopped.\r\n");
-        while (true);
-}
-
-void UsgFault_Handler(void) {
-//      printf("Device Usg fault, stopped.\r\n");
-        while (true);
-}

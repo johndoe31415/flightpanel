@@ -31,6 +31,7 @@ typedef char* (*failfnc_t)(const void *lhs, const void *rhs);
 
 #define test_fail_if(cond)			if (cond) test_fail(__FILE__, __LINE__, __FUNCTION__, #cond " was true")
 #define test_fail_unless(cond)		if (!(cond)) test_fail(__FILE__, __LINE__, __FUNCTION__, #cond " was false")
+#define test_assert(cond)			test_fail_unless(cond)
 #define test_assert_str_eq(a, b)	{ const char *_a = (a); const char *_b = (b); if (strcmp(_a, _b)) test_fail_ext(__FILE__, __LINE__, __FUNCTION__, #a " != " #b, testbed_failfnc_str, _a, _b); }
 #define test_assert_int_eq(a, b)	{ int _a = (a); int _b = (b); if (_a != _b) test_fail_ext(__FILE__, __LINE__, __FUNCTION__, #a " != " #b, testbed_failfnc_int, &_a, &_b); }
 

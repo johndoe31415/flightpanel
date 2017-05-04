@@ -25,6 +25,10 @@
 #define __QEMU_CORE_H__
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
+void NMI_Handler(void);
+void MemManage_Handler(void);
+void SVC_Handler(void);
+void PWR_EnterSTANDBYMode(void);
 void SystemInit(void);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 

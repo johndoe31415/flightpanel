@@ -5,6 +5,7 @@ __pycache__
 
 flightpanel
 flightpanel.bin
+qemu_core
 
 en.stm32f4_dsp_stdperiph_lib.zip
 firmware/ext-st/stdperiph.a

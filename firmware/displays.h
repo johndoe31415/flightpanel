@@ -24,7 +24,7 @@
 #ifndef __DISPLAYS_H__
 #define __DISPLAYS_H__
 
-#define DISPLAY_COUNT		2
+#define DISPLAY_COUNT		12
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void display_dma_finished(void);

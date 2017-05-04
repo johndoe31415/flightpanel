@@ -54,6 +54,96 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 			.data = (uint8_t[128 * 64 / 8]) { },
 		},
 	},
+	[2] = {
+		.nSS_GPIO = Display3_nSS_GPIO,
+		.nSS_Pin = Display3_nSS_Pin,
+		.surface = &(const struct surface_t) {
+			.width = 128,
+			.height = 64,
+			.data = (uint8_t[128 * 64 / 8]) { },
+		},
+	},
+	[3] = {
+		.nSS_GPIO = Display3_nSS_GPIO,
+		.nSS_Pin = Display3_nSS_Pin,
+		.surface = &(const struct surface_t) {
+			.width = 128,
+			.height = 64,
+			.data = (uint8_t[128 * 64 / 8]) { },
+		},
+	},
+	[4] = {
+		.nSS_GPIO = Display3_nSS_GPIO,
+		.nSS_Pin = Display3_nSS_Pin,
+		.surface = &(const struct surface_t) {
+			.width = 128,
+			.height = 64,
+			.data = (uint8_t[128 * 64 / 8]) { },
+		},
+	},
+	[5] = {
+		.nSS_GPIO = Display3_nSS_GPIO,
+		.nSS_Pin = Display3_nSS_Pin,
+		.surface = &(const struct surface_t) {
+			.width = 128,
+			.height = 64,
+			.data = (uint8_t[128 * 64 / 8]) { },
+		},
+	},
+	[6] = {
+		.nSS_GPIO = Display3_nSS_GPIO,
+		.nSS_Pin = Display3_nSS_Pin,
+		.surface = &(const struct surface_t) {
+			.width = 128,
+			.height = 64,
+			.data = (uint8_t[128 * 64 / 8]) { },
+		},
+	},
+	[7] = {
+		.nSS_GPIO = Display3_nSS_GPIO,
+		.nSS_Pin = Display3_nSS_Pin,
+		.surface = &(const struct surface_t) {
+			.width = 128,
+			.height = 64,
+			.data = (uint8_t[128 * 64 / 8]) { },
+		},
+	},
+	[8] = {
+		.nSS_GPIO = Display3_nSS_GPIO,
+		.nSS_Pin = Display3_nSS_Pin,
+		.surface = &(const struct surface_t) {
+			.width = 128,
+			.height = 64,
+			.data = (uint8_t[128 * 64 / 8]) { },
+		},
+	},
+	[9] = {
+		.nSS_GPIO = Display3_nSS_GPIO,
+		.nSS_Pin = Display3_nSS_Pin,
+		.surface = &(const struct surface_t) {
+			.width = 128,
+			.height = 64,
+			.data = (uint8_t[128 * 64 / 8]) { },
+		},
+	},
+	[10] = {
+		.nSS_GPIO = Display3_nSS_GPIO,
+		.nSS_Pin = Display3_nSS_Pin,
+		.surface = &(const struct surface_t) {
+			.width = 128,
+			.height = 64,
+			.data = (uint8_t[128 * 64 / 8]) { },
+		},
+	},
+	[11] = {
+		.nSS_GPIO = Display3_nSS_GPIO,
+		.nSS_Pin = Display3_nSS_Pin,
+		.surface = &(const struct surface_t) {
+			.width = 128,
+			.height = 64,
+			.data = (uint8_t[128 * 64 / 8]) { },
+		},
+	},
 };
 static bool surface_dirty[DISPLAY_COUNT];
 

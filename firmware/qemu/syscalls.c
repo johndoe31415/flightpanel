@@ -44,6 +44,19 @@ void _exit(int status) {
 }
 
 ssize_t _write_r(struct _reent *reent, int fd, const void *data, size_t length) {
+	if (fd == STDOUT_FILENO) {
+		for (int i = 0; i < length; i++) {
+			__asm__ __volatile__(
+				"mov r0, #3"			"\n\t"
+				"mov r1, %0"			"\n\t"
+				"bkpt #0xab"			"\n\t"
+				:
+				: "r"(data + i)
+				: "r0", "r1"
+			);
+		}
+		return length;
+	}
 	return 0;
 }
 

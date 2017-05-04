@@ -23,18 +23,41 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include "qemu_core.h"
 
 uint8_t foobar[128];
 int mookoo = 0x12345678;
 
+void NMI_Handler(void) {
+	while (true);
+}
+
+void MemManage_Handler(void) {
+	while (true);
+}
+
+void SVC_Handler(void) {
+	while (true);
+}
+
+void PWR_EnterSTANDBYMode(void) {
+}
+
+void cause_fault(void);
+void cause_fault_setregs(void);
+
 void SystemInit(void) {
+	printf("SystemInit()\n");
 	foobar[0] = 0xaa;
 	foobar[127] = 0x55;
 	mookoo++;
+	cause_fault_setregs();
 	while (true);
 }
 
 int main(void) {
 	while (true);
 }
+

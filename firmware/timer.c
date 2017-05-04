@@ -38,7 +38,6 @@ void delay_millis(uint32_t millisecs) {
 	while (milli_ticks);
 }
 
-
 void TIM3_IRQHandler(void) {
 	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET) {
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);

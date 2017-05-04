@@ -21,31 +21,26 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __FAULT_H__
-#define __FAULT_H__
+.syntax unified
+.cpu cortex-m4
+.fpu softvfp
+.thumb
 
-/*
- r10 sl
- r11 fp
- r12 ip
- r13 sp
- r14 lr
- r15 pc
-*/
-struct fault_stack_layout_t {
-	uint32_t faultmask;
-	uint32_t psr;
-	uint32_t r4[8];
-	uint32_t r0[4];
-	uint32_t r12;		// ip
-	uint32_t r14;		// lr
-	uint32_t pc;
-	uint32_t xpsr;
-};
+.macro _faulthandler id
+	push {r4-r11}
+	mrs r0, FAULTMASK
+	mrs r1, PSR
+	push {r0-r1}
+	mov r0, \id
+	mov r1, sp
+	b generic_fault_handler
+	1:
+	b 1b
+.endm
 
-/*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void fail_assertion(const char *assertion, const char *filename, int lineno);
-void generic_fault_handler(uint32_t fault_id, const struct fault_stack_layout_t *stack_layout);
-/***************  AUTO GENERATED SECTION ENDS   ***************/
+.type default_fault_handler, %function
+default_fault_handler:
+	_faulthandler 0x0
+.size default_fault_handler, .-default_fault_handler
+.global default_fault_handler
 
-#endif

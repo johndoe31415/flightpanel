@@ -21,31 +21,35 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __FAULT_H__
-#define __FAULT_H__
+.syntax unified
+.cpu cortex-m4
+.fpu softvfp
+.thumb
 
-/*
- r10 sl
- r11 fp
- r12 ip
- r13 sp
- r14 lr
- r15 pc
-*/
-struct fault_stack_layout_t {
-	uint32_t faultmask;
-	uint32_t psr;
-	uint32_t r4[8];
-	uint32_t r0[4];
-	uint32_t r12;		// ip
-	uint32_t r14;		// lr
-	uint32_t pc;
-	uint32_t xpsr;
-};
+.type cause_fault, %function
+cause_fault:
+	bkpt #1
+.size cause_fault, .-cause_fault
+.global cause_fault
 
-/*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void fail_assertion(const char *assertion, const char *filename, int lineno);
-void generic_fault_handler(uint32_t fault_id, const struct fault_stack_layout_t *stack_layout);
-/***************  AUTO GENERATED SECTION ENDS   ***************/
-
-#endif
+.type cause_fault_setregs, %function
+cause_fault_setregs:
+	ldr r0, =0xaabbcc00
+	ldr r1, =0xaabbcc01
+	ldr r2, =0xaabbcc02
+	ldr r3, =0xaabbcc03
+	ldr r4, =0xaabbcc04
+	ldr r5, =0xaabbcc05
+	ldr r6, =0xaabbcc06
+	ldr r7, =0xaabbcc07
+	ldr r8, =0xaabbcc08
+	ldr r9, =0xaabbcc09
+	ldr r10, =0xaabbcc10		// sl
+	ldr r11, =0xaabbcc11		// fp 
+	ldr r12, =0xaabbcc12		// ip
+//	ldr r13, =0xaabbcc13		// sp
+	ldr r14, =0xaabbcc14		// lr
+//	ldr r15, =0xaabbcc15		// pc
+	b cause_fault
+.size cause_fault_setregs, .-cause_fault_setregs
+.global cause_fault_setregs

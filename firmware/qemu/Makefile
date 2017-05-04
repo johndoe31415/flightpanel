@@ -1,5 +1,8 @@
 .PHONY: all clean gdb sim simgdb
 
+vpath %.c ..
+vpath %.s ..
+
 TARGETS := qemu_core
 
 PREFIX := arm-none-eabi-
@@ -10,10 +13,11 @@ AR := $(PREFIX)ar
 GDB := $(PREFIX)gdb
 
 CFLAGS := $(CFLAGS) -std=c11 -Wall -Wmissing-prototypes -Wstrict-prototypes -Werror=implicit-function-declaration -Werror=format -Os -g3 -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb
+CFLAGS += -I../ext-st/include -I../ext-st/include-cmsis -I../ext-st/include-cmsis-dev -include ../library_config.h
 LDFLAGS := -Tgeneric-hosted.ld
 LDFLAGS += -Wl,--gc-sections
 
-OBJS := qemu_core.o syscalls.o ../ivt.o
+OBJS := qemu_core.o syscalls.o ivt.o corefault.o causefault.o fault.o
 
 all: $(TARGETS)
 
