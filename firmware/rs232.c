@@ -25,6 +25,14 @@
 
 #include "rs232.h"
 #include "pinmap.h"
+#include "boundedbuffer.h"
+
+#define RS232_TX_BUFSIZE		256
+static bool tx_in_progress;
+static struct bounded_buffer_t rs232_tx_buffer = {
+	.bufsize = RS232_TX_BUFSIZE,
+	.data = (uint8_t[RS232_TX_BUFSIZE]) { },
+};
 
 void USART2_IRQHandler(void) {
 	if (USART_GetITStatus(USART2, USART_IT_RXNE) == SET) {
@@ -42,11 +50,42 @@ void USART2_IRQHandler(void) {
 			Dbg4_SetTo(rxChar & 0x08);
 			*/
 		}
-
+	}
+	if (USART_GetITStatus(USART2, USART_IT_TXE) == SET) {
+		/* Transmission complete, try to send next byte */
+		uint16_t next_byte = boundedbuffer_getbyte(&rs232_tx_buffer);
+		if (next_byte == -1) {
+			/* No next byte, we're finished */
+			tx_in_progress = false;
+		} else {
+			/* Keep sending */
+			USART_SendData(USART2, next_byte);
+		}
 	}
 }
 
-void rs232_transmitchar(char c) {
-	while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
-	USART_SendData(USART2, c);
+static void rs232_buffer_lock(void) {
+	USART_ITConfig(USART2, USART_IT_TXE, DISABLE);
 }
+
+static void rs232_buffer_unlock(void) {
+	USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
+}
+
+void rs232_transmitchar(char c) {
+	bool put_in_buffer;
+	do {
+		rs232_buffer_lock();
+		put_in_buffer = boundedbuffer_putbyte(&rs232_tx_buffer, c);
+
+		rs232_buffer_unlock();
+	} while (!put_in_buffer);
+	if (!tx_in_progress) {
+		tx_in_progress = true;
+		USART_SendData(USART2, boundedbuffer_getbyte(&rs232_tx_buffer));
+	}
+//	while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
+}
+
+
+

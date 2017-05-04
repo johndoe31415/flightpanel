@@ -20,7 +20,7 @@ LDFLAGS := -Tstm32f407.ld
 LDFLAGS += -Wl,--gc-sections
 STATICLIBS := ext-st/stdperiph.a cube/cube.a
 
-OBJS := ivt.o flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o configuration.o ssd1306.o displays.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o instruments.o iomux.o frequencies.o debounce.o stm32f4xx_devid.o stm32f4xx_stackpaint.o
+OBJS := ivt.o flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o configuration.o ssd1306.o displays.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o instruments.o iomux.o frequencies.o debounce.o stm32f4xx_devid.o stm32f4xx_stackpaint.o corefault.o boundedbuffer.o
 
 all: $(TARGETS)
 
@@ -30,6 +30,7 @@ tests:
 clean:
 	make -C tests clean
 	rm -f $(OBJS) $(TARGETS)
+	rm -f flightpanel.sym
 
 readflash:
 	$(STFLASH) read firmware.bin 0x08000000 65536
