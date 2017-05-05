@@ -32,6 +32,7 @@
 #include <misc.h>
 #include "pinmap.h"
 #include "init.h"
+#include "rs232.h"
 
 #define PLL_M					8
 #define PLL_N					336
@@ -105,15 +106,29 @@ static void init_clock(void) {
 
 
 static void init_gpio(void) {
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-	GPIO_InitTypeDef GPIO_InitStructure = {
-		.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15,
-		.GPIO_Mode = GPIO_Mode_OUT,
-		.GPIO_OType = GPIO_OType_PP,
-		.GPIO_Speed = GPIO_Speed_2MHz,
-		.GPIO_PuPd = GPIO_PuPd_NOPULL,
-	};
-	GPIO_Init(GPIOD, &GPIO_InitStructure);
+	{
+		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+		GPIO_InitTypeDef GPIO_InitStructure = {
+			.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15,
+			.GPIO_Mode = GPIO_Mode_OUT,
+			.GPIO_OType = GPIO_OType_PP,
+			.GPIO_Speed = GPIO_Speed_2MHz,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
+		};
+		GPIO_Init(GPIOD, &GPIO_InitStructure);
+	}
+
+	{
+		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+		GPIO_InitTypeDef GPIO_InitStructure = {
+			.GPIO_Pin = GPIO_Pin_0,
+			.GPIO_Mode = GPIO_Mode_IN,
+			.GPIO_OType = GPIO_OType_OD,
+			.GPIO_Speed = GPIO_Speed_2MHz,
+			.GPIO_PuPd = GPIO_PuPd_DOWN,
+		};
+		GPIO_Init(GPIOA, &GPIO_InitStructure);
+	}
 }
 
 static void init_uart(void) {
@@ -170,7 +185,7 @@ static void init_uart(void) {
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 
 	/* Send a null byte (first byte will be lost */
-	USART_SendData(USART2, 0);
+	rs232_transmitchar(0);
 }
 
 static void init_timer(void) {

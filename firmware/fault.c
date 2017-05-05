@@ -47,7 +47,7 @@ static const char *exception_names[] = {
 };
 
 void fail_assertion(const char *assertion, const char *filename, int lineno) {
-	printf("Assertion failed: %s (%s:%d)\n", assertion, filename, lineno);
+	//printf("Assertion failed: %s (%s:%d)\n", assertion, filename, lineno);
 	while (true);
 }
 

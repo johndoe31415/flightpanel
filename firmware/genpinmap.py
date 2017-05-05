@@ -92,9 +92,11 @@ class PinmapGenerator(object):
 				self._print_cols("#define %s_Pin" % (pin.name), "GPIO_Pin_%d" % (pin.pin), file = f)
 				self._print_cols("#define %s_SetHIGH()" % (pin.name), "%s_GPIO->BSRRL = %s_Pin" % (pin.name, pin.name), file = f)
 				self._print_cols("#define %s_SetLOW()" % (pin.name), "%s_GPIO->BSRRH = %s_Pin" % (pin.name, pin.name), file = f)
+				self._print_cols("#define %s_Toggle()" % (pin.name), "%s_GPIO->ODR ^= %s_Pin" % (pin.name, pin.name), file = f)
 				self._print_cols("#define %s_Pulse()" % (pin.name), "do { %s_SetHIGH(); delay_loopcnt(LOOPCOUNT_50NS); %s_SetLOW(); } while (0)" % (pin.name, pin.name), file = f)
 				self._print_cols("#define %s_InvPulse()" % (pin.name), "do { %s_SetLOW(); delay_loopcnt(LOOPCOUNT_50NS); %s_SetHIGH(); } while (0)" % (pin.name, pin.name), file = f)
 				self._print_cols("#define %s_SetTo(value)" % (pin.name), "if (value) { %s_SetHIGH(); } else { %s_SetLOW(); }" % (pin.name, pin.name), file = f)
+				self._print_cols("#define %s_GetValue()" % (pin.name), "(%s_GPIO->IDR & %s_Pin)" % (pin.name, pin.name), file = f)
 			print(file = f)
 
 		print("#endif", file = f)

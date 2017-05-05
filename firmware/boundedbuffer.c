@@ -79,6 +79,7 @@ bool boundedbuffer_putbyte(struct bounded_buffer_t *buffer, uint8_t data) {
 		return false;
 	}
 	buffer->data[buffer->wr_index] = data;
+	buffer->fill++;
 	buffer->wr_index++;
 	if (buffer->wr_index == buffer->bufsize) {
 		buffer->wr_index = 0;
@@ -91,6 +92,7 @@ int16_t boundedbuffer_getbyte(struct bounded_buffer_t *buffer) {
 		return -1;
 	}
 	int16_t retval = buffer->data[buffer->rd_index];
+	buffer->fill--;
 	buffer->rd_index++;
 	if (buffer->rd_index == buffer->bufsize) {
 		buffer->rd_index = 0;

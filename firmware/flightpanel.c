@@ -50,6 +50,23 @@
 #include "stm32f4xx_stackpaint.h"
 
 int main(void) {
+#if 0
+	char x = 'A';
+	while (true) {
+		while (UserButton_GetValue()) {
+			LEDGreen_SetHIGH();
+		}
+		LEDGreen_SetLOW();
+		rs232_transmitchar(x);
+		x++;
+		if (x > 'Z') {
+			rs232_transmitchar('\r');
+			rs232_transmitchar('\n');
+			x = 'A';
+		}
+	}
+#endif
+
 	printf("Reset successful.\n");
 	init_usb_late();
 	printf("USB initialized.\n");

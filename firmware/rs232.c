@@ -35,7 +35,9 @@ static struct bounded_buffer_t rs232_tx_buffer = {
 };
 
 void USART2_IRQHandler(void) {
+	LEDRed_SetHIGH();
 	if (USART_GetITStatus(USART2, USART_IT_RXNE) == SET) {
+		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
 		uint8_t rxChar = USART_ReceiveData(USART2);
 //		rs232_transmitchar(rxChar + 1);
 //		rs232_transmitchar('\r');
@@ -51,9 +53,10 @@ void USART2_IRQHandler(void) {
 			*/
 		}
 	}
-	if (USART_GetITStatus(USART2, USART_IT_TXE) == SET) {
+	if (USART_GetITStatus(USART2, USART_IT_TC) == SET) {
+		USART_ClearITPendingBit(USART2, USART_IT_TC);
 		/* Transmission complete, try to send next byte */
-		uint16_t next_byte = boundedbuffer_getbyte(&rs232_tx_buffer);
+		int16_t next_byte = boundedbuffer_getbyte(&rs232_tx_buffer);
 		if (next_byte == -1) {
 			/* No next byte, we're finished */
 			tx_in_progress = false;
@@ -62,14 +65,15 @@ void USART2_IRQHandler(void) {
 			USART_SendData(USART2, next_byte);
 		}
 	}
+	LEDRed_SetLOW();
 }
 
 static void rs232_buffer_lock(void) {
-	USART_ITConfig(USART2, USART_IT_TXE, DISABLE);
+	USART_ITConfig(USART2, USART_IT_TC, DISABLE);
 }
 
 static void rs232_buffer_unlock(void) {
-	USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
+	USART_ITConfig(USART2, USART_IT_TC, ENABLE);
 }
 
 void rs232_transmitchar(char c) {
@@ -77,14 +81,12 @@ void rs232_transmitchar(char c) {
 	do {
 		rs232_buffer_lock();
 		put_in_buffer = boundedbuffer_putbyte(&rs232_tx_buffer, c);
-
 		rs232_buffer_unlock();
 	} while (!put_in_buffer);
 	if (!tx_in_progress) {
 		tx_in_progress = true;
 		USART_SendData(USART2, boundedbuffer_getbyte(&rs232_tx_buffer));
 	}
-//	while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
 }
 
 

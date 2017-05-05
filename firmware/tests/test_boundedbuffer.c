@@ -25,6 +25,7 @@
 #include <boundedbuffer.h>
 
 static void test_basics(void) {
+	subtest_start();
 	struct bounded_buffer_t buffer = {
 		.bufsize = 32,
 		.data = (uint8_t[32]) { },
@@ -41,6 +42,7 @@ static void test_basics(void) {
 }
 
 static void test_put_head(void) {
+	subtest_start();
 	struct bounded_buffer_t buffer = {
 		.bufsize = 32,
 		.data = (uint8_t[32]) { },
@@ -72,10 +74,32 @@ static void test_put_head(void) {
 	test_assert(!memcmp(expect_data, result, buffer.bufsize));
 }
 
+static void test_single_char(void) {
+	subtest_start();
+
+	struct bounded_buffer_t buffer = {
+		.bufsize = 32,
+		.data = (uint8_t[32]) { },
+	};
+
+	test_assert_int_eq(boundedbuffer_getbyte(&buffer), -1);
+	test_assert(boundedbuffer_putbyte(&buffer, 'X'));
+	test_assert_int_eq(boundedbuffer_getbyte(&buffer), 'X');
+	test_assert_int_eq(boundedbuffer_getbyte(&buffer), -1);
+	test_assert(boundedbuffer_putbyte(&buffer, 'A'));
+	test_assert(boundedbuffer_putbyte(&buffer, 'B'));
+	test_assert(boundedbuffer_putbyte(&buffer, 'C'));
+	test_assert_int_eq(boundedbuffer_getbyte(&buffer), 'A');
+	test_assert_int_eq(boundedbuffer_getbyte(&buffer), 'B');
+	test_assert_int_eq(boundedbuffer_getbyte(&buffer), 'C');
+	test_assert_int_eq(boundedbuffer_getbyte(&buffer), -1);
+}
+
 int main(int argc, char **argv) {
 	test_start(argc, argv);
 	test_basics();
 	test_put_head();
+	test_single_char();
 	test_success();
 	return 0;
 }
