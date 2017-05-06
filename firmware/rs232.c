@@ -27,7 +27,7 @@
 #include "pinmap.h"
 #include "boundedbuffer.h"
 
-#define RS232_TX_BUFSIZE		256
+#define RS232_TX_BUFSIZE		16
 static bool tx_in_progress;
 static struct bounded_buffer_t rs232_tx_buffer = {
 	.bufsize = RS232_TX_BUFSIZE,
