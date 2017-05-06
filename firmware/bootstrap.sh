@@ -92,9 +92,11 @@ rm -f "${CUBE_SUBDIR}/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_conf
 rm -f "${CUBE_SUBDIR}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_conf_template.h"
 cp -n "${CUBE_SUBDIR}/Projects/STM32F4-Discovery/Demonstrations/Inc/usbd_conf.h" .
 cp -n "${CUBE_SUBDIR}/Projects/STM32F4-Discovery/Demonstrations/Src/usbd_conf.c" .
+sed -i 's/\(NVIC_SetPriority\s*(\s*SysTick_IRQn.*\)/\/\/\0    \/\/ Disable high prio systick because of USART2 deadlock/g' usbd_conf.c
 sed "s/.*#define assert_param.*//g;" "${CUBE_SUBDIR}/Projects/STM32F401-Discovery/Examples/BSP/Inc/stm32f4xx_hal_conf.h" >stm32f4xx_hal_conf.h
 sed -i "s/.*#define assert_param.*//g;" "${CUBE_SUBDIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_utils.c"
 ln -fs "${CUBE_SUBDIR}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/" include-core
 ln -fs "${CUBE_SUBDIR}/Drivers/STM32F4xx_HAL_Driver/Inc" include-hal
 ln -fs "${CUBE_SUBDIR}/Drivers/CMSIS/Device/ST/STM32F4xx/Include" include-cmsis
 
+#NVIC_SetPriority (SysTick_IRQn

@@ -104,6 +104,10 @@ static void init_clock(void) {
 	while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL);
 }
 
+static void init_nvic(void) {
+	/* 4 Bits preemtion priority, 0 bits for sub priority */
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+}
 
 static void init_gpio(void) {
 	{
@@ -177,7 +181,7 @@ static void init_uart(void) {
 	/* Enable the USARTx Interrupt */
 	NVIC_InitTypeDef NVIC_InitStructure = {
 		.NVIC_IRQChannel = USART2_IRQn,
-		.NVIC_IRQChannelPreemptionPriority = 0,
+		.NVIC_IRQChannelPreemptionPriority = 15,
 		.NVIC_IRQChannelSubPriority = 0,
 		.NVIC_IRQChannelCmd = ENABLE,
 	};
@@ -206,7 +210,7 @@ static void init_timer(void) {
 	/* Enable IRQ */
 	NVIC_InitTypeDef NVIC_InitStructure = {
 		.NVIC_IRQChannel = TIM3_IRQn,
-		.NVIC_IRQChannelPreemptionPriority = 0,
+		.NVIC_IRQChannelPreemptionPriority = 15,
 		.NVIC_IRQChannelSubPriority = 0,
 		.NVIC_IRQChannelCmd = ENABLE,
 	};
@@ -310,7 +314,7 @@ static void init_display_spi_dma(void) {
 	/* Enable IRQ */
 	NVIC_InitTypeDef NVIC_InitStructure = {
 		.NVIC_IRQChannel = DMA1_Stream4_IRQn,
-		.NVIC_IRQChannelPreemptionPriority = 0,
+		.NVIC_IRQChannelPreemptionPriority = 15,
 		.NVIC_IRQChannelSubPriority = 0,
 		.NVIC_IRQChannelCmd = ENABLE,
 	};
@@ -427,14 +431,14 @@ static void init_iomux_spi_dma(void) {
 	/* Enable IRQ */
 	NVIC_InitTypeDef NVIC_InitStructure = {
 		.NVIC_IRQChannel = DMA1_Stream5_IRQn,
-		.NVIC_IRQChannelPreemptionPriority = 0,
+		.NVIC_IRQChannelPreemptionPriority = 15,
 		.NVIC_IRQChannelSubPriority = 0,
 		.NVIC_IRQChannelCmd = ENABLE,
 	};
 	NVIC_Init(&NVIC_InitStructure);
 	NVIC_InitTypeDef NVIC_InitStructure2 = {
 		.NVIC_IRQChannel = DMA1_Stream2_IRQn,
-		.NVIC_IRQChannelPreemptionPriority = 0,
+		.NVIC_IRQChannelPreemptionPriority = 15,
 		.NVIC_IRQChannelSubPriority = 0,
 		.NVIC_IRQChannelCmd = ENABLE,
 	};
@@ -519,7 +523,7 @@ static void init_usb(void) {
 	/* Enable IRQ */
 	NVIC_InitTypeDef NVIC_InitStructure = {
 		.NVIC_IRQChannel = OTG_FS_IRQn,
-		.NVIC_IRQChannelPreemptionPriority = 0,
+		.NVIC_IRQChannelPreemptionPriority = 15,
 		.NVIC_IRQChannelSubPriority = 0,
 		.NVIC_IRQChannelCmd = ENABLE,
 	};
@@ -578,6 +582,7 @@ static void init_debug(void) {
 void SystemInit(void) {
 	__disable_irq();
 	init_clock();
+	init_nvic();
 	init_gpio();
 	init_uart();
 	init_rotary_encoders();

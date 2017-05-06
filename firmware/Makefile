@@ -36,7 +36,7 @@ readflash:
 	$(STFLASH) read firmware.bin 0x08000000 65536
 
 gdb:
-	$(GDB) -d ext-st -d cube flightpanel -ex "target extended-remote :4242"
+	$(GDB) -d ext-st -d cube flightpanel -ex "source gdb.py" -ex "target extended-remote :4242"
 
 console:
 	picocom --baud 115200 /dev/ttyUSB*

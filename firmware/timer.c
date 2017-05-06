@@ -51,10 +51,6 @@ void SysTick_Handler(void) {
 	HAL_IncTick();
 	iomux_trigger();
 	hid_tick();
-
-	static int x = 0;
-	x++;
-	printf("Dead %d\n", x);
 }
 
 

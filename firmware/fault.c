@@ -52,7 +52,8 @@ void fail_assertion(const char *assertion, const char *filename, int lineno) {
 }
 
 void generic_fault_handler(uint32_t fault_id, const struct fault_stack_layout_t *stack_layout) {
-	int exception_no = stack_layout->psr & 0x3f;
+	/* ARM manual specifies 6 bit (0x3f) but STM32 has 9 bit for this (0x1ff) */
+	int exception_no = stack_layout->psr & 0x1ff;
 	if (fault_id) {
 		printf("~~~~~~~~~~~~~ Fault ID %lu: Exception %u (%s) ~~~~~~~~~~~~~\n", fault_id, exception_no, (exception_no < 13) ? exception_names[exception_no] : "?");
 	} else {

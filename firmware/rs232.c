@@ -27,7 +27,7 @@
 #include "pinmap.h"
 #include "boundedbuffer.h"
 
-#define RS232_TX_BUFSIZE		16
+#define RS232_TX_BUFSIZE		256
 static bool tx_in_progress;
 static struct bounded_buffer_t rs232_tx_buffer = {
 	.bufsize = RS232_TX_BUFSIZE,
@@ -38,20 +38,8 @@ void USART2_IRQHandler(void) {
 	LEDRed_SetHIGH();
 	if (USART_GetITStatus(USART2, USART_IT_RXNE) == SET) {
 		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
-		uint8_t rxChar = USART_ReceiveData(USART2);
-//		rs232_transmitchar(rxChar + 1);
-//		rs232_transmitchar('\r');
-//		rs232_transmitchar('\n');
-
-		if ((rxChar >= 'a') && (rxChar <= 'a' + 0xf)) {
-			rxChar -= 'a';
-			/*
-			Dbg1_SetTo(rxChar & 0x01);
-			Dbg2_SetTo(rxChar & 0x02);
-			Dbg3_SetTo(rxChar & 0x04);
-			Dbg4_SetTo(rxChar & 0x08);
-			*/
-		}
+		uint8_t rx_char = USART_ReceiveData(USART2);
+		(void)rx_char;
 	}
 	if (USART_GetITStatus(USART2, USART_IT_TC) == SET) {
 		USART_ClearITPendingBit(USART2, USART_IT_TC);
@@ -78,16 +66,31 @@ static void rs232_buffer_unlock(void) {
 
 void rs232_transmitchar(char c) {
 	bool put_in_buffer;
+	bool isr_priority_raised = false;
 	do {
 		rs232_buffer_lock();
 		put_in_buffer = boundedbuffer_putbyte(&rs232_tx_buffer, c);
+		if (!put_in_buffer && !isr_priority_raised) {
+			/* Buffer is full. If this rs232_transmitchar() was issued from an
+			 * ISR, then we would usually deadlock here. Therefore, raise
+			 * priority of the USART2 IRQ so that it can preemt the
+			 * (potentially) currently running handler. Lower the priority
+			 * afterwards again.
+			*/
+			isr_priority_raised = true;
+			NVIC_SetPriority(USART2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
+		}
 		rs232_buffer_unlock();
 	} while (!put_in_buffer);
+	if (isr_priority_raised) {
+		/* If we raised ISR priority so that transmission could go through,
+		 * then lower it back again */
+		NVIC_SetPriority(USART2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
+	}
+	rs232_buffer_lock();
 	if (!tx_in_progress) {
 		tx_in_progress = true;
 		USART_SendData(USART2, boundedbuffer_getbyte(&rs232_tx_buffer));
 	}
+	rs232_buffer_unlock();
 }
-
-
-

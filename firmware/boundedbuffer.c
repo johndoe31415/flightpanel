@@ -42,7 +42,6 @@ bool boundedbuffer_get(struct bounded_buffer_t *buffer, void *data, bb_size_t le
 		memcpy(data + bytes_until_eob, buffer->data + 0, length - bytes_until_eob);
 	}
 
-
 	buffer->rd_index = (buffer->rd_index + length) % buffer->bufsize;
 	buffer->fill -= length;
 	return true;
