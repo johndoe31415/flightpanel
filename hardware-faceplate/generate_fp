@@ -21,6 +21,7 @@
 #
 #	Johannes Bauer <JohannesBauer@gmx.de>
 
+import os
 import sys
 import collections
 from XMLParser import XMLParser
@@ -72,7 +73,7 @@ def get_matrix(item, skip = 0):
 class ComponentNames(object):
 	def __init__(self):
 		self._ids = collections.defaultdict(int)
-	
+
 	def get(self, name):
 		self._ids[name] += 1
 		return name + "_" + str(self._ids[name])
@@ -81,80 +82,81 @@ svg = XMLParser().parsefile(sys.argv[1])
 #svg = XMLParser().parsefile("test.svg")
 #svg.dump()
 
-width_mm = convert_unit(svg["width"])
-height_mm = convert_unit(svg["height"])
-cradius = 1
-print("var fp = new Frontpanel(\"instruments\", thick_2mm, %f, %f, alu_elox, elox_natural);" % (width_mm, height_mm))
-print("fp.SetCornerRadii(%f, %f, %f, %f);" % (cradius, cradius, cradius, cradius))
-print("AddFrontpanel(fp);")
-print()
-cnames = ComponentNames()
-master_items = { }
+with open(os.path.expanduser("~/.FrontDesign/Scripts/faceplate.fpjs"), "w") as f:
+	width_mm = convert_unit(svg["width"])
+	height_mm = convert_unit(svg["height"])
+	cradius = 1
+	print("var fp = new Frontpanel(\"instruments\", thick_2mm, %f, %f, alu_elox, elox_natural);" % (width_mm, height_mm), file = f)
+	print("fp.SetCornerRadii(%f, %f, %f, %f);" % (cradius, cradius, cradius, cradius), file = f)
+	print("AddFrontpanel(fp);", file = f)
+	print(file = f)
+	cnames = ComponentNames()
+	master_items = { }
 
 
-for item in svg.search("use"):
-	xlink = item["xlink:href"]
-	if xlink not in master_items:
-		master = svg.searchunique("g", id = xlink.lstrip("#"))
-		label = master["inkscape:label"]
+	for item in svg.search("use"):
+		xlink = item["xlink:href"]
+		if xlink not in master_items:
+			master = svg.searchunique("g", id = xlink.lstrip("#"))
+			label = master["inkscape:label"]
 
-		# Find reference element within master
-		try:
-			master_ref = master.searchunique("circle", **{ "inkscape:label": "#ref" })
-		except Exception as e:
-			print(e)
-			print("No reference for %s" % (label))
-			sys.exit(1)
-		
-		master_matrix = get_matrix(master_ref)
-		master_refpt = (float(master_ref["cx"]), float(master_ref["cy"]))
-		master_items[xlink] = (label, master_matrix, master_refpt)
+			# Find reference element within master
+			try:
+				master_ref = master.searchunique("circle", **{ "inkscape:label": "#ref" })
+			except Exception as e:
+				print(e)
+				print("No reference for %s" % (label))
+				sys.exit(1)
+
+			master_matrix = get_matrix(master_ref)
+			master_refpt = (float(master_ref["cx"]), float(master_ref["cy"]))
+			master_items[xlink] = (label, master_matrix, master_refpt)
 
 
-	(label, master_matrix, master_refpt) = master_items[xlink]
+		(label, master_matrix, master_refpt) = master_items[xlink]
 
-	item_matrix = get_matrix(item, skip = 1)
-	(x_px, y_px) = (master_matrix * item_matrix).apply(master_refpt[0], master_refpt[1])
+		item_matrix = get_matrix(item, skip = 1)
+		(x_px, y_px) = (master_matrix * item_matrix).apply(master_refpt[0], master_refpt[1])
 
-	(x, y) = (px_to_mm(x_px), height_mm - px_to_mm(y_px))
-	cname = cnames.get(label[1:])
+		(x, y) = (px_to_mm(x_px), height_mm - px_to_mm(y_px))
+		cname = cnames.get(label[1:])
 
-	if label in [ "#gled", "#yled", "#rled" ]:
-		print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname))
-		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))		
-	elif label == "#momentary":
-		print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname))
-		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
-	elif label == "#rotary":
-		print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname))
-		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
-	elif label == "#flip":
-		print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname))
-		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
-		engraving_diameter = 13
-		engraving_length = 2.5
-		print("var %s_mnt = new Line(\"%s_mnt\", %f).SetColor(engrave_no_color).SetTool(cutter_1_0mm);" % (cname, cname, engraving_length))
-		print("fp.AddElement(%s_mnt, %f, %f);" % (cname, x, y + (engraving_diameter / 2)))
-	elif label == "#lcd":
-		print("var %s = new RectHole(\"%s\", 29.4, 12.3, 1);" % (cname, cname))
-		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
-	elif label == "#mounting":
-		print("var %s = new DrillHole(\"%s\", 3).SetCountersink(sink_74A_M3);" % (cname, cname))
-		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
-	else:
-		print("// WARNING: Unused element '%s'" % (label))
-	print()
+		if label in [ "#gled", "#yled", "#rled" ]:
+			print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname), file = f)
+			print("fp.AddElement(%s, %f, %f);" % (cname, x, y), file = f)
+		elif label == "#momentary":
+			print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname), file = f)
+			print("fp.AddElement(%s, %f, %f);" % (cname, x, y), file = f)
+		elif label == "#rotary":
+			print("var %s = new DrillHole(\"%s\", 7);" % (cname, cname), file = f)
+			print("fp.AddElement(%s, %f, %f);" % (cname, x, y), file = f)
+		elif label == "#flip":
+			print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname), file = f)
+			print("fp.AddElement(%s, %f, %f);" % (cname, x, y), file = f)
+			engraving_diameter = 13
+			engraving_length = 2.5
+			print("var %s_mnt = new Line(\"%s_mnt\", %f).SetColor(engrave_no_color).SetTool(cutter_1_0mm);" % (cname, cname, engraving_length), file = f)
+			print("fp.AddElement(%s_mnt, %f, %f);" % (cname, x, y + (engraving_diameter / 2)), file = f)
+		elif label == "#lcd":
+			print("var %s = new RectHole(\"%s\", 29.4, 12.3, 1);" % (cname, cname), file = f)
+			print("fp.AddElement(%s, %f, %f);" % (cname, x, y), file = f)
+		elif label == "#mounting":
+			print("var %s = new DrillHole(\"%s\", 3).SetCountersink(sink_74A_M3);" % (cname, cname), file = f)
+			print("fp.AddElement(%s, %f, %f);" % (cname, x, y), file = f)
+		else:
+			print("// WARNING: Unused element '%s'" % (label))
+		print(file = f)
 
-for item in svg.search("text"):
-	text = item.getcdata()
-	(x_px, y_px) = get_matrix(item).apply(float(item["x"]), float(item["y"]))
-	
-	(x, y) = (px_to_mm(x_px), height_mm - px_to_mm(y_px))
-	y += 1.5
+	for item in svg.search("text"):
+		text = item.getcdata()
+		(x_px, y_px) = get_matrix(item).apply(float(item["x"]), float(item["y"]))
 
-	if (-10 < x < width_mm + 10) and (-10 < y < height_mm + 10):
-		cname = cnames.get("text")
-		print("var %s = new TextEngraving(\"%s\", \"%s\");" % (cname, cname, text))
-		print("fp.AddElement(%s, %f, %f);" % (cname, x, y))
-		print()
+		(x, y) = (px_to_mm(x_px), height_mm - px_to_mm(y_px))
+		y += 1.5
+
+		if (-10 < x < width_mm + 10) and (-10 < y < height_mm + 10):
+			cname = cnames.get("text")
+			print("var %s = new TextEngraving(\"%s\", \"%s\");" % (cname, cname, text), file = f)
+			print("fp.AddElement(%s, %f, %f);" % (cname, x, y), file = f)
+			print(file = f)
 
