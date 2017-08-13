@@ -86,7 +86,7 @@ with open(os.path.expanduser("~/.FrontDesign/Scripts/faceplate.fpjs"), "w") as f
 	width_mm = convert_unit(svg["width"])
 	height_mm = convert_unit(svg["height"])
 	cradius = 1
-	print("var fp = new Frontpanel(\"instruments\", thick_2mm, %f, %f, alu_elox, elox_natural);" % (width_mm, height_mm), file = f)
+	print("var fp = new Frontpanel(\"faceplate\", thick_2mm, %f, %f, alu_elox, elox_natural);" % (width_mm, height_mm), file = f)
 	print("fp.SetCornerRadii(%f, %f, %f, %f);" % (cradius, cradius, cradius, cradius), file = f)
 	print("AddFrontpanel(fp);", file = f)
 	print(file = f)

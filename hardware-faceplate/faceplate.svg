@@ -37,12 +37,12 @@
       <image
          sodipodi:absref="/home/joe/Eigene_Dokumente/Programmieren/flightpanel/hardware-faceplate/MT510.jpg"
          xlink:href="MT510.jpg"
-         width="450"
-         height="450"
-         preserveAspectRatio="none"
-         id="image10"
+         y="0"
          x="0"
-         y="0" />
+         id="image10"
+         preserveAspectRatio="none"
+         height="450"
+         width="450" />
     </pattern>
   </defs>
   <sodipodi:namedview
@@ -52,9 +52,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.55789498"
-     inkscape:cx="-80.691954"
-     inkscape:cy="536.08601"
+     inkscape:zoom="0.78898265"
+     inkscape:cx="130.24993"
+     inkscape:cy="309.02194"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -134,6 +134,26 @@
        position="438.05268,339.41127"
        orientation="1,0"
        id="guide4518"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="506.28019,96.046725"
+       orientation="0,1"
+       id="guide4775"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="446.57265,370.95355"
+       orientation="0,1"
+       id="guide4777"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="448.67318,468.83823"
+       orientation="0,1"
+       id="guide4779"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="450.3536,577.64567"
+       orientation="0,1"
+       id="guide4781"
        inkscape:locked="false" />
   </sodipodi:namedview>
   <metadata
@@ -630,23 +650,23 @@
        xml:space="preserve"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;line-height:0%;font-family:Din17;-inkscape-font-specification:'Din17 Medium';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        x="-740.77014"
-       y="851.81018"
+       y="851.10309"
        id="text4415-0-9-0-1"><tspan
          sodipodi:role="line"
          id="tspan4417-6-4-9-0"
          x="-740.77014"
-         y="851.81018"
+         y="851.10309"
          style="font-size:15.00000095px;line-height:1.25">HDG</tspan></text>
     <text
        xml:space="preserve"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;line-height:0%;font-family:Din17;-inkscape-font-specification:'Din17 Medium';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        x="-571.64874"
-       y="851.72772"
+       y="851.02063"
        id="text4415-0-9-0-1-3"><tspan
          sodipodi:role="line"
          id="tspan4417-6-4-9-0-0"
          x="-571.64874"
-         y="851.72772"
+         y="851.02063"
          style="font-size:15.00000095px;line-height:1.25">RATE</tspan></text>
     <text
        xml:space="preserve"
@@ -715,7 +735,7 @@
        y="0"
        xlink:href="#g5454"
        id="use5538"
-       transform="translate(225.62819,446.64915)"
+       transform="translate(227.42108,446.64915)"
        width="100%"
        height="100%" />
     <use
@@ -985,7 +1005,7 @@
        y="0"
        xlink:href="#g5454"
        id="use5958"
-       transform="translate(273.19477,656.46062)"
+       transform="translate(273.19477,653.63219)"
        width="100%"
        height="100%" />
     <g
@@ -1333,39 +1353,39 @@
        y="0"
        xlink:href="#g5454"
        id="use5536-6"
-       transform="translate(319.97552,555.88298)"
+       transform="translate(320.68263,555.38298)"
        width="100%"
        height="100%" />
     <text
        id="text4415-0-6-6-1-9-6-6-6-3"
-       y="755.32202"
-       x="-536.0965"
+       y="755.47455"
+       x="-536.23798"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;line-height:0%;font-family:Din17;-inkscape-font-specification:'Din17 Medium';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        xml:space="preserve"><tspan
-         y="755.32202"
-         x="-536.0965"
+         y="755.47455"
+         x="-536.23798"
          id="tspan4417-6-1-1-2-3-2-75-2-5"
          sodipodi:role="line"
          style="font-size:15.00000095px;line-height:1.25">DME/ADF</tspan></text>
     <text
        id="text4415-0-6-6-7-6-6-6"
        y="755.57202"
-       x="-615.47211"
+       x="-616.97217"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;line-height:0%;font-family:Din17;-inkscape-font-specification:'Din17 Medium';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        xml:space="preserve"><tspan
          y="755.57202"
-         x="-615.47211"
+         x="-616.97217"
          id="tspan4417-6-1-1-0-0-1-2"
          sodipodi:role="line"
          style="font-size:15.00000095px;line-height:1.25">NAV2</tspan></text>
     <text
        id="text4415-0-6-6-7-6-9"
        y="647.70386"
-       x="-614.85754"
+       x="-616.0647"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;line-height:0%;font-family:Din17;-inkscape-font-specification:'Din17 Medium';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        xml:space="preserve"><tspan
          y="647.70386"
-         x="-614.85754"
+         x="-616.0647"
          id="tspan4417-6-1-1-0-0-12"
          sodipodi:role="line"
          style="font-size:15.00000095px;line-height:1.25">NAV1</tspan></text>
@@ -1559,17 +1579,17 @@
        y="0"
        xlink:href="#g5454"
        id="use5536-6-6-7"
-       transform="translate(320.68263,447.14915)"
+       transform="translate(320.68263,446.64915)"
        width="100%"
        height="100%" />
     <text
        id="text4415-0-6-6-1-9-6-6-6-3-1-9"
-       y="648.20386"
-       x="-519.75153"
+       y="647.81635"
+       x="-520.26898"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;line-height:0%;font-family:Din17;-inkscape-font-specification:'Din17 Medium';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        xml:space="preserve"><tspan
-         y="648.20386"
-         x="-519.75153"
+         y="647.81635"
+         x="-520.26898"
          id="tspan4417-6-1-1-2-3-2-75-2-5-8-2"
          sodipodi:role="line"
          style="font-size:15.00000095px;line-height:1.25">OBS</tspan></text>
