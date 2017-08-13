@@ -125,10 +125,10 @@ with open(os.path.expanduser("~/.FrontDesign/Scripts/faceplate.fpjs"), "w") as f
 			print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname), file = f)
 			print("fp.AddElement(%s, %f, %f);" % (cname, x, y), file = f)
 		elif label == "#momentary":
-			print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname), file = f)
+			print("var %s = new DrillHole(\"%s\", 6.25);" % (cname, cname), file = f)
 			print("fp.AddElement(%s, %f, %f);" % (cname, x, y), file = f)
 		elif label == "#rotary":
-			print("var %s = new DrillHole(\"%s\", 7);" % (cname, cname), file = f)
+			print("var %s = new DrillHole(\"%s\", 7.1);" % (cname, cname), file = f)
 			print("fp.AddElement(%s, %f, %f);" % (cname, x, y), file = f)
 		elif label == "#flip":
 			print("var %s = new DrillHole(\"%s\", 6);" % (cname, cname), file = f)

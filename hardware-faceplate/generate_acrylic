@@ -21,6 +21,7 @@
 #
 #	Johannes Bauer <JohannesBauer@gmx.de>
 
+import os
 import collections
 hole_width_mm = 29.4
 hole_height_mm = 12.3
@@ -43,7 +44,6 @@ outer_height_mm = 2 * acryl_spacing_mm + inner_height_mm
 total_width_mm = count_x * outer_width_mm + ((count_x - 1) * inbetween_spacing)
 total_height_mm = count_y * outer_height_mm + ((count_y - 1) * inbetween_spacing)
 acryl_depth_mm = 3
-print("")
 
 class ComponentNames(object):
 	def __init__(self):
@@ -54,17 +54,18 @@ class ComponentNames(object):
 		return name + "_" + str(self._ids[name])
 
 
-print("var fp = new Frontpanel(\"acrylglas\", thick_3mm, %f, %f, acryl, acryl_clear);" % (total_width_mm, total_height_mm))
-print("AddFrontpanel(fp);")
-print()
+with open(os.path.expanduser("~/.FrontDesign/Scripts/acrylic.fpjs"), "w") as f:
+	print("var fp = new Frontpanel(\"acrylic\", thick_3mm, %f, %f, acryl, acryl_clear);" % (total_width_mm, total_height_mm), file = f)
+	print("AddFrontpanel(fp);", file = f)
+	print(file = f)
 
-cnames = ComponentNames()
-for y in range(count_y):
-	for x in range(count_x):
-		posx = (x * (outer_width_mm + inbetween_spacing)) + outer_width_mm / 2
-		posy = (y * (outer_height_mm + inbetween_spacing)) + outer_height_mm / 2
-		name = cnames.get("cav")
-		print("var %s = new Cavity(\"%s\");" % (name, name))
-		print("%s.MakeRectInRect(%f, %f, %f, %f, %f, %f, %f).SetTool(cutter_1_0mm);" % (name, outer_width_mm, outer_height_mm, base_depth_mm, inner_width_mm, inner_height_mm, hole_cradius_mm, hole_cradius_mm))
-		print("fp.AddElement(%s, %f, %f);" % (name, posx, posy))
-		print()
+	cnames = ComponentNames()
+	for y in range(count_y):
+		for x in range(count_x):
+			posx = (x * (outer_width_mm + inbetween_spacing)) + outer_width_mm / 2
+			posy = (y * (outer_height_mm + inbetween_spacing)) + outer_height_mm / 2
+			name = cnames.get("cav")
+			print("var %s = new Cavity(\"%s\");" % (name, name), file = f)
+			print("%s.MakeRectInRect(%f, %f, %f, %f, %f, %f, %f).SetTool(cutter_1_0mm);" % (name, outer_width_mm, outer_height_mm, base_depth_mm, inner_width_mm, inner_height_mm, hole_cradius_mm, hole_cradius_mm), file = f)
+			print("fp.AddElement(%s, %f, %f);" % (name, posx, posy), file = f)
+			print(file = f)
