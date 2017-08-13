@@ -1,0 +1,385 @@
+var fp = new Frontpanel("faceplate", thick_2mm, 154.000000, 237.000000, alu_elox, elox_natural);
+fp.SetCornerRadii(1.000000, 1.000000, 1.000000, 1.000000);
+AddFrontpanel(fp);
+
+var gled_1 = new DrillHole("gled_1", 6);
+fp.AddElement(gled_1, 99.426821, 82.537462);
+
+var gled_2 = new DrillHole("gled_2", 6);
+fp.AddElement(gled_2, 50.861865, 82.537462);
+
+var gled_3 = new DrillHole("gled_3", 6);
+fp.AddElement(gled_3, 75.144342, 82.537462);
+
+var rled_1 = new DrillHole("rled_1", 6);
+fp.AddElement(rled_1, 75.144342, 70.440610);
+
+var rotary_1 = new DrillHole("rotary_1", 7.1);
+fp.AddElement(rotary_1, 79.435578, 216.797424);
+
+var rotary_2 = new DrillHole("rotary_2", 7.1);
+fp.AddElement(rotary_2, 110.790983, 155.421321);
+
+var rotary_3 = new DrillHole("rotary_3", 7.1);
+fp.AddElement(rotary_3, 110.790983, 124.734218);
+
+var lcd_1 = new RectHole("lcd_1", 29.4, 12.3, 1);
+fp.AddElement(lcd_1, 17.683611, 216.893663);
+
+var lcd_2 = new RectHole("lcd_2", 29.4, 12.3, 1);
+fp.AddElement(lcd_2, 51.558731, 216.893663);
+
+var lcd_3 = new RectHole("lcd_3", 29.4, 12.3, 1);
+fp.AddElement(lcd_3, 17.683611, 186.404210);
+
+var lcd_4 = new RectHole("lcd_4", 29.4, 12.3, 1);
+fp.AddElement(lcd_4, 51.558731, 186.404210);
+
+var lcd_5 = new RectHole("lcd_5", 29.4, 12.3, 1);
+fp.AddElement(lcd_5, 17.683611, 155.717123);
+
+var lcd_6 = new RectHole("lcd_6", 29.4, 12.3, 1);
+fp.AddElement(lcd_6, 51.558731, 155.717123);
+
+var lcd_7 = new RectHole("lcd_7", 29.4, 12.3, 1);
+fp.AddElement(lcd_7, 17.683611, 125.030020);
+
+var lcd_8 = new RectHole("lcd_8", 29.4, 12.3, 1);
+fp.AddElement(lcd_8, 51.558731, 125.030020);
+
+var lcd_9 = new RectHole("lcd_9", 29.4, 12.3, 1);
+fp.AddElement(lcd_9, 17.683611, 93.447832);
+
+var lcd_10 = new RectHole("lcd_10", 29.4, 12.3, 1);
+fp.AddElement(lcd_10, 17.683611, 47.068315);
+
+var rotary_4 = new DrillHole("rotary_4", 7.1);
+fp.AddElement(rotary_4, 50.861889, 97.006108);
+
+var rotary_5 = new DrillHole("rotary_5", 7.1);
+fp.AddElement(rotary_5, 75.144366, 97.006108);
+
+var rotary_6 = new DrillHole("rotary_6", 7.1);
+fp.AddElement(rotary_6, 99.426845, 97.006108);
+
+var rotary_7 = new DrillHole("rotary_7", 7.1);
+fp.AddElement(rotary_7, 123.709336, 97.006108);
+
+var gled_4 = new DrillHole("gled_4", 6);
+fp.AddElement(gled_4, 132.171278, 70.440610);
+
+var yled_1 = new DrillHole("yled_1", 6);
+fp.AddElement(yled_1, 115.274927, 70.440610);
+
+var momentary_1 = new DrillHole("momentary_1", 6.25);
+fp.AddElement(momentary_1, 123.723123, 70.440620);
+
+var momentary_2 = new DrillHole("momentary_2", 6.25);
+fp.AddElement(momentary_2, 10.730348, 71.851732);
+
+var momentary_3 = new DrillHole("momentary_3", 6.25);
+fp.AddElement(momentary_3, 23.429997, 71.851732);
+
+var momentary_4 = new DrillHole("momentary_4", 6.25);
+fp.AddElement(momentary_4, 36.129997, 71.851732);
+
+var momentary_5 = new DrillHole("momentary_5", 6.25);
+fp.AddElement(momentary_5, 48.829997, 71.851732);
+
+var gled_5 = new DrillHole("gled_5", 6);
+fp.AddElement(gled_5, 45.084347, 37.643811);
+
+var yled_2 = new DrillHole("yled_2", 6);
+fp.AddElement(yled_2, 45.041785, 56.019161);
+
+var momentary_6 = new DrillHole("momentary_6", 6.25);
+fp.AddElement(momentary_6, 45.411759, 46.831498);
+
+var flip_1 = new DrillHole("flip_1", 6);
+fp.AddElement(flip_1, 17.594306, 20.605068);
+var flip_1_mnt = new Line("flip_1_mnt", 2.500000).SetColor(engrave_no_color).SetTool(cutter_1_0mm);
+fp.AddElement(flip_1_mnt, 17.594306, 27.105068);
+
+var flip_2 = new DrillHole("flip_2", 6);
+fp.AddElement(flip_2, 33.067794, 20.605068);
+var flip_2_mnt = new Line("flip_2_mnt", 2.500000).SetColor(engrave_no_color).SetTool(cutter_1_0mm);
+fp.AddElement(flip_2_mnt, 33.067794, 27.105068);
+
+var flip_3 = new DrillHole("flip_3", 6);
+fp.AddElement(flip_3, 48.541285, 20.605068);
+var flip_3_mnt = new Line("flip_3_mnt", 2.500000).SetColor(engrave_no_color).SetTool(cutter_1_0mm);
+fp.AddElement(flip_3_mnt, 48.541285, 27.105068);
+
+var flip_4 = new DrillHole("flip_4", 6);
+fp.AddElement(flip_4, 64.014773, 20.605068);
+var flip_4_mnt = new Line("flip_4_mnt", 2.500000).SetColor(engrave_no_color).SetTool(cutter_1_0mm);
+fp.AddElement(flip_4_mnt, 64.014773, 27.105068);
+
+var flip_5 = new DrillHole("flip_5", 6);
+fp.AddElement(flip_5, 79.488267, 20.605068);
+var flip_5_mnt = new Line("flip_5_mnt", 2.500000).SetColor(engrave_no_color).SetTool(cutter_1_0mm);
+fp.AddElement(flip_5_mnt, 79.488267, 27.105068);
+
+var flip_6 = new DrillHole("flip_6", 6);
+fp.AddElement(flip_6, 137.057932, 20.605068);
+var flip_6_mnt = new Line("flip_6_mnt", 2.500000).SetColor(engrave_no_color).SetTool(cutter_1_0mm);
+fp.AddElement(flip_6_mnt, 137.057932, 27.105068);
+
+var lcd_11 = new RectHole("lcd_11", 29.4, 12.3, 1);
+fp.AddElement(lcd_11, 85.433848, 155.717123);
+
+var lcd_12 = new RectHole("lcd_12", 29.4, 12.3, 1);
+fp.AddElement(lcd_12, 85.433848, 125.030019);
+
+var rotary_8 = new DrillHole("rotary_8", 7.1);
+fp.AddElement(rotary_8, 137.111465, 124.734218);
+
+var gled_6 = new DrillHole("gled_6", 6);
+fp.AddElement(gled_6, 95.846933, 222.166037);
+
+var gled_7 = new DrillHole("gled_7", 6);
+fp.AddElement(gled_7, 95.988045, 191.880491);
+
+var gled_8 = new DrillHole("gled_8", 6);
+fp.AddElement(gled_8, 108.547044, 222.166037);
+
+var gled_9 = new DrillHole("gled_9", 6);
+fp.AddElement(gled_9, 108.547044, 191.880491);
+
+var momentary_7 = new DrillHole("momentary_7", 6.25);
+fp.AddElement(momentary_7, 95.846974, 212.637105);
+
+var momentary_8 = new DrillHole("momentary_8", 6.25);
+fp.AddElement(momentary_8, 95.988085, 182.723409);
+
+var momentary_9 = new DrillHole("momentary_9", 6.25);
+fp.AddElement(momentary_9, 108.547070, 212.637105);
+
+var momentary_10 = new DrillHole("momentary_10", 6.25);
+fp.AddElement(momentary_10, 121.247070, 212.637105);
+
+var momentary_11 = new DrillHole("momentary_11", 6.25);
+fp.AddElement(momentary_11, 121.247070, 182.723409);
+
+var momentary_12 = new DrillHole("momentary_12", 6.25);
+fp.AddElement(momentary_12, 108.547070, 182.723409);
+
+var gled_10 = new DrillHole("gled_10", 6);
+fp.AddElement(gled_10, 121.247044, 222.166037);
+
+var gled_11 = new DrillHole("gled_11", 6);
+fp.AddElement(gled_11, 121.247044, 191.880491);
+
+var rotary_9 = new DrillHole("rotary_9", 7.1);
+fp.AddElement(rotary_9, 136.911903, 216.797424);
+
+var rotary_10 = new DrillHole("rotary_10", 7.1);
+fp.AddElement(rotary_10, 137.111465, 155.421321);
+
+var rotary_11 = new DrillHole("rotary_11", 7.1);
+fp.AddElement(rotary_11, 79.435578, 186.594346);
+
+var mounting_1 = new DrillHole("mounting_1", 3).SetCountersink(sink_74A_M3);
+fp.AddElement(mounting_1, 4.549973, 232.199773);
+
+var mounting_2 = new DrillHole("mounting_2", 3).SetCountersink(sink_74A_M3);
+fp.AddElement(mounting_2, 4.549973, 4.549979);
+
+var mounting_3 = new DrillHole("mounting_3", 3).SetCountersink(sink_74A_M3);
+fp.AddElement(mounting_3, 149.519996, 232.199773);
+
+var mounting_4 = new DrillHole("mounting_4", 3).SetCountersink(sink_74A_M3);
+fp.AddElement(mounting_4, 149.519996, 4.549979);
+
+var momentary_13 = new DrillHole("momentary_13", 6.25);
+fp.AddElement(momentary_13, 73.739248, 54.828725);
+
+var momentary_14 = new DrillHole("momentary_14", 6.25);
+fp.AddElement(momentary_14, 86.439575, 54.828725);
+
+var momentary_15 = new DrillHole("momentary_15", 6.25);
+fp.AddElement(momentary_15, 99.139575, 54.828725);
+
+var momentary_16 = new DrillHole("momentary_16", 6.25);
+fp.AddElement(momentary_16, 111.839575, 54.828725);
+
+var momentary_17 = new DrillHole("momentary_17", 6.25);
+fp.AddElement(momentary_17, 124.539575, 54.828725);
+
+var momentary_18 = new DrillHole("momentary_18", 6.25);
+fp.AddElement(momentary_18, 124.539575, 39.588999);
+
+var momentary_19 = new DrillHole("momentary_19", 6.25);
+fp.AddElement(momentary_19, 111.839575, 39.588999);
+
+var momentary_20 = new DrillHole("momentary_20", 6.25);
+fp.AddElement(momentary_20, 99.139575, 39.588999);
+
+var momentary_21 = new DrillHole("momentary_21", 6.25);
+fp.AddElement(momentary_21, 86.439575, 39.588999);
+
+var momentary_22 = new DrillHole("momentary_22", 6.25);
+fp.AddElement(momentary_22, 73.739248, 39.588999);
+
+var text_1 = new TextEngraving("text_1", "ALT");
+fp.AddElement(text_1, 47.699789, 108.145160);
+
+var text_2 = new TextEngraving("text_2", "HDG");
+fp.AddElement(text_2, 71.403647, 108.113412);
+
+var text_3 = new TextEngraving("text_3", "RATE");
+fp.AddElement(text_3, 119.133465, 108.136684);
+
+var text_4 = new TextEngraving("text_4", "IAS");
+fp.AddElement(text_4, 96.636061, 108.104937);
+
+var text_5 = new TextEngraving("text_5", "AP");
+fp.AddElement(text_5, 80.295730, 70.528798);
+
+var text_6 = new TextEngraving("text_6", "COM1");
+fp.AddElement(text_6, 5.891109, 225.869474);
+
+var text_7 = new TextEngraving("text_7", "COM1-STBY");
+fp.AddElement(text_7, 39.776920, 225.831377);
+
+var text_8 = new TextEngraving("text_8", "COM2");
+fp.AddElement(text_8, 5.891109, 195.167209);
+
+var text_9 = new TextEngraving("text_9", "COM2-STBY");
+fp.AddElement(text_9, 39.776920, 195.237770);
+
+var text_10 = new TextEngraving("text_10", "NAV1");
+fp.AddElement(text_10, 5.649815, 164.725898);
+
+var text_11 = new TextEngraving("text_11", "NAV1-STBY");
+fp.AddElement(text_11, 39.535608, 164.760476);
+
+var text_12 = new TextEngraving("text_12", "NAV2");
+fp.AddElement(text_12, 5.649815, 134.094449);
+
+var text_13 = new TextEngraving("text_13", "NAV2-STBY");
+fp.AddElement(text_13, 39.535617, 134.167124);
+
+var text_14 = new TextEngraving("text_14", "AP");
+fp.AddElement(text_14, 5.886870, 102.341793);
+
+var text_15 = new TextEngraving("text_15", "XPDR");
+fp.AddElement(text_15, 5.895345, 55.827317);
+
+var text_16 = new TextEngraving("text_16", "NAV");
+fp.AddElement(text_16, 103.135531, 70.524585);
+
+var text_17 = new TextEngraving("text_17", "GPS");
+fp.AddElement(text_17, 137.475538, 70.492820);
+
+var text_18 = new TextEngraving("text_18", "AP");
+fp.AddElement(text_18, 8.383927, 66.207581);
+
+var text_19 = new TextEngraving("text_19", "APR");
+fp.AddElement(text_19, 32.606979, 66.207581);
+
+var text_20 = new TextEngraving("text_20", "NAV");
+fp.AddElement(text_20, 19.942567, 66.207581);
+
+var text_21 = new TextEngraving("text_21", "REV");
+fp.AddElement(text_21, 45.222676, 66.207581);
+
+var text_22 = new TextEngraving("text_22", "STBY");
+fp.AddElement(text_22, 49.554612, 55.951419);
+
+var text_23 = new TextEngraving("text_23", "C");
+fp.AddElement(text_23, 49.639722, 37.576071);
+
+var text_24 = new TextEngraving("text_24", "BCN");
+fp.AddElement(text_24, 13.971493, 10.876396);
+
+var text_25 = new TextEngraving("text_25", "LAND");
+fp.AddElement(text_25, 28.225214, 10.876396);
+
+var text_26 = new TextEngraving("text_26", "TAXI");
+fp.AddElement(text_26, 45.100517, 10.876396);
+
+var text_27 = new TextEngraving("text_27", "NAV");
+fp.AddElement(text_27, 60.527325, 10.876396);
+
+var text_28 = new TextEngraving("text_28", "STRB");
+fp.AddElement(text_28, 75.072466, 10.676836);
+
+var text_29 = new TextEngraving("text_29", "MASTER");
+fp.AddElement(text_29, 129.852776, 10.676836);
+
+var text_30 = new TextEngraving("text_30", "DME");
+fp.AddElement(text_30, 73.451410, 164.785868);
+
+var text_31 = new TextEngraving("text_31", "ADF");
+fp.AddElement(text_31, 73.688486, 134.200996);
+
+var text_32 = new TextEngraving("text_32", "DME/ADF");
+fp.AddElement(text_32, 129.127168, 135.101911);
+
+var text_33 = new TextEngraving("text_33", "NAV2");
+fp.AddElement(text_33, 106.342186, 135.074403);
+
+var text_34 = new TextEngraving("text_34", "NAV1");
+fp.AddElement(text_34, 106.598294, 165.517195);
+
+var text_35 = new TextEngraving("text_35", "ADF");
+fp.AddElement(text_35, 117.660110, 176.997321);
+
+var text_36 = new TextEngraving("text_36", "DME");
+fp.AddElement(text_36, 117.287176, 205.922067);
+
+var text_37 = new TextEngraving("text_37", "COM1");
+fp.AddElement(text_37, 91.929585, 205.934764);
+
+var text_38 = new TextEngraving("text_38", "COM2");
+fp.AddElement(text_38, 90.970128, 176.963457);
+
+var text_39 = new TextEngraving("text_39", "NAV1");
+fp.AddElement(text_39, 104.354393, 205.932645);
+
+var text_40 = new TextEngraving("text_40", "NAV2");
+fp.AddElement(text_40, 104.098265, 176.961337);
+
+var text_41 = new TextEngraving("text_41", "ATM");
+fp.AddElement(text_41, 133.522130, 227.103093);
+
+var text_42 = new TextEngraving("text_42", "OBS");
+fp.AddElement(text_42, 133.633975, 165.485448);
+
+var text_43 = new TextEngraving("text_43", "COM1");
+fp.AddElement(text_43, 75.173374, 227.105210);
+
+var text_44 = new TextEngraving("text_44", "COM2");
+fp.AddElement(text_44, 74.917249, 196.893248);
+
+var text_45 = new TextEngraving("text_45", "0");
+fp.AddElement(text_45, 72.714781, 49.185240);
+
+var text_46 = new TextEngraving("text_46", "1");
+fp.AddElement(text_46, 85.533653, 49.217018);
+
+var text_47 = new TextEngraving("text_47", "2");
+fp.AddElement(text_47, 98.132059, 49.168307);
+
+var text_48 = new TextEngraving("text_48", "3");
+fp.AddElement(text_48, 110.914603, 49.166190);
+
+var text_49 = new TextEngraving("text_49", "4");
+fp.AddElement(text_49, 123.648467, 49.210640);
+
+var text_50 = new TextEngraving("text_50", "5");
+fp.AddElement(text_50, 72.765595, 34.004676);
+
+var text_51 = new TextEngraving("text_51", "6");
+fp.AddElement(text_51, 85.461687, 33.945410);
+
+var text_52 = new TextEngraving("text_52", "7");
+fp.AddElement(text_52, 98.000817, 33.991948);
+
+var text_53 = new TextEngraving("text_53", "VFR");
+fp.AddElement(text_53, 108.409621, 33.991948);
+
+var text_54 = new TextEngraving("text_54", "IDENT");
+fp.AddElement(text_54, 119.171223, 33.981393);
+

@@ -1,0 +1,51 @@
+var fp = new Frontpanel("acrylic", thick_3mm, 101.640000, 67.120000, acryl, acryl_clear);
+AddFrontpanel(fp);
+
+var cav_1 = new Cavity("cav_1");
+cav_1.MakeRectInRect(33.880000, 16.780000, 2.000000, 28.900000, 11.800000, 1.000000, 1.000000).SetTool(cutter_1_0mm);
+fp.AddElement(cav_1, 16.940000, 8.390000);
+
+var cav_2 = new Cavity("cav_2");
+cav_2.MakeRectInRect(33.880000, 16.780000, 2.000000, 28.900000, 11.800000, 1.000000, 1.000000).SetTool(cutter_1_0mm);
+fp.AddElement(cav_2, 50.820000, 8.390000);
+
+var cav_3 = new Cavity("cav_3");
+cav_3.MakeRectInRect(33.880000, 16.780000, 2.000000, 28.900000, 11.800000, 1.000000, 1.000000).SetTool(cutter_1_0mm);
+fp.AddElement(cav_3, 84.700000, 8.390000);
+
+var cav_4 = new Cavity("cav_4");
+cav_4.MakeRectInRect(33.880000, 16.780000, 2.000000, 28.900000, 11.800000, 1.000000, 1.000000).SetTool(cutter_1_0mm);
+fp.AddElement(cav_4, 16.940000, 25.170000);
+
+var cav_5 = new Cavity("cav_5");
+cav_5.MakeRectInRect(33.880000, 16.780000, 2.000000, 28.900000, 11.800000, 1.000000, 1.000000).SetTool(cutter_1_0mm);
+fp.AddElement(cav_5, 50.820000, 25.170000);
+
+var cav_6 = new Cavity("cav_6");
+cav_6.MakeRectInRect(33.880000, 16.780000, 2.000000, 28.900000, 11.800000, 1.000000, 1.000000).SetTool(cutter_1_0mm);
+fp.AddElement(cav_6, 84.700000, 25.170000);
+
+var cav_7 = new Cavity("cav_7");
+cav_7.MakeRectInRect(33.880000, 16.780000, 2.000000, 28.900000, 11.800000, 1.000000, 1.000000).SetTool(cutter_1_0mm);
+fp.AddElement(cav_7, 16.940000, 41.950000);
+
+var cav_8 = new Cavity("cav_8");
+cav_8.MakeRectInRect(33.880000, 16.780000, 2.000000, 28.900000, 11.800000, 1.000000, 1.000000).SetTool(cutter_1_0mm);
+fp.AddElement(cav_8, 50.820000, 41.950000);
+
+var cav_9 = new Cavity("cav_9");
+cav_9.MakeRectInRect(33.880000, 16.780000, 2.000000, 28.900000, 11.800000, 1.000000, 1.000000).SetTool(cutter_1_0mm);
+fp.AddElement(cav_9, 84.700000, 41.950000);
+
+var cav_10 = new Cavity("cav_10");
+cav_10.MakeRectInRect(33.880000, 16.780000, 2.000000, 28.900000, 11.800000, 1.000000, 1.000000).SetTool(cutter_1_0mm);
+fp.AddElement(cav_10, 16.940000, 58.730000);
+
+var cav_11 = new Cavity("cav_11");
+cav_11.MakeRectInRect(33.880000, 16.780000, 2.000000, 28.900000, 11.800000, 1.000000, 1.000000).SetTool(cutter_1_0mm);
+fp.AddElement(cav_11, 50.820000, 58.730000);
+
+var cav_12 = new Cavity("cav_12");
+cav_12.MakeRectInRect(33.880000, 16.780000, 2.000000, 28.900000, 11.800000, 1.000000, 1.000000).SetTool(cutter_1_0mm);
+fp.AddElement(cav_12, 84.700000, 58.730000);
+
