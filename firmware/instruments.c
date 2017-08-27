@@ -103,42 +103,42 @@ static struct rotary_encoder_with_button_t rotary_nav2 = {
 static const struct rotary_input_t rotary_inputs[] = {
 	{
 		.target = &rotary_com1.rotary,
-		.pin1 = 99,
-		.pin2 = 99,
+		.pin1 = PIN_INVALID,
+		.pin2 = PIN_INVALID,
 	},
 	{
 		.target = &rotary_com2.rotary,
-		.pin1 = 99,
-		.pin2 = 99,
+		.pin1 = PIN_INVALID,
+		.pin2 = PIN_INVALID,
 	},
 	{
 		.target = &rotary_nav1.rotary,
-		.pin1 = 99,
-		.pin2 = 99,
+		.pin1 = PIN_INVALID,
+		.pin2 = PIN_INVALID,
 	},
 	{
 		.target = &rotary_nav2.rotary,
-		.pin1 = 99,
-		.pin2 = 99,
+		.pin1 = PIN_INVALID,
+		.pin2 = PIN_INVALID,
 	},
 };
 
 static const struct button_input_t button_inputs[] = {
 	{
 		.target = &rotary_com1.button,
-		.pin = 99,
+		.pin = PIN_INVALID,
 	},
 	{
 		.target = &rotary_com2.button,
-		.pin = 99,
+		.pin = PIN_INVALID,
 	},
 	{
 		.target = &rotary_nav1.button,
-		.pin = 99,
+		.pin = PIN_INVALID,
 	},
 	{
 		.target = &rotary_nav2.button,
-		.pin = 99,
+		.pin = PIN_INVALID,
 	},
 };
 
@@ -173,11 +173,15 @@ static void swap_uint16(uint16_t *a, uint16_t *b) {
 
 void instruments_handle_inputs(void) {
 	for (int i = 0; i < sizeof(rotary_inputs) / sizeof(struct rotary_input_t); i++) {
-		rotary_encoder_update(rotary_inputs[i].target, iomux_get_input(rotary_inputs[i].pin1), iomux_get_input(rotary_inputs[i].pin2));
+		if ((rotary_inputs[i].pin1 != PIN_INVALID) && (rotary_inputs[i].pin2 != PIN_INVALID)) {
+			rotary_encoder_update(rotary_inputs[i].target, iomux_get_input(rotary_inputs[i].pin1), iomux_get_input(rotary_inputs[i].pin2));
+		}
 	}
 
 	for (int i = 0; i < sizeof(button_inputs) / sizeof(struct button_input_t); i++) {
-		button_debounce(button_inputs[i].target, !iomux_get_input(button_inputs[i].pin));
+		if (button_inputs[i].pin != PIN_INVALID) {
+			button_debounce(button_inputs[i].target, !iomux_get_input(button_inputs[i].pin));
+		}
 	}
 }
 
@@ -259,7 +263,7 @@ void instruments_idle_loop(void) {
 		if (cnt++ >= 10000) {
 			cnt = 0;
 
-			iomux_output_setall(0);
+			iomux_output_setall(0xff);
 			iomux_output_set(pin, true);
 			pin++;
 			if (pin == IOMUX_OUTPUTS) {
