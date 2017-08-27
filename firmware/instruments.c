@@ -103,42 +103,42 @@ static struct rotary_encoder_with_button_t rotary_nav2 = {
 static const struct rotary_input_t rotary_inputs[] = {
 	{
 		.target = &rotary_com1.rotary,
-		.pin1 = 55,
-		.pin2 = 48,
+		.pin1 = 99,
+		.pin2 = 99,
 	},
 	{
 		.target = &rotary_com2.rotary,
-		.pin1 = 111,
-		.pin2 = 111,
+		.pin1 = 99,
+		.pin2 = 99,
 	},
 	{
 		.target = &rotary_nav1.rotary,
-		.pin1 = 111,
-		.pin2 = 111,
+		.pin1 = 99,
+		.pin2 = 99,
 	},
 	{
 		.target = &rotary_nav2.rotary,
-		.pin1 = 111,
-		.pin2 = 111,
+		.pin1 = 99,
+		.pin2 = 99,
 	},
 };
 
 static const struct button_input_t button_inputs[] = {
 	{
 		.target = &rotary_com1.button,
-		.pin = 49,
+		.pin = 99,
 	},
 	{
 		.target = &rotary_com2.button,
-		.pin = 111,
+		.pin = 99,
 	},
 	{
 		.target = &rotary_nav1.button,
-		.pin = 111,
+		.pin = 99,
 	},
 	{
 		.target = &rotary_nav2.button,
-		.pin = 111,
+		.pin = 99,
 	},
 };
 
@@ -200,6 +200,8 @@ static void redraw_frequency_display(bool *do_redraw, int surface_index, uint32_
 void instruments_idle_loop(void) {
 	rotary_com1.rotary.changed = true;
 	rotary_com1.rotary.value = 0x123;
+	int cnt = 0;
+	int pin = 0;
 	while (true) {
 		if (rotary_com1.rotary.changed) {
 			rotary_com1.rotary.changed = false;
@@ -251,6 +253,19 @@ void instruments_idle_loop(void) {
 		redraw_frequency_display(&redraw_nav1_standby, 5, nav_index_to_frequency_khz(rotary_nav1.rotary.value));
 		redraw_frequency_display(&redraw_nav2_active, 6, nav_index_to_frequency_khz(instrument_state.nav2_active_index));
 		redraw_frequency_display(&redraw_nav2_standby, 7, nav_index_to_frequency_khz(rotary_nav2.rotary.value));
+
+
+		iomux_dump_iochange();
+		if (cnt++ >= 10000) {
+			cnt = 0;
+
+			iomux_output_setall(0);
+			iomux_output_set(pin, true);
+			pin++;
+			if (pin == IOMUX_OUTPUTS) {
+				pin = 0;
+			}
+		}
 	}
 }
 

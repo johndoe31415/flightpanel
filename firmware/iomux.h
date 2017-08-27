@@ -27,10 +27,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define IOMUX_BYTECOUNT			9
+#define IOMUX_OUTPUTS			(IOMUX_BYTECOUNT * 8)
+
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void iomux_trigger(void);
 void iomux_dma_finished(void);
 bool iomux_get_input(int pin_id);
+void iomux_output_setall(uint8_t byte_value);
 void iomux_output_set(int pin_id, bool value);
 void iomux_dump_iochange(void);
 /***************  AUTO GENERATED SECTION ENDS   ***************/

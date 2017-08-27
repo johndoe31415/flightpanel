@@ -32,10 +32,9 @@
 #include "init.h"
 #include "instruments.h"
 
-#define BYTECOUNT		7
-static uint8_t outputs[BYTECOUNT];
-static uint8_t inputs[BYTECOUNT];
-static uint8_t last_inputs[BYTECOUNT];
+static uint8_t outputs[IOMUX_BYTECOUNT];
+static uint8_t inputs[IOMUX_BYTECOUNT];
+static uint8_t last_inputs[IOMUX_BYTECOUNT];
 
 /*
 static const struct iomux_callback_single_pin_t iomux_callbacks_single[] = {
@@ -58,7 +57,7 @@ static const struct iomux_callback_dual_pin_t iomux_callbacks_dual[] = {
 
 #if 0
 static uint8_t testpattern_index = 0;
-static const uint8_t output_testpattern[10][BYTECOUNT] = {
+static const uint8_t output_testpattern[10][IOMUX_BYTECOUNT] = {
 	{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
 	{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
 	{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
@@ -98,9 +97,9 @@ void iomux_trigger(void) {
 	/*
 	testpattern_index++;
 	if (testpattern_index < 10) {
-		memcpy(outputs, output_testpattern[testpattern_index], BYTECOUNT);
+		memcpy(outputs, output_testpattern[testpattern_index], IOMUX_BYTECOUNT);
 	} else {
-		memset(outputs, 0xff, BYTECOUNT);
+		memset(outputs, 0xff, IOMUX_BYTECOUNT);
 	}
 	*/
 
@@ -132,6 +131,10 @@ bool iomux_get_input(int pin_id) {
 	return ((inputs[byteno] >> bitno) & 1) != 0;
 }
 
+void iomux_output_setall(uint8_t byte_value) {
+	memset(outputs, byte_value, IOMUX_BYTECOUNT);
+}
+
 void iomux_output_set(int pin_id, bool value) {
 	int byteno = pin_id / 8;
 	int bitno = pin_id % 8;
@@ -157,19 +160,19 @@ static void iomux_diff_array(const uint8_t *array1, const uint8_t *array2, int l
 
 static void iomux_dump(void) {
 	printf("In: ");
-	iomux_dump_array(inputs, BYTECOUNT);
+	iomux_dump_array(inputs, IOMUX_BYTECOUNT);
 	printf("  Out: ");
-	iomux_dump_array(outputs, BYTECOUNT);
+	iomux_dump_array(outputs, IOMUX_BYTECOUNT);
 }
 
 void iomux_dump_iochange(void) {
-	if (memcmp(last_inputs, inputs, BYTECOUNT)) {
+	if (memcmp(last_inputs, inputs, IOMUX_BYTECOUNT)) {
 		/* Some input has changed. Dump! */
 		iomux_dump();
 		printf("  ");
-		iomux_diff_array(last_inputs, inputs, BYTECOUNT);
+		iomux_diff_array(last_inputs, inputs, IOMUX_BYTECOUNT);
 		printf("\n");
-		memcpy(last_inputs, inputs, BYTECOUNT);
+		memcpy(last_inputs, inputs, IOMUX_BYTECOUNT);
 	}
 }
 
