@@ -32,8 +32,8 @@
 #define DISPLAY_HEIGHT		32
 
 struct ssd1306_display_t {
-	GPIO_TypeDef *nSS_GPIO;
-	uint32_t nSS_Pin;
+	GPIO_TypeDef *CS_GPIO;
+	uint32_t CS_Pin;
 	const struct surface_t *surface;
 };
 

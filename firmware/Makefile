@@ -21,7 +21,7 @@ LDFLAGS := -Tstm32f407.ld
 LDFLAGS += -Wl,--gc-sections
 STATICLIBS := ext-st/stdperiph.a cube/cube.a
 
-OBJS := pinmap.h ivt.o flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o configuration.o ssd1306.o displays.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o instruments.o iomux.o frequencies.o debounce.o stm32f4xx_devid.o stm32f4xx_stackpaint.o corefault.o boundedbuffer.o debugconsole.o debug.o
+OBJS := pinmap.h ivt.o flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o configuration.o ssd1306.o displays.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o instruments.o iomux.o frequencies.o debounce.o stm32f4xx_devid.o stm32f4xx_stackpaint.o corefault.o boundedbuffer.o debugconsole.o debug.o pinmap.c
 
 all: $(TARGETS)
 

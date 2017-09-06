@@ -1,91 +1,81 @@
+# vim:set syntax=sh ts=8 tw=0:
 # USB
-PC0		OUT		USB_PowerSwitchOn
-PD5		IN		USB_FS_OverCurrent
-PA9		IN		USB_OTG_VBUS
-PA11	IO		USB_OTG_M
-PA12	IO		USB_OTG_P
-PA10	IN		USB_OTG_ID
+PC0	OUT	USB_PowerSwitchOn
+PD5	IN	USB_FS_OverCurrent
+PA9	IN	USB_OTG_VBUS
+PA11	IO	USB_OTG_M
+PA12	IO	USB_OTG_P
+PA10	IN	USB_OTG_ID
 
 # User switch
-PA0		IN_DN	UserButton
+PA0	IN	UserButton		init,pulldown
 
 # LEDs
-PD12	OUT		LEDGreen
-PD13	OUT		LEDOrange
-PD14	OUT		LEDRed
-PD15	OUT		LEDBlue
+PD12	OUT	LEDGreen		init
+PD13	OUT	LEDOrange		init
+PD14	OUT	LEDRed			init
+PD15	OUT	LEDBlue			init
 
 # MEMS
-PE0		IN		MEMS_INT1
-PE1		IN		MEMS_INT2
-PA7		OUT		MEMS_MOSI
-PA6		IN		MEMS_MISO
-PA5		OUT		MEMS_SCK
-PE3		OUT		MEMS_I2C_SPI
+PE0	IN	MEMS_INT1
+PE1	IN	MEMS_INT2
+PA7	OUT	MEMS_MOSI
+PA6	IN	MEMS_MISO
+PA5	OUT	MEMS_SCK
+PE3	OUT	MEMS_I2C_SPI
 
 # Audio
-PD4		OUT		AudioReset
-PC3		IN		AudioPDM_OUT
-PC7		?		Audio_MCK
-PC10	?		Audio_SCK
-PC12	?		Audio_SD
-PA4		?		Audio_WS
-PB6		IO		Audio_SCL
-PB9		IO		Audio_SDA
-PB10	OUT		Audio_CLK_IN
+PD4	OUT	AudioReset
+PC3	IN	AudioPDM_OUT
+PC7	?	Audio_MCK
+PC10	?	Audio_SCK
+PC12	?	Audio_SD
+PA4	?	Audio_WS
+PB6	IO	Audio_SCL
+PB9	IO	Audio_SDA
+PB10	OUT	Audio_CLK_IN
 
 ########### My additions
 # LCD Display (D0 = SCK, D1 = MOSI)
-PB13	OUT		Display_SCK
-#PB14	IN		Display_MISO
-PB15	OUT		Display_MOSI
-PD2		OUT		Display_DC
-PD1		OUT		Display_nRESET
-PB0		OUT		Display1_nSS
-PB1		OUT		Display2_nSS
-PB2		OUT		Display3_nSS
-PB3		OUT		Display4_nSS
-PB4		OUT		Display5_nSS
-PB5		OUT		Display6_nSS
-PB7		OUT		Display7_nSS
-PD3		OUT		Display8_nSS
-PD4		OUT		Display9_nSS
-PD7		OUT		Display10_nSS
-PD0		OUT		Display11_nSS
-PD8		OUT		Display12_nSS
-:Display_nSS	Display\d+_nSS
+PB13	OUT	Display_SCK		init,speed=25,af=SPI2,connect=Display 3
+PB15	OUT	Display_MOSI		init,speed=25,af=SPI2,connect=Display 4
+PD1	OUT	Display_RESET		init,activelow,connect=Display 5
+PD2	OUT	Display_DC		init,comment=Data/!Control,connect=Display 6
+PB0	OUT	Display1_CS		init,activelow,speed=25,connect=Display 7
+PB1	OUT	Display2_CS		init,activelow,speed=25,connect=Display 8
+PB2	OUT	Display3_CS		init,activelow,speed=25,connect=Display 9
+PB3	OUT	Display4_CS		init,activelow,speed=25,connect=Display 10
+PB4	OUT	Display5_CS		init,activelow,speed=25,connect=Display 11
+PB5	OUT	Display6_CS		init,activelow,speed=25,connect=Display 12
+PB7	OUT	Display7_CS		init,activelow,speed=25,connect=Display 13
+PD3	OUT	Display8_CS		init,activelow,speed=25,connect=Display 14
+PD4	OUT	Display9_CS		init,activelow,speed=25,connect=Display 15
+PD7	OUT	Display10_CS		init,activelow,speed=25,connect=Display 16
+PD0	OUT	Display11_CS		init,activelow,speed=25,connect=Display 17
+PD8	OUT	Display12_CS		init,activelow,speed=25,connect=Display 18
+
+# Group all chip select signals together
+:Display_CS	Display\d+_CS
 
 # I/O mulitplexer
-PC10	OUT		IOMux_SCK
-PC11	IN		IOMux_MISO
-PC12	OUT		IOMux_MOSI
-PC0		OUT		IOMux_In_PE
-PC1		OUT		IOMux_Out_OE
-PC2		OUT		IOMux_Out_STCP
-
-# Rotary1
-PD10	IN_UP	Rotary1_A
-PD11	IN_UP	Rotary1_B
-PD9		IN_UP	Rotary1_Btn
+PC10	OUT	IOMux_SCK		init,speed=25,af=SPI3,connect=IOMux 3
+PC1	OUT	IOMux_Out_OE		init,activelow,connect=IOMux 5
+PC2	OUT	IOMux_Out_STCP		init,connect=IOMux 6
+PC12	OUT	IOMux_MOSI		init,speed=25,af=SPI3,connect=IOMux 7
+PC11	IN	IOMux_MISO		init,speed=25,af=SPI3,connect=IOMux 8
+PC0	OUT	IOMux_In_PE		init,activelow,connect=IOMux 9
 
 # Configuration
-PB9		IO		EEPROM_SDA
-PB6		IO		EEPROM_SCL
+PB9	IO	EEPROM_SDA		init,af=I2C1
+PB6	IO	EEPROM_SCL		init,af=I2C1
 
 # Debug
-#PD1		OUT		Dbg1
-#PD2		OUT		Dbg2
-#PD3		OUT		Dbg3
-#PD4		OUT		Dbg4
+#PD1	OUT	Dbg1
+#PD2	OUT	Dbg2
+#PD3	OUT	Dbg3
+#PD4	OUT	Dbg4
 
 # RS232 Debug Console
-PD5			OUT		USART_TX
-PD6			IN		USART_RX
-
-# 12 LEDs (12 OUT)
-# 10 Displays (10 OUT)
-
-# 8 Rotary Encoders (24 IN)
-# 27 Switches (27 IN)
-# -> 7 x 74165
+PD5	OUT	USART_TX		init,af=USART2
+PD6	IN	USART_RX		init,af=USART2
 

@@ -37,8 +37,8 @@ static void displays_check_dma_schedule(void);
 static int8_t current_dma_update = -1;
 static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 	[0] = {
-		.nSS_GPIO = Display1_nSS_GPIO,
-		.nSS_Pin = Display1_nSS_Pin,
+		.CS_GPIO = Display1_CS_GPIO,
+		.CS_Pin = Display1_CS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -46,8 +46,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[1] = {
-		.nSS_GPIO = Display2_nSS_GPIO,
-		.nSS_Pin = Display2_nSS_Pin,
+		.CS_GPIO = Display2_CS_GPIO,
+		.CS_Pin = Display2_CS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -55,8 +55,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[2] = {
-		.nSS_GPIO = Display3_nSS_GPIO,
-		.nSS_Pin = Display3_nSS_Pin,
+		.CS_GPIO = Display3_CS_GPIO,
+		.CS_Pin = Display3_CS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -64,8 +64,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[3] = {
-		.nSS_GPIO = Display4_nSS_GPIO,
-		.nSS_Pin = Display4_nSS_Pin,
+		.CS_GPIO = Display4_CS_GPIO,
+		.CS_Pin = Display4_CS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -73,8 +73,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[4] = {
-		.nSS_GPIO = Display5_nSS_GPIO,
-		.nSS_Pin = Display5_nSS_Pin,
+		.CS_GPIO = Display5_CS_GPIO,
+		.CS_Pin = Display5_CS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -82,8 +82,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[5] = {
-		.nSS_GPIO = Display6_nSS_GPIO,
-		.nSS_Pin = Display6_nSS_Pin,
+		.CS_GPIO = Display6_CS_GPIO,
+		.CS_Pin = Display6_CS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -91,8 +91,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[6] = {
-		.nSS_GPIO = Display7_nSS_GPIO,
-		.nSS_Pin = Display7_nSS_Pin,
+		.CS_GPIO = Display7_CS_GPIO,
+		.CS_Pin = Display7_CS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -100,8 +100,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[7] = {
-		.nSS_GPIO = Display8_nSS_GPIO,
-		.nSS_Pin = Display8_nSS_Pin,
+		.CS_GPIO = Display8_CS_GPIO,
+		.CS_Pin = Display8_CS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -109,8 +109,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[8] = {
-		.nSS_GPIO = Display9_nSS_GPIO,
-		.nSS_Pin = Display9_nSS_Pin,
+		.CS_GPIO = Display9_CS_GPIO,
+		.CS_Pin = Display9_CS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -118,8 +118,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[9] = {
-		.nSS_GPIO = Display10_nSS_GPIO,
-		.nSS_Pin = Display10_nSS_Pin,
+		.CS_GPIO = Display10_CS_GPIO,
+		.CS_Pin = Display10_CS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -127,8 +127,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[10] = {
-		.nSS_GPIO = Display11_nSS_GPIO,
-		.nSS_Pin = Display11_nSS_Pin,
+		.CS_GPIO = Display11_CS_GPIO,
+		.CS_Pin = Display11_CS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -136,8 +136,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[11] = {
-		.nSS_GPIO = Display12_nSS_GPIO,
-		.nSS_Pin = Display12_nSS_Pin,
+		.CS_GPIO = Display12_CS_GPIO,
+		.CS_Pin = Display12_CS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -148,11 +148,11 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 static bool surface_dirty[DISPLAY_COUNT];
 
 static void displays_enable_cs(int display_index) {
-	GPIO_ResetBits(displays[display_index].nSS_GPIO, displays[display_index].nSS_Pin);
+	GPIO_ResetBits(displays[display_index].CS_GPIO, displays[display_index].CS_Pin);
 }
 
 static void displays_disable_cs(int display_index) {
-	GPIO_SetBits(displays[display_index].nSS_GPIO, displays[display_index].nSS_Pin);
+	GPIO_SetBits(displays[display_index].CS_GPIO, displays[display_index].CS_Pin);
 }
 
 static void display_dma_start(int display_index) {
@@ -192,9 +192,9 @@ const struct surface_t* displays_get_surface(int display_index) {
 
 void init_displays(void) {
 	/* Reset all displays */
-	Display_nRESET_set_LOW();
+	Display_RESET_set_ACTIVE();
 	delay_millis(1);
-	Display_nRESET_set_HIGH();
+	Display_RESET_set_INACTIVE();
 
 	for (int did = 0; did < DISPLAY_COUNT; did++) {
 		for (int i = 0; i < 100; i++) {

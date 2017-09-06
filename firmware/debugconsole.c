@@ -36,18 +36,18 @@
 #define KEY_BACKSPACE		0x7f
 
 static const struct gpio_definition_t known_gpios[] = {
-	Display1_nSS_GPIO_Definition,
-	Display2_nSS_GPIO_Definition,
-	Display3_nSS_GPIO_Definition,
-	Display4_nSS_GPIO_Definition,
-	Display5_nSS_GPIO_Definition,
-	Display6_nSS_GPIO_Definition,
-	Display7_nSS_GPIO_Definition,
-	Display8_nSS_GPIO_Definition,
-	Display9_nSS_GPIO_Definition,
-	Display10_nSS_GPIO_Definition,
-	Display11_nSS_GPIO_Definition,
-	Display12_nSS_GPIO_Definition,
+	Display1_CS_GPIO_Definition,
+	Display2_CS_GPIO_Definition,
+	Display3_CS_GPIO_Definition,
+	Display4_CS_GPIO_Definition,
+	Display5_CS_GPIO_Definition,
+	Display6_CS_GPIO_Definition,
+	Display7_CS_GPIO_Definition,
+	Display8_CS_GPIO_Definition,
+	Display9_CS_GPIO_Definition,
+	Display10_CS_GPIO_Definition,
+	Display11_CS_GPIO_Definition,
+	Display12_CS_GPIO_Definition,
 };
 #define KNOWN_GPIO_COUNT		(sizeof(known_gpios) / sizeof(known_gpios[0]))
 

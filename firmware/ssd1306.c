@@ -101,12 +101,12 @@ void ssd1306_set_control(const struct ssd1306_display_t *display) {
 }
 
 static void ssd1306_send_data(const struct ssd1306_display_t *display, const uint8_t *data, int length) {
-	if (display->nSS_GPIO) {
-		GPIO_ResetBits(display->nSS_GPIO, display->nSS_Pin);
+	if (display->CS_GPIO) {
+		GPIO_ResetBits(display->CS_GPIO, display->CS_Pin);
 	}
 	spi_tx_data(DisplaySPI_SPI, data, length);
-	if (display->nSS_GPIO) {
-		GPIO_SetBits(display->nSS_GPIO, display->nSS_Pin);
+	if (display->CS_GPIO) {
+		GPIO_SetBits(display->CS_GPIO, display->CS_Pin);
 	}
 }
 
