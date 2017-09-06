@@ -206,9 +206,60 @@ class PinmapGenerator(object):
 		print("#endif", file = f)
 
 	def _write_source(self, f):
+		init_pins = [ pin for pin in self._names.values() if pin.attributes.get("init") ]
+
+		# Determine used ports first
+		used_ports = set(pin.port for pin in init_pins)
+
+		# Then group by GPIO tuple
+		grouped_pins = collections.defaultdict(list)
+		for pin in init_pins:
+			if pin.usage in [ "IN", "OUT" ]:
+				mode = pin.usage
+			elif pin.usage == "IO":
+				mode = "IN"
+			if pin.attributes.get("af"):
+				mode = "AF"
+			otype = { "IN": "OD", "OUT": "PP", "IO": "OD" }[pin.usage]
+
+			if pin.attributes.get("pullup"):
+				pullup = "UP"
+			elif pin.attributes.get("pulldown"):
+				pullup = "DOWN"
+			else:
+				pullup = "NOPULL"
+			speed = pin.attributes.get("speed", "2")
+			key = (pin.port, mode, otype, speed, pullup)
+			grouped_pins[key].append(pin)
+
+
+		print("#include <stm32f4xx_gpio.h>", file = f)
+		print("#include <stm32f4xx_rcc.h>", file = f)
 		print("#include \"pinmap.h\"", file = f)
+
 		print(file = f)
 		print("void pinmap_initialize(void) {", file = f)
+		for port in sorted(used_ports):
+			print("	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIO%s, ENABLE);" % (port), file = f)
+		print(file = f)
+
+		for pin in sorted(init_pins):
+			if pin.attributes.get("af"):
+				print("	GPIO_PinAFConfig(GPIO%s, %s_PinSource, GPIO_AF_%s);" % (pin.port, pin.name, pin.attributes["af"]), file = f)
+		print(file = f)
+
+		for ((port, mode, otype, speed, pullup), pins) in sorted(grouped_pins.items()):
+			print("	{	// %d pin(s) on PORT%s with mode %s, otype %s, speed %s MHz and pullup %s" % (len(pins), port, mode, otype, speed, pullup), file = f)
+			print("		GPIO_InitTypeDef GPIO_InitStructure = {", file = f)
+			print("			.GPIO_Pin = %s," % (" | ".join("%s_Pin" % (pin.name) for pin in sorted(pins))), file = f)
+			print("			.GPIO_Mode = GPIO_Mode_%s," % (mode), file = f)
+			print("			.GPIO_OType = GPIO_OType_%s," % (otype), file = f)
+			print("			.GPIO_Speed = GPIO_Speed_%sMHz," % (speed), file = f)
+			print("			.GPIO_PuPd = GPIO_PuPd_%s," % (pullup), file = f)
+			print("		};", file = f)
+			print("		GPIO_Init(GPIO%s, &GPIO_InitStructure);" % (port), file = f)
+			print("	}", file = f)
+
 		print("}", file = f)
 
 	def write_header(self, outfilename):
