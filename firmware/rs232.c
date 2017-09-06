@@ -42,16 +42,16 @@ void rs232_debug_setleds(void) {
 	LEDRed_set(rs232_tx_buffer.fill > 0);
 }
 
-void USART2_IRQHandler(void) {
-	in_usart_irq = true;
-
+static void handle_usart_rxc_irq(void) {
 	/* Receive complete interrupt */
 	if (USART_GetITStatus(USART2, USART_IT_RXNE) == SET) {
 		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
 		uint8_t rx_char = USART_ReceiveData(USART2);
 		debugconsole_rxchar(rx_char);
 	}
+}
 
+static void handle_usart_txc_irq(void) {
 	/* Transmission complete interrupt */
 	if (USART_GetITStatus(USART2, USART_IT_TC) == SET) {
 		USART_ClearITPendingBit(USART2, USART_IT_TC);
@@ -65,7 +65,12 @@ void USART2_IRQHandler(void) {
 			USART_SendData(USART2, next_byte);
 		}
 	}
+}
 
+void USART2_IRQHandler(void) {
+	in_usart_irq = true;
+	handle_usart_rxc_irq();
+	handle_usart_txc_irq();
 	in_usart_irq = false;
 }
 
@@ -87,27 +92,19 @@ static void rs232_buffer_unlock(void) {
 
 void rs232_transmitchar(char c) {
 	bool put_in_buffer;
-	bool isr_priority_raised = false;
 	do {
 		rs232_buffer_lock();
 		put_in_buffer = boundedbuffer_putbyte(&rs232_tx_buffer, c);
-		if (!put_in_buffer && !isr_priority_raised) {
+		if (!put_in_buffer) {
 			/* Buffer is full. If this rs232_transmitchar() was issued from an
-			 * ISR, then we would usually deadlock here. Therefore, raise
-			 * priority of the USART2 IRQ so that it can preempt the
-			 * (potentially) currently running handler and clear the TX buffer
-			 * by sending out data. Lower the priority afterwards again.
+			 * ISR, then we would usually deadlock here. Therefore, manually
+			 * check for IRQ flag here in order to send out buffered data and
+			 * clear the TX buffer queue.
 			*/
-			isr_priority_raised = true;
-			NVIC_SetPriority(USART2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
+			handle_usart_txc_irq();
 		}
 		rs232_buffer_unlock();
 	} while (!put_in_buffer);
-	if (isr_priority_raised) {
-		/* If we raised ISR priority so that transmission could go through,
-		 * then lower it back again */
-		NVIC_SetPriority(USART2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
-	}
 
 	/* Now that the character is in the TX buffer, trigger actual transmission */
 	rs232_buffer_lock();
