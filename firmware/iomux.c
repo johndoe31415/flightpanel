@@ -86,10 +86,10 @@ void iomux_trigger(void) {
 
 	/* Then issue a SCK pulse when PE is load, effectively parallel loading the
 	 * HC166 chains */
-	IOMux_In_PE_SetLOW();
+	IOMux_In_PE_set_LOW();
 	delay_loopcnt(LOOPCOUNT_50NS);
-	IOMux_SCK_Pulse();
-	IOMux_In_PE_SetHIGH();
+	IOMux_SCK_pulse();
+	IOMux_In_PE_set_HIGH();
 
 	/* Switch back SCK to its original function */
 	reinit_iomux_spi_sck_AF(true);
@@ -108,10 +108,9 @@ void iomux_trigger(void) {
 }
 
 void iomux_dma_finished(void) {
-	IOMux_Out_STCP_Pulse();
-	IOMux_Out_OE_SetLOW();
+	IOMux_Out_STCP_pulse();
+	IOMux_Out_OE_set_LOW();
 	instruments_handle_inputs();
-//	Dbg1_SetLOW();
 //	iomux_dump_iochange();
 }
 

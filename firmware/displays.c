@@ -192,9 +192,9 @@ const struct surface_t* displays_get_surface(int display_index) {
 
 void init_displays(void) {
 	/* Reset all displays */
-	Display_nRESET_SetLOW();
+	Display_nRESET_set_LOW();
 	delay_millis(1);
-	Display_nRESET_SetHIGH();
+	Display_nRESET_set_HIGH();
 
 	for (int did = 0; did < DISPLAY_COUNT; did++) {
 		for (int i = 0; i < 100; i++) {

@@ -37,9 +37,9 @@ static struct bounded_buffer_t rs232_tx_buffer = {
 };
 
 void rs232_debug_setleds(void) {
-	LEDGreen_SetTo(tx_in_progress);
-	LEDBlue_SetTo(in_usart_irq);
-	LEDRed_SetTo(rs232_tx_buffer.fill > 0);
+	LEDGreen_set(tx_in_progress);
+	LEDBlue_set(in_usart_irq);
+	LEDRed_set(rs232_tx_buffer.fill > 0);
 }
 
 void USART2_IRQHandler(void) {
