@@ -35,6 +35,7 @@
 #endif
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
+void debug_show_version(void);
 void debug_show_device_id(void);
 void debug_show_compiler(void);
 void debug_show_memory(void);

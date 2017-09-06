@@ -26,6 +26,10 @@
 #include "stm32f4xx_stackpaint.h"
 #include "debug.h"
 
+void debug_show_version(void) {
+	printf("Compiled from: " BUILD_REVISION "\n");
+}
+
 void debug_show_device_id(void) {
 	char ascii_device_id[32];
 	stm32fxx_get_ascii_devid(ascii_device_id);
@@ -42,6 +46,7 @@ void debug_show_memory(void) {
 }
 
 void debug_show_all(void) {
+	debug_show_version();
 	debug_show_device_id();
 	debug_show_compiler();
 	debug_show_memory();

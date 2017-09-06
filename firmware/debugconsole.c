@@ -114,6 +114,7 @@ static void debugconsole_execute(void) {
 	}
 	if (!strcmp(cmd_input, "?") || !strcmp(cmd_input, "help")) {
 		printf("    off        Turn all debugging off\n");
+		printf("    info       Show device information\n");
 		printf("    rs232      Turn on RS232 debug\n");
 		printf("    listio     List supported GPIOs\n");
 		printf("    gpio-out   Toggle GPIO outputs\n");
@@ -121,6 +122,8 @@ static void debugconsole_execute(void) {
 		printf("    reset      Reset the MCU entirely\n");
 	} else if (!strcmp(cmd_input, "off")) {
 		debug_mode = DEBUG_DISABLED;
+	} else if (!strcmp(cmd_input, "info")) {
+		debug_show_all();
 	} else if (!strcmp(cmd_input, "rs232")) {
 		debug_mode = DEBUG_RS232_BUFFER;
 	} else if (!strcmp(cmd_input, "listio")) {
