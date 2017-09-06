@@ -64,8 +64,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[3] = {
-		.nSS_GPIO = Display3_nSS_GPIO,
-		.nSS_Pin = Display3_nSS_Pin,
+		.nSS_GPIO = Display4_nSS_GPIO,
+		.nSS_Pin = Display4_nSS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -73,8 +73,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[4] = {
-		.nSS_GPIO = Display3_nSS_GPIO,
-		.nSS_Pin = Display3_nSS_Pin,
+		.nSS_GPIO = Display5_nSS_GPIO,
+		.nSS_Pin = Display5_nSS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -82,8 +82,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[5] = {
-		.nSS_GPIO = Display3_nSS_GPIO,
-		.nSS_Pin = Display3_nSS_Pin,
+		.nSS_GPIO = Display6_nSS_GPIO,
+		.nSS_Pin = Display6_nSS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -91,8 +91,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[6] = {
-		.nSS_GPIO = Display3_nSS_GPIO,
-		.nSS_Pin = Display3_nSS_Pin,
+		.nSS_GPIO = Display7_nSS_GPIO,
+		.nSS_Pin = Display7_nSS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -100,8 +100,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[7] = {
-		.nSS_GPIO = Display3_nSS_GPIO,
-		.nSS_Pin = Display3_nSS_Pin,
+		.nSS_GPIO = Display8_nSS_GPIO,
+		.nSS_Pin = Display8_nSS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -109,8 +109,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[8] = {
-		.nSS_GPIO = Display3_nSS_GPIO,
-		.nSS_Pin = Display3_nSS_Pin,
+		.nSS_GPIO = Display9_nSS_GPIO,
+		.nSS_Pin = Display9_nSS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -118,8 +118,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[9] = {
-		.nSS_GPIO = Display3_nSS_GPIO,
-		.nSS_Pin = Display3_nSS_Pin,
+		.nSS_GPIO = Display10_nSS_GPIO,
+		.nSS_Pin = Display10_nSS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -127,8 +127,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[10] = {
-		.nSS_GPIO = Display3_nSS_GPIO,
-		.nSS_Pin = Display3_nSS_Pin,
+		.nSS_GPIO = Display11_nSS_GPIO,
+		.nSS_Pin = Display11_nSS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
@@ -136,8 +136,8 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		},
 	},
 	[11] = {
-		.nSS_GPIO = Display3_nSS_GPIO,
-		.nSS_Pin = Display3_nSS_Pin,
+		.nSS_GPIO = Display12_nSS_GPIO,
+		.nSS_Pin = Display12_nSS_Pin,
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,

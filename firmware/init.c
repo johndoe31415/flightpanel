@@ -186,9 +186,10 @@ static void init_uart(void) {
 		.NVIC_IRQChannelCmd = ENABLE,
 	};
 	NVIC_Init(&NVIC_InitStructure);
-	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);	// RX register not empty
+	USART_ITConfig(USART2, USART_IT_TC, ENABLE);	// TX complete
 
-	/* Send a null byte (first byte will be lost */
+	/* Send a null byte (first byte will be lost) */
 	rs232_transmitchar(0);
 }
 
@@ -567,6 +568,7 @@ static void init_crc(void) {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_CRC, ENABLE);
 }
 
+#if 0
 static void init_debug(void) {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 	GPIO_InitTypeDef GPIO_InitStructure = {
@@ -578,6 +580,7 @@ static void init_debug(void) {
 	};
 	GPIO_Init(Dbg1_GPIO, &GPIO_InitStructure);
 }
+#endif
 
 void SystemInit(void) {
 	__disable_irq();
@@ -593,7 +596,7 @@ void SystemInit(void) {
 	init_iomux_spi_dma();
 	init_i2c();
 	init_crc();
-	init_debug();
+//	init_debug();
 //	init_usb();
 	init_systick();
 	init_timer();

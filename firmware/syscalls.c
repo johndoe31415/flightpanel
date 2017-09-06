@@ -42,7 +42,7 @@ void _exit(int status) {
 }
 
 ssize_t _write_r(struct _reent *reent, int fd, const void *data, size_t length) {
-	if (fd == STDOUT_FILENO) {
+	if ((fd == STDOUT_FILENO) || (fd == STDERR_FILENO)) {
 		for (size_t i = 0; i < length; i++) {
 			char c = ((char*)data)[i];
 			if (c == '\n') {

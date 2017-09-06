@@ -27,6 +27,7 @@
 #include "timer.h"
 #include "instruments.h"
 #include "iomux.h"
+#include "debugconsole.h"
 #include "pinmap.h"
 
 void HAL_IncTick(void);
@@ -51,6 +52,7 @@ void SysTick_Handler(void) {
 	HAL_IncTick();
 	iomux_trigger();
 	hid_tick();
+	debugconsole_tick();
 }
 
 

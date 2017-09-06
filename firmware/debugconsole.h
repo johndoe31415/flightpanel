@@ -21,14 +21,14 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __STM32F4XX_DEVID_H__
-#define __STM32F4XX_DEVID_H__
+#ifndef __DEBUGCONSOLE_H__
+#define __DEBUGCONSOLE_H__
 
 #include <stdint.h>
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void stm32fxx_get_devid(uint8_t bin_device_id[static 12]);
-void stm32fxx_get_ascii_devid(char *device_id);
+void debugconsole_tick(void);
+void debugconsole_rxchar(uint8_t rxchar);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

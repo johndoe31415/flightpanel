@@ -37,17 +37,23 @@ PB10	OUT		Audio_CLK_IN
 ########### My additions
 # LCD Display (D0 = SCK, D1 = MOSI)
 PB13	OUT		Display_SCK
-PB14	IN		Display_MISO
+#PB14	IN		Display_MISO
 PB15	OUT		Display_MOSI
-PD1		OUT		Display_DC
-PD2		OUT		Display_nRESET
-PB1		OUT		Display1_nSS
-PB2		OUT		Display2_nSS
-PB3		OUT		Display3_nSS
-PB4		OUT		Display4_nSS
-PB5		OUT		Display5_nSS
-PB6		OUT		Display6_nSS
+PD2		OUT		Display_DC
+PD1		OUT		Display_nRESET
+PB0		OUT		Display1_nSS
+PB1		OUT		Display2_nSS
+PB2		OUT		Display3_nSS
+PB3		OUT		Display4_nSS
+PB4		OUT		Display5_nSS
+PB5		OUT		Display6_nSS
 PB7		OUT		Display7_nSS
+PD3		OUT		Display8_nSS
+PD4		OUT		Display9_nSS
+PD7		OUT		Display10_nSS
+PD0		OUT		Display11_nSS
+PD8		OUT		Display12_nSS
+:Display_nSS	Display\d+_nSS
 
 # I/O mulitplexer
 PC10	OUT		IOMux_SCK
@@ -67,10 +73,14 @@ PB9		IO		EEPROM_SDA
 PB6		IO		EEPROM_SCL
 
 # Debug
-PD1		OUT		Dbg1
-PD2		OUT		Dbg2
-PD3		OUT		Dbg3
-PD4		OUT		Dbg4
+#PD1		OUT		Dbg1
+#PD2		OUT		Dbg2
+#PD3		OUT		Dbg3
+#PD4		OUT		Dbg4
+
+# RS232 Debug Console
+PD5			OUT		USART_TX
+PD6			IN		USART_RX
 
 # 12 LEDs (12 OUT)
 # 10 Displays (10 OUT)
@@ -78,3 +88,4 @@ PD4		OUT		Dbg4
 # 8 Rotary Encoders (24 IN)
 # 27 Switches (27 IN)
 # -> 7 x 74165
+

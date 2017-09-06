@@ -21,14 +21,28 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __STM32F4XX_DEVID_H__
-#define __STM32F4XX_DEVID_H__
+#include <stdio.h>
+#include "stm32f4xx_devid.h"
+#include "stm32f4xx_stackpaint.h"
+#include "debug.h"
 
-#include <stdint.h>
+void debug_show_device_id(void) {
+	char ascii_device_id[32];
+	stm32fxx_get_ascii_devid(ascii_device_id);
+	printf("STM32 Device ID: %s\n", ascii_device_id);
+}
 
-/*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void stm32fxx_get_devid(uint8_t bin_device_id[static 12]);
-void stm32fxx_get_ascii_devid(char *device_id);
-/***************  AUTO GENERATED SECTION ENDS   ***************/
+void debug_show_compiler(void) {
+	printf("Compiled with: gcc " __VERSION__ " newlib " _NEWLIB_VERSION " on " BUILD_TIMESTAMP_UTC " UTC\n");
+}
 
-#endif
+void debug_show_memory(void) {
+	struct stackpaint_result_t stackpaint = stm32fxx_get_stackpaint();
+	printf("%d bytes of heap used, %d bytes of stack used.\n", stackpaint.heap_used, stackpaint.stack_used);
+}
+
+void debug_show_all(void) {
+	debug_show_device_id();
+	debug_show_compiler();
+	debug_show_memory();
+}

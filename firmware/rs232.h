@@ -25,8 +25,8 @@
 #define __RS232_H__
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
+void rs232_debug_setleds(void);
 void USART2_IRQHandler(void);
-void rs232_transmitbuffer(const uint8_t *buffer, int length);
 void rs232_transmitchar(char c);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 

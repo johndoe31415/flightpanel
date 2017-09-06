@@ -31,9 +31,11 @@ class PinmapGenerator(object):
 
 	def __init__(self, pinmap_file):
 		self._pins = collections.defaultdict(list)
-		self._names = set()
+		self._names = { }
+		self._groups = { }
 		with open(pinmap_file) as f:
 			self._parse(f)
+		self._groups = self._resolve_groups()
 		self._check()
 
 	def _parse(self, f):
@@ -43,16 +45,28 @@ class PinmapGenerator(object):
 				continue
 			if line == "":
 				continue
+			if line.startswith(":"):
+				# Group definition
+				(group_name, group_regex) = line[1:].split()
+				self._groups[group_name] = re.compile(group_regex)
+				continue
 			result = self._ENTRY_LINE.match(line)
 			if not result:
 				raise Exception("Cannot parse line %d (\"%s\")." % (lineno, line))
 			result = result.groupdict()
 			if result["name"] in self._names:
 				raise Exception("Error: Pin name '%s' is duplicate." % (result["name"]))
-			self._names.add(result["name"])
 			pin = (result["port"], int(result["pin"]))
 			pintuple = self._PinTuple(port = pin[0], pin = pin[1], usage = result["usage"], name = result["name"], lineno = lineno)
+			self._names[result["name"]] = pintuple
 			self._pins[pin].append(pintuple)
+
+	def _resolve_groups(self):
+		result = { }
+		for (group_name, group_re) in self._groups.items():
+			matching_names = [ name for name in self._names if group_re.fullmatch(name) is not None ]
+			result[group_name] = matching_names
+		return result
 
 	def _check(self):
 		for pins in sorted(self._pins.values()):
@@ -60,6 +74,9 @@ class PinmapGenerator(object):
 				print("Warning: Port pin %s%d has multiple names:" % (pins[0].port, pins[0].pin))
 				for pin in sorted(pins):
 					print("    %s (%s) defined in line %d" % (pin.name, pin.usage, pin.lineno))
+		for (group_name, group_members) in self._groups.items():
+			if len(group_members) == 0:
+				print("Warning: Group '%s' has no members." % (group_name))
 		print()
 
 	@staticmethod
@@ -84,6 +101,14 @@ class PinmapGenerator(object):
 		print("#include <stm32f4xx_gpio.h>", file = f)
 		print("#include \"timer.h\"", file = f)
 		print(file = f)
+		print("struct gpio_definition_t {", file = f)
+		print("	const char *pin_name;", file = f)
+		print("	const char *name;", file = f)
+		print("	GPIO_TypeDef *gpio;", file = f)
+		print("	int pin;", file = f)
+		print("	const char *comment;", file = f)
+		print("};", file = f)
+		print(file = f)
 		for pins in sorted(self._pins.values()):
 			for pin in pins:
 				print("// P%s%d: %s (%s)" % (pin.port, pin.pin, pin.name, pin.usage), file = f)
@@ -97,6 +122,10 @@ class PinmapGenerator(object):
 				self._print_cols("#define %s_InvPulse()" % (pin.name), "do { %s_SetLOW(); delay_loopcnt(LOOPCOUNT_50NS); %s_SetHIGH(); } while (0)" % (pin.name, pin.name), file = f)
 				self._print_cols("#define %s_SetTo(value)" % (pin.name), "if (value) { %s_SetHIGH(); } else { %s_SetLOW(); }" % (pin.name, pin.name), file = f)
 				self._print_cols("#define %s_GetValue()" % (pin.name), "(%s_GPIO->IDR & %s_Pin)" % (pin.name, pin.name), file = f)
+				self._print_cols("#define %s_GPIO_Definition" % (pin.name), "{ .name = \"%s\", .pin_name = \"%s%d\", .gpio = %s_GPIO, .pin = %s_Pin }" % (pin.name, pin.port, pin.pin, pin.name, pin.name), file = f)
+			print(file = f)
+		for (group_name, group_members) in self._groups.items():
+			print("// %s: Group of %d pins (%s)" % (group_name, len(group_members), ", ".join(group_members)), file = f)
 			print(file = f)
 
 		print("#endif", file = f)

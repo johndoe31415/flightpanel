@@ -46,38 +46,14 @@
 #include "instruments.h"
 #include "iomux.h"
 #include "pinmap.h"
-#include "stm32f4xx_devid.h"
-#include "stm32f4xx_stackpaint.h"
+#include "debug.h"
 
 int main(void) {
-#if 0
-	char x = 'A';
-	while (true) {
-		while (UserButton_GetValue()) {
-			LEDGreen_SetHIGH();
-		}
-		LEDGreen_SetLOW();
-		rs232_transmitchar(x);
-		x++;
-		if (x > 'Z') {
-			rs232_transmitchar('\r');
-			rs232_transmitchar('\n');
-			x = 'A';
-		}
-	}
-#endif
-
 	printf("Reset successful.\n");
 	init_usb_late();
 	printf("USB initialized.\n");
 
-	char ascii_device_id[32];
-	stm32fxx_get_ascii_devid(ascii_device_id);
-	printf("STM32 Device ID: %s\n", ascii_device_id);
-	printf("Compiled with: gcc " __VERSION__ " newlib " _NEWLIB_VERSION " on " BUILD_TIMESTAMP_UTC " UTC\n");
-
-	struct stackpaint_result_t stackpaint = stm32fxx_get_stackpaint();
-	printf("%d bytes of heap used, %d bytes of stack used.\n", stackpaint.heap_used, stackpaint.stack_used);
+	debug_show_all();
 
 	init_displays();
 	instruments_idle_loop();

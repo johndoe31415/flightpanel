@@ -28,7 +28,7 @@
 
 #define STM32Fxx_DEVICE_ID_REGISTER		((uint32_t*)0x1fff7a10)
 
-void stm32fxx_get_devid(uint8_t bin_device_id[12]) {
+void stm32fxx_get_devid(uint8_t bin_device_id[static 12]) {
 	for (int i = 0; i < 3; i++) {
 		((uint32_t*)bin_device_id)[i] = STM32Fxx_DEVICE_ID_REGISTER[i];
 	}
