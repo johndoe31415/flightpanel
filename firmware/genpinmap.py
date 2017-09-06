@@ -143,7 +143,7 @@ class PinmapGenerator(object):
 		print(file = f)
 		for pins in sorted(self._pins.values()):
 			for pin in sorted(pins):
-				print("// P%s%d: %s (%s) -- %s" % (pin.port, pin.pin, pin.name, pin.usage, pin.attributes), file = f)
+				print("// P%s%d: %s (%s) -- %s" % (pin.port, pin.pin, pin.name, pin.usage, sorted(pin.attributes)), file = f)
 				self._print_cols("#define %s_GPIO" % (pin.name), "GPIO%s" % (pin.port), file = f)
 				self._print_cols("#define %s_PinSource" % (pin.name), "GPIO_PinSource%d" % (pin.pin), file = f)
 				self._print_cols("#define %s_Pin" % (pin.name), "GPIO_Pin_%d" % (pin.pin), file = f)
