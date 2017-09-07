@@ -24,6 +24,7 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
+/* These values are only valid for 168 MHz operation */
 #define LOOPCOUNT_35NS			0
 #define LOOPCOUNT_50NS			1
 #define LOOPCOUNT_80NS			2
