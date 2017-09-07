@@ -145,7 +145,9 @@ if not os.path.isfile(cache_dir + "compiler.tar.gz"):
 		print("Download finished.")
 	except subprocess.CalledProcessError:
 		# Catch and exit so that stacktrace does not reveal URI in log
-		print("Call to wget failed.")
+		print("Call to wget failed while trying to download the cache file from CACHE_FILE_UPSTREAM_URI.")
+		print("Not printing out further details since the URI is hidden.")
+		print("Check that the URI is accessible (permissions?).")
 		sys.exit(1)
 	subprocess.check_call([ "tar", "-x", "-v", "-C", os.getenv("HOME"), "-f", "cache.tar" ])
 else:
