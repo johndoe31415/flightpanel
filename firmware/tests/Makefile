@@ -3,7 +3,8 @@
 vpath %.c ..
 
 CFLAGS := -std=c11 -Wall -Werror -Wmissing-prototypes -Wstrict-prototypes -Werror=implicit-function-declaration -O3 -I..
-CFLAGS += -pie -fPIE -fsanitize=address -fsanitize=undefined -fsanitize=leak
+CFLAGS += -pie -fPIE -fsanitize=address
+#CFLAGS += -fsanitize=undefined -fsanitize=leak
 LDFLAGS :=
 
 TEST_COMMON_OBJS := testbed.o
