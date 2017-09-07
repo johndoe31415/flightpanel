@@ -33,6 +33,11 @@
 #include "debug.h"
 #include "stm32f4xx_reset.h"
 #include "iomux.h"
+#include "displays.h"
+#include "surface.h"
+#include "font.h"
+#include "vcr-osd-mono-20.h"
+#include "vcr-osd-mono-30.h"
 
 #define CMD_BUFFER_SIZE		32
 #define KEY_BACKSPACE		0x7f
@@ -59,6 +64,7 @@ enum debugmode_t {
 	DEBUG_GPIO_OUTPUTS,
 	DEBUG_IOMUX_INPUTS,
 	DEBUG_IOMUX_OUTPUTS,
+	DEBUG_DISPLAY,
 };
 
 static enum debugmode_t debug_mode;
@@ -119,6 +125,27 @@ static void iomux_set_outputs(void) {
 	}
 }
 
+static void display_debug(void) {
+	static uint8_t counter;
+	debug_accu = (debug_accu + 1) % DISPLAY_COUNT;
+
+	const struct surface_t *surface = displays_get_surface(debug_accu);
+
+	surface_clear(surface);
+	surface_draw_border(surface);
+
+	struct cursor_t cursor = { 5, 35 };
+	char text[16];
+	sprintf(text, "%2d", debug_accu);
+	blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor);
+
+	sprintf(text, "%3d", counter++);
+	cursor = (struct cursor_t){ 5, 60 };
+	blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor);
+
+	display_mark_surface_dirty(debug_accu);
+}
+
 static void debugconsole_print_prompt(void) {
 	fprintf(stderr, "[");
 	switch (debug_mode) {
@@ -143,6 +170,10 @@ static void debugconsole_print_prompt(void) {
 
 		case DEBUG_IOMUX_OUTPUTS:
 			fprintf(stderr, "IOMux OUT");
+			break;
+
+		case DEBUG_DISPLAY:
+			fprintf(stderr, "Display");
 			break;
 
 		default:
@@ -175,6 +206,10 @@ void debugconsole_tick(void) {
 		case DEBUG_IOMUX_OUTPUTS:
 			iomux_set_outputs();
 			break;
+
+		case DEBUG_DISPLAY:
+			display_debug();
+			break;
 	}
 }
 
@@ -202,8 +237,9 @@ static void debugconsole_execute(void) {
 		printf("    listio     List supported GPIOs\n");
 		printf("    gpio-out   Toggle GPIO outputs\n");
 		printf("    memory     Show memory statistics\n");
-		printf("    iomux-in   Debug IOMultiplexer inputs\n");
-		printf("    iomux-out  Debug IOMultiplexer outputs\n");
+		printf("    iomux-in   Dump IOMultiplexer inputs\n");
+		printf("    iomux-out  Output test pattern on IOMultiplexer outputs\n");
+		printf("    display    Reset OLED displays and output test text\n");
 		printf("    reset      Reset the MCU entirely\n");
 	} else if (!strcmp(cmd_input, "off")) {
 		debug_mode = DEBUG_DISABLED;
@@ -227,6 +263,10 @@ static void debugconsole_execute(void) {
 	} else if (!strcmp(cmd_input, "iomux-out")) {
 		debug_accu = 0;
 		debug_mode = DEBUG_IOMUX_OUTPUTS;
+	} else if (!strcmp(cmd_input, "display")) {
+		init_displays();
+		debug_accu = 0;
+		debug_mode = DEBUG_DISPLAY;
 	} else if (!strcmp(cmd_input, "reset")) {
 		stm32f4xx_reset();
 	} else if (cmd_length == 0) {

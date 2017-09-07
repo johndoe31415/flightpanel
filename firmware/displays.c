@@ -191,16 +191,15 @@ const struct surface_t* displays_get_surface(int display_index) {
 }
 
 void init_displays(void) {
-	/* Reset all displays */
+	/* Reset all displays. Do busy waiting here because this might be triggered
+	 * from ISR and therefore delay_millis() would deadlock. */
 	Display_RESET_set_ACTIVE();
-	delay_millis(1);
+	for (volatile int i = 0; i < 100000; i++);
 	Display_RESET_set_INACTIVE();
 
 	for (int did = 0; did < DISPLAY_COUNT; did++) {
-		for (int i = 0; i < 100; i++) {
-			surface_clear(displays[0].surface);
-		}
-		ssd1306_init(&displays[0]);
+		surface_clear(displays[did].surface);
+		ssd1306_init(&displays[did]);
 	}
 }
 

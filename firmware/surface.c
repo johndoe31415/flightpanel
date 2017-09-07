@@ -81,3 +81,14 @@ void surface_dump(const struct surface_t *surface) {
 	}
 }
 
+void surface_draw_border(const struct surface_t *surface) {
+	for (int x = 0; x < surface->width; x++) {
+		surface_setpixel(surface, x, 0);
+		surface_setpixel(surface, x, surface->height - 1);
+	}
+	for (int y = 0; y < surface->height; y++) {
+		surface_setpixel(surface, 0, y);
+		surface_setpixel(surface, surface->width - 1, y);
+	}
+}
+

@@ -38,6 +38,7 @@ void surface_clear(const struct surface_t *surface);
 bool surface_getpixel(const struct surface_t *surface, int x, int y);
 void surface_setpixel(const struct surface_t *surface, int x, int y);
 void surface_dump(const struct surface_t *surface);
+void surface_draw_border(const struct surface_t *surface);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif
