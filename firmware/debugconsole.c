@@ -132,6 +132,9 @@ static void debugconsole_print_prompt(void) {
 
 		case DEBUG_GPIO_OUTPUTS:
 			fprintf(stderr, "GPIO P%s = %s", known_gpios[debug_accu].pin_name, known_gpios[debug_accu].name);
+			if (known_gpios[debug_accu].connect) {
+				fprintf(stderr, " : %s", known_gpios[debug_accu].connect);
+			}
 			break;
 
 		case DEBUG_IOMUX_INPUTS:
@@ -176,7 +179,14 @@ void debugconsole_tick(void) {
 }
 
 static void debugconsole_print_gpio(void) {
-	printf("Now debugging GPIO output P%s (%s).\n", known_gpios[debug_accu].pin_name, known_gpios[debug_accu].name);
+	printf("Now debugging GPIO output P%s (%s).", known_gpios[debug_accu].pin_name, known_gpios[debug_accu].name);
+	if (known_gpios[debug_accu].comment) {
+		printf(" %s.", known_gpios[debug_accu].comment);
+	}
+	if (known_gpios[debug_accu].connect) {
+		printf(" Connected to %s.", known_gpios[debug_accu].connect);
+	}
+	printf("\n");
 }
 
 static void debugconsole_execute(void) {
@@ -204,7 +214,7 @@ static void debugconsole_execute(void) {
 	} else if (!strcmp(cmd_input, "listio")) {
 		printf("%d known GPIOs:\n", KNOWN_GPIO_COUNT);
 		for (int i = 0; i < KNOWN_GPIO_COUNT; i++) {
-			printf("  %2d: P%-3s %s\n", i, known_gpios[i].pin_name, known_gpios[i].name);
+			printf("  %2d: P%-3s %-14s %-10s %s\n", i, known_gpios[i].pin_name, known_gpios[i].name, known_gpios[i].comment ? known_gpios[i].comment : "", known_gpios[i].connect ? known_gpios[i].connect : "");
 		}
 	} else if (!strcmp(cmd_input, "gpio-out")) {
 		debug_accu = 0;
