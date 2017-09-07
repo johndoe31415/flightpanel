@@ -60,7 +60,8 @@ static const struct gpio_definition_t known_gpios[] = {
 
 enum debugmode_t {
 	DEBUG_DISABLED = 0,
-	DEBUG_RS232_BUFFER,
+	DEBUG_RS232_ISR,
+	DEBUG_RS232_ECHO,
 	DEBUG_GPIO_OUTPUTS,
 	DEBUG_IOMUX_INPUTS,
 	DEBUG_IOMUX_OUTPUTS,
@@ -153,8 +154,12 @@ static void debugconsole_print_prompt(void) {
 			fprintf(stderr, "off");
 			break;
 
-		case DEBUG_RS232_BUFFER:
-			fprintf(stderr, "RS232");
+		case DEBUG_RS232_ISR:
+			fprintf(stderr, "RS232 ISR");
+			break;
+
+		case DEBUG_RS232_ECHO:
+			fprintf(stderr, "RS232 echo");
 			break;
 
 		case DEBUG_GPIO_OUTPUTS:
@@ -188,10 +193,11 @@ void debugconsole_tick(void) {
 	}
 	switch (debug_mode) {
 		case DEBUG_DISABLED:
+		case DEBUG_RS232_ECHO:
 			// Just here to omit warning
 			return;
 
-		case DEBUG_RS232_BUFFER:
+		case DEBUG_RS232_ISR:
 			rs232_debug_setleds();
 			break;
 
@@ -233,7 +239,8 @@ static void debugconsole_execute(void) {
 	if (!strcmp(cmd_input, "?") || !strcmp(cmd_input, "help")) {
 		printf("    off        Turn all debugging off\n");
 		printf("    info       Show device information\n");
-		printf("    rs232      Turn on RS232 debug\n");
+		printf("    rs232-isr  RS232 ISR debugging (green = TX in progress, blue = in ISR, red = buffer not empty)\n");
+		printf("    rs232-echo Echo the recevied characters on the RS232 interface as hex\n");
 		printf("    listio     List supported GPIOs\n");
 		printf("    gpio-out   Toggle GPIO outputs\n");
 		printf("    memory     Show memory statistics\n");
@@ -245,8 +252,10 @@ static void debugconsole_execute(void) {
 		debug_mode = DEBUG_DISABLED;
 	} else if (!strcmp(cmd_input, "info")) {
 		debug_show_all();
-	} else if (!strcmp(cmd_input, "rs232")) {
-		debug_mode = DEBUG_RS232_BUFFER;
+	} else if (!strcmp(cmd_input, "rs232-isr")) {
+		debug_mode = DEBUG_RS232_ISR;
+	} else if (!strcmp(cmd_input, "rs232-echo")) {
+		debug_mode = DEBUG_RS232_ECHO;
 	} else if (!strcmp(cmd_input, "listio")) {
 		printf("%d known GPIOs:\n", KNOWN_GPIO_COUNT);
 		for (int i = 0; i < KNOWN_GPIO_COUNT; i++) {
@@ -281,7 +290,9 @@ static void debugconsole_execute(void) {
 }
 
 void debugconsole_rxchar(uint8_t rxchar) {
-//	fprintf(stderr, "[%02x]", rxchar);
+	if (debug_mode == DEBUG_RS232_ECHO) {
+		fprintf(stderr, "[%02x]", rxchar);
+	}
 	if (rxchar == '\r') {
 		printf("\n");
 		debugconsole_execute();
