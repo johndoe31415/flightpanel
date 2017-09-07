@@ -25,14 +25,10 @@
 #define __STM32F4XX_STACKPAINT_H__
 
 struct stackpaint_result_t {
-	int heap_used;
-	int stack_used;
+	unsigned int total_ram_bytes;
+	unsigned int heap_used_bytes;
+	unsigned int stack_used_bytes;
 };
-
-#define RAM_BEGIN		((uint8_t*)0x20000000)
-#define RAM_SIZE		0x20000
-#define RAM_END			(RAM_BEGIN + RAM_SIZE)
-#define RAM_WORD_SIZE	(RAM_SIZE / 4)
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 struct stackpaint_result_t stm32fxx_get_stackpaint(void);

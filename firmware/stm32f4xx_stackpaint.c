@@ -26,25 +26,31 @@
 #include <string.h>
 #include "stm32f4xx_stackpaint.h"
 
+extern const uint8_t _sram, _eram;
+
 struct stackpaint_result_t stm32fxx_get_stackpaint(void) {
 	struct stackpaint_result_t result;
 	memset(&result, 0, sizeof(result));
 
+	/* Determine RAM size */
+	result.total_ram_bytes = &_eram - &_sram;
+
 	/* Determine heap usage */
-	const uint32_t *ram = (const uint32_t*)RAM_BEGIN;
-	for (int i = 0; i < RAM_WORD_SIZE; i++) {
+	const unsigned int ram_word_size = result.total_ram_bytes / sizeof(uint32_t);
+	const uint32_t *ram = (const uint32_t*)&_sram;
+	for (int i = 0; i < ram_word_size; i++) {
 		if (ram[i] == 0xdeadbeef) {
 			break;
 		}
-		result.heap_used += 4;
+		result.heap_used_bytes += 4;
 	}
 
 	/* Determine stack usage */
-	for (int i = RAM_WORD_SIZE - 1; i >= 0; i--) {
+	for (int i = ram_word_size - 1; i >= 0; i--) {
 		if (ram[i] == 0xdeadbeef) {
 			break;
 		}
-		result.stack_used += 4;
+		result.stack_used_bytes += 4;
 	}
 
 #if 0
