@@ -33,6 +33,7 @@
 #include "pinmap.h"
 #include "init.h"
 #include "rs232.h"
+#include "stm32f407_adc.h"
 
 #define PLL_M					8
 #define PLL_N					336
@@ -430,6 +431,7 @@ void SystemInit(void) {
 	init_crc();
 //	init_debug();
 //	init_usb();
+	init_stm32f407_adc();
 	init_systick();
 	init_timer();
 	__enable_irq();

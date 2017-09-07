@@ -39,7 +39,9 @@
 #include "vcr-osd-mono-20.h"
 #include "vcr-osd-mono-30.h"
 #include "eeprom.h"
+#include "stm32f407_adc.h"
 
+#define iabs(x)				(((x) < 0) ? -(x) : (x))
 #define CMD_BUFFER_SIZE		32
 #define KEY_BACKSPACE		0x7f
 
@@ -68,6 +70,7 @@ enum debugmode_t {
 	DEBUG_IOMUX_OUTPUTS,
 	DEBUG_DISPLAY,
 	DEBUG_DELAY,
+	DEBUG_ADC_TELEMETRY,
 };
 
 static enum debugmode_t debug_mode;
@@ -187,6 +190,10 @@ static void debugconsole_print_prompt(void) {
 			fprintf(stderr, "Delay");
 			break;
 
+		case DEBUG_ADC_TELEMETRY:
+			fprintf(stderr, "ADC");
+			break;
+
 		default:
 			fprintf(stderr, "? (%d)", debug_mode);
 	}
@@ -228,6 +235,14 @@ void debugconsole_tick(void) {
 			delay_loopcnt(10000);
 			LEDBlue_set_INACTIVE();
 			break;
+
+		case DEBUG_ADC_TELEMETRY:
+			debug_accu++;
+			if (debug_accu == 1000) {
+				debug_accu = 0;
+				struct adc_telemetry_t telemetry = adc_get_telemetry();
+				printf("Vdd = %lu.%03lu V, temperature %d.%d °C, %lu µV at 30°C, slope %lu µV per °C\n", telemetry.vref_millivolts / 1000, telemetry.vref_millivolts % 1000, telemetry.temperature_10th_deg_c / 10, iabs(telemetry.temperature_10th_deg_c) % 10, telemetry.tempsensor_offset_microvolts_at_30_deg_c, telemetry.tempsensor_slope_microvolts_per_deg_c);
+			}
 	}
 }
 
@@ -261,6 +276,7 @@ static void debugconsole_execute(void) {
 		printf("    iomux-out  Output test pattern on IOMultiplexer outputs\n");
 		printf("    display    Reset OLED displays and output test text\n");
 		printf("    delay      Issue a 10000 count delay_loopcount() and output on blue LED (PD15)\n");
+		printf("    adc        Gather environmental data (supply voltage, temperature) measured via ADC");
 		printf("    reset      Reset the MCU entirely\n");
 	} else if (!strcmp(cmd_input, "off")) {
 		debug_mode = DEBUG_DISABLED;
@@ -295,6 +311,9 @@ static void debugconsole_execute(void) {
 		debug_mode = DEBUG_DISPLAY;
 	} else if (!strcmp(cmd_input, "delay")) {
 		debug_mode = DEBUG_DELAY;
+	} else if (!strcmp(cmd_input, "adc")) {
+		debug_accu = 0;
+		debug_mode = DEBUG_ADC_TELEMETRY;
 	} else if (!strcmp(cmd_input, "reset")) {
 		stm32f4xx_reset();
 	} else if (cmd_length == 0) {

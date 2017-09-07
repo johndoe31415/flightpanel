@@ -79,6 +79,7 @@ void subtest_finish_specific(const char *subtestname) {
 		abort();
 	}
 
+	debug("Subtest %s: %s.%s\n", (failure_count == 0) ? "PASSED" : "FAILED", current_testname, current_subtestname);
 	fprintf(summary_file, "<< %s %s %d\n", current_testname, current_subtestname, failure_count);
 	fflush(summary_file);
 	current_subtestname = NULL;
