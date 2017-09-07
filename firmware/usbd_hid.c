@@ -36,7 +36,7 @@
 #define USBD_LANGID_STRING									0x409
 #define USBD_MANUFACTURER_STRING							"Johannes Bauer"
 
-#define USBD_PRODUCT_FS_STRING								"flightpanel v0.01"
+#define USBD_PRODUCT_FS_STRING								"flightpanel " BUILD_REVISION
 #define USBD_SERIALNUMBER_FS_STRING							"316eef25237e"
 #define USBD_CONFIGURATION_FS_STRING						"HID Config"
 #define USBD_INTERFACE_FS_STRING							"HID Interface"
