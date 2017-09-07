@@ -67,6 +67,7 @@ enum debugmode_t {
 	DEBUG_IOMUX_INPUTS,
 	DEBUG_IOMUX_OUTPUTS,
 	DEBUG_DISPLAY,
+	DEBUG_DELAY,
 };
 
 static enum debugmode_t debug_mode;
@@ -182,6 +183,10 @@ static void debugconsole_print_prompt(void) {
 			fprintf(stderr, "Display");
 			break;
 
+		case DEBUG_DELAY:
+			fprintf(stderr, "Delay");
+			break;
+
 		default:
 			fprintf(stderr, "? (%d)", debug_mode);
 	}
@@ -217,6 +222,12 @@ void debugconsole_tick(void) {
 		case DEBUG_DISPLAY:
 			display_debug();
 			break;
+
+		case DEBUG_DELAY:
+			LEDBlue_set_ACTIVE();
+			delay_loopcnt(10000);
+			LEDBlue_set_INACTIVE();
+			break;
 	}
 }
 
@@ -249,6 +260,7 @@ static void debugconsole_execute(void) {
 		printf("    iomux-in   Dump IOMultiplexer inputs\n");
 		printf("    iomux-out  Output test pattern on IOMultiplexer outputs\n");
 		printf("    display    Reset OLED displays and output test text\n");
+		printf("    delay      Issue a 10000 count delay_loopcount() and output on blue LED (PD15)\n");
 		printf("    reset      Reset the MCU entirely\n");
 	} else if (!strcmp(cmd_input, "off")) {
 		debug_mode = DEBUG_DISABLED;
@@ -281,6 +293,8 @@ static void debugconsole_execute(void) {
 		init_displays();
 		debug_accu = 0;
 		debug_mode = DEBUG_DISPLAY;
+	} else if (!strcmp(cmd_input, "delay")) {
+		debug_mode = DEBUG_DELAY;
 	} else if (!strcmp(cmd_input, "reset")) {
 		stm32f4xx_reset();
 	} else if (cmd_length == 0) {

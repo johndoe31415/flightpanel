@@ -194,7 +194,7 @@ void init_displays(void) {
 	/* Reset all displays. Do busy waiting here because this might be triggered
 	 * from ISR and therefore delay_millis() would deadlock. */
 	Display_RESET_set_ACTIVE();
-	for (volatile int i = 0; i < 100000; i++);
+	delay_loopcnt(LOOPCOUNT_1MS);
 	Display_RESET_set_INACTIVE();
 
 	for (int did = 0; did < DISPLAY_COUNT; did++) {

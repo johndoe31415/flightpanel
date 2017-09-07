@@ -28,6 +28,17 @@
 #define LOOPCOUNT_50NS			1
 #define LOOPCOUNT_80NS			2
 #define LOOPCOUNT_110NS			3
+#define LOOPCOUNT_1MS			42000
+
+/* Asymptotic behavior of this delay loop: 4 clock cycles per iteration count.
+ * Therefore:
+ *     t_delay = 4 / f_cpu * itercnt
+ *     itercnt = t_delay * f_cpu / 4
+ *     f_cpu = itercnt / t_delay * 4
+ *
+ * Example: f_cpu = 168 MHz, itercnt = 10000, t_delay = 238 µs
+ * Example: f_cpu = 168 MHz, t_delay = 1 ms, itercnt = 42000
+ */
 
 #define delay_loopcnt(nopcnt) { int _nopcnt = nopcnt; \
 	__asm__ __volatile__(		\

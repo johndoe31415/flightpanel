@@ -54,5 +54,3 @@ void SysTick_Handler(void) {
 	hid_tick();
 	debugconsole_tick();
 }
-
-
