@@ -38,6 +38,7 @@
 #include "font.h"
 #include "vcr-osd-mono-20.h"
 #include "vcr-osd-mono-30.h"
+#include "eeprom.h"
 
 #define CMD_BUFFER_SIZE		32
 #define KEY_BACKSPACE		0x7f
@@ -241,6 +242,7 @@ static void debugconsole_execute(void) {
 		printf("    info       Show device information\n");
 		printf("    rs232-isr  RS232 ISR debugging (green = TX in progress, blue = in ISR, red = buffer not empty)\n");
 		printf("    rs232-echo Echo the recevied characters on the RS232 interface as hex\n");
+		printf("    eeprom     Dump EEPROM contents\n");
 		printf("    listio     List supported GPIOs\n");
 		printf("    gpio-out   Toggle GPIO outputs\n");
 		printf("    memory     Show memory statistics\n");
@@ -256,6 +258,9 @@ static void debugconsole_execute(void) {
 		debug_mode = DEBUG_RS232_ISR;
 	} else if (!strcmp(cmd_input, "rs232-echo")) {
 		debug_mode = DEBUG_RS232_ECHO;
+	} else if (!strcmp(cmd_input, "eeprom")) {
+		bool success = eeprom_dump(4);
+		printf("EEPROM dump %s.\n", success ? "successful" : "had a problem");
 	} else if (!strcmp(cmd_input, "listio")) {
 		printf("%d known GPIOs:\n", KNOWN_GPIO_COUNT);
 		for (int i = 0; i < KNOWN_GPIO_COUNT; i++) {
