@@ -31,6 +31,7 @@
 #include "pinmap.h"
 #include "rs232.h"
 #include "debug.h"
+#include "stm32f4xx_reset.h"
 
 #define CMD_BUFFER_SIZE		32
 #define KEY_BACKSPACE		0x7f
@@ -138,7 +139,7 @@ static void debugconsole_execute(void) {
 	} else if (!strcmp(cmd_input, "memory")) {
 		debug_show_memory();
 	} else if (!strcmp(cmd_input, "reset")) {
-		// TODO: implement reset
+		stm32f4xx_reset();
 	} else if (cmd_length == 0) {
 		if (debug_mode == DEBUG_GPIO_OUTPUTS) {
 			debug_accu = (debug_accu + 1) % KNOWN_GPIO_COUNT;
