@@ -32,6 +32,7 @@
 #include "rs232.h"
 #include "debug.h"
 #include "stm32f4xx_reset.h"
+#include "iomux.h"
 
 #define CMD_BUFFER_SIZE		32
 #define KEY_BACKSPACE		0x7f
@@ -56,12 +57,67 @@ enum debugmode_t {
 	DEBUG_DISABLED = 0,
 	DEBUG_RS232_BUFFER,
 	DEBUG_GPIO_OUTPUTS,
+	DEBUG_IOMUX_INPUTS,
+	DEBUG_IOMUX_OUTPUTS,
 };
 
 static enum debugmode_t debug_mode;
 static char cmd_input[CMD_BUFFER_SIZE];
 static uint8_t cmd_length;
 static int debug_accu;
+static uint8_t iomux_last_inputs[IOMUX_BYTECOUNT];
+
+static void iomux_check_inputs(void) {
+	uint8_t iomux_inputs[IOMUX_BYTECOUNT];
+	memcpy(iomux_inputs, iomux_input_array(), IOMUX_BYTECOUNT);
+	if (memcmp(iomux_inputs, iomux_last_inputs, IOMUX_BYTECOUNT)) {
+		/* Nothing changed. */
+		return;
+	}
+
+	for (int i = 0; i < IOMUX_OUTPUTS; i++) {
+		bool new_value = iomux_get_input_from(iomux_inputs, i);
+		if (i && ((i % 8) == 0)) {
+			printf("  ");
+		}
+		printf("%c", new_value ? '1' : '0');
+	}
+	printf("  ");
+	for (int i = 0; i < IOMUX_OUTPUTS; i++) {
+		bool old_value = iomux_get_input_from(iomux_last_inputs, i);
+		bool new_value = iomux_get_input_from(iomux_inputs, i);
+		if (old_value != new_value) {
+			printf("%c%d", new_value ? '+' : '-', i);
+		}
+	}
+	printf("\n");
+}
+
+static void iomux_set_outputs(void) {
+	const int id_bit_count = 7;
+	const int id_tick_count = (id_bit_count * 3);
+	const int total_tick_count = id_tick_count * 3;
+	debug_accu = (debug_accu + 1) % total_tick_count;
+	if (debug_accu < id_tick_count) {
+		/* Output IDs */
+		int bitno = debug_accu / 3;
+		int bitpos = debug_accu % 3;
+		if (bitpos == 0) {
+			iomux_output_setall(0xff);
+		} else if (bitpos == 1) {
+			/* Output big endian */
+			bitno = (id_bit_count - 1) - bitno;
+			for (int i = 0; i < IOMUX_OUTPUTS; i++) {
+				iomux_output_set(i, i & (1 << bitno));
+			}
+		} else {
+			iomux_output_setall(0);
+		}
+	} else {
+		/* Pause */
+		iomux_output_setall(0);
+	}
+}
 
 static void debugconsole_print_prompt(void) {
 	fprintf(stderr, "[");
@@ -76,6 +132,14 @@ static void debugconsole_print_prompt(void) {
 
 		case DEBUG_GPIO_OUTPUTS:
 			fprintf(stderr, "GPIO P%s = %s", known_gpios[debug_accu].pin_name, known_gpios[debug_accu].name);
+			break;
+
+		case DEBUG_IOMUX_INPUTS:
+			fprintf(stderr, "IOMux IN");
+			break;
+
+		case DEBUG_IOMUX_OUTPUTS:
+			fprintf(stderr, "IOMux OUT");
 			break;
 
 		default:
@@ -100,6 +164,14 @@ void debugconsole_tick(void) {
 		case DEBUG_GPIO_OUTPUTS:
 			known_gpios[debug_accu].gpio->ODR ^= known_gpios[debug_accu].pin;
 			break;
+
+		case DEBUG_IOMUX_INPUTS:
+			iomux_check_inputs();
+			break;
+
+		case DEBUG_IOMUX_OUTPUTS:
+			iomux_set_outputs();
+			break;
 	}
 }
 
@@ -120,6 +192,8 @@ static void debugconsole_execute(void) {
 		printf("    listio     List supported GPIOs\n");
 		printf("    gpio-out   Toggle GPIO outputs\n");
 		printf("    memory     Show memory statistics\n");
+		printf("    iomux-in   Debug IOMultiplexer inputs\n");
+		printf("    iomux-out  Debug IOMultiplexer outputs\n");
 		printf("    reset      Reset the MCU entirely\n");
 	} else if (!strcmp(cmd_input, "off")) {
 		debug_mode = DEBUG_DISABLED;
@@ -138,6 +212,11 @@ static void debugconsole_execute(void) {
 		debugconsole_print_gpio();
 	} else if (!strcmp(cmd_input, "memory")) {
 		debug_show_memory();
+	} else if (!strcmp(cmd_input, "iomux-in")) {
+		debug_mode = DEBUG_IOMUX_INPUTS;
+	} else if (!strcmp(cmd_input, "iomux-out")) {
+		debug_accu = 0;
+		debug_mode = DEBUG_IOMUX_OUTPUTS;
 	} else if (!strcmp(cmd_input, "reset")) {
 		stm32f4xx_reset();
 	} else if (cmd_length == 0) {
