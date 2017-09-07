@@ -34,6 +34,7 @@ struct surface_t {
 };
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
+void surface_fill(const struct surface_t *surface, uint8_t pattern);
 void surface_clear(const struct surface_t *surface);
 bool surface_getpixel(const struct surface_t *surface, int x, int y);
 void surface_setpixel(const struct surface_t *surface, int x, int y);

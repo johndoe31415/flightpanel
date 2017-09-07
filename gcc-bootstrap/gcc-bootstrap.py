@@ -29,11 +29,11 @@ import sys
 
 Package = collections.namedtuple("Package", [ "name", "url", "subdir" ])
 packages = [
-	Package(name = "binutils", url = "https://ftp.gnu.org/gnu/binutils/binutils-2.28.tar.gz", subdir = "binutils-2.28"),
-	Package(name = "gcc", url = "https://ftp.gnu.org/gnu/gcc/gcc-6.3.0/gcc-6.3.0.tar.gz", subdir = "gcc-6.3.0"),
-	Package(name = "newlib", url = "http://ftp.gwdg.de/pub/linux/sources.redhat.com/newlib/newlib-2.5.0.20170323.tar.gz", subdir = "newlib-2.5.0.20170323"),
-	Package(name = "gdb", url = "https://ftp.gnu.org/gnu/gdb/gdb-7.12.tar.gz", subdir = "gdb-7.12"),
-	Package(name = "stlink2", url = "https://github.com/texane/stlink/archive/1.3.1.tar.gz", subdir = "stlink-1.3.1"),
+	Package(name = "binutils", url = "https://ftp.gnu.org/gnu/binutils/binutils-2.29.tar.gz", subdir = "binutils-2.29"),
+	Package(name = "gcc", url = "https://ftp.gnu.org/gnu/gcc/gcc-7.2.0/gcc-7.2.0.tar.gz", subdir = "gcc-7.2.0"),
+	Package(name = "newlib", url = "http://ftp.gwdg.de/pub/linux/sources.redhat.com/newlib/newlib-2.5.0.20170818.tar.gz", subdir = "newlib-2.5.0.20170818"),
+	Package(name = "gdb", url = "https://ftp.gnu.org/gnu/gdb/gdb-8.0.tar.gz", subdir = "gdb-8.0"),
+	Package(name = "stlink2", url = "https://github.com/texane/stlink/archive/1.4.0.tar.gz", subdir = "stlink-1.4.0"),
 ]
 prefix_dir = os.getenv("HOME") + "/bin/gcc-cm4"
 

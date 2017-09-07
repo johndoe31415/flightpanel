@@ -29,8 +29,12 @@
 #include "surface.h"
 #include "debug.h"
 
+void surface_fill(const struct surface_t *surface, uint8_t pattern) {
+	memset(surface->data, pattern, surface->width * surface->height / 8);
+}
+
 void surface_clear(const struct surface_t *surface) {
-	memset(surface->data, 0x00, surface->width * surface->height / 8);
+	surface_fill(surface, 0);
 }
 
 #if defined(SURFACE_ACCESSOR_LR_TB_ROWBYTES)
