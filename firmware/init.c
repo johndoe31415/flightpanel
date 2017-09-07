@@ -109,60 +109,8 @@ static void init_nvic(void) {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 }
 
-static void init_gpio(void) {
-	{
-		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-		GPIO_InitTypeDef GPIO_InitStructure = {
-			.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15,
-			.GPIO_Mode = GPIO_Mode_OUT,
-			.GPIO_OType = GPIO_OType_PP,
-			.GPIO_Speed = GPIO_Speed_2MHz,
-			.GPIO_PuPd = GPIO_PuPd_NOPULL,
-		};
-		GPIO_Init(GPIOD, &GPIO_InitStructure);
-	}
-
-	{
-		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-		GPIO_InitTypeDef GPIO_InitStructure = {
-			.GPIO_Pin = GPIO_Pin_0,
-			.GPIO_Mode = GPIO_Mode_IN,
-			.GPIO_OType = GPIO_OType_OD,
-			.GPIO_Speed = GPIO_Speed_2MHz,
-			.GPIO_PuPd = GPIO_PuPd_DOWN,
-		};
-		GPIO_Init(GPIOA, &GPIO_InitStructure);
-	}
-}
-
 static void init_uart(void) {
-	/* Connect PXx to USARTx_Tx*/
-	GPIO_PinAFConfig(GPIOD, UART_TX_SOURCE, GPIO_AF_USART2);
-	GPIO_PinAFConfig(GPIOD, UART_RX_SOURCE, GPIO_AF_USART2);
-
-	{
-		GPIO_InitTypeDef GPIO_InitStructure = {
-			.GPIO_Pin = GPIO_Pin_5,
-			.GPIO_Mode = GPIO_Mode_AF,
-			.GPIO_OType = GPIO_OType_PP,
-			.GPIO_Speed = GPIO_Speed_2MHz,
-			.GPIO_PuPd = GPIO_PuPd_NOPULL,
-		};
-		GPIO_Init(GPIOD, &GPIO_InitStructure);
-	}
-	{
-		GPIO_InitTypeDef GPIO_InitStructure = {
-			.GPIO_Pin = GPIO_Pin_6,
-			.GPIO_Mode = GPIO_Mode_AF,
-			.GPIO_OType = GPIO_OType_OD,
-			.GPIO_Speed = GPIO_Speed_2MHz,
-			.GPIO_PuPd = GPIO_PuPd_NOPULL,
-		};
-		GPIO_Init(GPIOD, &GPIO_InitStructure);
-	}
-
 	/* USART configuration */
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 
 	USART_InitTypeDef USART_InitStructure = {
@@ -219,57 +167,9 @@ static void init_timer(void) {
 	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
 }
 
-static void init_rotary_encoders(void) {
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-	GPIO_InitTypeDef GPIO_InitStructure = {
-		.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11,
-		.GPIO_Mode = GPIO_Mode_IN,
-		.GPIO_OType = GPIO_OType_OD,
-		.GPIO_Speed = GPIO_Speed_2MHz,
-		.GPIO_PuPd = GPIO_PuPd_UP,
-	};
-	GPIO_Init(GPIOD, &GPIO_InitStructure);
-}
-
 static void init_display_spi(void) {
 	// SPI2 with PinPack 2 (PB13 = SCK, PB14 = MISO, PB15 = MOSI) on APB1, GPIOB on AHB1
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
-
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_SPI2);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource14, GPIO_AF_SPI2);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource15, GPIO_AF_SPI2);
-
-	{
-		GPIO_InitTypeDef GPIO_InitStructure = {
-			.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_15,
-			.GPIO_Mode = GPIO_Mode_AF,
-			.GPIO_OType = GPIO_OType_PP,
-			.GPIO_Speed = GPIO_Speed_25MHz,
-			.GPIO_PuPd = GPIO_PuPd_NOPULL,
-		};
-		GPIO_Init(GPIOB, &GPIO_InitStructure);
-	}
-	{
-		GPIO_InitTypeDef GPIO_InitStructure = {
-			.GPIO_Pin = GPIO_Pin_14,
-			.GPIO_Mode = GPIO_Mode_AF,
-			.GPIO_OType = GPIO_OType_OD,
-			.GPIO_Speed = GPIO_Speed_2MHz,
-			.GPIO_PuPd = GPIO_PuPd_NOPULL,
-		};
-		GPIO_Init(GPIOB, &GPIO_InitStructure);
-	}
-	{
-		GPIO_InitTypeDef GPIO_InitStructure = {
-			.GPIO_Pin = GPIO_Pin_1,
-			.GPIO_Mode = GPIO_Mode_OUT,
-			.GPIO_OType = GPIO_OType_PP,
-			.GPIO_Speed = GPIO_Speed_25MHz,
-			.GPIO_PuPd = GPIO_PuPd_NOPULL,
-		};
-		GPIO_Init(GPIOB, &GPIO_InitStructure);
-	}
 
 	SPI_InitTypeDef SPI_InitStructure = {
 		.SPI_Direction = SPI_Direction_2Lines_FullDuplex,
@@ -326,33 +226,7 @@ static void init_display_spi_dma(void) {
 
 static void init_iomux_spi(void) {
 	// SPI3 with PinPack ? (PC10 = SCK, PC11 = MISO, PC12 = MOSI) on APB1, GPIOC on AHB1
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
-
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_SPI3);
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_SPI3);
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource12, GPIO_AF_SPI3);
-
-	{
-		GPIO_InitTypeDef GPIO_InitStructure = {
-			.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_12,
-			.GPIO_Mode = GPIO_Mode_AF,
-			.GPIO_OType = GPIO_OType_PP,
-			.GPIO_Speed = GPIO_Speed_25MHz,
-			.GPIO_PuPd = GPIO_PuPd_NOPULL,
-		};
-		GPIO_Init(GPIOC, &GPIO_InitStructure);
-	}
-	{
-		GPIO_InitTypeDef GPIO_InitStructure = {
-			.GPIO_Pin = GPIO_Pin_11,
-			.GPIO_Mode = GPIO_Mode_AF,
-			.GPIO_OType = GPIO_OType_OD,
-			.GPIO_Speed = GPIO_Speed_25MHz,
-			.GPIO_PuPd = GPIO_PuPd_NOPULL,
-		};
-		GPIO_Init(GPIOC, &GPIO_InitStructure);
-	}
 
 	SPI_InitTypeDef SPI_InitStructure = {
 		.SPI_Direction = SPI_Direction_2Lines_FullDuplex,
@@ -448,18 +322,6 @@ static void init_iomux_spi_dma(void) {
 	DMA_ITConfig(DMA1_Stream2, DMA_IT_TC, ENABLE);
 }
 
-static void init_iomux_ctl(void) {
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
-	GPIO_InitTypeDef GPIO_InitStructure = {
-		.GPIO_Pin = IOMux_In_PE_Pin | IOMux_Out_OE_Pin | IOMux_Out_STCP_Pin,
-		.GPIO_Mode = GPIO_Mode_OUT,
-		.GPIO_OType = GPIO_OType_PP,
-		.GPIO_Speed = GPIO_Speed_25MHz,
-		.GPIO_PuPd = GPIO_PuPd_NOPULL,
-	};
-	GPIO_Init(IOMux_In_PE_GPIO, &GPIO_InitStructure);
-}
-
 #if 0
 static void init_usb(void) {
 	/* VBUS = PA9, ID = PA10, D- = PA11, D+ = PA12 */
@@ -537,21 +399,7 @@ static void init_systick(void) {
 }
 
 static void init_i2c(void) {
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
-
-	/* Enable alternate I2C function */
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource6, GPIO_AF_I2C1);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource9, GPIO_AF_I2C1);
-
-	GPIO_InitTypeDef GPIO_InitStructure = {
-		.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_9,
-		.GPIO_Mode = GPIO_Mode_AF,
-		.GPIO_OType = GPIO_OType_OD,
-		.GPIO_Speed = GPIO_Speed_2MHz,
-		.GPIO_PuPd = GPIO_PuPd_NOPULL,
-	};
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 	I2C_InitTypeDef I2C_InitStructure = {
 		.I2C_ClockSpeed = 400000,
@@ -568,30 +416,14 @@ static void init_crc(void) {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_CRC, ENABLE);
 }
 
-#if 0
-static void init_debug(void) {
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-	GPIO_InitTypeDef GPIO_InitStructure = {
-		.GPIO_Pin = Dbg1_Pin | Dbg2_Pin | Dbg3_Pin | Dbg4_Pin,
-		.GPIO_Mode = GPIO_Mode_OUT,
-		.GPIO_OType = GPIO_OType_PP,
-		.GPIO_Speed = GPIO_Speed_100MHz,
-		.GPIO_PuPd = GPIO_PuPd_NOPULL,
-	};
-	GPIO_Init(Dbg1_GPIO, &GPIO_InitStructure);
-}
-#endif
-
 void SystemInit(void) {
 	__disable_irq();
 	init_clock();
 	init_nvic();
-	init_gpio();
+	pinmap_initialize();
 	init_uart();
-	init_rotary_encoders();
 	init_display_spi();
 	init_display_spi_dma();
-	init_iomux_ctl();
 	init_iomux_spi();
 	init_iomux_spi_dma();
 	init_i2c();
