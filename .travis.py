@@ -220,13 +220,16 @@ if (len(sys.argv) == 1) or ("a" in sys.argv[1]):
 		print("Compiler used for Win32 cross compilation:", file = f)
 		print(subprocess.check_output([ "i686-w64-mingw32-gcc", "-v" ], stderr = subprocess.STDOUT).decode(), file = f)
 
-	git_status = subprocess.check_output([ "git", "status", "--short" ])
-	with open(dev_dir + "git-status.txt", "wb") as f:
-		f.write(git_status)
+		returncode = subprocess.call([ "git", "diff-index", "--quiet", "HEAD" ])
+		if returncode != 0:
+			# We're dealing with a dirty build. Include diff and status files.
+			git_status = subprocess.check_output([ "git", "status", "--short" ])
+			with open(dev_dir + "git-status.txt", "wb") as f:
+				f.write(git_status)
 
-	git_diff = subprocess.check_output([ "git", "diff" ])
-	with open(dev_dir + "git-diff.txt", "wb") as f:
-		f.write(git_diff)
+			git_diff = subprocess.check_output([ "git", "diff" ])
+			with open(dev_dir + "git-diff.txt", "wb") as f:
+				f.write(git_diff)
 
 	shutil.copy("LICENSE", dev_dir)
 	shutil.copy("firmware/flightpanel.bin", dev_dir + "firmware")
