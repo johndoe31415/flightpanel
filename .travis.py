@@ -137,7 +137,8 @@ def updated_env(update_dict):
 	return env
 
 cache_dir = os.getenv("HOME") + "/.cache/flightpanel/"
-if not os.path.isfile(cache_dir + "compiler.tar.gz"):
+cache_compiler_file = cache_dir + "compiler.tar.gz"
+if not os.path.isfile(cache_compiler_file):
 	# Download and extract cache from upstream
 	try:
 		print("Downloading toolchain from CACHE_FILE_UPSTREAM_URI...")
@@ -151,14 +152,14 @@ if not os.path.isfile(cache_dir + "compiler.tar.gz"):
 		sys.exit(1)
 	subprocess.check_call([ "tar", "-x", "-v", "-C", os.getenv("HOME"), "-f", "cache.tar" ])
 else:
-	print("Not downloading toolchain from CACHE_FILE_UPSTREAM_URI, using cached.")
+	print("Not downloading toolchain from CACHE_FILE_UPSTREAM_URI, using cached: %s" % (cache_compiler_file))
 
 compiler_dir = os.getenv("HOME") + "/bin/gcc-cm4/bin"
 if not os.path.isdir(compiler_dir):
 	# Extract compiler from cache
-	subprocess.check_call([ "tar", "-x", "-v", "-z", "-C", os.getenv("HOME"), "-f", cache_dir + "compiler.tar.gz" ])
+	subprocess.check_call([ "tar", "-x", "-v", "-z", "-C", os.getenv("HOME"), "-f", cache_compiler_file ])
 else:
-	print("Not extracting Cortex-M4 compiler, already present.")
+	print("Not extracting Cortex-M4 compiler, already present: %s" % (compiler_dir))
 
 os.environ["PATH"] = compiler_dir + ":" + os.getenv("PATH")
 
