@@ -31,7 +31,7 @@ test: all
 	@./$(firstword $(TEST_OBJS)) --summary
 
 clean:
-	rm -f $(TEST_COMMON_OBJS) $(TEST_OBJS) ../*.o
+	rm -f $(TEST_COMMON_OBJS) $(TEST_OBJS) ../*.o *.o
 	rm -f helper_surface.o
 	rm -f tests.log
 

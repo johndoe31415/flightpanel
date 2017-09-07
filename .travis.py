@@ -140,9 +140,9 @@ cache_dir = os.getenv("HOME") + "/.cache/flightpanel/"
 if not os.path.isfile(cache_dir + "compiler.tar.gz"):
 	# Download and extract cache from upstream
 	try:
-		print("Downloading...")
+		print("Downloading toolchain from CACHE_FILE_UPSTREAM_URI...")
 		subprocess.check_call([ "wget", "-o", "/dev/null", "-O", "cache.tar", os.getenv("CACHE_FILE_UPSTREAM_URI") ])
-		print("Download finished.")
+		print("Download of toolchain finished successfully from CACHE_FILE_UPSTREAM_URI.")
 	except subprocess.CalledProcessError:
 		# Catch and exit so that stacktrace does not reveal URI in log
 		print("Call to wget failed while trying to download the cache file from CACHE_FILE_UPSTREAM_URI.")
@@ -151,7 +151,7 @@ if not os.path.isfile(cache_dir + "compiler.tar.gz"):
 		sys.exit(1)
 	subprocess.check_call([ "tar", "-x", "-v", "-C", os.getenv("HOME"), "-f", "cache.tar" ])
 else:
-	print("Not downloading cache, already present.")
+	print("Not downloading toolchain from CACHE_FILE_UPSTREAM_URI, using cached.")
 
 compiler_dir = os.getenv("HOME") + "/bin/gcc-cm4/bin"
 if not os.path.isdir(compiler_dir):
