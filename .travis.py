@@ -199,13 +199,13 @@ if (len(sys.argv) == 1) or ("a" in sys.argv[1]):
 	os.makedirs(dev_dir + "windows-fsx")
 	os.makedirs(dev_dir + "linux-xplane/flightpanel/64")
 
-	git_rev = subprocess.check_output([ "git", "rev-parse", "HEAD" ]).decode("utf-8").rstrip("\r\n ")
+	git_rev = subprocess.check_output([ "git", "describe", "--abbrev=10", "--dirty", "--always" ]).decode("utf-8").rstrip("\r\n ")
 	with open(dev_dir + "version_info.txt", "w") as f:
 		print("Automatic development build", file = f)
 		print("===========================", file = f)
 		print(file = f)
 		print("Created at: %s UTC" % (now_utc.strftime("%A, %Y-%m-%d %H:%M:%S")), file = f)
-		print("Built from commit %s" % (git_rev), file = f)
+		print("Built from %s" % (git_rev), file = f)
 		print(file = f)
 		print("flightpanel is open source software and licensed under the GNU GPL-3.", file = f)
 		print("More information and full source code:", file = f)
@@ -218,6 +218,14 @@ if (len(sys.argv) == 1) or ("a" in sys.argv[1]):
 		print(file = f)
 		print("Compiler used for Win32 cross compilation:", file = f)
 		print(subprocess.check_output([ "i686-w64-mingw32-gcc", "-v" ], stderr = subprocess.STDOUT).decode(), file = f)
+
+	git_status = subprocess.check_output([ "git", "status", "--short" ])
+	with open(dev_dir + "git-status.txt", "wb") as f:
+		f.write(git_status)
+
+	git_diff = subprocess.check_output([ "git", "diff" ])
+	with open(dev_dir + "git-diff.txt", "wb") as f:
+		f.write(git_diff)
 
 	shutil.copy("LICENSE", dev_dir)
 	shutil.copy("firmware/flightpanel.bin", dev_dir + "firmware")
