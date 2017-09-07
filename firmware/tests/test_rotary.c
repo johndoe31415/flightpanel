@@ -38,6 +38,7 @@ static struct rotary_input_t inputs[] = {
 };
 
 static void test_rotary_normal(void) {
+	subtest_start();
 	struct rotary_encoder_t rotary = {
 		.detent_cnt = 26,
 		.wrap_around = false,
@@ -62,9 +63,11 @@ static void test_rotary_normal(void) {
 		}
 		test_assert_int_eq(rotary.value, 0);
 	}
+	subtest_finished();
 }
 
 static void test_rotary_glitch(void) {
+	subtest_start();
 	struct rotary_encoder_t rotary = {
 		.detent_cnt = 51,
 		.wrap_around = false,
@@ -77,7 +80,7 @@ static void test_rotary_glitch(void) {
 		bool changed_value = rotary_encoder_update(&rotary, input->in1, input->in2);
 		int expect_value = rotary.value;
 
-		const struct rotary_input_t *prev_input = &inputs[(q - 1) % 4];
+		const struct rotary_input_t *prev_input = &inputs[(q + 4 - 1) % 4];
 		const struct rotary_input_t *next_input = &inputs[(q + 1) % 4];
 		rotary_encoder_update(&rotary, prev_input->in1, prev_input->in2);
 		test_assert_int_eq(rotary.value, expect_value);
@@ -92,9 +95,11 @@ static void test_rotary_glitch(void) {
 		}
 	}
 	test_assert_int_eq(rotary.value, rotary.detent_cnt - 1);
+	subtest_finished();
 }
 
 static void test_rotary_wrap(void) {
+	subtest_start();
 	const int expect_increment = 4;
 	struct rotary_encoder_t rotary = {
 		.detent_cnt = 13,
@@ -119,6 +124,7 @@ static void test_rotary_wrap(void) {
 			test_assert_int_eq(rotary.value, expect_value);
 		}
 	}
+	subtest_finished();
 }
 
 int main(int argc, char **argv) {
@@ -126,7 +132,7 @@ int main(int argc, char **argv) {
 	test_rotary_normal();
 	test_rotary_glitch();
 	test_rotary_wrap();
-	test_success();
+	test_finished();
 	return 0;
 }
 

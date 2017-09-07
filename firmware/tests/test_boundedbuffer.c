@@ -39,6 +39,7 @@ static void test_basics(void) {
 		test_assert(boundedbuffer_get(&buffer, copy, 7));
 		test_assert(!strcmp(copy, "foobar"));
 	}
+	subtest_finished();
 }
 
 static void test_put_head(void) {
@@ -72,6 +73,7 @@ static void test_put_head(void) {
 		0x66, 0x6f, 0x6f, 0x62
 	};
 	test_assert(!memcmp(expect_data, result, buffer.bufsize));
+	subtest_finished();
 }
 
 static void test_single_char(void) {
@@ -93,6 +95,7 @@ static void test_single_char(void) {
 	test_assert_int_eq(boundedbuffer_getbyte(&buffer), 'B');
 	test_assert_int_eq(boundedbuffer_getbyte(&buffer), 'C');
 	test_assert_int_eq(boundedbuffer_getbyte(&buffer), -1);
+	subtest_finished();
 }
 
 int main(int argc, char **argv) {
@@ -100,7 +103,7 @@ int main(int argc, char **argv) {
 	test_basics();
 	test_put_head();
 	test_single_char();
-	test_success();
+	test_finished();
 	return 0;
 }
 

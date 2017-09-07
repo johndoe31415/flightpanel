@@ -2,7 +2,8 @@
 
 vpath %.c ..
 
-CFLAGS := -std=c11 -Wall -Wmissing-prototypes -Wstrict-prototypes -Werror=implicit-function-declaration -O3 -I..
+CFLAGS := -std=c11 -Wall -Werror -Wmissing-prototypes -Wstrict-prototypes -Werror=implicit-function-declaration -O3 -I..
+CFLAGS += -pie -fPIE -fsanitize=address -fsanitize=undefined -fsanitize=leak
 LDFLAGS :=
 
 TEST_COMMON_OBJS := testbed.o
@@ -13,7 +14,8 @@ TEST_OBJS := \
 	test_font \
 	test_rotary \
 	test_debounce \
-	test_boundedbuffer
+	test_boundedbuffer \
+	test_testbed
 
 all: $(TEST_COMMON_OBJS) $(TEST_OBJS)
 
@@ -24,6 +26,7 @@ test_font: $(TEST_COMMON_OBJS) surface.o font.o vcr-osd-mono-20.o helper_surface
 test_rotary: $(TEST_COMMON_OBJS) rotary.o
 test_debounce: $(TEST_COMMON_OBJS) debounce.o
 test_boundedbuffer: $(TEST_COMMON_OBJS) boundedbuffer.o
+test_testbed: $(TEST_COMMON_OBJS)
 
 test: all
 	rm -f tests.log

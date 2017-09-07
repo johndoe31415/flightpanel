@@ -33,6 +33,7 @@ static void test_noaction(void) {
 	for (int i = 1; i <= 100; i++) {
 		test_assert_int_eq(button_debounce(&button, false), BUTTON_NOACTION);
 	}
+	subtest_finished();
 }
 
 static void test_short_action(void) {
@@ -46,6 +47,7 @@ static void test_short_action(void) {
 			test_assert_int_eq(button_debounce(&button, i <= 50), (i == 20) ? BUTTON_PRESS : BUTTON_NOACTION);
 		}
 	}
+	subtest_finished();
 }
 
 static void test_long_action(void) {
@@ -58,6 +60,7 @@ static void test_long_action(void) {
 	for (int i = 1; i <= 100; i++) {
 		test_assert_int_eq(button_debounce(&button, true), (i == 40) ? BUTTON_LONG_PRESS : BUTTON_NOACTION);
 	}
+	subtest_finished();
 }
 
 static void test_short_action_longbutton(void) {
@@ -70,6 +73,7 @@ static void test_short_action_longbutton(void) {
 	for (int i = 1; i <= 100; i++) {
 		test_assert_int_eq(button_debounce(&button, (i < 25) ? true : false), (i == 25) ? BUTTON_PRESS : BUTTON_NOACTION);
 	}
+	subtest_finished();
 }
 
 static void test_flaky_button(void) {
@@ -81,6 +85,7 @@ static void test_flaky_button(void) {
 	for (int i = 1; i <= 100; i++) {
 		test_assert_int_eq(button_debounce(&button, ((i % 5) == 0) ? false : true), (i == 32) ? BUTTON_PRESS : BUTTON_NOACTION);
 	}
+	subtest_finished();
 }
 
 static void test_flaky_long_button(void) {
@@ -94,6 +99,7 @@ static void test_flaky_long_button(void) {
 	for (int i = 1; i <= 100; i++) {
 		test_assert_int_eq(button_debounce(&button, ((i % 5) == 0) ? false : true), (i == 35) ? BUTTON_PRESS : BUTTON_NOACTION);
 	}
+	subtest_finished();
 }
 
 static void test_deadtime(void) {
@@ -125,6 +131,7 @@ static void test_deadtime(void) {
 			test_assert_int_eq(button_debounce(&button, true), (i == button.threshold) ? ((deadtime_wait >= button.deadtime) ? BUTTON_PRESS : BUTTON_NOACTION) : BUTTON_NOACTION);
 		}
 	}
+	subtest_finished();
 }
 
 int main(int argc, char **argv) {
@@ -136,7 +143,7 @@ int main(int argc, char **argv) {
 	test_flaky_button();
 	test_flaky_long_button();
 	test_deadtime();
-	test_success();
+	test_finished();
 	return 0;
 }
 

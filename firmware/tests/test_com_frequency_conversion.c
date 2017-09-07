@@ -25,10 +25,13 @@
 #include <frequencies.h>
 
 static void test_basics(void) {
+	subtest_start();
 	test_assert_int_eq(COM_MIN_FREQUENCY_KHZ, 118000);
+	subtest_finished();
 }
 
 static void test_fine(void) {
+	subtest_start();
 	test_assert_int_eq(com_index_to_frequency_khz(0), COM_MIN_FREQUENCY_KHZ);
 	test_assert_int_eq(com_index_to_frequency_khz(1) , 118005);
 	test_assert_int_eq(com_index_to_frequency_khz(2) , 118010);
@@ -79,13 +82,16 @@ static void test_fine(void) {
 	test_assert_int_eq(160, com_frequency_khz_to_index(119000));
 	test_assert_int_eq(161, com_frequency_khz_to_index(119005));
 	test_assert_int_eq((160 * 19) - 1, com_frequency_khz_to_index(136990));
+	subtest_finished();
 }
 
 static void test_coarse(void) {
+	subtest_start();
 	for (int i = 0; i < 40 * 19; i++) {
 		test_assert_int_eq(com_index_to_frequency_khz(4 * i), COM_MIN_FREQUENCY_KHZ + (i * 25));
 		test_assert_int_eq(4 * i, com_frequency_khz_to_index(COM_MIN_FREQUENCY_KHZ + (i * 25)));
 	}
+	subtest_finished();
 }
 
 int main(int argc, char **argv) {
@@ -93,7 +99,7 @@ int main(int argc, char **argv) {
 	test_basics();
 	test_fine();
 	test_coarse();
-	test_success();
+	test_finished();
 	return 0;
 }
 

@@ -31,9 +31,11 @@
 #include <errno.h>
 #include "testbed.h"
 
-static const char *testname;
 static FILE *debug_log = NULL;
 static FILE *summary_file = NULL;
+static const char *current_testname;
+static const char *current_subtestname;
+static int failure_count;
 
 bool test_verbose(void) {
 	return debug_log != NULL;
@@ -53,6 +55,33 @@ void debug(const char *msg, ...) {
 		vfprintf(summary_file, msg, ap);
 		va_end(ap);
 	}
+}
+
+void subtest_start_specific(const char *subtestname) {
+	if (current_subtestname != NULL) {
+		fprintf(stderr, "Tried to start subtest '%s.%s' when still inside subtest '%s.%s'. Aborting.\n", current_testname, current_subtestname, current_testname, subtestname);
+		abort();
+	}
+	current_subtestname = subtestname;
+	failure_count = 0;
+
+	fprintf(summary_file, ">> %s %s\n", current_testname, current_subtestname);
+	fflush(summary_file);
+}
+
+void subtest_finish_specific(const char *subtestname) {
+	if (current_subtestname == NULL) {
+		fprintf(stderr, "Tried to finish subtest %s without having entered it. Aborting.\n", subtestname);
+		abort();
+	}
+	if (strcmp(subtestname, current_subtestname)) {
+		fprintf(stderr, "Tried to finish subtest %s, but currently in subtest %s. Aborting.\n", subtestname, current_subtestname);
+		abort();
+	}
+
+	fprintf(summary_file, "<< %s %s %d\n", current_testname, current_subtestname, failure_count);
+	fflush(summary_file);
+	current_subtestname = NULL;
 }
 
 static void test_syntax(const char *pgmname) {
@@ -84,13 +113,18 @@ static int test_print_summary(void) {
 		exit(EXIT_FAILURE);
 	}
 	int conducted_test_cnt = 0;
-	int failed_test_cnt = 0;
+	int successful_test_cnt = 0;
+	int conducted_subtest_cnt = 0;
+	int successful_subtest_cnt = 0;
+	bool test_successful = false;
+	bool subtest_successful = false;
 	char line[256];
+
 	print_headline("TEST SUMMARY");
 	while (fgets(line, sizeof(line) - 1, f)) {
 		line[sizeof(line) - 1] = 0;
 		int l = strlen(line);
-		if (l && (line[0] != '*')) {
+		if (l && (line[0] == '#')) {
 			continue;
 		}
 		if (l && (line[l - 1] == '\r')) {
@@ -99,24 +133,49 @@ static int test_print_summary(void) {
 		if (l && (line[l - 1] == '\n')) {
 			line[--l] = 0;
 		}
+		if (!l) {
+			continue;
+		}
 
-		strtok(line, " ");
-		char *testname = strtok(NULL, " ");
-		int test_success = atoi(strtok(NULL, " "));
-		conducted_test_cnt++;
-		if (!test_success) {
-			fprintf(stderr, "FAILED: %s\n", testname);
-			failed_test_cnt++;
+		char *msgtype = strtok(line, " ");
+		if (!strcmp(msgtype, ">")) {
+			/* Start of test */
+			conducted_test_cnt++;
+			test_successful = true;
+		} else if (!strcmp(msgtype, ">>")) {
+			/* Start of subtest */
+			conducted_subtest_cnt++;
+			subtest_successful = true;
+		} else if (!strcmp(msgtype, "<<")) {
+			/* End of subtest */
+			if (subtest_successful) {
+				successful_subtest_cnt++;
+			}
+		} else if (!strcmp(msgtype, "<")) {
+			/* End of test */
+			if (test_successful) {
+				successful_test_cnt++;
+			}
+		} else if (!strcmp(msgtype, "-")) {
+			/* Failure report */
+			test_successful = false;
+			subtest_successful = false;
+		} else {
+			fprintf(stderr, "Do not know how to handle message type '%s'. Aborting.\n", msgtype);
+			abort();
 		}
 	}
 	fclose(f);
-	const int successful_test_cnt = conducted_test_cnt - failed_test_cnt;
-	fprintf(stderr, "%d tests: %d PASS, %d FAIL\n", conducted_test_cnt, successful_test_cnt, failed_test_cnt);
+	const int failed_test_cnt = conducted_test_cnt - successful_test_cnt;
+	const int failed_subtest_cnt = conducted_subtest_cnt - successful_subtest_cnt;
+	fprintf(stderr, "%d tests: %d PASS, %d FAIL.\n", conducted_test_cnt, successful_test_cnt, failed_test_cnt);
+	fprintf(stderr, "%d subtest: %d PASS, %d FAIL.\n", conducted_subtest_cnt, successful_subtest_cnt, failed_subtest_cnt);
 	if (failed_test_cnt == 0) {
 		print_headline("EVERYTHING OK");
 	} else {
 		print_headline("FAILED TESTS");
 	}
+
 	return (failed_test_cnt > 0) ? 1 : 0;
 }
 
@@ -155,28 +214,26 @@ void test_start(int argc, char **argv) {
 		test_syntax(argv[0]);
 		exit(EXIT_FAILURE);
 	}
-	testname = new_testname;
+	current_testname = new_testname;
+	fprintf(summary_file, "\n> %s\n", current_testname);
+	fflush(summary_file);
 }
 
-void test_success(void) {
-	fprintf(stderr, "PASS: %s\n", testname);
-	fprintf(summary_file, "* %s 1\n", testname);
+void test_finished(void) {
+	fprintf(summary_file, "\n< %s\n", current_testname);
 	fclose(summary_file);
-	exit(EXIT_SUCCESS);
 }
 
 void test_fail_ext(const char *file, int line, const char *fncname, const char *reason, failfnc_t failfnc, const void *lhs, const void *rhs) {
-	fprintf(summary_file, "- FAILED %s:%d %s: %s (%s)\n", file, line, fncname, testname, reason);
-	fprintf(stderr, "FAILED %s:%d %s: %s (%.80s)\n", file, line, fncname, testname, reason);
+	fprintf(summary_file, "- FAILED %s:%d %s: %s.%s (%s)\n", file, line, fncname, current_testname, current_subtestname, reason);
+	fprintf(stderr, "FAILED %s:%d %s: %s.%s (%.80s)\n", file, line, fncname, current_testname, current_subtestname, reason);
 	if (failfnc != NULL) {
 		char *extended_reason = failfnc(lhs, rhs);
 		fprintf(summary_file, "- %s\n", extended_reason);
 		fprintf(stderr, "   %.120s\n", extended_reason);
 		free(extended_reason);
 	}
-	fprintf(summary_file, "* %s 0\n", testname);
-	fclose(summary_file);
-	exit(EXIT_FAILURE);
+	failure_count++;
 }
 
 void test_fail(const char *file, int line, const char *fncname, const char *reason) {
