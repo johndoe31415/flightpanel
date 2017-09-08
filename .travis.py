@@ -142,6 +142,11 @@ def msg(text):
 cache_dir = os.getenv("HOME") + "/.cache/flightpanel/"
 cache_compiler_file = cache_dir + "compiler.tar.gz"
 if not os.path.isfile(cache_compiler_file):
+	if os.getenv("CACHE_FILE_UPSTREAM_URI") is None:
+		msg("Would need to download binary compiler/header package, but environment variable CACHE_FILE_UPSTREAM_URI is unset.")
+		msg("Cannot continue with release, aborting.")
+		sys.exit(1)
+
 	# Download and extract cache from upstream
 	try:
 		msg("Downloading toolchain from CACHE_FILE_UPSTREAM_URI...")
@@ -260,6 +265,11 @@ if (len(sys.argv) == 1) or ("a" in sys.argv[1]):
 
 if (len(sys.argv) == 1) or ("u" in sys.argv[1]):
 	# (u)pload build artifact to GitHub
+	if os.getenv("GITHUB_ACCESS_TOKEN") is None:
+		msg("Would need to upload packaged binaries to GitHub, but environment variable GITHUB_ACCESS_TOKEN is unset.")
+		msg("Cannot continue with release, aborting.")
+		sys.exit(1)
+
 	github = GitHubAccessor(owner = "johndoe31415", repo = "flightpanel", token = os.getenv("GITHUB_ACCESS_TOKEN"))
 	git_rev = subprocess.check_output([ "git", "rev-parse", "HEAD" ]).decode("utf-8").rstrip("\r\n ")
 
