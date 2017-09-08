@@ -26,6 +26,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stm32f4xx_dma.h>
 
 #include "debugconsole.h"
 #include "pinmap.h"
@@ -255,6 +256,50 @@ void debugconsole_tick(void) {
 	}
 }
 
+static void terminate_dma_stream(DMA_Stream_TypeDef *dma_stream) {
+	if (GET_BITS(dma_stream->CR, 0, 1)) {
+		printf("Terminating DMA %p\n", dma_stream);
+		BIT_PATCH_REGISTER(dma_stream->CR, 0, 1, 0);
+		if (GET_BITS(dma_stream->CR, 0, 1)) {
+			printf("Unsuccessful.\n");
+		} else {
+			printf("Successful!\n");
+		}
+	}
+}
+
+static void terminate_all_dma1(void) {
+	terminate_dma_stream(DMA1_Stream0);
+	terminate_dma_stream(DMA1_Stream2);
+	terminate_dma_stream(DMA1_Stream3);
+	terminate_dma_stream(DMA1_Stream4);
+	terminate_dma_stream(DMA1_Stream5);
+	terminate_dma_stream(DMA1_Stream6);
+	terminate_dma_stream(DMA1_Stream7);
+}
+
+static void dump_dma_status(void) {
+	printf("Status of controller DMA1:\n");
+	DMA_Stream_TypeDef *dma_stream = DMA1_Stream0;
+	for (int i = 0; i < 8; i++) {
+		void *peripheral_addr = (void*)dma_stream[i].PAR;
+		void *memory_addr = (void*)dma_stream[i].M0AR;
+		bool peripheral_inc = GET_BITS(dma_stream[i].CR, 9, 1);
+		bool memory_inc = GET_BITS(dma_stream[i].CR, 10, 1);
+		uint8_t direction = GET_BITS(dma_stream[i].CR, 6, 2);
+		uint8_t channel = GET_BITS(dma_stream[i].CR, 25, 3);
+		const char *direction_str = "?";
+		if (direction == 0) {
+			direction_str = "->";
+		} else if (direction == 1) {
+			direction_str = "<-";
+		} else if (direction == 2) {
+			direction_str = "MM";
+		}
+		printf("  DMA1_Stream%d Ch%d: %s %p%s %s %p%s\n", i, channel, (dma_stream[i].CR & 1) ? "Enabled" : "Disabled", peripheral_addr, peripheral_inc ? "++" : "", direction_str, memory_addr, memory_inc ? "++" : "");
+	}
+}
+
 static void debugconsole_print_gpio(void) {
 	printf("Now debugging GPIO output P%s (%s).", known_gpio_outputs[debug_accu].pin_name, known_gpio_outputs[debug_accu].name);
 	if (known_gpio_outputs[debug_accu].comment) {
@@ -265,6 +310,9 @@ static void debugconsole_print_gpio(void) {
 	}
 	printf("\n");
 
+	/* Stop all DMA transfers */
+	terminate_all_dma1();
+
 	/* Change possible AF setting of this GPIO to regular output */
 	BIT_PATCH_REGISTER(known_gpio_outputs[debug_accu].gpio->MODER, 2 * known_gpio_outputs[debug_accu].pin_source, 2, 1);
 
@@ -273,6 +321,26 @@ static void debugconsole_print_gpio(void) {
 
 	/* And turn off all pullups/pulldowns */
 	BIT_PATCH_REGISTER(known_gpio_outputs[debug_accu].gpio->PUPDR, 2 * known_gpio_outputs[debug_accu].pin_source, 2, 0);
+}
+
+static const char *get_moder_str(uint8_t moder) {
+	switch (moder) {
+		case 0: return "In";
+		case 1: return "Out";
+		case 2: return "AF";
+		case 3: return "Ana";
+		default: return "?";
+	}
+}
+
+static const char *get_speed_str(uint8_t speed) {
+	switch (speed) {
+		case 0: return "2 MHz";
+		case 1: return "25 MHz";
+		case 2: return "50 MHz";
+		case 3: return "100 MHz";
+		default: return "?";
+	}
 }
 
 static void debugconsole_execute(void) {
@@ -294,7 +362,8 @@ static void debugconsole_execute(void) {
 		printf("    iomux-out  Output test pattern on IOMultiplexer outputs\n");
 		printf("    display    Reset OLED displays and output test text\n");
 		printf("    delay      Issue a 10000 count delay_loopcount() and output on blue LED (PD15)\n");
-		printf("    adc        Gather environmental data (supply voltage, temperature) measured via ADC");
+		printf("    adc        Gather environmental data (supply voltage, temperature) measured via ADC\n");
+		printf("    dma        Show overview of DMA status\n");
 		printf("    reset      Reset the MCU entirely\n");
 	} else if (!strcmp(cmd_input, "off")) {
 		debug_mode = DEBUG_DISABLED;
@@ -308,13 +377,17 @@ static void debugconsole_execute(void) {
 		bool success = eeprom_dump(4);
 		printf("EEPROM dump %s.\n", success ? "successful" : "had a problem");
 	} else if (!strcmp(cmd_input, "listio")) {
-		printf("%d known GPIOs:\n", KNOWN_GPIO_OUTPUT_COUNT);
+		printf("%d known GPIO outputs:\n", KNOWN_GPIO_OUTPUT_COUNT);
 		for (int i = 0; i < KNOWN_GPIO_OUTPUT_COUNT; i++) {
-			printf("  %2d: P%-3s %-14s %-10s %s\n", i, known_gpio_outputs[i].pin_name, known_gpio_outputs[i].name, known_gpio_outputs[i].comment ? known_gpio_outputs[i].comment : "", known_gpio_outputs[i].connect ? known_gpio_outputs[i].connect : "");
+			uint8_t moder = GET_BITS(known_gpio_outputs[i].gpio->MODER, 2 * known_gpio_outputs[i].pin_source, 2);
+			uint8_t speed = GET_BITS(known_gpio_outputs[i].gpio->OSPEEDR, 2 * known_gpio_outputs[debug_accu].pin_source, 2);
+			printf("  %2d: P%-3s %3s %7s %-14s %-15s %s\n", i, known_gpio_outputs[i].pin_name, get_moder_str(moder), get_speed_str(speed), known_gpio_outputs[i].name, known_gpio_outputs[i].comment ? known_gpio_outputs[i].comment : "", known_gpio_outputs[i].connect ? known_gpio_outputs[i].connect : "");
 		}
 	} else if (!strcmp(cmd_input, "gpio-out")) {
 		printf("Warning: Changing pin functionality to OUTPUT, i.e., disabling alternate function.\n");
-		printf("These will not be restored. You will likely need to reset the MCU after this test.\n");
+		printf("Also all DMA transfers will be stopped; neither AF nor DMA will be restored.\n");
+		printf("You *will* need to reset the MCU after this test.\n");
+		printf("\n");
 		debug_accu = 0;
 		debug_mode = DEBUG_GPIO_OUTPUTS;
 		debugconsole_print_gpio();
@@ -334,6 +407,8 @@ static void debugconsole_execute(void) {
 	} else if (!strcmp(cmd_input, "adc")) {
 		debug_accu = 0;
 		debug_mode = DEBUG_ADC_TELEMETRY;
+	} else if (!strcmp(cmd_input, "dma")) {
+		dump_dma_status();
 	} else if (!strcmp(cmd_input, "reset")) {
 		stm32f4xx_reset();
 	} else if (cmd_length == 0) {

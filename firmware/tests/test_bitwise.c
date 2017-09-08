@@ -64,12 +64,21 @@ static void test_patch_reg(void) {
 	subtest_finished();
 }
 
+static void test_get_bits(void) {
+	subtest_start();
+	test_assert_int_eq(GET_BITS(0xabcdef12, 0, 8), 0x12);
+	test_assert_int_eq(GET_BITS(0xabcdef12, 8, 8), 0xef);
+	test_assert_int_eq(GET_BITS(0xabcdef12, 12, 8), 0xde);
+	subtest_finished();
+}
+
 int main(int argc, char **argv) {
 	test_start(argc, argv);
 	test_mask();
 	test_shifted_mask();
 	test_patch();
 	test_patch_reg();
+	test_get_bits();
 	test_finished();
 	return 0;
 }

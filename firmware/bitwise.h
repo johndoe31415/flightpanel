@@ -30,4 +30,6 @@
 
 #define BIT_PATCH_REGISTER(lvalue, bit_offset, bit_length, patch_value)	(lvalue) = BIT_PATCH((lvalue), (bit_offset), (bit_length), (patch_value))
 
+#define GET_BITS(value, bit_offset, bit_length)							(((value) >> (bit_offset)) & BIT_MASK(bit_length))
+
 #endif
