@@ -131,7 +131,7 @@ struct gpio_definition_t {
 #define USB_OTG_ID_npulse()						do { USB_OTG_ID_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_OTG_ID_set_ACTIVE(); } while (0)
 #define USB_OTG_ID_GPIO_Definition				{ .gpio = USB_OTG_ID_GPIO, .name = "USB_OTG_ID", .pin_name = "A10", .pin_source = USB_OTG_ID_PinSource }
 
-// PA0: UserButton (IN) -- ['init', 'pulldown']
+// PA0: UserButton (IN) -- ['init', 'pulldown', 'speed']
 #define UserButton_GPIO							GPIOA
 #define UserButton_PinSource					GPIO_PinSource0
 #define UserButton_Pin							GPIO_Pin_0

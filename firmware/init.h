@@ -27,6 +27,7 @@
 #include <stdbool.h>
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
+void disable_pin_reconfiguration(void);
 void reinit_iomux_spi_sck_AF(bool use_af);
 void SystemInit(void);
 /***************  AUTO GENERATED SECTION ENDS   ***************/

@@ -27,6 +27,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stm32f4xx_dma.h>
+#include <stm32f4xx_spi.h>
 
 #include "debugconsole.h"
 #include "pinmap.h"
@@ -42,6 +43,7 @@
 #include "eeprom.h"
 #include "stm32f407_adc.h"
 #include "bitwise.h"
+#include "init.h"
 
 #define iabs(x)				(((x) < 0) ? -(x) : (x))
 #define CMD_BUFFER_SIZE		32
@@ -71,6 +73,12 @@ static const struct gpio_definition_t known_gpio_outputs[] = {
 };
 #define KNOWN_GPIO_OUTPUT_COUNT		(sizeof(known_gpio_outputs) / sizeof(known_gpio_outputs[0]))
 
+static const struct gpio_definition_t known_gpio_inputs[] = {
+	IOMux_MISO_GPIO_Definition,
+	UserButton_GPIO_Definition,
+};
+#define KNOWN_GPIO_INPUT_COUNT		(sizeof(known_gpio_inputs) / sizeof(known_gpio_inputs[0]))
+
 enum debugmode_t {
 	DEBUG_DISABLED = 0,
 	DEBUG_RS232_ISR,
@@ -86,6 +94,7 @@ enum debugmode_t {
 static enum debugmode_t debug_mode;
 static char cmd_input[CMD_BUFFER_SIZE];
 static uint8_t cmd_length;
+static uint8_t last_cmd_length;
 static int debug_accu;
 static uint8_t iomux_last_inputs[IOMUX_BYTECOUNT];
 
@@ -296,12 +305,31 @@ static void dump_dma_status(void) {
 		} else if (direction == 2) {
 			direction_str = "MM";
 		}
-		printf("  DMA1_Stream%d Ch%d: %s %p%s %s %p%s\n", i, channel, (dma_stream[i].CR & 1) ? "Enabled" : "Disabled", peripheral_addr, peripheral_inc ? "++" : "", direction_str, memory_addr, memory_inc ? "++" : "");
+		printf("  DMA1_Stream%d Ch%d: %-8s %p%s %s %p%s\n", i, channel, (dma_stream[i].CR & 1) ? "Enabled" : "Disabled", peripheral_addr, peripheral_inc ? "++" : "", direction_str, memory_addr, memory_inc ? "++" : "");
+	}
+}
+
+static void debugconsole_reset_gpios(const struct gpio_definition_t *gpios, unsigned int io_count, bool make_output) {
+#if 0
+	/* Stop all DMA transfers */
+	terminate_all_dma1();
+
+	/* Stop all SPI units */
+	SPI_Cmd(SPI2, DISABLE);
+	SPI_Cmd(SPI3, DISABLE);
+#endif
+
+	for (int i = 0; i < io_count; i++) {
+		/* Change possible AF setting of this GPIO to regular output */
+		BIT_PATCH_REGISTER(gpios[i].gpio->MODER, 2 * gpios[i].pin_source, 2, make_output ? 1 : 0);
+
+		/* Also change the speed rating to slow */
+		BIT_PATCH_REGISTER(gpios[i].gpio->OSPEEDR, 2 * gpios[i].pin_source, 2, 0);
 	}
 }
 
 static void debugconsole_print_gpio(void) {
-	printf("Now debugging GPIO output P%s (%s).", known_gpio_outputs[debug_accu].pin_name, known_gpio_outputs[debug_accu].name);
+	printf("%d: Now debugging GPIO output P%s (%s).", debug_accu, known_gpio_outputs[debug_accu].pin_name, known_gpio_outputs[debug_accu].name);
 	if (known_gpio_outputs[debug_accu].comment) {
 		printf(" %s.", known_gpio_outputs[debug_accu].comment);
 	}
@@ -309,18 +337,6 @@ static void debugconsole_print_gpio(void) {
 		printf(" Connected to %s.", known_gpio_outputs[debug_accu].connect);
 	}
 	printf("\n");
-
-	/* Stop all DMA transfers */
-	terminate_all_dma1();
-
-	/* Change possible AF setting of this GPIO to regular output */
-	BIT_PATCH_REGISTER(known_gpio_outputs[debug_accu].gpio->MODER, 2 * known_gpio_outputs[debug_accu].pin_source, 2, 1);
-
-	/* Also change the speed rating to slow */
-	BIT_PATCH_REGISTER(known_gpio_outputs[debug_accu].gpio->OSPEEDR, 2 * known_gpio_outputs[debug_accu].pin_source, 2, 0);
-
-	/* And turn off all pullups/pulldowns */
-	BIT_PATCH_REGISTER(known_gpio_outputs[debug_accu].gpio->PUPDR, 2 * known_gpio_outputs[debug_accu].pin_source, 2, 0);
 }
 
 static const char *get_moder_str(uint8_t moder) {
@@ -340,6 +356,16 @@ static const char *get_speed_str(uint8_t speed) {
 		case 2: return "50 MHz";
 		case 3: return "100 MHz";
 		default: return "?";
+	}
+}
+
+static void dump_io(const struct gpio_definition_t *gpios, unsigned int io_count, const char *text) {
+	printf("%d known GPIO %ss:\n", io_count, text);
+	for (int i = 0; i < io_count; i++) {
+		uint8_t moder = GET_BITS(gpios[i].gpio->MODER, 2 * gpios[i].pin_source, 2);
+		uint8_t speed = GET_BITS(gpios[i].gpio->OSPEEDR, 2 * gpios[debug_accu].pin_source, 2);
+		bool state = GET_BITS(gpios[i].gpio->IDR, gpios[debug_accu].pin_source, 1);
+		printf("  %2d: P%-3s %3s %7s %s %-14s %-15s %s\n", i, gpios[i].pin_name, get_moder_str(moder), get_speed_str(speed), state ? "HI" : "LO", gpios[i].name, gpios[i].comment ? gpios[i].comment : "", gpios[i].connect ? gpios[i].connect : "");
 	}
 }
 
@@ -377,19 +403,22 @@ static void debugconsole_execute(void) {
 		bool success = eeprom_dump(4);
 		printf("EEPROM dump %s.\n", success ? "successful" : "had a problem");
 	} else if (!strcmp(cmd_input, "listio")) {
-		printf("%d known GPIO outputs:\n", KNOWN_GPIO_OUTPUT_COUNT);
-		for (int i = 0; i < KNOWN_GPIO_OUTPUT_COUNT; i++) {
-			uint8_t moder = GET_BITS(known_gpio_outputs[i].gpio->MODER, 2 * known_gpio_outputs[i].pin_source, 2);
-			uint8_t speed = GET_BITS(known_gpio_outputs[i].gpio->OSPEEDR, 2 * known_gpio_outputs[debug_accu].pin_source, 2);
-			printf("  %2d: P%-3s %3s %7s %-14s %-15s %s\n", i, known_gpio_outputs[i].pin_name, get_moder_str(moder), get_speed_str(speed), known_gpio_outputs[i].name, known_gpio_outputs[i].comment ? known_gpio_outputs[i].comment : "", known_gpio_outputs[i].connect ? known_gpio_outputs[i].connect : "");
-		}
+		dump_io(known_gpio_outputs, KNOWN_GPIO_OUTPUT_COUNT, "output");
+		dump_io(known_gpio_inputs, KNOWN_GPIO_INPUT_COUNT, "input");
 	} else if (!strcmp(cmd_input, "gpio-out")) {
-		printf("Warning: Changing pin functionality to OUTPUT, i.e., disabling alternate function.\n");
-		printf("Also all DMA transfers will be stopped; neither AF nor DMA will be restored.\n");
-		printf("You *will* need to reset the MCU after this test.\n");
-		printf("\n");
-		debug_accu = 0;
-		debug_mode = DEBUG_GPIO_OUTPUTS;
+		if (debug_mode != DEBUG_GPIO_OUTPUTS) {
+			printf("Warning: Changing pin functionality to OUTPUT, i.e., disabling alternate function.\n");
+			printf("Also all DMA transfers will be stopped; neither AF nor DMA will be restored.\n");
+			printf("You *will* need to reset the MCU after this test.\n");
+			printf("\n");
+			debugconsole_reset_gpios(known_gpio_inputs, KNOWN_GPIO_INPUT_COUNT, false);
+			debugconsole_reset_gpios(known_gpio_outputs, KNOWN_GPIO_OUTPUT_COUNT, true);
+			debug_accu = 0;
+			debug_mode = DEBUG_GPIO_OUTPUTS;
+		} else {
+			/* Increase pin */
+			debug_accu = (debug_accu + 1) % KNOWN_GPIO_OUTPUT_COUNT;
+		}
 		debugconsole_print_gpio();
 	} else if (!strcmp(cmd_input, "memory")) {
 		debug_show_memory();
@@ -411,9 +440,9 @@ static void debugconsole_execute(void) {
 		dump_dma_status();
 	} else if (!strcmp(cmd_input, "reset")) {
 		stm32f4xx_reset();
-	} else if (cmd_length == 0) {
+	} else if (!strcmp(cmd_input, "-")) {
 		if (debug_mode == DEBUG_GPIO_OUTPUTS) {
-			debug_accu = (debug_accu + 1) % KNOWN_GPIO_OUTPUT_COUNT;
+			debug_accu = (debug_accu + KNOWN_GPIO_OUTPUT_COUNT - 1) % KNOWN_GPIO_OUTPUT_COUNT;
 			debugconsole_print_gpio();
 		}
 	} else {
@@ -428,6 +457,12 @@ void debugconsole_rxchar(uint8_t rxchar) {
 	}
 	if (rxchar == '\r') {
 		printf("\n");
+		if (cmd_length == 0) {
+			/* Repeat last command */
+			cmd_length = last_cmd_length;
+		} else {
+			last_cmd_length = cmd_length;
+		}
 		debugconsole_execute();
 		debugconsole_print_prompt();
 	} else if (rxchar == KEY_BACKSPACE) {

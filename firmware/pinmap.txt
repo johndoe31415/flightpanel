@@ -8,7 +8,7 @@ PA12	IO	USB_OTG_P
 PA10	IN	USB_OTG_ID
 
 # User switch
-PA0	IN	UserButton		init,pulldown
+PA0	IN	UserButton		init,pulldown,speed=2
 
 # LEDs
 PD12	OUT	LEDGreen		init
