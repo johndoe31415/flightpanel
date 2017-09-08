@@ -137,7 +137,8 @@ def updated_env(update_dict):
 	return env
 
 def msg(text):
-	print("==> %s" % (text), file = sys.stderr)
+	print("==> %s" % (text))
+	sys.stdout.flush()
 
 cache_dir = os.getenv("HOME") + "/.cache/flightpanel/"
 cache_compiler_file = cache_dir + "compiler.tar.gz"
