@@ -62,12 +62,6 @@ uint32_t SystemCoreClock = RUNNING_CLK_FREQUENCY;
 
 #define UART_IRQn				USART2_IRQn
 
-static bool pin_reconfig_disabled = false;
-
-void disable_pin_reconfiguration(void) {
-	pin_reconfig_disabled = true;
-}
-
 static void init_clock(void) {
 	/* Enable HSE */
 	RCC->CR |= RCC_CR_HSEON;
@@ -250,10 +244,6 @@ static void init_iomux_spi(void) {
 }
 
 void reinit_iomux_spi_sck_AF(bool use_af) {
-	if (pin_reconfig_disabled) {
-		return;
-	}
-
 	GPIO_InitTypeDef GPIO_InitStructure = {
 		.GPIO_Pin = GPIO_Pin_10,
 		.GPIO_Mode = use_af ? GPIO_Mode_AF : GPIO_Mode_OUT,

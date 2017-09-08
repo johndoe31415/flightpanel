@@ -27,7 +27,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stm32f4xx_dma.h>
-#include <stm32f4xx_spi.h>
 
 #include "debugconsole.h"
 #include "pinmap.h"
@@ -43,7 +42,6 @@
 #include "eeprom.h"
 #include "stm32f407_adc.h"
 #include "bitwise.h"
-#include "init.h"
 
 #define iabs(x)				(((x) < 0) ? -(x) : (x))
 #define CMD_BUFFER_SIZE		32
@@ -265,28 +263,6 @@ void debugconsole_tick(void) {
 	}
 }
 
-static void terminate_dma_stream(DMA_Stream_TypeDef *dma_stream) {
-	if (GET_BITS(dma_stream->CR, 0, 1)) {
-		printf("Terminating DMA %p\n", dma_stream);
-		BIT_PATCH_REGISTER(dma_stream->CR, 0, 1, 0);
-		if (GET_BITS(dma_stream->CR, 0, 1)) {
-			printf("Unsuccessful.\n");
-		} else {
-			printf("Successful!\n");
-		}
-	}
-}
-
-static void terminate_all_dma1(void) {
-	terminate_dma_stream(DMA1_Stream0);
-	terminate_dma_stream(DMA1_Stream2);
-	terminate_dma_stream(DMA1_Stream3);
-	terminate_dma_stream(DMA1_Stream4);
-	terminate_dma_stream(DMA1_Stream5);
-	terminate_dma_stream(DMA1_Stream6);
-	terminate_dma_stream(DMA1_Stream7);
-}
-
 static void dump_dma_status(void) {
 	printf("Status of controller DMA1:\n");
 	DMA_Stream_TypeDef *dma_stream = DMA1_Stream0;
@@ -310,15 +286,6 @@ static void dump_dma_status(void) {
 }
 
 static void debugconsole_reset_gpios(const struct gpio_definition_t *gpios, unsigned int io_count, bool make_output) {
-#if 0
-	/* Stop all DMA transfers */
-	terminate_all_dma1();
-
-	/* Stop all SPI units */
-	SPI_Cmd(SPI2, DISABLE);
-	SPI_Cmd(SPI3, DISABLE);
-#endif
-
 	for (int i = 0; i < io_count; i++) {
 		/* Change possible AF setting of this GPIO to regular output */
 		BIT_PATCH_REGISTER(gpios[i].gpio->MODER, 2 * gpios[i].pin_source, 2, make_output ? 1 : 0);
@@ -359,13 +326,18 @@ static const char *get_speed_str(uint8_t speed) {
 	}
 }
 
-static void dump_io(const struct gpio_definition_t *gpios, unsigned int io_count, const char *text) {
+static void dump_io(const struct gpio_definition_t *gpios, unsigned int io_count, const char *text, bool dump_outputs) {
 	printf("%d known GPIO %ss:\n", io_count, text);
 	for (int i = 0; i < io_count; i++) {
 		uint8_t moder = GET_BITS(gpios[i].gpio->MODER, 2 * gpios[i].pin_source, 2);
 		uint8_t speed = GET_BITS(gpios[i].gpio->OSPEEDR, 2 * gpios[debug_accu].pin_source, 2);
-		bool state = GET_BITS(gpios[i].gpio->IDR, gpios[debug_accu].pin_source, 1);
-		printf("  %2d: P%-3s %3s %7s %s %-14s %-15s %s\n", i, gpios[i].pin_name, get_moder_str(moder), get_speed_str(speed), state ? "HI" : "LO", gpios[i].name, gpios[i].comment ? gpios[i].comment : "", gpios[i].connect ? gpios[i].connect : "");
+		bool state;
+		if (dump_outputs) {
+			state = GET_BIT(gpios[i].gpio->ODR, gpios[i].pin_source);
+		} else {
+			state = GET_BIT(gpios[i].gpio->IDR, gpios[i].pin_source);
+		}
+		printf("  %2d: P%-3s %3s %7s %s %-14s %-15s %s\n", i, gpios[i].pin_name, get_moder_str(moder), get_speed_str(speed), state ? "HI" : "lo", gpios[i].name, gpios[i].comment ? gpios[i].comment : "", gpios[i].connect ? gpios[i].connect : "");
 	}
 }
 
@@ -403,14 +375,15 @@ static void debugconsole_execute(void) {
 		bool success = eeprom_dump(4);
 		printf("EEPROM dump %s.\n", success ? "successful" : "had a problem");
 	} else if (!strcmp(cmd_input, "listio")) {
-		dump_io(known_gpio_outputs, KNOWN_GPIO_OUTPUT_COUNT, "output");
-		dump_io(known_gpio_inputs, KNOWN_GPIO_INPUT_COUNT, "input");
+		dump_io(known_gpio_outputs, KNOWN_GPIO_OUTPUT_COUNT, "output", true);
+		dump_io(known_gpio_inputs, KNOWN_GPIO_INPUT_COUNT, "input", false);
 	} else if (!strcmp(cmd_input, "gpio-out")) {
 		if (debug_mode != DEBUG_GPIO_OUTPUTS) {
 			printf("Warning: Changing pin functionality to OUTPUT, i.e., disabling alternate function.\n");
 			printf("Also all DMA transfers will be stopped; neither AF nor DMA will be restored.\n");
 			printf("You *will* need to reset the MCU after this test.\n");
 			printf("\n");
+			iomux_disable();
 			debugconsole_reset_gpios(known_gpio_inputs, KNOWN_GPIO_INPUT_COUNT, false);
 			debugconsole_reset_gpios(known_gpio_outputs, KNOWN_GPIO_OUTPUT_COUNT, true);
 			debug_accu = 0;
@@ -440,6 +413,11 @@ static void debugconsole_execute(void) {
 		dump_dma_status();
 	} else if (!strcmp(cmd_input, "reset")) {
 		stm32f4xx_reset();
+	} else if (!strcmp(cmd_input, "+")) {
+		if (debug_mode == DEBUG_GPIO_OUTPUTS) {
+			debug_accu = (debug_accu + 1) % KNOWN_GPIO_OUTPUT_COUNT;
+			debugconsole_print_gpio();
+		}
 	} else if (!strcmp(cmd_input, "-")) {
 		if (debug_mode == DEBUG_GPIO_OUTPUTS) {
 			debug_accu = (debug_accu + KNOWN_GPIO_OUTPUT_COUNT - 1) % KNOWN_GPIO_OUTPUT_COUNT;

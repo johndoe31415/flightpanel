@@ -72,6 +72,15 @@ static void test_get_bits(void) {
 	subtest_finished();
 }
 
+static void test_get_bit(void) {
+	subtest_start();
+	test_assert(!GET_BIT(0x40000, 8));
+	test_assert(!GET_BIT(0x40000, 9));
+	test_assert(!GET_BIT(0x40000, 10));
+	test_assert(GET_BIT(0x40000, 18));
+	subtest_finished();
+}
+
 int main(int argc, char **argv) {
 	test_start(argc, argv);
 	test_mask();
@@ -79,6 +88,7 @@ int main(int argc, char **argv) {
 	test_patch();
 	test_patch_reg();
 	test_get_bits();
+	test_get_bit();
 	test_finished();
 	return 0;
 }

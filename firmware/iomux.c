@@ -34,13 +34,22 @@
 
 static uint8_t outputs[IOMUX_BYTECOUNT];
 static uint8_t inputs[IOMUX_BYTECOUNT];
+static bool iomux_disabled = false;
 
 const uint8_t *iomux_input_array(void) {
 	return inputs;
 }
 
+void iomux_disable(void) {
+	iomux_disabled = true;
+}
+
 /* Trigger IOMux transfer */
 void iomux_trigger(void) {
+	if (iomux_disabled) {
+		return;
+	}
+
 	if (!spi_dma_tx_rx_ready(IOMuxSPI_DMAStream_TX, IOMuxSPI_DMAStream_RX)) {
 		/* Last handling was lasting longer than expected, do silently discard
 		 * this round. */
