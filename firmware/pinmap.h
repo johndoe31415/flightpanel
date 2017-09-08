@@ -8,7 +8,7 @@ struct gpio_definition_t {
 	const char *pin_name;
 	const char *name;
 	GPIO_TypeDef *gpio;
-	int pin;
+	int pin_source;
 	const char *comment;
 	const char *connect;
 };
@@ -26,7 +26,7 @@ struct gpio_definition_t {
 #define USB_PowerSwitchOn_toggle()				USB_PowerSwitchOn_GPIO->ODR ^= USB_PowerSwitchOn_Pin
 #define USB_PowerSwitchOn_pulse()				do { USB_PowerSwitchOn_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_PowerSwitchOn_set_INACTIVE(); } while (0)
 #define USB_PowerSwitchOn_npulse()				do { USB_PowerSwitchOn_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_PowerSwitchOn_set_ACTIVE(); } while (0)
-#define USB_PowerSwitchOn_GPIO_Definition		{ .gpio = USB_PowerSwitchOn_GPIO, .name = "USB_PowerSwitchOn", .pin = USB_PowerSwitchOn_Pin, .pin_name = "C0" }
+#define USB_PowerSwitchOn_GPIO_Definition		{ .gpio = USB_PowerSwitchOn_GPIO, .name = "USB_PowerSwitchOn", .pin_name = "C0", .pin_source = USB_PowerSwitchOn_PinSource }
 // PC0: IOMux_In_PE (OUT) -- ['activelow', 'connect', 'init']
 #define IOMux_In_PE_GPIO						GPIOC
 #define IOMux_In_PE_PinSource					GPIO_PinSource0
@@ -40,7 +40,7 @@ struct gpio_definition_t {
 #define IOMux_In_PE_toggle()					IOMux_In_PE_GPIO->ODR ^= IOMux_In_PE_Pin
 #define IOMux_In_PE_pulse()						do { IOMux_In_PE_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_In_PE_set_INACTIVE(); } while (0)
 #define IOMux_In_PE_npulse()					do { IOMux_In_PE_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_In_PE_set_ACTIVE(); } while (0)
-#define IOMux_In_PE_GPIO_Definition				{ .connect = "IOMux 9", .gpio = IOMux_In_PE_GPIO, .name = "IOMux_In_PE", .pin = IOMux_In_PE_Pin, .pin_name = "C0" }
+#define IOMux_In_PE_GPIO_Definition				{ .connect = "IOMux 9", .gpio = IOMux_In_PE_GPIO, .name = "IOMux_In_PE", .pin_name = "C0", .pin_source = IOMux_In_PE_PinSource }
 
 // PD5: USB_FS_OverCurrent (IN) -- []
 #define USB_FS_OverCurrent_GPIO					GPIOD
@@ -55,7 +55,7 @@ struct gpio_definition_t {
 #define USB_FS_OverCurrent_toggle()				USB_FS_OverCurrent_GPIO->ODR ^= USB_FS_OverCurrent_Pin
 #define USB_FS_OverCurrent_pulse()				do { USB_FS_OverCurrent_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_FS_OverCurrent_set_INACTIVE(); } while (0)
 #define USB_FS_OverCurrent_npulse()				do { USB_FS_OverCurrent_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_FS_OverCurrent_set_ACTIVE(); } while (0)
-#define USB_FS_OverCurrent_GPIO_Definition		{ .gpio = USB_FS_OverCurrent_GPIO, .name = "USB_FS_OverCurrent", .pin = USB_FS_OverCurrent_Pin, .pin_name = "D5" }
+#define USB_FS_OverCurrent_GPIO_Definition		{ .gpio = USB_FS_OverCurrent_GPIO, .name = "USB_FS_OverCurrent", .pin_name = "D5", .pin_source = USB_FS_OverCurrent_PinSource }
 // PD5: USART_TX (OUT) -- ['af', 'init']
 #define USART_TX_GPIO							GPIOD
 #define USART_TX_PinSource						GPIO_PinSource5
@@ -69,7 +69,7 @@ struct gpio_definition_t {
 #define USART_TX_toggle()						USART_TX_GPIO->ODR ^= USART_TX_Pin
 #define USART_TX_pulse()						do { USART_TX_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USART_TX_set_INACTIVE(); } while (0)
 #define USART_TX_npulse()						do { USART_TX_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USART_TX_set_ACTIVE(); } while (0)
-#define USART_TX_GPIO_Definition				{ .gpio = USART_TX_GPIO, .name = "USART_TX", .pin = USART_TX_Pin, .pin_name = "D5" }
+#define USART_TX_GPIO_Definition				{ .gpio = USART_TX_GPIO, .name = "USART_TX", .pin_name = "D5", .pin_source = USART_TX_PinSource }
 
 // PA9: USB_OTG_VBUS (IN) -- []
 #define USB_OTG_VBUS_GPIO						GPIOA
@@ -84,7 +84,7 @@ struct gpio_definition_t {
 #define USB_OTG_VBUS_toggle()					USB_OTG_VBUS_GPIO->ODR ^= USB_OTG_VBUS_Pin
 #define USB_OTG_VBUS_pulse()					do { USB_OTG_VBUS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_OTG_VBUS_set_INACTIVE(); } while (0)
 #define USB_OTG_VBUS_npulse()					do { USB_OTG_VBUS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_OTG_VBUS_set_ACTIVE(); } while (0)
-#define USB_OTG_VBUS_GPIO_Definition			{ .gpio = USB_OTG_VBUS_GPIO, .name = "USB_OTG_VBUS", .pin = USB_OTG_VBUS_Pin, .pin_name = "A9" }
+#define USB_OTG_VBUS_GPIO_Definition			{ .gpio = USB_OTG_VBUS_GPIO, .name = "USB_OTG_VBUS", .pin_name = "A9", .pin_source = USB_OTG_VBUS_PinSource }
 
 // PA11: USB_OTG_M (IO) -- []
 #define USB_OTG_M_GPIO							GPIOA
@@ -99,7 +99,7 @@ struct gpio_definition_t {
 #define USB_OTG_M_toggle()						USB_OTG_M_GPIO->ODR ^= USB_OTG_M_Pin
 #define USB_OTG_M_pulse()						do { USB_OTG_M_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_OTG_M_set_INACTIVE(); } while (0)
 #define USB_OTG_M_npulse()						do { USB_OTG_M_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_OTG_M_set_ACTIVE(); } while (0)
-#define USB_OTG_M_GPIO_Definition				{ .gpio = USB_OTG_M_GPIO, .name = "USB_OTG_M", .pin = USB_OTG_M_Pin, .pin_name = "A11" }
+#define USB_OTG_M_GPIO_Definition				{ .gpio = USB_OTG_M_GPIO, .name = "USB_OTG_M", .pin_name = "A11", .pin_source = USB_OTG_M_PinSource }
 
 // PA12: USB_OTG_P (IO) -- []
 #define USB_OTG_P_GPIO							GPIOA
@@ -114,7 +114,7 @@ struct gpio_definition_t {
 #define USB_OTG_P_toggle()						USB_OTG_P_GPIO->ODR ^= USB_OTG_P_Pin
 #define USB_OTG_P_pulse()						do { USB_OTG_P_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_OTG_P_set_INACTIVE(); } while (0)
 #define USB_OTG_P_npulse()						do { USB_OTG_P_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_OTG_P_set_ACTIVE(); } while (0)
-#define USB_OTG_P_GPIO_Definition				{ .gpio = USB_OTG_P_GPIO, .name = "USB_OTG_P", .pin = USB_OTG_P_Pin, .pin_name = "A12" }
+#define USB_OTG_P_GPIO_Definition				{ .gpio = USB_OTG_P_GPIO, .name = "USB_OTG_P", .pin_name = "A12", .pin_source = USB_OTG_P_PinSource }
 
 // PA10: USB_OTG_ID (IN) -- []
 #define USB_OTG_ID_GPIO							GPIOA
@@ -129,7 +129,7 @@ struct gpio_definition_t {
 #define USB_OTG_ID_toggle()						USB_OTG_ID_GPIO->ODR ^= USB_OTG_ID_Pin
 #define USB_OTG_ID_pulse()						do { USB_OTG_ID_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_OTG_ID_set_INACTIVE(); } while (0)
 #define USB_OTG_ID_npulse()						do { USB_OTG_ID_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_OTG_ID_set_ACTIVE(); } while (0)
-#define USB_OTG_ID_GPIO_Definition				{ .gpio = USB_OTG_ID_GPIO, .name = "USB_OTG_ID", .pin = USB_OTG_ID_Pin, .pin_name = "A10" }
+#define USB_OTG_ID_GPIO_Definition				{ .gpio = USB_OTG_ID_GPIO, .name = "USB_OTG_ID", .pin_name = "A10", .pin_source = USB_OTG_ID_PinSource }
 
 // PA0: UserButton (IN) -- ['init', 'pulldown']
 #define UserButton_GPIO							GPIOA
@@ -144,7 +144,7 @@ struct gpio_definition_t {
 #define UserButton_toggle()						UserButton_GPIO->ODR ^= UserButton_Pin
 #define UserButton_pulse()						do { UserButton_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); UserButton_set_INACTIVE(); } while (0)
 #define UserButton_npulse()						do { UserButton_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); UserButton_set_ACTIVE(); } while (0)
-#define UserButton_GPIO_Definition				{ .gpio = UserButton_GPIO, .name = "UserButton", .pin = UserButton_Pin, .pin_name = "A0" }
+#define UserButton_GPIO_Definition				{ .gpio = UserButton_GPIO, .name = "UserButton", .pin_name = "A0", .pin_source = UserButton_PinSource }
 
 // PD12: LEDGreen (OUT) -- ['init']
 #define LEDGreen_GPIO							GPIOD
@@ -159,7 +159,7 @@ struct gpio_definition_t {
 #define LEDGreen_toggle()						LEDGreen_GPIO->ODR ^= LEDGreen_Pin
 #define LEDGreen_pulse()						do { LEDGreen_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); LEDGreen_set_INACTIVE(); } while (0)
 #define LEDGreen_npulse()						do { LEDGreen_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); LEDGreen_set_ACTIVE(); } while (0)
-#define LEDGreen_GPIO_Definition				{ .gpio = LEDGreen_GPIO, .name = "LEDGreen", .pin = LEDGreen_Pin, .pin_name = "D12" }
+#define LEDGreen_GPIO_Definition				{ .gpio = LEDGreen_GPIO, .name = "LEDGreen", .pin_name = "D12", .pin_source = LEDGreen_PinSource }
 
 // PD13: LEDOrange (OUT) -- ['init']
 #define LEDOrange_GPIO							GPIOD
@@ -174,7 +174,7 @@ struct gpio_definition_t {
 #define LEDOrange_toggle()						LEDOrange_GPIO->ODR ^= LEDOrange_Pin
 #define LEDOrange_pulse()						do { LEDOrange_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); LEDOrange_set_INACTIVE(); } while (0)
 #define LEDOrange_npulse()						do { LEDOrange_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); LEDOrange_set_ACTIVE(); } while (0)
-#define LEDOrange_GPIO_Definition				{ .gpio = LEDOrange_GPIO, .name = "LEDOrange", .pin = LEDOrange_Pin, .pin_name = "D13" }
+#define LEDOrange_GPIO_Definition				{ .gpio = LEDOrange_GPIO, .name = "LEDOrange", .pin_name = "D13", .pin_source = LEDOrange_PinSource }
 
 // PD14: LEDRed (OUT) -- ['init']
 #define LEDRed_GPIO								GPIOD
@@ -189,7 +189,7 @@ struct gpio_definition_t {
 #define LEDRed_toggle()							LEDRed_GPIO->ODR ^= LEDRed_Pin
 #define LEDRed_pulse()							do { LEDRed_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); LEDRed_set_INACTIVE(); } while (0)
 #define LEDRed_npulse()							do { LEDRed_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); LEDRed_set_ACTIVE(); } while (0)
-#define LEDRed_GPIO_Definition					{ .gpio = LEDRed_GPIO, .name = "LEDRed", .pin = LEDRed_Pin, .pin_name = "D14" }
+#define LEDRed_GPIO_Definition					{ .gpio = LEDRed_GPIO, .name = "LEDRed", .pin_name = "D14", .pin_source = LEDRed_PinSource }
 
 // PD15: LEDBlue (OUT) -- ['init']
 #define LEDBlue_GPIO							GPIOD
@@ -204,7 +204,7 @@ struct gpio_definition_t {
 #define LEDBlue_toggle()						LEDBlue_GPIO->ODR ^= LEDBlue_Pin
 #define LEDBlue_pulse()							do { LEDBlue_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); LEDBlue_set_INACTIVE(); } while (0)
 #define LEDBlue_npulse()						do { LEDBlue_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); LEDBlue_set_ACTIVE(); } while (0)
-#define LEDBlue_GPIO_Definition					{ .gpio = LEDBlue_GPIO, .name = "LEDBlue", .pin = LEDBlue_Pin, .pin_name = "D15" }
+#define LEDBlue_GPIO_Definition					{ .gpio = LEDBlue_GPIO, .name = "LEDBlue", .pin_name = "D15", .pin_source = LEDBlue_PinSource }
 
 // PE0: MEMS_INT1 (IN) -- []
 #define MEMS_INT1_GPIO							GPIOE
@@ -219,7 +219,7 @@ struct gpio_definition_t {
 #define MEMS_INT1_toggle()						MEMS_INT1_GPIO->ODR ^= MEMS_INT1_Pin
 #define MEMS_INT1_pulse()						do { MEMS_INT1_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); MEMS_INT1_set_INACTIVE(); } while (0)
 #define MEMS_INT1_npulse()						do { MEMS_INT1_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); MEMS_INT1_set_ACTIVE(); } while (0)
-#define MEMS_INT1_GPIO_Definition				{ .gpio = MEMS_INT1_GPIO, .name = "MEMS_INT1", .pin = MEMS_INT1_Pin, .pin_name = "E0" }
+#define MEMS_INT1_GPIO_Definition				{ .gpio = MEMS_INT1_GPIO, .name = "MEMS_INT1", .pin_name = "E0", .pin_source = MEMS_INT1_PinSource }
 
 // PE1: MEMS_INT2 (IN) -- []
 #define MEMS_INT2_GPIO							GPIOE
@@ -234,7 +234,7 @@ struct gpio_definition_t {
 #define MEMS_INT2_toggle()						MEMS_INT2_GPIO->ODR ^= MEMS_INT2_Pin
 #define MEMS_INT2_pulse()						do { MEMS_INT2_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); MEMS_INT2_set_INACTIVE(); } while (0)
 #define MEMS_INT2_npulse()						do { MEMS_INT2_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); MEMS_INT2_set_ACTIVE(); } while (0)
-#define MEMS_INT2_GPIO_Definition				{ .gpio = MEMS_INT2_GPIO, .name = "MEMS_INT2", .pin = MEMS_INT2_Pin, .pin_name = "E1" }
+#define MEMS_INT2_GPIO_Definition				{ .gpio = MEMS_INT2_GPIO, .name = "MEMS_INT2", .pin_name = "E1", .pin_source = MEMS_INT2_PinSource }
 
 // PA7: MEMS_MOSI (OUT) -- []
 #define MEMS_MOSI_GPIO							GPIOA
@@ -249,7 +249,7 @@ struct gpio_definition_t {
 #define MEMS_MOSI_toggle()						MEMS_MOSI_GPIO->ODR ^= MEMS_MOSI_Pin
 #define MEMS_MOSI_pulse()						do { MEMS_MOSI_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); MEMS_MOSI_set_INACTIVE(); } while (0)
 #define MEMS_MOSI_npulse()						do { MEMS_MOSI_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); MEMS_MOSI_set_ACTIVE(); } while (0)
-#define MEMS_MOSI_GPIO_Definition				{ .gpio = MEMS_MOSI_GPIO, .name = "MEMS_MOSI", .pin = MEMS_MOSI_Pin, .pin_name = "A7" }
+#define MEMS_MOSI_GPIO_Definition				{ .gpio = MEMS_MOSI_GPIO, .name = "MEMS_MOSI", .pin_name = "A7", .pin_source = MEMS_MOSI_PinSource }
 
 // PA6: MEMS_MISO (IN) -- []
 #define MEMS_MISO_GPIO							GPIOA
@@ -264,7 +264,7 @@ struct gpio_definition_t {
 #define MEMS_MISO_toggle()						MEMS_MISO_GPIO->ODR ^= MEMS_MISO_Pin
 #define MEMS_MISO_pulse()						do { MEMS_MISO_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); MEMS_MISO_set_INACTIVE(); } while (0)
 #define MEMS_MISO_npulse()						do { MEMS_MISO_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); MEMS_MISO_set_ACTIVE(); } while (0)
-#define MEMS_MISO_GPIO_Definition				{ .gpio = MEMS_MISO_GPIO, .name = "MEMS_MISO", .pin = MEMS_MISO_Pin, .pin_name = "A6" }
+#define MEMS_MISO_GPIO_Definition				{ .gpio = MEMS_MISO_GPIO, .name = "MEMS_MISO", .pin_name = "A6", .pin_source = MEMS_MISO_PinSource }
 
 // PA5: MEMS_SCK (OUT) -- []
 #define MEMS_SCK_GPIO							GPIOA
@@ -279,7 +279,7 @@ struct gpio_definition_t {
 #define MEMS_SCK_toggle()						MEMS_SCK_GPIO->ODR ^= MEMS_SCK_Pin
 #define MEMS_SCK_pulse()						do { MEMS_SCK_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); MEMS_SCK_set_INACTIVE(); } while (0)
 #define MEMS_SCK_npulse()						do { MEMS_SCK_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); MEMS_SCK_set_ACTIVE(); } while (0)
-#define MEMS_SCK_GPIO_Definition				{ .gpio = MEMS_SCK_GPIO, .name = "MEMS_SCK", .pin = MEMS_SCK_Pin, .pin_name = "A5" }
+#define MEMS_SCK_GPIO_Definition				{ .gpio = MEMS_SCK_GPIO, .name = "MEMS_SCK", .pin_name = "A5", .pin_source = MEMS_SCK_PinSource }
 
 // PE3: MEMS_I2C_SPI (OUT) -- []
 #define MEMS_I2C_SPI_GPIO						GPIOE
@@ -294,7 +294,7 @@ struct gpio_definition_t {
 #define MEMS_I2C_SPI_toggle()					MEMS_I2C_SPI_GPIO->ODR ^= MEMS_I2C_SPI_Pin
 #define MEMS_I2C_SPI_pulse()					do { MEMS_I2C_SPI_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); MEMS_I2C_SPI_set_INACTIVE(); } while (0)
 #define MEMS_I2C_SPI_npulse()					do { MEMS_I2C_SPI_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); MEMS_I2C_SPI_set_ACTIVE(); } while (0)
-#define MEMS_I2C_SPI_GPIO_Definition			{ .gpio = MEMS_I2C_SPI_GPIO, .name = "MEMS_I2C_SPI", .pin = MEMS_I2C_SPI_Pin, .pin_name = "E3" }
+#define MEMS_I2C_SPI_GPIO_Definition			{ .gpio = MEMS_I2C_SPI_GPIO, .name = "MEMS_I2C_SPI", .pin_name = "E3", .pin_source = MEMS_I2C_SPI_PinSource }
 
 // PD4: AudioReset (OUT) -- []
 #define AudioReset_GPIO							GPIOD
@@ -309,7 +309,7 @@ struct gpio_definition_t {
 #define AudioReset_toggle()						AudioReset_GPIO->ODR ^= AudioReset_Pin
 #define AudioReset_pulse()						do { AudioReset_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); AudioReset_set_INACTIVE(); } while (0)
 #define AudioReset_npulse()						do { AudioReset_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); AudioReset_set_ACTIVE(); } while (0)
-#define AudioReset_GPIO_Definition				{ .gpio = AudioReset_GPIO, .name = "AudioReset", .pin = AudioReset_Pin, .pin_name = "D4" }
+#define AudioReset_GPIO_Definition				{ .gpio = AudioReset_GPIO, .name = "AudioReset", .pin_name = "D4", .pin_source = AudioReset_PinSource }
 // PD4: Display9_CS (OUT) -- ['activelow', 'connect', 'init', 'speed']
 #define Display9_CS_GPIO						GPIOD
 #define Display9_CS_PinSource					GPIO_PinSource4
@@ -323,7 +323,7 @@ struct gpio_definition_t {
 #define Display9_CS_toggle()					Display9_CS_GPIO->ODR ^= Display9_CS_Pin
 #define Display9_CS_pulse()						do { Display9_CS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display9_CS_set_INACTIVE(); } while (0)
 #define Display9_CS_npulse()					do { Display9_CS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display9_CS_set_ACTIVE(); } while (0)
-#define Display9_CS_GPIO_Definition				{ .connect = "Display 15", .gpio = Display9_CS_GPIO, .name = "Display9_CS", .pin = Display9_CS_Pin, .pin_name = "D4" }
+#define Display9_CS_GPIO_Definition				{ .connect = "Display 15", .gpio = Display9_CS_GPIO, .name = "Display9_CS", .pin_name = "D4", .pin_source = Display9_CS_PinSource }
 
 // PC3: AudioPDM_OUT (IN) -- []
 #define AudioPDM_OUT_GPIO						GPIOC
@@ -338,7 +338,7 @@ struct gpio_definition_t {
 #define AudioPDM_OUT_toggle()					AudioPDM_OUT_GPIO->ODR ^= AudioPDM_OUT_Pin
 #define AudioPDM_OUT_pulse()					do { AudioPDM_OUT_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); AudioPDM_OUT_set_INACTIVE(); } while (0)
 #define AudioPDM_OUT_npulse()					do { AudioPDM_OUT_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); AudioPDM_OUT_set_ACTIVE(); } while (0)
-#define AudioPDM_OUT_GPIO_Definition			{ .gpio = AudioPDM_OUT_GPIO, .name = "AudioPDM_OUT", .pin = AudioPDM_OUT_Pin, .pin_name = "C3" }
+#define AudioPDM_OUT_GPIO_Definition			{ .gpio = AudioPDM_OUT_GPIO, .name = "AudioPDM_OUT", .pin_name = "C3", .pin_source = AudioPDM_OUT_PinSource }
 
 // PC7: Audio_MCK (?) -- []
 #define Audio_MCK_GPIO							GPIOC
@@ -353,7 +353,7 @@ struct gpio_definition_t {
 #define Audio_MCK_toggle()						Audio_MCK_GPIO->ODR ^= Audio_MCK_Pin
 #define Audio_MCK_pulse()						do { Audio_MCK_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_MCK_set_INACTIVE(); } while (0)
 #define Audio_MCK_npulse()						do { Audio_MCK_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_MCK_set_ACTIVE(); } while (0)
-#define Audio_MCK_GPIO_Definition				{ .gpio = Audio_MCK_GPIO, .name = "Audio_MCK", .pin = Audio_MCK_Pin, .pin_name = "C7" }
+#define Audio_MCK_GPIO_Definition				{ .gpio = Audio_MCK_GPIO, .name = "Audio_MCK", .pin_name = "C7", .pin_source = Audio_MCK_PinSource }
 
 // PC10: Audio_SCK (?) -- []
 #define Audio_SCK_GPIO							GPIOC
@@ -368,7 +368,7 @@ struct gpio_definition_t {
 #define Audio_SCK_toggle()						Audio_SCK_GPIO->ODR ^= Audio_SCK_Pin
 #define Audio_SCK_pulse()						do { Audio_SCK_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_SCK_set_INACTIVE(); } while (0)
 #define Audio_SCK_npulse()						do { Audio_SCK_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_SCK_set_ACTIVE(); } while (0)
-#define Audio_SCK_GPIO_Definition				{ .gpio = Audio_SCK_GPIO, .name = "Audio_SCK", .pin = Audio_SCK_Pin, .pin_name = "C10" }
+#define Audio_SCK_GPIO_Definition				{ .gpio = Audio_SCK_GPIO, .name = "Audio_SCK", .pin_name = "C10", .pin_source = Audio_SCK_PinSource }
 // PC10: IOMux_SCK (OUT) -- ['af', 'connect', 'init', 'speed']
 #define IOMux_SCK_GPIO							GPIOC
 #define IOMux_SCK_PinSource						GPIO_PinSource10
@@ -382,7 +382,7 @@ struct gpio_definition_t {
 #define IOMux_SCK_toggle()						IOMux_SCK_GPIO->ODR ^= IOMux_SCK_Pin
 #define IOMux_SCK_pulse()						do { IOMux_SCK_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_SCK_set_INACTIVE(); } while (0)
 #define IOMux_SCK_npulse()						do { IOMux_SCK_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_SCK_set_ACTIVE(); } while (0)
-#define IOMux_SCK_GPIO_Definition				{ .connect = "IOMux 3", .gpio = IOMux_SCK_GPIO, .name = "IOMux_SCK", .pin = IOMux_SCK_Pin, .pin_name = "C10" }
+#define IOMux_SCK_GPIO_Definition				{ .connect = "IOMux 3", .gpio = IOMux_SCK_GPIO, .name = "IOMux_SCK", .pin_name = "C10", .pin_source = IOMux_SCK_PinSource }
 
 // PC12: Audio_SD (?) -- []
 #define Audio_SD_GPIO							GPIOC
@@ -397,7 +397,7 @@ struct gpio_definition_t {
 #define Audio_SD_toggle()						Audio_SD_GPIO->ODR ^= Audio_SD_Pin
 #define Audio_SD_pulse()						do { Audio_SD_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_SD_set_INACTIVE(); } while (0)
 #define Audio_SD_npulse()						do { Audio_SD_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_SD_set_ACTIVE(); } while (0)
-#define Audio_SD_GPIO_Definition				{ .gpio = Audio_SD_GPIO, .name = "Audio_SD", .pin = Audio_SD_Pin, .pin_name = "C12" }
+#define Audio_SD_GPIO_Definition				{ .gpio = Audio_SD_GPIO, .name = "Audio_SD", .pin_name = "C12", .pin_source = Audio_SD_PinSource }
 // PC12: IOMux_MOSI (OUT) -- ['af', 'connect', 'init', 'speed']
 #define IOMux_MOSI_GPIO							GPIOC
 #define IOMux_MOSI_PinSource					GPIO_PinSource12
@@ -411,7 +411,7 @@ struct gpio_definition_t {
 #define IOMux_MOSI_toggle()						IOMux_MOSI_GPIO->ODR ^= IOMux_MOSI_Pin
 #define IOMux_MOSI_pulse()						do { IOMux_MOSI_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_MOSI_set_INACTIVE(); } while (0)
 #define IOMux_MOSI_npulse()						do { IOMux_MOSI_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_MOSI_set_ACTIVE(); } while (0)
-#define IOMux_MOSI_GPIO_Definition				{ .connect = "IOMux 7", .gpio = IOMux_MOSI_GPIO, .name = "IOMux_MOSI", .pin = IOMux_MOSI_Pin, .pin_name = "C12" }
+#define IOMux_MOSI_GPIO_Definition				{ .connect = "IOMux 7", .gpio = IOMux_MOSI_GPIO, .name = "IOMux_MOSI", .pin_name = "C12", .pin_source = IOMux_MOSI_PinSource }
 
 // PA4: Audio_WS (?) -- []
 #define Audio_WS_GPIO							GPIOA
@@ -426,7 +426,7 @@ struct gpio_definition_t {
 #define Audio_WS_toggle()						Audio_WS_GPIO->ODR ^= Audio_WS_Pin
 #define Audio_WS_pulse()						do { Audio_WS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_WS_set_INACTIVE(); } while (0)
 #define Audio_WS_npulse()						do { Audio_WS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_WS_set_ACTIVE(); } while (0)
-#define Audio_WS_GPIO_Definition				{ .gpio = Audio_WS_GPIO, .name = "Audio_WS", .pin = Audio_WS_Pin, .pin_name = "A4" }
+#define Audio_WS_GPIO_Definition				{ .gpio = Audio_WS_GPIO, .name = "Audio_WS", .pin_name = "A4", .pin_source = Audio_WS_PinSource }
 
 // PB6: Audio_SCL (IO) -- []
 #define Audio_SCL_GPIO							GPIOB
@@ -441,7 +441,7 @@ struct gpio_definition_t {
 #define Audio_SCL_toggle()						Audio_SCL_GPIO->ODR ^= Audio_SCL_Pin
 #define Audio_SCL_pulse()						do { Audio_SCL_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_SCL_set_INACTIVE(); } while (0)
 #define Audio_SCL_npulse()						do { Audio_SCL_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_SCL_set_ACTIVE(); } while (0)
-#define Audio_SCL_GPIO_Definition				{ .gpio = Audio_SCL_GPIO, .name = "Audio_SCL", .pin = Audio_SCL_Pin, .pin_name = "B6" }
+#define Audio_SCL_GPIO_Definition				{ .gpio = Audio_SCL_GPIO, .name = "Audio_SCL", .pin_name = "B6", .pin_source = Audio_SCL_PinSource }
 // PB6: EEPROM_SCL (IO) -- ['af', 'init']
 #define EEPROM_SCL_GPIO							GPIOB
 #define EEPROM_SCL_PinSource					GPIO_PinSource6
@@ -455,7 +455,7 @@ struct gpio_definition_t {
 #define EEPROM_SCL_toggle()						EEPROM_SCL_GPIO->ODR ^= EEPROM_SCL_Pin
 #define EEPROM_SCL_pulse()						do { EEPROM_SCL_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); EEPROM_SCL_set_INACTIVE(); } while (0)
 #define EEPROM_SCL_npulse()						do { EEPROM_SCL_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); EEPROM_SCL_set_ACTIVE(); } while (0)
-#define EEPROM_SCL_GPIO_Definition				{ .gpio = EEPROM_SCL_GPIO, .name = "EEPROM_SCL", .pin = EEPROM_SCL_Pin, .pin_name = "B6" }
+#define EEPROM_SCL_GPIO_Definition				{ .gpio = EEPROM_SCL_GPIO, .name = "EEPROM_SCL", .pin_name = "B6", .pin_source = EEPROM_SCL_PinSource }
 
 // PB9: Audio_SDA (IO) -- []
 #define Audio_SDA_GPIO							GPIOB
@@ -470,7 +470,7 @@ struct gpio_definition_t {
 #define Audio_SDA_toggle()						Audio_SDA_GPIO->ODR ^= Audio_SDA_Pin
 #define Audio_SDA_pulse()						do { Audio_SDA_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_SDA_set_INACTIVE(); } while (0)
 #define Audio_SDA_npulse()						do { Audio_SDA_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_SDA_set_ACTIVE(); } while (0)
-#define Audio_SDA_GPIO_Definition				{ .gpio = Audio_SDA_GPIO, .name = "Audio_SDA", .pin = Audio_SDA_Pin, .pin_name = "B9" }
+#define Audio_SDA_GPIO_Definition				{ .gpio = Audio_SDA_GPIO, .name = "Audio_SDA", .pin_name = "B9", .pin_source = Audio_SDA_PinSource }
 // PB9: EEPROM_SDA (IO) -- ['af', 'init']
 #define EEPROM_SDA_GPIO							GPIOB
 #define EEPROM_SDA_PinSource					GPIO_PinSource9
@@ -484,7 +484,7 @@ struct gpio_definition_t {
 #define EEPROM_SDA_toggle()						EEPROM_SDA_GPIO->ODR ^= EEPROM_SDA_Pin
 #define EEPROM_SDA_pulse()						do { EEPROM_SDA_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); EEPROM_SDA_set_INACTIVE(); } while (0)
 #define EEPROM_SDA_npulse()						do { EEPROM_SDA_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); EEPROM_SDA_set_ACTIVE(); } while (0)
-#define EEPROM_SDA_GPIO_Definition				{ .gpio = EEPROM_SDA_GPIO, .name = "EEPROM_SDA", .pin = EEPROM_SDA_Pin, .pin_name = "B9" }
+#define EEPROM_SDA_GPIO_Definition				{ .gpio = EEPROM_SDA_GPIO, .name = "EEPROM_SDA", .pin_name = "B9", .pin_source = EEPROM_SDA_PinSource }
 
 // PB10: Audio_CLK_IN (OUT) -- []
 #define Audio_CLK_IN_GPIO						GPIOB
@@ -499,7 +499,7 @@ struct gpio_definition_t {
 #define Audio_CLK_IN_toggle()					Audio_CLK_IN_GPIO->ODR ^= Audio_CLK_IN_Pin
 #define Audio_CLK_IN_pulse()					do { Audio_CLK_IN_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_CLK_IN_set_INACTIVE(); } while (0)
 #define Audio_CLK_IN_npulse()					do { Audio_CLK_IN_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Audio_CLK_IN_set_ACTIVE(); } while (0)
-#define Audio_CLK_IN_GPIO_Definition			{ .gpio = Audio_CLK_IN_GPIO, .name = "Audio_CLK_IN", .pin = Audio_CLK_IN_Pin, .pin_name = "B10" }
+#define Audio_CLK_IN_GPIO_Definition			{ .gpio = Audio_CLK_IN_GPIO, .name = "Audio_CLK_IN", .pin_name = "B10", .pin_source = Audio_CLK_IN_PinSource }
 
 // PB13: Display_SCK (OUT) -- ['af', 'connect', 'init', 'speed']
 #define Display_SCK_GPIO						GPIOB
@@ -514,7 +514,7 @@ struct gpio_definition_t {
 #define Display_SCK_toggle()					Display_SCK_GPIO->ODR ^= Display_SCK_Pin
 #define Display_SCK_pulse()						do { Display_SCK_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display_SCK_set_INACTIVE(); } while (0)
 #define Display_SCK_npulse()					do { Display_SCK_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display_SCK_set_ACTIVE(); } while (0)
-#define Display_SCK_GPIO_Definition				{ .connect = "Display 3", .gpio = Display_SCK_GPIO, .name = "Display_SCK", .pin = Display_SCK_Pin, .pin_name = "B13" }
+#define Display_SCK_GPIO_Definition				{ .connect = "Display 3", .gpio = Display_SCK_GPIO, .name = "Display_SCK", .pin_name = "B13", .pin_source = Display_SCK_PinSource }
 
 // PB15: Display_MOSI (OUT) -- ['af', 'connect', 'init', 'speed']
 #define Display_MOSI_GPIO						GPIOB
@@ -529,7 +529,7 @@ struct gpio_definition_t {
 #define Display_MOSI_toggle()					Display_MOSI_GPIO->ODR ^= Display_MOSI_Pin
 #define Display_MOSI_pulse()					do { Display_MOSI_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display_MOSI_set_INACTIVE(); } while (0)
 #define Display_MOSI_npulse()					do { Display_MOSI_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display_MOSI_set_ACTIVE(); } while (0)
-#define Display_MOSI_GPIO_Definition			{ .connect = "Display 4", .gpio = Display_MOSI_GPIO, .name = "Display_MOSI", .pin = Display_MOSI_Pin, .pin_name = "B15" }
+#define Display_MOSI_GPIO_Definition			{ .connect = "Display 4", .gpio = Display_MOSI_GPIO, .name = "Display_MOSI", .pin_name = "B15", .pin_source = Display_MOSI_PinSource }
 
 // PD1: Display_RESET (OUT) -- ['activelow', 'connect', 'init']
 #define Display_RESET_GPIO						GPIOD
@@ -544,7 +544,7 @@ struct gpio_definition_t {
 #define Display_RESET_toggle()					Display_RESET_GPIO->ODR ^= Display_RESET_Pin
 #define Display_RESET_pulse()					do { Display_RESET_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display_RESET_set_INACTIVE(); } while (0)
 #define Display_RESET_npulse()					do { Display_RESET_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display_RESET_set_ACTIVE(); } while (0)
-#define Display_RESET_GPIO_Definition			{ .connect = "Display 5", .gpio = Display_RESET_GPIO, .name = "Display_RESET", .pin = Display_RESET_Pin, .pin_name = "D1" }
+#define Display_RESET_GPIO_Definition			{ .connect = "Display 5", .gpio = Display_RESET_GPIO, .name = "Display_RESET", .pin_name = "D1", .pin_source = Display_RESET_PinSource }
 
 // PD2: Display_DC (OUT) -- ['comment', 'connect', 'init']
 #define Display_DC_GPIO							GPIOD
@@ -559,7 +559,7 @@ struct gpio_definition_t {
 #define Display_DC_toggle()						Display_DC_GPIO->ODR ^= Display_DC_Pin
 #define Display_DC_pulse()						do { Display_DC_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display_DC_set_INACTIVE(); } while (0)
 #define Display_DC_npulse()						do { Display_DC_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display_DC_set_ACTIVE(); } while (0)
-#define Display_DC_GPIO_Definition				{ .comment = "Data/!Control", .connect = "Display 6", .gpio = Display_DC_GPIO, .name = "Display_DC", .pin = Display_DC_Pin, .pin_name = "D2" }
+#define Display_DC_GPIO_Definition				{ .comment = "Data/!Control", .connect = "Display 6", .gpio = Display_DC_GPIO, .name = "Display_DC", .pin_name = "D2", .pin_source = Display_DC_PinSource }
 
 // PB0: Display1_CS (OUT) -- ['activelow', 'connect', 'init', 'speed']
 #define Display1_CS_GPIO						GPIOB
@@ -574,7 +574,7 @@ struct gpio_definition_t {
 #define Display1_CS_toggle()					Display1_CS_GPIO->ODR ^= Display1_CS_Pin
 #define Display1_CS_pulse()						do { Display1_CS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display1_CS_set_INACTIVE(); } while (0)
 #define Display1_CS_npulse()					do { Display1_CS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display1_CS_set_ACTIVE(); } while (0)
-#define Display1_CS_GPIO_Definition				{ .connect = "Display 7", .gpio = Display1_CS_GPIO, .name = "Display1_CS", .pin = Display1_CS_Pin, .pin_name = "B0" }
+#define Display1_CS_GPIO_Definition				{ .connect = "Display 7", .gpio = Display1_CS_GPIO, .name = "Display1_CS", .pin_name = "B0", .pin_source = Display1_CS_PinSource }
 
 // PB1: Display2_CS (OUT) -- ['activelow', 'connect', 'init', 'speed']
 #define Display2_CS_GPIO						GPIOB
@@ -589,7 +589,7 @@ struct gpio_definition_t {
 #define Display2_CS_toggle()					Display2_CS_GPIO->ODR ^= Display2_CS_Pin
 #define Display2_CS_pulse()						do { Display2_CS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display2_CS_set_INACTIVE(); } while (0)
 #define Display2_CS_npulse()					do { Display2_CS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display2_CS_set_ACTIVE(); } while (0)
-#define Display2_CS_GPIO_Definition				{ .connect = "Display 8", .gpio = Display2_CS_GPIO, .name = "Display2_CS", .pin = Display2_CS_Pin, .pin_name = "B1" }
+#define Display2_CS_GPIO_Definition				{ .connect = "Display 8", .gpio = Display2_CS_GPIO, .name = "Display2_CS", .pin_name = "B1", .pin_source = Display2_CS_PinSource }
 
 // PB2: Display3_CS (OUT) -- ['activelow', 'connect', 'init', 'speed']
 #define Display3_CS_GPIO						GPIOB
@@ -604,7 +604,7 @@ struct gpio_definition_t {
 #define Display3_CS_toggle()					Display3_CS_GPIO->ODR ^= Display3_CS_Pin
 #define Display3_CS_pulse()						do { Display3_CS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display3_CS_set_INACTIVE(); } while (0)
 #define Display3_CS_npulse()					do { Display3_CS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display3_CS_set_ACTIVE(); } while (0)
-#define Display3_CS_GPIO_Definition				{ .connect = "Display 9", .gpio = Display3_CS_GPIO, .name = "Display3_CS", .pin = Display3_CS_Pin, .pin_name = "B2" }
+#define Display3_CS_GPIO_Definition				{ .connect = "Display 9", .gpio = Display3_CS_GPIO, .name = "Display3_CS", .pin_name = "B2", .pin_source = Display3_CS_PinSource }
 
 // PB3: Display4_CS (OUT) -- ['activelow', 'connect', 'init', 'speed']
 #define Display4_CS_GPIO						GPIOB
@@ -619,7 +619,7 @@ struct gpio_definition_t {
 #define Display4_CS_toggle()					Display4_CS_GPIO->ODR ^= Display4_CS_Pin
 #define Display4_CS_pulse()						do { Display4_CS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display4_CS_set_INACTIVE(); } while (0)
 #define Display4_CS_npulse()					do { Display4_CS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display4_CS_set_ACTIVE(); } while (0)
-#define Display4_CS_GPIO_Definition				{ .connect = "Display 10", .gpio = Display4_CS_GPIO, .name = "Display4_CS", .pin = Display4_CS_Pin, .pin_name = "B3" }
+#define Display4_CS_GPIO_Definition				{ .connect = "Display 10", .gpio = Display4_CS_GPIO, .name = "Display4_CS", .pin_name = "B3", .pin_source = Display4_CS_PinSource }
 
 // PB4: Display5_CS (OUT) -- ['activelow', 'connect', 'init', 'speed']
 #define Display5_CS_GPIO						GPIOB
@@ -634,7 +634,7 @@ struct gpio_definition_t {
 #define Display5_CS_toggle()					Display5_CS_GPIO->ODR ^= Display5_CS_Pin
 #define Display5_CS_pulse()						do { Display5_CS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display5_CS_set_INACTIVE(); } while (0)
 #define Display5_CS_npulse()					do { Display5_CS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display5_CS_set_ACTIVE(); } while (0)
-#define Display5_CS_GPIO_Definition				{ .connect = "Display 11", .gpio = Display5_CS_GPIO, .name = "Display5_CS", .pin = Display5_CS_Pin, .pin_name = "B4" }
+#define Display5_CS_GPIO_Definition				{ .connect = "Display 11", .gpio = Display5_CS_GPIO, .name = "Display5_CS", .pin_name = "B4", .pin_source = Display5_CS_PinSource }
 
 // PB5: Display6_CS (OUT) -- ['activelow', 'connect', 'init', 'speed']
 #define Display6_CS_GPIO						GPIOB
@@ -649,7 +649,7 @@ struct gpio_definition_t {
 #define Display6_CS_toggle()					Display6_CS_GPIO->ODR ^= Display6_CS_Pin
 #define Display6_CS_pulse()						do { Display6_CS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display6_CS_set_INACTIVE(); } while (0)
 #define Display6_CS_npulse()					do { Display6_CS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display6_CS_set_ACTIVE(); } while (0)
-#define Display6_CS_GPIO_Definition				{ .connect = "Display 12", .gpio = Display6_CS_GPIO, .name = "Display6_CS", .pin = Display6_CS_Pin, .pin_name = "B5" }
+#define Display6_CS_GPIO_Definition				{ .connect = "Display 12", .gpio = Display6_CS_GPIO, .name = "Display6_CS", .pin_name = "B5", .pin_source = Display6_CS_PinSource }
 
 // PB7: Display7_CS (OUT) -- ['activelow', 'connect', 'init', 'speed']
 #define Display7_CS_GPIO						GPIOB
@@ -664,7 +664,7 @@ struct gpio_definition_t {
 #define Display7_CS_toggle()					Display7_CS_GPIO->ODR ^= Display7_CS_Pin
 #define Display7_CS_pulse()						do { Display7_CS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display7_CS_set_INACTIVE(); } while (0)
 #define Display7_CS_npulse()					do { Display7_CS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display7_CS_set_ACTIVE(); } while (0)
-#define Display7_CS_GPIO_Definition				{ .connect = "Display 13", .gpio = Display7_CS_GPIO, .name = "Display7_CS", .pin = Display7_CS_Pin, .pin_name = "B7" }
+#define Display7_CS_GPIO_Definition				{ .connect = "Display 13", .gpio = Display7_CS_GPIO, .name = "Display7_CS", .pin_name = "B7", .pin_source = Display7_CS_PinSource }
 
 // PD3: Display8_CS (OUT) -- ['activelow', 'connect', 'init', 'speed']
 #define Display8_CS_GPIO						GPIOD
@@ -679,7 +679,7 @@ struct gpio_definition_t {
 #define Display8_CS_toggle()					Display8_CS_GPIO->ODR ^= Display8_CS_Pin
 #define Display8_CS_pulse()						do { Display8_CS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display8_CS_set_INACTIVE(); } while (0)
 #define Display8_CS_npulse()					do { Display8_CS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display8_CS_set_ACTIVE(); } while (0)
-#define Display8_CS_GPIO_Definition				{ .connect = "Display 14", .gpio = Display8_CS_GPIO, .name = "Display8_CS", .pin = Display8_CS_Pin, .pin_name = "D3" }
+#define Display8_CS_GPIO_Definition				{ .connect = "Display 14", .gpio = Display8_CS_GPIO, .name = "Display8_CS", .pin_name = "D3", .pin_source = Display8_CS_PinSource }
 
 // PD7: Display10_CS (OUT) -- ['activelow', 'connect', 'init', 'speed']
 #define Display10_CS_GPIO						GPIOD
@@ -694,7 +694,7 @@ struct gpio_definition_t {
 #define Display10_CS_toggle()					Display10_CS_GPIO->ODR ^= Display10_CS_Pin
 #define Display10_CS_pulse()					do { Display10_CS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display10_CS_set_INACTIVE(); } while (0)
 #define Display10_CS_npulse()					do { Display10_CS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display10_CS_set_ACTIVE(); } while (0)
-#define Display10_CS_GPIO_Definition			{ .connect = "Display 16", .gpio = Display10_CS_GPIO, .name = "Display10_CS", .pin = Display10_CS_Pin, .pin_name = "D7" }
+#define Display10_CS_GPIO_Definition			{ .connect = "Display 16", .gpio = Display10_CS_GPIO, .name = "Display10_CS", .pin_name = "D7", .pin_source = Display10_CS_PinSource }
 
 // PD0: Display11_CS (OUT) -- ['activelow', 'connect', 'init', 'speed']
 #define Display11_CS_GPIO						GPIOD
@@ -709,7 +709,7 @@ struct gpio_definition_t {
 #define Display11_CS_toggle()					Display11_CS_GPIO->ODR ^= Display11_CS_Pin
 #define Display11_CS_pulse()					do { Display11_CS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display11_CS_set_INACTIVE(); } while (0)
 #define Display11_CS_npulse()					do { Display11_CS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display11_CS_set_ACTIVE(); } while (0)
-#define Display11_CS_GPIO_Definition			{ .connect = "Display 17", .gpio = Display11_CS_GPIO, .name = "Display11_CS", .pin = Display11_CS_Pin, .pin_name = "D0" }
+#define Display11_CS_GPIO_Definition			{ .connect = "Display 17", .gpio = Display11_CS_GPIO, .name = "Display11_CS", .pin_name = "D0", .pin_source = Display11_CS_PinSource }
 
 // PD8: Display12_CS (OUT) -- ['activelow', 'connect', 'init', 'speed']
 #define Display12_CS_GPIO						GPIOD
@@ -724,7 +724,7 @@ struct gpio_definition_t {
 #define Display12_CS_toggle()					Display12_CS_GPIO->ODR ^= Display12_CS_Pin
 #define Display12_CS_pulse()					do { Display12_CS_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display12_CS_set_INACTIVE(); } while (0)
 #define Display12_CS_npulse()					do { Display12_CS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); Display12_CS_set_ACTIVE(); } while (0)
-#define Display12_CS_GPIO_Definition			{ .connect = "Display 18", .gpio = Display12_CS_GPIO, .name = "Display12_CS", .pin = Display12_CS_Pin, .pin_name = "D8" }
+#define Display12_CS_GPIO_Definition			{ .connect = "Display 18", .gpio = Display12_CS_GPIO, .name = "Display12_CS", .pin_name = "D8", .pin_source = Display12_CS_PinSource }
 
 // PC1: IOMux_Out_OE (OUT) -- ['activelow', 'connect', 'init']
 #define IOMux_Out_OE_GPIO						GPIOC
@@ -739,7 +739,7 @@ struct gpio_definition_t {
 #define IOMux_Out_OE_toggle()					IOMux_Out_OE_GPIO->ODR ^= IOMux_Out_OE_Pin
 #define IOMux_Out_OE_pulse()					do { IOMux_Out_OE_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_Out_OE_set_INACTIVE(); } while (0)
 #define IOMux_Out_OE_npulse()					do { IOMux_Out_OE_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_Out_OE_set_ACTIVE(); } while (0)
-#define IOMux_Out_OE_GPIO_Definition			{ .connect = "IOMux 5", .gpio = IOMux_Out_OE_GPIO, .name = "IOMux_Out_OE", .pin = IOMux_Out_OE_Pin, .pin_name = "C1" }
+#define IOMux_Out_OE_GPIO_Definition			{ .connect = "IOMux 5", .gpio = IOMux_Out_OE_GPIO, .name = "IOMux_Out_OE", .pin_name = "C1", .pin_source = IOMux_Out_OE_PinSource }
 
 // PC2: IOMux_Out_STCP (OUT) -- ['connect', 'init']
 #define IOMux_Out_STCP_GPIO						GPIOC
@@ -754,7 +754,7 @@ struct gpio_definition_t {
 #define IOMux_Out_STCP_toggle()					IOMux_Out_STCP_GPIO->ODR ^= IOMux_Out_STCP_Pin
 #define IOMux_Out_STCP_pulse()					do { IOMux_Out_STCP_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_Out_STCP_set_INACTIVE(); } while (0)
 #define IOMux_Out_STCP_npulse()					do { IOMux_Out_STCP_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_Out_STCP_set_ACTIVE(); } while (0)
-#define IOMux_Out_STCP_GPIO_Definition			{ .connect = "IOMux 6", .gpio = IOMux_Out_STCP_GPIO, .name = "IOMux_Out_STCP", .pin = IOMux_Out_STCP_Pin, .pin_name = "C2" }
+#define IOMux_Out_STCP_GPIO_Definition			{ .connect = "IOMux 6", .gpio = IOMux_Out_STCP_GPIO, .name = "IOMux_Out_STCP", .pin_name = "C2", .pin_source = IOMux_Out_STCP_PinSource }
 
 // PC11: IOMux_MISO (IN) -- ['af', 'connect', 'init', 'speed']
 #define IOMux_MISO_GPIO							GPIOC
@@ -769,7 +769,7 @@ struct gpio_definition_t {
 #define IOMux_MISO_toggle()						IOMux_MISO_GPIO->ODR ^= IOMux_MISO_Pin
 #define IOMux_MISO_pulse()						do { IOMux_MISO_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_MISO_set_INACTIVE(); } while (0)
 #define IOMux_MISO_npulse()						do { IOMux_MISO_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_MISO_set_ACTIVE(); } while (0)
-#define IOMux_MISO_GPIO_Definition				{ .connect = "IOMux 8", .gpio = IOMux_MISO_GPIO, .name = "IOMux_MISO", .pin = IOMux_MISO_Pin, .pin_name = "C11" }
+#define IOMux_MISO_GPIO_Definition				{ .connect = "IOMux 8", .gpio = IOMux_MISO_GPIO, .name = "IOMux_MISO", .pin_name = "C11", .pin_source = IOMux_MISO_PinSource }
 
 // PD6: USART_RX (IN) -- ['af', 'init']
 #define USART_RX_GPIO							GPIOD
@@ -784,7 +784,7 @@ struct gpio_definition_t {
 #define USART_RX_toggle()						USART_RX_GPIO->ODR ^= USART_RX_Pin
 #define USART_RX_pulse()						do { USART_RX_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USART_RX_set_INACTIVE(); } while (0)
 #define USART_RX_npulse()						do { USART_RX_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USART_RX_set_ACTIVE(); } while (0)
-#define USART_RX_GPIO_Definition				{ .gpio = USART_RX_GPIO, .name = "USART_RX", .pin = USART_RX_Pin, .pin_name = "D6" }
+#define USART_RX_GPIO_Definition				{ .gpio = USART_RX_GPIO, .name = "USART_RX", .pin_name = "D6", .pin_source = USART_RX_PinSource }
 
 // Display_CS: Group of 12 pins (Display1_CS, Display2_CS, Display3_CS, Display4_CS, Display5_CS, Display6_CS, Display7_CS, Display8_CS, Display9_CS, Display10_CS, Display11_CS, Display12_CS)
 #define Display_CS_set_ACTIVE()					do { GPIOB->BSRRH = Display1_CS_Pin | Display2_CS_Pin | Display3_CS_Pin | Display4_CS_Pin | Display5_CS_Pin | Display6_CS_Pin | Display7_CS_Pin; GPIOD->BSRRH = Display8_CS_Pin | Display9_CS_Pin | Display10_CS_Pin | Display11_CS_Pin | Display12_CS_Pin; } while (0)

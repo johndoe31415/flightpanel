@@ -136,7 +136,7 @@ class PinmapGenerator(object):
 		print("	const char *pin_name;", file = f)
 		print("	const char *name;", file = f)
 		print("	GPIO_TypeDef *gpio;", file = f)
-		print("	int pin;", file = f)
+		print("	int pin_source;", file = f)
 		print("	const char *comment;", file = f)
 		print("	const char *connect;", file = f)
 		print("};", file = f)
@@ -163,10 +163,10 @@ class PinmapGenerator(object):
 				self._print_cols("#define %s_npulse()" % (pin.name), "do { %s_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); %s_set_ACTIVE(); } while (0)" % (pin.name, pin.name), file = f)
 
 				structure_members = {
-					"name":		"\"%s\"" % (pin.name),
-					"pin_name":	"\"%s%d\"" % (pin.port, pin.pin),
-					"gpio":		"%s_GPIO" % (pin.name),
-					"pin":		"%s_Pin" % (pin.name),
+					"name":			"\"%s\"" % (pin.name),
+					"pin_name":		"\"%s%d\"" % (pin.port, pin.pin),
+					"gpio":			"%s_GPIO" % (pin.name),
+					"pin_source":	"%s_PinSource" % (pin.name),
 				}
 				if "comment" in pin.attributes:
 					structure_members["comment"] = "\"%s\"" % (pin.attributes["comment"])

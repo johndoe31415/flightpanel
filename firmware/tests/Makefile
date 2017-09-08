@@ -24,7 +24,8 @@ TEST_OBJS := \
 	test_debounce \
 	test_boundedbuffer \
 	test_testbed \
-	test_telemetry
+	test_telemetry \
+	test_bitwise
 
 all: $(TEST_COMMON_OBJS) $(TEST_OBJS)
 
@@ -37,6 +38,7 @@ test_debounce: $(TEST_COMMON_OBJS) debounce.o
 test_boundedbuffer: $(TEST_COMMON_OBJS) boundedbuffer.o
 test_telemetry: $(TEST_COMMON_OBJS) stm32f407_tempsensor.o
 test_testbed: $(TEST_COMMON_OBJS)
+test_bitwise: $(TEST_COMMON_OBJS)
 
 test: all
 	rm -f tests.log

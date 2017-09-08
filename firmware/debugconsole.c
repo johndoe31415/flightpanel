@@ -40,12 +40,17 @@
 #include "vcr-osd-mono-30.h"
 #include "eeprom.h"
 #include "stm32f407_adc.h"
+#include "bitwise.h"
 
 #define iabs(x)				(((x) < 0) ? -(x) : (x))
 #define CMD_BUFFER_SIZE		32
 #define KEY_BACKSPACE		0x7f
 
-static const struct gpio_definition_t known_gpios[] = {
+static const struct gpio_definition_t known_gpio_outputs[] = {
+	Display_SCK_GPIO_Definition,
+	Display_MOSI_GPIO_Definition,
+	Display_RESET_GPIO_Definition,
+	Display_DC_GPIO_Definition,
 	Display1_CS_GPIO_Definition,
 	Display2_CS_GPIO_Definition,
 	Display3_CS_GPIO_Definition,
@@ -58,8 +63,12 @@ static const struct gpio_definition_t known_gpios[] = {
 	Display10_CS_GPIO_Definition,
 	Display11_CS_GPIO_Definition,
 	Display12_CS_GPIO_Definition,
+	IOMux_SCK_GPIO_Definition,
+	IOMux_Out_OE_GPIO_Definition,
+	IOMux_Out_STCP_GPIO_Definition,
+	IOMux_MOSI_GPIO_Definition,
 };
-#define KNOWN_GPIO_COUNT		(sizeof(known_gpios) / sizeof(known_gpios[0]))
+#define KNOWN_GPIO_OUTPUT_COUNT		(sizeof(known_gpio_outputs) / sizeof(known_gpio_outputs[0]))
 
 enum debugmode_t {
 	DEBUG_DISABLED = 0,
@@ -168,9 +177,9 @@ static void debugconsole_print_prompt(void) {
 			break;
 
 		case DEBUG_GPIO_OUTPUTS:
-			fprintf(stderr, "GPIO P%s = %s", known_gpios[debug_accu].pin_name, known_gpios[debug_accu].name);
-			if (known_gpios[debug_accu].connect) {
-				fprintf(stderr, " : %s", known_gpios[debug_accu].connect);
+			fprintf(stderr, "GPIO P%s = %s", known_gpio_outputs[debug_accu].pin_name, known_gpio_outputs[debug_accu].name);
+			if (known_gpio_outputs[debug_accu].connect) {
+				fprintf(stderr, " : %s", known_gpio_outputs[debug_accu].connect);
 			}
 			break;
 
@@ -215,7 +224,7 @@ void debugconsole_tick(void) {
 			break;
 
 		case DEBUG_GPIO_OUTPUTS:
-			known_gpios[debug_accu].gpio->ODR ^= known_gpios[debug_accu].pin;
+			known_gpio_outputs[debug_accu].gpio->ODR ^= (1 << known_gpio_outputs[debug_accu].pin_source);
 			break;
 
 		case DEBUG_IOMUX_INPUTS:
@@ -247,14 +256,23 @@ void debugconsole_tick(void) {
 }
 
 static void debugconsole_print_gpio(void) {
-	printf("Now debugging GPIO output P%s (%s).", known_gpios[debug_accu].pin_name, known_gpios[debug_accu].name);
-	if (known_gpios[debug_accu].comment) {
-		printf(" %s.", known_gpios[debug_accu].comment);
+	printf("Now debugging GPIO output P%s (%s).", known_gpio_outputs[debug_accu].pin_name, known_gpio_outputs[debug_accu].name);
+	if (known_gpio_outputs[debug_accu].comment) {
+		printf(" %s.", known_gpio_outputs[debug_accu].comment);
 	}
-	if (known_gpios[debug_accu].connect) {
-		printf(" Connected to %s.", known_gpios[debug_accu].connect);
+	if (known_gpio_outputs[debug_accu].connect) {
+		printf(" Connected to %s.", known_gpio_outputs[debug_accu].connect);
 	}
 	printf("\n");
+
+	/* Change possible AF setting of this GPIO to regular output */
+	BIT_PATCH_REGISTER(known_gpio_outputs[debug_accu].gpio->MODER, 2 * known_gpio_outputs[debug_accu].pin_source, 2, 1);
+
+	/* Also change the speed rating to slow */
+	BIT_PATCH_REGISTER(known_gpio_outputs[debug_accu].gpio->OSPEEDR, 2 * known_gpio_outputs[debug_accu].pin_source, 2, 0);
+
+	/* And turn off all pullups/pulldowns */
+	BIT_PATCH_REGISTER(known_gpio_outputs[debug_accu].gpio->PUPDR, 2 * known_gpio_outputs[debug_accu].pin_source, 2, 0);
 }
 
 static void debugconsole_execute(void) {
@@ -290,11 +308,13 @@ static void debugconsole_execute(void) {
 		bool success = eeprom_dump(4);
 		printf("EEPROM dump %s.\n", success ? "successful" : "had a problem");
 	} else if (!strcmp(cmd_input, "listio")) {
-		printf("%d known GPIOs:\n", KNOWN_GPIO_COUNT);
-		for (int i = 0; i < KNOWN_GPIO_COUNT; i++) {
-			printf("  %2d: P%-3s %-14s %-10s %s\n", i, known_gpios[i].pin_name, known_gpios[i].name, known_gpios[i].comment ? known_gpios[i].comment : "", known_gpios[i].connect ? known_gpios[i].connect : "");
+		printf("%d known GPIOs:\n", KNOWN_GPIO_OUTPUT_COUNT);
+		for (int i = 0; i < KNOWN_GPIO_OUTPUT_COUNT; i++) {
+			printf("  %2d: P%-3s %-14s %-10s %s\n", i, known_gpio_outputs[i].pin_name, known_gpio_outputs[i].name, known_gpio_outputs[i].comment ? known_gpio_outputs[i].comment : "", known_gpio_outputs[i].connect ? known_gpio_outputs[i].connect : "");
 		}
 	} else if (!strcmp(cmd_input, "gpio-out")) {
+		printf("Warning: Changing pin functionality to OUTPUT, i.e., disabling alternate function.\n");
+		printf("These will not be restored. You will likely need to reset the MCU after this test.\n");
 		debug_accu = 0;
 		debug_mode = DEBUG_GPIO_OUTPUTS;
 		debugconsole_print_gpio();
@@ -318,7 +338,7 @@ static void debugconsole_execute(void) {
 		stm32f4xx_reset();
 	} else if (cmd_length == 0) {
 		if (debug_mode == DEBUG_GPIO_OUTPUTS) {
-			debug_accu = (debug_accu + 1) % KNOWN_GPIO_COUNT;
+			debug_accu = (debug_accu + 1) % KNOWN_GPIO_OUTPUT_COUNT;
 			debugconsole_print_gpio();
 		}
 	} else {
