@@ -23,6 +23,9 @@
 
 #include "stm32f407_tempsensor.h"
 
+//#define RDIV(p, q)		((p) / (q))					/* No rounding */
+#define RDIV(p, q)		(((p) + ((q) / 2)) / (q))		/* With rounding */
+
 void calculate_telemetry(struct adc_telemetry_t *telemetry, const uint16_t adu_30_deg_c, const uint16_t adu_110_deg_c, const uint16_t adu_vrefint, const uint16_t adu_tempsensor) {
 	/* Assume Vrefint is 1.21 V (typical according to datasheet) and calculate
 	 * Vref from this (Vdd = Vref in our case). Since:
@@ -43,5 +46,5 @@ void calculate_telemetry(struct adc_telemetry_t *telemetry, const uint16_t adu_3
 	 * temperature_tenths_degc = -800 * adu_30 / (adu_110 - adu_30) + 1201200 * adu_temp / ((adu_110 - adu_30) * adu_vref) + 300
 	*/
 	const uint16_t adu_refdiff = adu_110_deg_c - adu_30_deg_c;
-	telemetry->temperature_10th_deg_c = (1201200 * adu_tempsensor / (adu_refdiff * adu_vrefint)) - (800 * adu_30_deg_c / adu_refdiff) + 300;
+	telemetry->temperature_10th_deg_c = RDIV(1201200 * adu_tempsensor, adu_refdiff * adu_vrefint) - RDIV(800 * adu_30_deg_c, adu_refdiff) + 300;
 }

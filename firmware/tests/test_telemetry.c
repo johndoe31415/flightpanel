@@ -49,6 +49,12 @@ static void test_temperature_calculation(void) {
 	test_assert_int_almost_eq(telemetry.tempsensor_offset_microvolts_at_30_deg_c, 759121, 1);
 	test_assert_int_almost_eq(telemetry.tempsensor_slope_microvolts_per_deg_c, 2559, 1);
 	test_assert_int_almost_eq(telemetry.temperature_10th_deg_c, 360, 1);
+	debug("Vref = %d.%03d V, Temp = %d.%d°C, Offset = %d.%03d mV at 30°C, Slope = %d.%03d mV/°C\n",
+			telemetry.vref_millivolts / 1000, telemetry.vref_millivolts % 1000,
+			telemetry.temperature_10th_deg_c / 10, telemetry.temperature_10th_deg_c % 10,
+			telemetry.tempsensor_offset_microvolts_at_30_deg_c / 1000, telemetry.tempsensor_offset_microvolts_at_30_deg_c % 1000,
+			telemetry.tempsensor_slope_microvolts_per_deg_c / 1000, telemetry.tempsensor_slope_microvolts_per_deg_c % 1000
+	);
 	subtest_finished();
 }
 
