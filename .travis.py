@@ -161,7 +161,7 @@ compiler_dir = os.getenv("HOME") + "/bin/gcc-cm4/bin"
 if not os.path.isdir(compiler_dir):
 	# Extract compiler from cache
 	msg("Extracting compiler from %s" % (cache_compiler_file))
-	subprocess.check_call([ "tar", "-x", , "-z", "-C", os.getenv("HOME"), "-f", cache_compiler_file ])
+	subprocess.check_call([ "tar", "-x", "-z", "-C", os.getenv("HOME"), "-f", cache_compiler_file ])
 else:
 	msg("Not extracting Cortex-M4 compiler, already present: %s" % (compiler_dir))
 
