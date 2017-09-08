@@ -3,8 +3,15 @@
 vpath %.c ..
 
 CFLAGS := -std=c11 -Wall -Werror -Wmissing-prototypes -Wstrict-prototypes -Werror=implicit-function-declaration -O3 -I..
-CFLAGS += -pie -fPIE -fsanitize=address
-#CFLAGS += -fsanitize=undefined -fsanitize=leak
+ifneq ($(USER),travis)
+# On Travis-CI, gcc does not support "undefined" and "leak" sanitizers.
+# Furthermore (and worse, actually), there seems to be a kernel < 4.12.8
+# installed which causes the address sanitizer to cause spurious fails ("Shadow
+# memory range interleaves with an existing memory mapping. ASan cannot proceed
+# correctly. ABORTING."), leading to a broken build. Therefore we do not run
+# sanitizers on Travis.
+CFLAGS += -pie -fPIE -fsanitize=address -fsanitize=undefined -fsanitize=leak
+endif
 LDFLAGS :=
 
 TEST_COMMON_OBJS := testbed.o
