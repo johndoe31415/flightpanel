@@ -237,6 +237,9 @@ if (len(sys.argv) == 1) or ("a" in sys.argv[1]):
 		print("Compiler used for firmware:", file = f)
 		print(subprocess.check_output([ "arm-none-eabi-gcc", "-v" ], stderr = subprocess.STDOUT).decode(), file = f)
 		print(file = f)
+		print("Compiler used for running tests:", file = f)
+		print(subprocess.check_output([ "cc", "-v" ], stderr = subprocess.STDOUT).decode(), file = f)
+		print(file = f)
 		print("Compiler used for Win32 cross compilation:", file = f)
 		print(subprocess.check_output([ "i686-w64-mingw32-gcc", "-v" ], stderr = subprocess.STDOUT).decode(), file = f)
 
