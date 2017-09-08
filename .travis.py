@@ -137,7 +137,7 @@ def updated_env(update_dict):
 	return env
 
 def msg(text):
-	print("==> %s" % (text))
+	print("==> %s" % (text), file = sys.stderr)
 
 cache_dir = os.getenv("HOME") + "/.cache/flightpanel/"
 cache_compiler_file = cache_dir + "compiler.tar.gz"
@@ -277,7 +277,7 @@ if (len(sys.argv) == 1) or ("u" in sys.argv[1]):
 	asset_content_type = "application/x-gtar-compressed"
 	with open(asset_filename, "rb") as f:
 		asset_data = f.read()
-	msg("Read asset from %s build from commit %s (%d bytes total)" % (asset_filename, git_rev, len(asset_data)))
+	msg("Read asset from \"%s\", which was built from commit %s (%d bytes total)" % (asset_filename, git_rev, len(asset_data)))
 
 	msg("Updating ref of tag %s to point to %s" % (tagname, git_rev))
 	result = github.update_ref("tags/" + tagname, git_rev)
@@ -290,7 +290,7 @@ if (len(sys.argv) == 1) or ("u" in sys.argv[1]):
 	elif result.status_code != 200:
 		raise Exception("Unexpected response when trying to update_ref: %s" % (result))
 
-	msg("Getting release on GibHub by the tag name of %s" % (tagname))
+	msg("Getting release on GibHub by the tag name of \"%s\"" % (tagname))
 	release = github.get_release_by_tagname(tagname)
 	if release.status_code == 404:
 		# No release yet, create
@@ -309,12 +309,12 @@ if (len(sys.argv) == 1) or ("u" in sys.argv[1]):
 		for asset in release["assets"]:
 			if asset["name"] == asset_filename:
 				asset_id = asset["id"]
-				msg("Deleting asset %s" % (asset_id))
+				msg("Deleting currently uploaded GitHub asset #%s" % (asset_id))
 				result = github.release_delete_asset(asset_id)
 				if result.status_code != 204:
 					raise Exception("Unexpected response when trying to delete_release: %s" % (result))
 
-	msg("Uploading asset %s to GitHub" % (asset_filename))
+	msg("Uploading asset \"%s\" to GitHub" % (asset_filename))
 	result = github.release_upload_asset(release["upload_url"], asset_content_type, asset_filename, asset_data)
 	if result.status_code != 201:
 		raise Exception("Unexpected response when trying to upload_asset: %s" % (result))
