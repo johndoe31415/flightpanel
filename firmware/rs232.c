@@ -29,17 +29,33 @@
 #include "debugconsole.h"
 
 #define RS232_TX_BUFSIZE		256
-static bool tx_in_progress;
 static bool in_usart_irq;
 static struct bounded_buffer_t rs232_tx_buffer = {
 	.bufsize = RS232_TX_BUFSIZE,
 	.data = (uint8_t[RS232_TX_BUFSIZE]) { },
 };
 
+static bool usart_tx_in_progress(void) {
+	/* Transmit data register not empty */
+	return !(USART2->SR & (1 << 7));
+}
+
 void rs232_debug_setleds(void) {
-	LEDGreen_set(tx_in_progress);
+	LEDGreen_set(usart_tx_in_progress());
 	LEDBlue_set(in_usart_irq);
 	LEDRed_set(rs232_tx_buffer.fill > 0);
+}
+
+static void send_next_byte(void) {
+	if (usart_tx_in_progress()) {
+		return;
+	}
+
+	int16_t next_byte = boundedbuffer_getbyte(&rs232_tx_buffer);
+	if (next_byte != -1) {
+		/* Transmit data register is empty and we have a byte to send */
+		USART_SendData(USART2, next_byte);
+	}
 }
 
 static void handle_usart_rxc_irq(void) {
@@ -53,24 +69,17 @@ static void handle_usart_rxc_irq(void) {
 
 static void handle_usart_txc_irq(void) {
 	/* Transmission complete interrupt */
-	if (USART_GetITStatus(USART2, USART_IT_TC) == SET) {
-		USART_ClearITPendingBit(USART2, USART_IT_TC);
+	if (USART_GetITStatus(USART2, USART_IT_TXE) == SET) {
 		/* Transmission complete, try to send next byte */
-		int16_t next_byte = boundedbuffer_getbyte(&rs232_tx_buffer);
-		if (next_byte == -1) {
-			/* No next byte, we're finished */
-			tx_in_progress = false;
-		} else {
-			/* Keep sending */
-			USART_SendData(USART2, next_byte);
-		}
+		USART_ClearITPendingBit(USART2, USART_IT_TXE);
+		send_next_byte();
 	}
 }
 
 void USART2_IRQHandler(void) {
 	in_usart_irq = true;
-	handle_usart_rxc_irq();
 	handle_usart_txc_irq();
+	handle_usart_rxc_irq();
 	in_usart_irq = false;
 }
 
@@ -79,7 +88,7 @@ static void rs232_buffer_lock(void) {
 		return;
 	}
 	USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);	// RX register not empty
-	USART_ITConfig(USART2, USART_IT_TC, DISABLE);	// TX complete
+	USART_ITConfig(USART2, USART_IT_TXE, DISABLE);	// TX complete
 }
 
 static void rs232_buffer_unlock(void) {
@@ -87,7 +96,7 @@ static void rs232_buffer_unlock(void) {
 		return;
 	}
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);	// RX register not empty
-	USART_ITConfig(USART2, USART_IT_TC, ENABLE);	// TX complete
+	USART_ITConfig(USART2, USART_IT_TXE, ENABLE);	// TX complete
 }
 
 void rs232_transmitchar(char c) {
@@ -102,15 +111,11 @@ void rs232_transmitchar(char c) {
 			 * clear the TX buffer queue.
 			*/
 			handle_usart_txc_irq();
+			send_next_byte();
 		}
 		rs232_buffer_unlock();
 	} while (!put_in_buffer);
 
 	/* Now that the character is in the TX buffer, trigger actual transmission */
-	rs232_buffer_lock();
-	if (!tx_in_progress) {
-		tx_in_progress = true;
-		USART_SendData(USART2, boundedbuffer_getbyte(&rs232_tx_buffer));
-	}
-	rs232_buffer_unlock();
+	send_next_byte();
 }
