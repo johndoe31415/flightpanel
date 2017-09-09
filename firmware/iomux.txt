@@ -1,0 +1,96 @@
+* Out
+58	Radio_ADF
+59	Radio_NAV2
+60	Radio_COM2
+61	Radio_DME
+62	Radio_NAV1
+63	Radio_COM1
+
+64	NavSrc_GPS
+65	NavSrc_NAV
+
+66	XPDR_C
+67	XPDR_STBY
+
+68	AP_IAS
+69	AP_HDG
+70	AP_ALT
+71	AP_MASTER
+
+* In
+27	Rotary_COM1_A
+28	Rotary_COM1_B
+23	Rotary_COM1_Button
+
+22	Rotary_COM2_A
+16	Rotary_COM2_B
+17	Rotary_COM2_Button
+
+11	Rotary_ATM_A
+12	Rotary_ATM_B
+7	Rotary_ATM_Button
+
+36	Rotary_NAV1_A
+34	Rotary_NAV1_B
+35	Rotary_NAV1_Button
+
+13	Rotary_NAV2_A
+9	Rotary_NAV2_B
+10	Rotary_NAV2_Button
+
+33	Rotary_OBS_A
+38	Rotary_OBS_B
+37	Rotary_OBS_Button
+
+8	Rotary_DME_ADF_A
+15	Rotary_DME_ADF_B
+14	Rotary_DME_ADF_Button
+
+39	Rotary_AP_ALT_A
+43	Rotary_AP_ALT_B
+32	Rotary_AP_ALT_Button
+
+42	Rotary_AP_HDG_A
+45	Rotary_AP_HDG_B
+44	Rotary_AP_HDG_Button
+
+29	Rotary_AP_IAS_A
+25	Rotary_AP_IAS_B
+26	Rotary_AP_IAS_Button
+
+24	Rotary_AP_RATE_A
+31	Rotary_AP_RATE_B
+30	Rotary_AP_RATE_Button
+
+54	Button_Radio_COM1
+48	Button_Radio_NAV1
+55	Button_Radio_DME
+50	Button_Radio_COM2
+53	Button_Radio_NAV2
+49	Button_Radio_ADF
+
+40	Button_AP
+47	Button_AP_NAV
+51	Button_AP_APR
+52	Button_AP_REV
+
+41	Button_XPDR_Mode
+46	Button_NavSrc
+
+62	Button_XPDR_0
+56	Button_XPDR_1
+63	Button_XPDR_2
+67	Button_XPDR_3
+68	Button_XPDR_4
+59	Button_XPDR_5
+60	Button_XPDR_6
+58	Button_XPDR_7
+61	Button_XPDR_VFR
+57	Button_XPDR_IDENT
+
+71	Switch_BCN
+64	Switch_LAND
+70	Switch_TAXI
+65	Switch_NAV
+69	Switch_STRB
+66	Switch_MASTER
