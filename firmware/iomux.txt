@@ -1,3 +1,6 @@
+# Number of daisy-chained multiplexers
+~ 9
+
 * Out
 58	Radio_ADF
 59	Radio_NAV2

@@ -27,6 +27,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stm32f4xx_dma.h>
+#include <stm32f4xx_spi.h>
 
 #include "debugconsole.h"
 #include "pinmap.h"
@@ -42,6 +43,7 @@
 #include "eeprom.h"
 #include "stm32f407_adc.h"
 #include "bitwise.h"
+#include "iomux_pinmap.h"
 
 #define iabs(x)				(((x) < 0) ? -(x) : (x))
 #define CMD_BUFFER_SIZE		32
@@ -117,7 +119,11 @@ static void iomux_check_inputs(void) {
 		bool old_value = iomux_get_input_from(iomux_last_inputs, i);
 		bool new_value = iomux_get_input_from(iomux_inputs, i);
 		if (old_value != new_value) {
-			printf("%c%d", new_value ? '+' : '-', i);
+			printf(" %c%d", new_value ? '+' : '-', i);
+			const struct iomux_pin_t *pin = iomux_get_input_description(i);
+			if (pin) {
+				printf(" (%s)", pin->name);
+			}
 		}
 	}
 	printf("\n");
@@ -273,16 +279,15 @@ void debugconsole_tick(void) {
 	}
 }
 
-static void dump_dma_status(void) {
-	printf("Status of controller DMA1:\n");
-	DMA_Stream_TypeDef *dma_stream = DMA1_Stream0;
+static void dump_dma_status(const char *name, DMA_TypeDef *dma, DMA_Stream_TypeDef *dma_streams) {
+	printf("Status of controller %s (%p, streams at %p):\n", name, dma, dma_streams);
 	for (int i = 0; i < 8; i++) {
-		void *peripheral_addr = (void*)dma_stream[i].PAR;
-		void *memory_addr = (void*)dma_stream[i].M0AR;
-		bool peripheral_inc = GET_BITS(dma_stream[i].CR, 9, 1);
-		bool memory_inc = GET_BITS(dma_stream[i].CR, 10, 1);
-		uint8_t direction = GET_BITS(dma_stream[i].CR, 6, 2);
-		uint8_t channel = GET_BITS(dma_stream[i].CR, 25, 3);
+		void *peripheral_addr = (void*)dma_streams[i].PAR;
+		void *memory_addr = (void*)dma_streams[i].M0AR;
+		bool peripheral_inc = GET_BIT(dma_streams[i].CR, 9);
+		bool memory_inc = GET_BIT(dma_streams[i].CR, 10);
+		uint8_t direction = GET_BITS(dma_streams[i].CR, 6, 2);
+		uint8_t channel = GET_BITS(dma_streams[i].CR, 25, 3);
 		const char *direction_str = "?";
 		if (direction == 0) {
 			direction_str = "->";
@@ -291,8 +296,54 @@ static void dump_dma_status(void) {
 		} else if (direction == 2) {
 			direction_str = "MM";
 		}
-		printf("  DMA1_Stream%d Ch%d: %-8s %p%s %s %p%s\n", i, channel, (dma_stream[i].CR & 1) ? "Enabled" : "Disabled", peripheral_addr, peripheral_inc ? "++" : "", direction_str, memory_addr, memory_inc ? "++" : "");
+		printf("  DMA1_Stream%d Ch%d: %-8s %p%s %s %p%s", i, channel, (dma_streams[i].CR & 1) ? "Enabled" : "Disabled", peripheral_addr, peripheral_inc ? "++" : "", direction_str, memory_addr, memory_inc ? "++" : "");
+
+		uint32_t status = (i < 4) ? dma->LISR : dma->HISR;
+		uint8_t bit_offset = (i % 4) * 6;
+		if (bit_offset >= 12) {
+			bit_offset += 4;
+		}
+		bool FEIF = GET_BIT(status, bit_offset + 0);
+		bool DMEIF = GET_BIT(status, bit_offset + 2);
+		bool TEIF = GET_BIT(status, bit_offset + 3);
+		bool HTIF = GET_BIT(status, bit_offset + 4);
+		bool TCIF = GET_BIT(status, bit_offset + 5);
+		if (FEIF) printf(" FE");
+		if (DMEIF) printf(" DME");
+		if (TEIF) printf(" TE");
+		if (HTIF) printf(" HT");
+		if (TCIF) printf(" TC");
+		printf("\n");
 	}
+}
+
+static void dump_spi_status(const char *name, SPI_TypeDef *spi) {
+	printf("%s:", name);
+	if (spi->SR & (1 << 8)) {
+		printf(" FRE");
+	}
+	if (spi->SR & SPI_I2S_FLAG_BSY) {
+		printf(" BSY");
+	}
+	if (spi->SR & SPI_I2S_FLAG_OVR) {
+		printf(" OVR");
+	}
+	if (spi->SR & (1 << 5)) {
+		printf(" MODF");
+	}
+	if (spi->SR & (1 << 4)) {
+		printf(" CRCERR");
+	}
+	if (spi->SR & (1 << 3)) {
+		printf(" UDR");
+	}
+	if (spi->SR & SPI_I2S_FLAG_TXE) {
+		printf(" TXE");
+	}
+	if (spi->SR & SPI_I2S_FLAG_RXNE) {
+		printf(" RXNE");
+	}
+	printf("\n");
 }
 
 static void debugconsole_reset_gpios(const struct gpio_definition_t *gpios, unsigned int io_count, bool make_output) {
@@ -372,6 +423,7 @@ static void debugconsole_execute(void) {
 		printf("    display    Reset OLED displays and output test text\n");
 		printf("    delay      Issue a 10000 count delay_loopcount() and output on blue LED (PD15)\n");
 		printf("    adc        Gather environmental data (supply voltage, temperature) measured via ADC\n");
+		printf("    spi        Show overview of SPI status\n");
 		printf("    dma        Show overview of DMA status\n");
 		printf("    reset      Reset the MCU entirely\n");
 	} else if (!strcmp(cmd_input, "off")) {
@@ -428,8 +480,12 @@ static void debugconsole_execute(void) {
 	} else if (!strcmp(cmd_input, "adc")) {
 		debug_accu = 0;
 		debug_mode = DEBUG_ADC_TELEMETRY;
+	} else if (!strcmp(cmd_input, "spi")) {
+		dump_spi_status("SPI1", SPI1);
+		dump_spi_status("SPI2", SPI2);
+		dump_spi_status("SPI3", SPI3);
 	} else if (!strcmp(cmd_input, "dma")) {
-		dump_dma_status();
+		dump_dma_status("DMA1", DMA1, DMA1_Stream0);
 	} else if (!strcmp(cmd_input, "reset")) {
 		stm32f4xx_reset();
 	} else if (!strcmp(cmd_input, "+")) {

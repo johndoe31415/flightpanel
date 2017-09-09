@@ -320,6 +320,8 @@ static void init_iomux_spi_dma(void) {
 	NVIC_Init(&NVIC_InitStructure2);
 	DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE);
 	DMA_ITConfig(DMA1_Stream2, DMA_IT_TC, ENABLE);
+	DMA_ITConfig(DMA1_Stream5, DMA_IT_FE, ENABLE);
+	DMA_ITConfig(DMA1_Stream2, DMA_IT_FE, ENABLE);
 }
 
 #if 0

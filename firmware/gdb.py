@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 import gdb
-class DebugCortexMIRQs (gdb.Command):
-	"Debugging of Cortex-M IRQs and their priorities."
 
+class DebugCortexM(gdb.Command):
+	"Debugging of Cortex-M internals."
+	_CMDNAME = "cm"
 	_UINT32_T = gdb.lookup_type("uint32_t")
 	_VECTORS = {
 		0: "Reset_Handler",
@@ -100,7 +101,7 @@ class DebugCortexMIRQs (gdb.Command):
 	}
 
 	def __init__ (self):
-		super(DebugCortexMIRQs, self).__init__("cm", gdb.COMMAND_SUPPORT, gdb.COMPLETE_NONE, True)
+		super(DebugCortexM, self).__init__(self._CMDNAME, gdb.COMMAND_SUPPORT, gdb.COMPLETE_NONE, True)
 
 	def _irq_name(self, irqno):
 		return self._VECTORS.get(irqno, "IRQ%d" % (irqno))
@@ -126,7 +127,20 @@ class DebugCortexMIRQs (gdb.Command):
 				result[value_no] = value
 		return result
 
-	def invoke(self, arg, from_tty):
+	def _cmd_help(self, arg, from_tty):
+		"""Print this help page."""
+		for methodname in dir(self):
+			if methodname.startswith("_cmd_"):
+				cmdname = methodname[5:]
+				method = getattr(self, methodname)
+				helptext = method.__doc__
+				print("%s %-8s %s" % (self._CMDNAME, cmdname, helptext))
+
+	def _readmem(self, address, wordcnt):
+		return self._str_to_uint32_array(gdb.selected_inferior().read_memory(address, 4 * wordcnt))
+
+	def _cmd_irq(self, args, from_tty):
+		"""Show information about registered and pending IRQs."""
 		SCB_addr = 0xe000e000 + 0xd00		# System Control Block
 		SHPR_addr =	SCB_addr + 0x18			# System Handler Priority Register
 		SHCSR_addr = SCB_addr + 0x24		# System Handler Control and Status Register
@@ -188,4 +202,96 @@ class DebugCortexMIRQs (gdb.Command):
 			line += "Prio %d" % (IP[base_irq_no])
 			print(line)
 
-DebugCortexMIRQs()
+	def _cmd_dma(self, args, from_tty):
+		"""Dump information about DMA controller DMA1."""
+		PERIPH_BASE = 0x40000000
+		AHB1PERIPH_BASE = PERIPH_BASE + 0x00020000
+		DMA1_BASE = AHB1PERIPH_BASE + 0x6000
+		DMA1_Streams = [ DMA1_BASE + 0x10 + (0x18 * i) for i in range(8) ]
+		(LISR, HISR) = self._readmem(DMA1_BASE + 0x00, 2)
+		for (i, stream) in enumerate(DMA1_Streams):
+			if i < 4:
+				SR = LISR
+			else:
+				SR = HISR
+			bitoffset = {
+				0: 0,
+				1: 6,
+				2: 16,
+				3: 22,
+			}[i % 4]
+			FEIF = (SR >> (bitoffset + 0)) & 1
+			DMEIF = (SR >> (bitoffset + 2)) & 1
+			TEIF = (SR >> (bitoffset + 3)) & 1
+			HTIF = (SR >> (bitoffset + 4)) & 1
+			TCIF = (SR >> (bitoffset + 5)) & 1
+			flag_strings = [
+				"FEIF" if FEIF else None,
+				"DMEIF" if DMEIF else None,
+				"TEIF" if TEIF else None,
+				"HTIF" if HTIF else None,
+				"TCIF" if TCIF else None,
+			]
+			flag_strings = [ flag_str for flag_str in flag_strings if flag_str is not None ]
+			flag_string = " + ".join(flag_strings)
+
+			(CR, NDTR, PAR, M0AR) = self._readmem(stream, 4)
+			direction = (CR >> 6) & 0x3
+			direction = {
+				0:	"->",
+				1:	"<-",
+			}.get(direction, "?")
+			channel = (CR >> 25) & 0x7
+			enabled = "Enabled" if (CR & 0x1) else "Disabled"
+			print("DMA1_Stream%d Ch%d %s %-16s 0x%08x %s 0x%08x" % (i, channel, enabled, flag_string, PAR, direction, M0AR))
+
+	def _cmd_bpgpio(self, args, from_tty):
+		"""Set a breakpoint on GPIO access."""
+		if len(args) != 1:
+			print("GPIO argument required.")
+			return
+
+		gpio_name = args[0]
+		gpio_port = gpio_name[1]
+		gpio_pin = int(gpio_name[2:])
+		known_ports = {
+			"A":	0x0000,
+			"B":	0x0400,
+			"C":	0x0800,
+			"D":	0x0c00,
+			"E":	0x1000,
+			"F":	0x1400,
+			"G":	0x1800,
+			"H":	0x1c00,
+			"I":	0x2000,
+			"J":	0x2400,
+			"K":	0x2800,
+		}
+		if gpio_port not in known_ports:
+			print("Unable to determine GPIO pin offset of port %d." % (gpio_port))
+			return
+
+		PERIPH_BASE = 0x40000000
+		AHB1PERIPH_BASE = PERIPH_BASE + 0x00020000
+		GPIO_BASE = known_ports[gpio_port] + AHB1PERIPH_BASE
+		GPIO_ODR = GPIO_BASE + 0x14
+		GPIO_BSRR = GPIO_BASE + 0x18
+
+		print("Breaking on GPIO on Port%s (based 0x%x), pin %d." % (gpio_port, GPIO_BASE, gpio_pin))
+		gdb.Breakpoint(spec = "*0x%x" % (GPIO_ODR), type = gdb.BP_WATCHPOINT)
+		gdb.Breakpoint(spec = "*0x%x" % (GPIO_BSRR), type = gdb.BP_WATCHPOINT)
+
+	def invoke(self, arg, from_tty):
+		if (arg == "?") or (arg == ""):
+			return self._cmd_help(arg, from_tty)
+
+		arg = arg.split()
+		method = getattr(self, "_cmd_" + arg[0], None)
+		if method is None:
+			print("No such command '%s'. Type '%s help' for help." % (arg, self._CMDNAME))
+			return
+
+		return method(arg[1:], from_tty)
+
+
+DebugCortexM()

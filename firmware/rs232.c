@@ -49,7 +49,6 @@ void rs232_debug_setleds(void) {
 	LEDRed_set(rs232_tx_buffer.fill > 0);
 }
 
-
 static uint32_t rs232_buffer_lock(void) {
 	uint32_t previous_irq_mask = USART2->CR1 & USART_CR1_IRQ_MASK;
 	USART2->CR1 &= ~USART_CR1_IRQ_MASK;
@@ -94,10 +93,8 @@ static void handle_usart_txc_irq(void) {
 
 void USART2_IRQHandler(void) {
 	in_usart_irq = true;
-	LEDBlue_set_ACTIVE();
 	handle_usart_txc_irq();
 	handle_usart_rxc_irq();
-	LEDBlue_set_INACTIVE();
 	in_usart_irq = false;
 }
 
