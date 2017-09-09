@@ -84,6 +84,7 @@ enum debugmode_t {
 	DEBUG_GPIO_OUTPUTS,
 	DEBUG_IOMUX_INPUTS,
 	DEBUG_IOMUX_OUTPUTS,
+	DEBUG_IOMUX_OUTPUT_PATTERN,
 	DEBUG_DISPLAY,
 	DEBUG_DELAY,
 	DEBUG_ADC_TELEMETRY,
@@ -99,7 +100,7 @@ static uint8_t iomux_last_inputs[IOMUX_BYTECOUNT];
 static void iomux_check_inputs(void) {
 	uint8_t iomux_inputs[IOMUX_BYTECOUNT];
 	memcpy(iomux_inputs, iomux_input_array(), IOMUX_BYTECOUNT);
-	if (memcmp(iomux_inputs, iomux_last_inputs, IOMUX_BYTECOUNT)) {
+	if (!memcmp(iomux_inputs, iomux_last_inputs, IOMUX_BYTECOUNT)) {
 		/* Nothing changed. */
 		return;
 	}
@@ -120,6 +121,7 @@ static void iomux_check_inputs(void) {
 		}
 	}
 	printf("\n");
+	memcpy(iomux_last_inputs, iomux_inputs, IOMUX_BYTECOUNT);
 }
 
 static void iomux_set_outputs(void) {
@@ -196,7 +198,11 @@ static void debugconsole_print_prompt(void) {
 			break;
 
 		case DEBUG_IOMUX_OUTPUTS:
-			fprintf(stderr, "IOMux OUT");
+			fprintf(stderr, "IOMux OUT %d", debug_accu);
+			break;
+
+		case DEBUG_IOMUX_OUTPUT_PATTERN:
+			fprintf(stderr, "IOMux Pattern");
 			break;
 
 		case DEBUG_DISPLAY:
@@ -240,6 +246,10 @@ void debugconsole_tick(void) {
 			break;
 
 		case DEBUG_IOMUX_OUTPUTS:
+			iomux_output_toggle(debug_accu);
+			break;
+
+		case DEBUG_IOMUX_OUTPUT_PATTERN:
 			iomux_set_outputs();
 			break;
 
@@ -354,10 +364,11 @@ static void debugconsole_execute(void) {
 		printf("    rs232-echo Echo the recevied characters on the RS232 interface as hex\n");
 		printf("    eeprom     Dump EEPROM contents\n");
 		printf("    listio     List supported GPIOs\n");
-		printf("    gpio-out   Toggle GPIO outputs\n");
+		printf("    gpio-out   Toggle GPIO outputs. Repeat command to switch active output.\n");
 		printf("    memory     Show memory statistics\n");
 		printf("    iomux-in   Dump IOMultiplexer inputs\n");
-		printf("    iomux-out  Output test pattern on IOMultiplexer outputs\n");
+		printf("    iomux-out  Debug IOMux outputs one-by-one. Repeat command to switch active output.\n");
+		printf("    iomux-ptr  Output test pattern on IOMultiplexer outputs\n");
 		printf("    display    Reset OLED displays and output test text\n");
 		printf("    delay      Issue a 10000 count delay_loopcount() and output on blue LED (PD15)\n");
 		printf("    adc        Gather environmental data (supply voltage, temperature) measured via ADC\n");
@@ -398,8 +409,16 @@ static void debugconsole_execute(void) {
 	} else if (!strcmp(cmd_input, "iomux-in")) {
 		debug_mode = DEBUG_IOMUX_INPUTS;
 	} else if (!strcmp(cmd_input, "iomux-out")) {
+		if (debug_mode != DEBUG_IOMUX_OUTPUTS) {
+			debug_accu = 0;
+			debug_mode = DEBUG_IOMUX_OUTPUTS;
+		} else {
+			debug_accu = (debug_accu + 1) % IOMUX_OUTPUTS;
+		}
+		iomux_output_setall(0);
+	} else if (!strcmp(cmd_input, "iomux-ptr")) {
 		debug_accu = 0;
-		debug_mode = DEBUG_IOMUX_OUTPUTS;
+		debug_mode = DEBUG_IOMUX_OUTPUT_PATTERN;
 	} else if (!strcmp(cmd_input, "display")) {
 		init_displays();
 		debug_accu = 0;
@@ -417,11 +436,17 @@ static void debugconsole_execute(void) {
 		if (debug_mode == DEBUG_GPIO_OUTPUTS) {
 			debug_accu = (debug_accu + 1) % KNOWN_GPIO_OUTPUT_COUNT;
 			debugconsole_print_gpio();
+		} else if (debug_mode == DEBUG_IOMUX_OUTPUTS) {
+			debug_accu = (debug_accu + 1) % IOMUX_OUTPUTS;
+			iomux_output_setall(0);
 		}
 	} else if (!strcmp(cmd_input, "-")) {
 		if (debug_mode == DEBUG_GPIO_OUTPUTS) {
 			debug_accu = (debug_accu + KNOWN_GPIO_OUTPUT_COUNT - 1) % KNOWN_GPIO_OUTPUT_COUNT;
 			debugconsole_print_gpio();
+		} else if (debug_mode == DEBUG_IOMUX_OUTPUTS) {
+			debug_accu = (debug_accu + IOMUX_OUTPUTS - 1) % IOMUX_OUTPUTS;
+			iomux_output_setall(0);
 		}
 	} else {
 		printf("Unrecognized command '%s'.\n", cmd_input);

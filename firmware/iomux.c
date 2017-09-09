@@ -93,6 +93,12 @@ void iomux_output_setall(uint8_t byte_value) {
 	memset(outputs, byte_value, IOMUX_BYTECOUNT);
 }
 
+void iomux_output_toggle(int pin_id) {
+	int byteno = pin_id / 8;
+	int bitno = pin_id % 8;
+	outputs[byteno] ^= (1 << bitno);
+}
+
 void iomux_output_set(int pin_id, bool value) {
 	int byteno = pin_id / 8;
 	int bitno = pin_id % 8;
