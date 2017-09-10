@@ -44,6 +44,9 @@ Reset_Handler:
 	dsb
 	isb
 
+	# First load the application MSP
+	ldr sp, [r0]
+
 	# Now load the address of the application reset vector
 	ldr r0, [r0, #4]
 
