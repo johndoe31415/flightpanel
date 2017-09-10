@@ -23,7 +23,10 @@ CFLAGS += -DBUILD_TIMESTAMP_UTC='"$(BUILD_TIMESTAMP_UTC)"' -DBUILD_REVISION='"$(
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -Icube -Icube/include-core -Icube/include-hid -Icube/include-hal -Icube/include-cmsis
 #CFLAGS += -specs=nano.specs -specs=rdimon.specs
-LDFLAGS := -Tstm32f407.ld
+#LDFLAGS := -Tstm32f407.ld
+#WRITE_ADDR := 0x08000000
+LDFLAGS := -Tstm32f407_boot_ram.ld
+WRITE_ADDR := 0x20000000
 LDFLAGS += -Wl,--gc-sections
 STATICLIBS := ext-st/stdperiph.a cube/cube.a
 
@@ -39,6 +42,7 @@ clean:
 	make -C tests clean
 	rm -f $(OBJS) $(TARGETS)
 	rm -f flightpanel.sym
+	rm -f boot_ram boot_ram.bin
 
 readflash:
 	$(STFLASH) read firmware.bin 0x08000000 65536
@@ -51,7 +55,8 @@ console:
 
 program: flightpanel.bin
 	-killall st-util
-	$(STFLASH) write $< 0x08000000
+	$(STFLASH) write $< $(WRITE_ADDR)
+	$(STFLASH) reset
 
 bindump: flightpanel.bin
 	$(OBJDUMP) -b binary -m armv3m -D $<
@@ -61,6 +66,16 @@ flightpanel: $(ADDITIONAL_DEPENDENCY) $(OBJS)
 
 flightpanel.bin: flightpanel
 	$(OBJCOPY) -O binary $< $@
+
+boot_ram: boot_ram.s
+	$(CC) $(CFLAGS) -Tstm32f407.ld -nostdlib -o $@ $<
+
+boot_ram.bin: boot_ram
+	$(OBJCOPY) -O binary $< $@
+
+program_ramloader: boot_ram.bin
+	-killall st-util
+	$(STFLASH) write boot_ram.bin 0x08000000
 
 flightpanel.sym: flightpanel.c
 	$(CC) $(CFLAGS) -E -dM -o $@ $<

@@ -49,8 +49,10 @@
 #include "debug.h"
 #include "dsr_tasks.h"
 
+extern uint8_t _sflash;
+
 int main(void) {
-	printf("Reset successful.\n");
+	printf("Reset successful. Running from %p.\n", &_sflash);
 	init_usb_late();
 	printf("USB initialized.\n");
 
