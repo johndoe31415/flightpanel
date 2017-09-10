@@ -21,44 +21,45 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <stm32f4xx_gpio.h>
-#include <stm32f4xx_spi.h>
-#include <stm32f4xx_dma.h>
-#include <stm32f4xx_i2c.h>
-
-#include "rs232.h"
-#include "rotary.h"
-#include "spi.h"
-#include "usb.h"
-#include "timer.h"
-#include "i2c.h"
-#include "eeprom.h"
-#include "configuration.h"
-#include "usbd_hid.h"
-#include "usb.h"
+#include "dsr_tasks.h"
 #include "displays.h"
 #include "instruments.h"
 #include "iomux.h"
-#include "pinmap.h"
-#include "debug.h"
-#include "dsr_tasks.h"
+#include "debugconsole.h"
 
-int main(void) {
-	printf("Reset successful.\n");
-	init_usb_late();
-	printf("USB initialized.\n");
+static struct dsr_runtime_info_t dsr_runtime_info[NUMBER_OF_DSRS];
+static const struct dsr_task_definition_t dsr_definitions[NUMBER_OF_DSRS] = {
+	[DSR_TASK_IDLE] = {
+		.callback = instruments_idle_loop,
+	},
+	[DSR_TASK_IOMPLEX_FINISHED] = {
+		.callback = iomux_dma_finished,
+	},
+	[DSR_TASK_DISPLAY_UPDATE_FINISHED] = {
+		.callback = display_dma_finished,
+	},
+	[DSR_TASK_EXECUTE_DEBUG_COMMAND] = {
+		.callback = dsr_execute_debug_command,
+	},
+};
 
-	debug_show_all();
-
-	init_displays();
-	execute_dsr_loop();
-	return 0;
+bool dsr_is_pending(enum dsr_task_t task) {
+	return dsr_runtime_info[task].pending;
 }
 
+void dsr_mark_pending(enum dsr_task_t task) {
+	dsr_runtime_info[task].pending = true;
+}
+
+void execute_dsr_loop(void) {
+	while (true) {
+		for (int i = 0; i < NUMBER_OF_DSRS; i++) {
+			if (dsr_runtime_info[i].pending) {
+				dsr_runtime_info[i].pending = false;
+				dsr_definitions[i].callback();
+				break;
+			}
+		}
+	}
+}
 

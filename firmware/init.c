@@ -215,7 +215,7 @@ static void init_display_spi_dma(void) {
 	/* Enable IRQ */
 	NVIC_InitTypeDef NVIC_InitStructure = {
 		.NVIC_IRQChannel = DMA1_Stream4_IRQn,
-		.NVIC_IRQChannelPreemptionPriority = 15,
+		.NVIC_IRQChannelPreemptionPriority = 1,
 		.NVIC_IRQChannelSubPriority = 0,
 		.NVIC_IRQChannelCmd = ENABLE,
 	};
@@ -306,22 +306,20 @@ static void init_iomux_spi_dma(void) {
 	/* Enable IRQ */
 	NVIC_InitTypeDef NVIC_InitStructure = {
 		.NVIC_IRQChannel = DMA1_Stream5_IRQn,
-		.NVIC_IRQChannelPreemptionPriority = 15,
+		.NVIC_IRQChannelPreemptionPriority = 1,
 		.NVIC_IRQChannelSubPriority = 0,
 		.NVIC_IRQChannelCmd = ENABLE,
 	};
 	NVIC_Init(&NVIC_InitStructure);
 	NVIC_InitTypeDef NVIC_InitStructure2 = {
 		.NVIC_IRQChannel = DMA1_Stream2_IRQn,
-		.NVIC_IRQChannelPreemptionPriority = 15,
+		.NVIC_IRQChannelPreemptionPriority = 1,
 		.NVIC_IRQChannelSubPriority = 0,
 		.NVIC_IRQChannelCmd = ENABLE,
 	};
 	NVIC_Init(&NVIC_InitStructure2);
 	DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE);
 	DMA_ITConfig(DMA1_Stream2, DMA_IT_TC, ENABLE);
-	DMA_ITConfig(DMA1_Stream5, DMA_IT_FE, ENABLE);
-	DMA_ITConfig(DMA1_Stream2, DMA_IT_FE, ENABLE);
 }
 
 #if 0

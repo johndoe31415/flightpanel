@@ -44,6 +44,7 @@
 #include "stm32f407_adc.h"
 #include "bitwise.h"
 #include "iomux_pinmap.h"
+#include "dsr_tasks.h"
 
 #define iabs(x)				(((x) < 0) ? -(x) : (x))
 #define CMD_BUFFER_SIZE		32
@@ -510,7 +511,16 @@ static void debugconsole_execute(void) {
 	cmd_length = 0;
 }
 
+void dsr_execute_debug_command(void) {
+	debugconsole_execute();
+	debugconsole_print_prompt();
+}
+
 void debugconsole_rxchar(uint8_t rxchar) {
+	if (dsr_is_pending(DSR_TASK_EXECUTE_DEBUG_COMMAND)) {
+		/* Do not accept new characters while execution in progress */
+		return;
+	}
 	if (debug_mode == DEBUG_RS232_ECHO) {
 		fprintf(stderr, "[%02x]", rxchar);
 	}
@@ -522,8 +532,7 @@ void debugconsole_rxchar(uint8_t rxchar) {
 		} else {
 			last_cmd_length = cmd_length;
 		}
-		debugconsole_execute();
-		debugconsole_print_prompt();
+		dsr_mark_pending(DSR_TASK_EXECUTE_DEBUG_COMMAND);
 	} else if (rxchar == KEY_BACKSPACE) {
 		if (cmd_length > 0) {
 			cmd_length--;

@@ -25,10 +25,8 @@
 #include <stm32f4xx_spi.h>
 #include <stm32f4xx_dma.h>
 #include "spi.h"
-#include "displays.h"
-#include "iomux.h"
 #include "fncmap.h"
-#include "pinmap.h"
+#include "dsr_tasks.h"
 
 void DisplaySPI_DMAStream_TX_IRQHandler(void);
 void DisplaySPI_DMAStream_TX_IRQHandler(void) {
@@ -36,7 +34,7 @@ void DisplaySPI_DMAStream_TX_IRQHandler(void) {
 		DMA_ClearITPendingBit(DisplaySPI_DMAStream_TX, DisplaySPI_DMAStream_TX_TCIF);
 		SPI_I2S_DMACmd(DisplaySPI_SPI, SPI_I2S_DMAReq_Tx, DISABLE);
 		DMA_Cmd(DisplaySPI_DMAStream_TX, DISABLE);
-		display_dma_finished();
+		dsr_mark_pending(DSR_TASK_DISPLAY_UPDATE_FINISHED);
 	}
 }
 
@@ -47,11 +45,6 @@ void IOMuxSPI_DMAStream_TX_IRQHandler(void) {
 		SPI_I2S_DMACmd(IOMuxSPI_SPI, SPI_I2S_DMAReq_Tx, DISABLE);
 		DMA_Cmd(IOMuxSPI_DMAStream_TX, DISABLE);
 	}
-	if (DMA_GetITStatus(IOMuxSPI_DMAStream_TX, IOMuxSPI_DMAStream_TX_FEIF)) {
-		LEDBlue_set_ACTIVE();
-		/* TX automatically disabled already, also disable RX */
-		DMA_ClearITPendingBit(IOMuxSPI_DMAStream_TX, IOMuxSPI_DMAStream_TX_FEIF);
-	}
 }
 
 void IOMuxSPI_DMAStream_RX_IRQHandler(void);
@@ -60,13 +53,7 @@ void IOMuxSPI_DMAStream_RX_IRQHandler(void) {
 		DMA_ClearITPendingBit(IOMuxSPI_DMAStream_RX, IOMuxSPI_DMAStream_RX_TCIF);
 		SPI_I2S_DMACmd(IOMuxSPI_SPI, SPI_I2S_DMAReq_Rx, DISABLE);
 		DMA_Cmd(IOMuxSPI_DMAStream_RX, DISABLE);
-		iomux_dma_finished();
-	}
-	if (DMA_GetITStatus(IOMuxSPI_DMAStream_RX, IOMuxSPI_DMAStream_RX_FEIF)) {
-		LEDOrange_set_ACTIVE();
-		/* RX automatically disabled already, also disable TX */
-		DMA_ClearITPendingBit(IOMuxSPI_DMAStream_RX, IOMuxSPI_DMAStream_RX_FEIF);
-		//DMA_Cmd(IOMuxSPI_DMAStream_TX, DISABLE);
+		dsr_mark_pending(DSR_TASK_IOMPLEX_FINISHED);
 	}
 }
 

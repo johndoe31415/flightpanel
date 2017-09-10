@@ -204,7 +204,7 @@ static void redraw_frequency_display(bool *do_redraw, int surface_index, uint32_
 void instruments_idle_loop(void) {
 	rotary_com1.rotary.changed = true;
 	rotary_com1.rotary.value = 0x123;
-	while (true) {
+	//while (true) {
 		if (rotary_com1.rotary.changed) {
 			rotary_com1.rotary.changed = false;
 			redraw_com1_standby = true;
@@ -255,7 +255,8 @@ void instruments_idle_loop(void) {
 		redraw_frequency_display(&redraw_nav1_standby, 5, nav_index_to_frequency_khz(rotary_nav1.rotary.value));
 		redraw_frequency_display(&redraw_nav2_active, 6, nav_index_to_frequency_khz(instrument_state.nav2_active_index));
 		redraw_frequency_display(&redraw_nav2_standby, 7, nav_index_to_frequency_khz(rotary_nav2.rotary.value));
-	}
+
+	//}
 }
 
 void instruments_set_by_host(const struct hid_set_report_t *report) {
