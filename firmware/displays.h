@@ -27,7 +27,7 @@
 #define DISPLAY_COUNT		12
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void display_dma_finished(void);
+void dsr_display_dma_finished(void);
 void display_mark_surface_dirty(int display_index);
 const struct surface_t* displays_get_surface(int display_index);
 void init_displays(void);

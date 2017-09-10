@@ -45,6 +45,7 @@
 #include "displays.h"
 #include "instruments.h"
 #include "iomux.h"
+#include "iomux_pinmap.h"
 #include "pinmap.h"
 #include "debug.h"
 #include "dsr_tasks.h"
@@ -59,6 +60,9 @@ int main(void) {
 	debug_show_all();
 
 	init_displays();
+	iomux_output_set(IOMUX_OUT_XPDR_STBY, true);
+	iomux_output_set(IOMUX_OUT_NavSrc_NAV, true);
+	dsr_mark_pending(DSR_TASK_IDLE);
 	execute_dsr_loop();
 	return 0;
 }

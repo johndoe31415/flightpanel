@@ -33,8 +33,9 @@
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 const uint8_t *iomux_input_array(void);
 void iomux_disable(void);
+void iomux_clamp_all_outputs(bool do_clamp);
 void iomux_trigger(void);
-void iomux_dma_finished(void);
+void dsr_iomux_dma_finished(void);
 bool iomux_get_input_from(const uint8_t *iomux_array, int pin_id);
 bool iomux_get_input(int pin_id);
 void iomux_output_setall(uint8_t byte_value);

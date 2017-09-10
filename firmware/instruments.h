@@ -74,7 +74,7 @@ struct flight_data {
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void hid_tick(void);
 void instruments_handle_inputs(void);
-void instruments_idle_loop(void);
+void dsr_idle_task(void);
 void instruments_set_by_host(const struct hid_set_report_t *report);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 

@@ -33,8 +33,10 @@
 #include "instruments.h"
 
 static uint8_t outputs[IOMUX_BYTECOUNT];
+static uint8_t clamped_outputs[IOMUX_BYTECOUNT];
 static uint8_t inputs[IOMUX_BYTECOUNT];
 static bool iomux_disabled = false;
+static bool iomux_clamped = false;
 
 const uint8_t *iomux_input_array(void) {
 	return inputs;
@@ -42,6 +44,10 @@ const uint8_t *iomux_input_array(void) {
 
 void iomux_disable(void) {
 	iomux_disabled = true;
+}
+
+void iomux_clamp_all_outputs(bool do_clamp) {
+	iomux_clamped = do_clamp;
 }
 
 /* Trigger IOMux transfer */
@@ -70,10 +76,10 @@ void iomux_trigger(void) {
 	reinit_iomux_spi_sck_AF(true);
 
 	/* Start the DMA transfer */
-	spi_tx_rx_data_dma(IOMuxSPI_SPI, IOMuxSPI_DMAStream_TX, outputs, IOMuxSPI_DMAStream_RX, inputs, sizeof(outputs));
+	spi_tx_rx_data_dma(IOMuxSPI_SPI, IOMuxSPI_DMAStream_TX, iomux_clamped ? clamped_outputs : outputs, IOMuxSPI_DMAStream_RX, inputs, sizeof(outputs));
 }
 
-void iomux_dma_finished(void) {
+void dsr_iomux_dma_finished(void) {
 	IOMux_Out_STCP_pulse();
 	IOMux_Out_OE_set_LOW();
 	instruments_handle_inputs();

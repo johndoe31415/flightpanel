@@ -161,7 +161,7 @@ static void display_dma_start(int display_index) {
 	spi_tx_data_dma(DisplaySPI_SPI, DisplaySPI_DMAStream_TX, displays[display_index].surface->data, 128 * 64 / 8);
 }
 
-void display_dma_finished(void) {
+void dsr_display_dma_finished(void) {
 	displays_disable_cs(current_dma_update);
 	current_dma_update = -1;
 	displays_check_dma_schedule();

@@ -38,6 +38,8 @@
 #include "iomux.h"
 #include "instruments.h"
 #include "frequencies.h"
+#include "iomux_pinmap.h"
+#include "dsr_tasks.h"
 
 #define USB_REPORT_INTERVAL_MS		25
 
@@ -100,45 +102,120 @@ static struct rotary_encoder_with_button_t rotary_nav2 = {
 	}
 };
 
+struct button_t radio_com1_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+struct button_t radio_nav1_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+struct button_t radio_dme_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+struct button_t radio_com2_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+struct button_t radio_nav2_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+struct button_t radio_adf_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+
+struct button_t xpdf_mode_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+struct button_t navsrc_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+
+struct button_t ap_master_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+
 static const struct rotary_input_t rotary_inputs[] = {
 	{
 		.target = &rotary_com1.rotary,
-		.pin1 = PIN_INVALID,
-		.pin2 = PIN_INVALID,
+		.pin1 = IOMUX_IN_Rotary_COM1_A,
+		.pin2 = IOMUX_IN_Rotary_COM1_B,
 	},
 	{
 		.target = &rotary_com2.rotary,
-		.pin1 = PIN_INVALID,
-		.pin2 = PIN_INVALID,
+		.pin1 = IOMUX_IN_Rotary_COM2_A,
+		.pin2 = IOMUX_IN_Rotary_COM2_B,
 	},
 	{
 		.target = &rotary_nav1.rotary,
-		.pin1 = PIN_INVALID,
-		.pin2 = PIN_INVALID,
+		.pin1 = IOMUX_IN_Rotary_NAV1_A,
+		.pin2 = IOMUX_IN_Rotary_NAV1_B,
 	},
 	{
 		.target = &rotary_nav2.rotary,
-		.pin1 = PIN_INVALID,
-		.pin2 = PIN_INVALID,
+		.pin1 = IOMUX_IN_Rotary_NAV2_A,
+		.pin2 = IOMUX_IN_Rotary_NAV2_B,
 	},
 };
 
 static const struct button_input_t button_inputs[] = {
 	{
 		.target = &rotary_com1.button,
-		.pin = PIN_INVALID,
+		.pin = IOMUX_IN_Rotary_COM1_Button,
 	},
 	{
 		.target = &rotary_com2.button,
-		.pin = PIN_INVALID,
+		.pin = IOMUX_IN_Rotary_COM2_Button,
 	},
 	{
 		.target = &rotary_nav1.button,
-		.pin = PIN_INVALID,
+		.pin = IOMUX_IN_Rotary_NAV1_Button,
 	},
 	{
 		.target = &rotary_nav2.button,
-		.pin = PIN_INVALID,
+		.pin = IOMUX_IN_Rotary_NAV2_Button,
+	},
+	{
+		.target = &radio_com1_button,
+		.pin = IOMUX_IN_Button_Radio_COM1,
+	},
+	{
+		.target = &radio_nav1_button,
+		.pin = IOMUX_IN_Button_Radio_NAV1,
+	},
+	{
+		.target = &radio_dme_button,
+		.pin = IOMUX_IN_Button_Radio_DME,
+	},
+	{
+		.target = &radio_com2_button,
+		.pin = IOMUX_IN_Button_Radio_COM2,
+	},
+	{
+		.target = &radio_nav2_button,
+		.pin = IOMUX_IN_Button_Radio_NAV2,
+	},
+	{
+		.target = &radio_adf_button,
+		.pin = IOMUX_IN_Button_Radio_ADF,
+	},
+	{
+		.target = &xpdf_mode_button,
+		.pin = IOMUX_IN_Button_XPDR_Mode,
+	},
+	{
+		.target = &navsrc_button,
+		.pin = IOMUX_IN_Button_NavSrc,
+	},
+	{
+		.target = &ap_master_button,
+		.pin = IOMUX_IN_Button_AP,
 	},
 };
 
@@ -201,66 +278,100 @@ static void redraw_frequency_display(bool *do_redraw, int surface_index, uint32_
 	}
 }
 
-void instruments_idle_loop(void) {
-	rotary_com1.rotary.changed = true;
-	rotary_com1.rotary.value = 0x123;
-	//while (true) {
-		if (rotary_com1.rotary.changed) {
-			rotary_com1.rotary.changed = false;
-			redraw_com1_standby = true;
-		}
-		if (rotary_com2.rotary.changed) {
-			rotary_com2.rotary.changed = false;
-			redraw_com2_standby = true;
-		}
-		if (rotary_nav1.rotary.changed) {
-			rotary_nav1.rotary.changed = false;
-			redraw_nav1_standby = true;
-		}
-		if (rotary_nav2.rotary.changed) {
-			rotary_nav2.rotary.changed = false;
-			redraw_nav2_standby = true;
-		}
+static bool button_pressed(struct button_t *button) {
+	if (button->lastpress != BUTTON_NOACTION) {
+		button->lastpress = BUTTON_NOACTION;
+		return true;
+	}
+	return false;
+}
 
-		if (rotary_com1.button.lastpress != BUTTON_NOACTION) {
-			rotary_com1.button.lastpress = BUTTON_NOACTION;
-			swap_uint16(&rotary_com1.rotary.value, &instrument_state.com1_active_index);
-			redraw_com1_active = true;
-			redraw_com1_standby = true;
-		}
-		if (rotary_com2.button.lastpress != BUTTON_NOACTION) {
-			rotary_com2.button.lastpress = BUTTON_NOACTION;
-			swap_uint16(&rotary_com2.rotary.value, &instrument_state.com2_active_index);
-			redraw_com2_active = true;
-			redraw_com2_standby = true;
-		}
-		if (rotary_nav1.button.lastpress != BUTTON_NOACTION) {
-			rotary_nav1.button.lastpress = BUTTON_NOACTION;
-			swap_uint16(&rotary_nav1.rotary.value, &instrument_state.nav1_active_index);
-			redraw_nav1_active = true;
-			redraw_nav1_standby = true;
-		}
-		if (rotary_nav2.button.lastpress != BUTTON_NOACTION) {
-			rotary_nav2.button.lastpress = BUTTON_NOACTION;
-			swap_uint16(&rotary_nav2.rotary.value, &instrument_state.nav2_active_index);
-			redraw_nav2_active = true;
-			redraw_nav2_standby = true;
-		}
+static bool rotary_changed(struct rotary_encoder_t *rotary) {
+	if (rotary->changed) {
+		rotary->changed = false;
+		return true;
+	}
+	return false;
+}
 
-		redraw_frequency_display(&redraw_com1_active, 0, com_index_to_frequency_khz(instrument_state.com1_active_index));
-		redraw_frequency_display(&redraw_com1_standby, 1, com_index_to_frequency_khz(rotary_com1.rotary.value));
-		redraw_frequency_display(&redraw_com2_active, 2, com_index_to_frequency_khz(instrument_state.com2_active_index));
-		redraw_frequency_display(&redraw_com2_standby, 3, com_index_to_frequency_khz(rotary_com2.rotary.value));
-		redraw_frequency_display(&redraw_nav1_active, 4, nav_index_to_frequency_khz(instrument_state.nav1_active_index));
-		redraw_frequency_display(&redraw_nav1_standby, 5, nav_index_to_frequency_khz(rotary_nav1.rotary.value));
-		redraw_frequency_display(&redraw_nav2_active, 6, nav_index_to_frequency_khz(instrument_state.nav2_active_index));
-		redraw_frequency_display(&redraw_nav2_standby, 7, nav_index_to_frequency_khz(rotary_nav2.rotary.value));
+void dsr_idle_task(void) {
+	dsr_mark_pending(DSR_TASK_IDLE);
+	iomux_clamp_all_outputs(iomux_get_input(IOMUX_IN_Switch_MASTER));
+	if (rotary_changed(&rotary_com1.rotary)) {
+		redraw_com1_standby = true;
+	}
+	if (rotary_changed(&rotary_com2.rotary)) {
+		redraw_com2_standby = true;
+	}
+	if (rotary_changed(&rotary_nav1.rotary)) {
+		redraw_nav1_standby = true;
+	}
+	if (rotary_changed(&rotary_nav2.rotary)) {
+		redraw_nav2_standby = true;
+	}
 
-	//}
+	if (button_pressed(&rotary_com1.button)) {
+		swap_uint16(&rotary_com1.rotary.value, &instrument_state.com1_active_index);
+		redraw_com1_active = true;
+		redraw_com1_standby = true;
+	}
+	if (button_pressed(&rotary_com2.button)) {
+		swap_uint16(&rotary_com2.rotary.value, &instrument_state.com2_active_index);
+		redraw_com2_active = true;
+		redraw_com2_standby = true;
+	}
+	if (button_pressed(&rotary_nav1.button)) {
+		swap_uint16(&rotary_nav1.rotary.value, &instrument_state.nav1_active_index);
+		redraw_nav1_active = true;
+		redraw_nav1_standby = true;
+	}
+	if (button_pressed(&rotary_nav2.button)) {
+		swap_uint16(&rotary_nav2.rotary.value, &instrument_state.nav2_active_index);
+		redraw_nav2_active = true;
+		redraw_nav2_standby = true;
+	}
+	if (button_pressed(&radio_com1_button)) {
+		iomux_output_toggle(IOMUX_OUT_Radio_COM1);
+	}
+	if (button_pressed(&radio_nav1_button)) {
+		iomux_output_toggle(IOMUX_OUT_Radio_NAV1);
+	}
+	if (button_pressed(&radio_dme_button)) {
+		iomux_output_toggle(IOMUX_OUT_Radio_DME);
+	}
+	if (button_pressed(&radio_com2_button)) {
+		iomux_output_toggle(IOMUX_OUT_Radio_COM2);
+	}
+	if (button_pressed(&radio_nav2_button)) {
+		iomux_output_toggle(IOMUX_OUT_Radio_NAV2);
+	}
+	if (button_pressed(&radio_adf_button)) {
+		iomux_output_toggle(IOMUX_OUT_Radio_ADF);
+	}
+	if (button_pressed(&xpdf_mode_button)) {
+		iomux_output_toggle(IOMUX_OUT_XPDR_STBY);
+		iomux_output_toggle(IOMUX_OUT_XPDR_C);
+	}
+	if (button_pressed(&navsrc_button)) {
+		iomux_output_toggle(IOMUX_OUT_NavSrc_NAV);
+		iomux_output_toggle(IOMUX_OUT_NavSrc_GPS);
+	}
+	if (button_pressed(&ap_master_button)) {
+		iomux_output_toggle(IOMUX_OUT_AP_MASTER);
+	}
+
+	redraw_frequency_display(&redraw_com1_active, 0, com_index_to_frequency_khz(instrument_state.com1_active_index));
+	redraw_frequency_display(&redraw_com1_standby, 1, com_index_to_frequency_khz(rotary_com1.rotary.value));
+	redraw_frequency_display(&redraw_com2_active, 2, com_index_to_frequency_khz(instrument_state.com2_active_index));
+	redraw_frequency_display(&redraw_com2_standby, 3, com_index_to_frequency_khz(rotary_com2.rotary.value));
+	redraw_frequency_display(&redraw_nav1_active, 4, nav_index_to_frequency_khz(instrument_state.nav1_active_index));
+	redraw_frequency_display(&redraw_nav1_standby, 5, nav_index_to_frequency_khz(rotary_nav1.rotary.value));
+	redraw_frequency_display(&redraw_nav2_active, 6, nav_index_to_frequency_khz(instrument_state.nav2_active_index));
+	redraw_frequency_display(&redraw_nav2_standby, 7, nav_index_to_frequency_khz(rotary_nav2.rotary.value));
 }
 
 void instruments_set_by_host(const struct hid_set_report_t *report) {
-	printf("set %d %d\n", report->com1_active, report->com1_standby);
+	printf("HostSet %d %d\n", report->com1_active, report->com1_standby);
 	instrument_state.com1_active_index = report->com1_active;
 	rotary_com1.rotary.value = report->com1_standby;
 	instrument_state.com2_active_index = report->com2_active;
@@ -278,3 +389,4 @@ void instruments_set_by_host(const struct hid_set_report_t *report) {
 	redraw_nav2_active = true;
 	redraw_nav2_standby = true;
 }
+

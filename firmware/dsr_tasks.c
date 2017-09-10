@@ -30,13 +30,13 @@
 static struct dsr_runtime_info_t dsr_runtime_info[NUMBER_OF_DSRS];
 static const struct dsr_task_definition_t dsr_definitions[NUMBER_OF_DSRS] = {
 	[DSR_TASK_IDLE] = {
-		.callback = instruments_idle_loop,
+		.callback = dsr_idle_task,
 	},
 	[DSR_TASK_IOMPLEX_FINISHED] = {
-		.callback = iomux_dma_finished,
+		.callback = dsr_iomux_dma_finished,
 	},
 	[DSR_TASK_DISPLAY_UPDATE_FINISHED] = {
-		.callback = display_dma_finished,
+		.callback = dsr_display_dma_finished,
 	},
 	[DSR_TASK_EXECUTE_DEBUG_COMMAND] = {
 		.callback = dsr_execute_debug_command,
