@@ -55,8 +55,7 @@ console:
 
 program: flightpanel.bin
 	-killall st-util
-	$(STFLASH) write $< $(WRITE_ADDR)
-	$(STFLASH) reset
+	$(STFLASH) --reset write $< $(WRITE_ADDR)
 
 bindump: flightpanel.bin
 	$(OBJDUMP) -b binary -m armv3m -D $<
