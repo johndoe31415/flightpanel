@@ -32,8 +32,8 @@
 #include "init.h"
 #include "instruments.h"
 
-static uint8_t outputs[IOMUX_BYTECOUNT];
-static uint8_t clamped_outputs[IOMUX_BYTECOUNT];
+static uint8_t output_transfer[IOMUX_BYTECOUNT];
+static uint8_t output_modify[IOMUX_BYTECOUNT];
 static uint8_t inputs[IOMUX_BYTECOUNT];
 static bool iomux_disabled = false;
 static bool iomux_clamped = false;
@@ -76,7 +76,8 @@ void iomux_trigger(void) {
 	reinit_iomux_spi_sck_AF(true);
 
 	/* Start the DMA transfer */
-	spi_tx_rx_data_dma(IOMuxSPI_SPI, IOMuxSPI_DMAStream_TX, iomux_clamped ? clamped_outputs : outputs, IOMuxSPI_DMAStream_RX, inputs, sizeof(outputs));
+	memcpy(output_transfer, output_modify, sizeof(output_transfer));
+	spi_tx_rx_data_dma(IOMuxSPI_SPI, IOMuxSPI_DMAStream_TX, output_transfer, IOMuxSPI_DMAStream_RX, inputs, sizeof(output_transfer));
 }
 
 void dsr_iomux_dma_finished(void) {
@@ -96,22 +97,22 @@ bool iomux_get_input(int pin_id) {
 }
 
 void iomux_output_setall(uint8_t byte_value) {
-	memset(outputs, byte_value, IOMUX_BYTECOUNT);
+	memset(output_modify, byte_value, IOMUX_BYTECOUNT);
 }
 
 void iomux_output_toggle(int pin_id) {
 	int byteno = pin_id / 8;
 	int bitno = pin_id % 8;
-	outputs[byteno] ^= (1 << bitno);
+	output_modify[byteno] ^= (1 << bitno);
 }
 
 void iomux_output_set(int pin_id, bool value) {
 	int byteno = pin_id / 8;
 	int bitno = pin_id % 8;
 	if (value) {
-		outputs[byteno] |= (1 << bitno);
+		output_modify[byteno] |= (1 << bitno);
 	} else {
-		outputs[byteno] &= ~(1 << bitno);
+		output_modify[byteno] &= ~(1 << bitno);
 	}
 }
 

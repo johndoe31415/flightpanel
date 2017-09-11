@@ -105,7 +105,9 @@ static void dump_debug_registers(void) {
 	printf("CYCCNT %lu\n", DWT->CYCCNT);
 	for (int i = 0; i < 100; i++) {
 		timing_start();
-		delay_loopcnt(50);
+		LEDBlue_set_ACTIVE();
+		delay_loopcnt(100);
+		LEDBlue_set_INACTIVE();
 		uint32_t cycles = timing_end();
 		printf("Cyc %lu\n", cycles - 2);
 	}
@@ -144,20 +146,21 @@ static void iomux_check_inputs(void) {
 
 static void iomux_set_outputs(void) {
 	const int id_bit_count = 7;
-	const int id_tick_count = (id_bit_count * 3);
+	const int id_tick_count = (id_bit_count * 4);
 	const int total_tick_count = id_tick_count * 3;
 	debug_accu = (debug_accu + 1) % total_tick_count;
 	if (debug_accu < id_tick_count) {
 		/* Output IDs */
-		int bitno = debug_accu / 3;
-		int bitpos = debug_accu % 3;
+		int bitno = debug_accu / 4;
+		int bitpos = debug_accu % 4;
 		if (bitpos == 0) {
 			iomux_output_setall(0xff);
 		} else if (bitpos == 1) {
 			/* Output big endian */
-			bitno = (id_bit_count - 1) - bitno;
+//			bitno = (id_bit_count - 1) - bitno;
 			for (int i = 0; i < IOMUX_OUTPUTS; i++) {
-				iomux_output_set(i, i & (1 << bitno));
+				bool bit_value = (i & (1 << bitno)) != 0;
+				iomux_output_set(i, bit_value);
 			}
 		} else {
 			iomux_output_setall(0);

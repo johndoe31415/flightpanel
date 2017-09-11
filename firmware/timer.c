@@ -51,6 +51,7 @@ void SysTick_Handler(void) {
 	}
 	HAL_IncTick();
 	iomux_trigger();
+	//delay_loopcnt(1000);
 	hid_tick();
 	debugconsole_tick();
 }
