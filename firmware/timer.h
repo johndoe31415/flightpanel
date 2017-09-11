@@ -24,7 +24,7 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
-/* These values are only valid for 168 MHz operation */
+/* These values are only valid for 168 MHz operation and execution from flash ROM */
 #define LOOPCOUNT_35NS			0
 #define LOOPCOUNT_50NS			1
 #define LOOPCOUNT_80NS			2
