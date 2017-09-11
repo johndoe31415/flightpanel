@@ -157,7 +157,7 @@ static void iomux_set_outputs(void) {
 			iomux_output_setall(0xff);
 		} else if (bitpos == 1) {
 			/* Output big endian */
-//			bitno = (id_bit_count - 1) - bitno;
+			bitno = (id_bit_count - 1) - bitno;
 			for (int i = 0; i < IOMUX_OUTPUTS; i++) {
 				bool bit_value = (i & (1 << bitno)) != 0;
 				iomux_output_set(i, bit_value);
