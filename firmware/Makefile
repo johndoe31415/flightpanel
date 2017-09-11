@@ -53,6 +53,9 @@ gdb:
 console:
 	picocom --baud 115200 /dev/ttyUSB*
 
+reset:
+	$(STFLASH) reset
+
 program: flightpanel.bin
 	-killall st-util
 	$(STFLASH) --reset write $< $(WRITE_ADDR)

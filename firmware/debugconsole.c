@@ -102,15 +102,11 @@ static int debug_accu;
 static uint8_t iomux_last_inputs[IOMUX_BYTECOUNT];
 
 static void dump_debug_registers(void) {
-	printf("CYCCNT %lu\n", DWT->CYCCNT);
-	for (int i = 0; i < 100; i++) {
-		timing_start();
-		LEDBlue_set_ACTIVE();
-		delay_loopcnt(100);
-		LEDBlue_set_INACTIVE();
-		uint32_t cycles = timing_end();
-		printf("Cyc %lu\n", cycles - 2);
-	}
+	const int loopcount = 200;
+	timing_start();
+	delay_loopcnt(loopcount);
+	uint32_t cycles = timing_end();
+	printf("%lu cycles per delay_loopcnt(%d), i.e., %ld cycles/loopcnt\n", cycles, loopcount, cycles / loopcount);
 }
 
 static void iomux_check_inputs(void) {

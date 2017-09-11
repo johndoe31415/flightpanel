@@ -31,18 +31,23 @@
 #define LOOPCOUNT_110NS			3
 #define LOOPCOUNT_1MS			42000
 
-/* Asymptotic behavior of this delay loop: 4 clock cycles per iteration count.
- * Therefore:
- *     t_delay = 4 / f_cpu * itercnt
- *     itercnt = t_delay * f_cpu / 4
- *     f_cpu = itercnt / t_delay * 4
+/* Asymptotic behavior of this delay loop: CKCNT = 4 clock cycles per iteration
+ * count when executing from flash ROM. CKCNT = 6 clock cycles per iteration
+ * when executing from SRAM.
  *
- * Example: f_cpu = 168 MHz, itercnt = 10000, t_delay = 238 µs
- * Example: f_cpu = 168 MHz, t_delay = 1 ms, itercnt = 42000
+ * Therefore:
+ *     t_delay = CKCNT / f_cpu * itercnt
+ *     itercnt = t_delay * f_cpu / CKCNT
+ *     f_cpu = itercnt / t_delay * CKCNT
+ *
+ * Example: Flash ROM, f_cpu = 168 MHz, itercnt = 10000, t_delay = 238 µs
+ * Example: Flash ROM, f_cpu = 168 MHz, t_delay = 1 ms, itercnt = 42000
+ * Example: SRAM, f_cpu = 168 MHz, itercnt = 200, t_delay = 7.14 µs
  */
 
 #define delay_loopcnt(nopcnt) { int _nopcnt = nopcnt; \
 	__asm__ __volatile__(		\
+		".align 2"					"\n\t"				\
 		"0:"						"\n\t"				\
 		"cbz %0, 1f"				"\n\t"				\
 		"subs %0, #1"				"\n\t"				\
