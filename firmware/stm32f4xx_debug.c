@@ -22,54 +22,45 @@
 **/
 
 #include <stdio.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <stm32f4xx_gpio.h>
-#include <stm32f4xx_spi.h>
-#include <stm32f4xx_dma.h>
-#include <stm32f4xx_i2c.h>
-
-#include "rs232.h"
-#include "rotary.h"
-#include "spi.h"
-#include "usb.h"
-#include "timer.h"
-#include "i2c.h"
-#include "eeprom.h"
-#include "configuration.h"
-#include "usbd_hid.h"
-#include "usb.h"
-#include "displays.h"
-#include "instruments.h"
-#include "iomux.h"
-#include "iomux_pinmap.h"
-#include "pinmap.h"
-#include "debug.h"
-#include "dsr_tasks.h"
+#include <stdint.h>
+#include <misc.h>
 #include "stm32f4xx_debug.h"
 
-extern uint8_t _sflash;
+uint32_t overhead_cycles;
 
-int main(void) {
-	printf("Reset successful. Running from %p.\n", &_sflash);
-	init_usb_late();
-	printf("USB initialized.\n");
-
-	debug_show_all();
-#ifndef RELEASE_BUILD
-	printf("Enabling Cortex-M debug unit.\n");
-	timing_init();
-#endif
-
-	init_displays();
-	iomux_output_set(IOMUX_OUT_XPDR_STBY, true);
-	iomux_output_set(IOMUX_OUT_NavSrc_NAV, true);
-	dsr_mark_pending(DSR_TASK_IDLE);
-	execute_dsr_loop();
-	return 0;
+void __attribute__ ((noinline)) timing_start(void) {
+	DWT->CYCCNT = 0;
 }
 
+uint32_t __attribute__ ((noinline)) timing_end(void) {
+	uint32_t cycles = DWT->CYCCNT;
+	if (cycles < overhead_cycles) {
+		return 0;
+	} else {
+		return cycles - overhead_cycles;
+	}
+}
 
+void timing_init(void) {
+	/* Unlock "Lock Access Register" inside ITM */
+	ITM->LAR = 0xC5ACCE55;
+
+	/* Enable core debugging */
+	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+
+	/* Enable cycle counting */
+	DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
+	/* Now calibrate */
+	uint32_t min_cycles = 0xffffffff;
+	overhead_cycles = 0;
+	for (int i = 0; i < 10; i++) {
+		timing_start();
+		uint32_t cycles = timing_end();
+		if (cycles < min_cycles) {
+			min_cycles = cycles;
+		}
+	}
+	overhead_cycles = min_cycles;
+	printf("Calibrated to %lu cycles.\n", overhead_cycles);
+}

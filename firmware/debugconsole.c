@@ -45,6 +45,7 @@
 #include "bitwise.h"
 #include "iomux_pinmap.h"
 #include "dsr_tasks.h"
+#include "stm32f4xx_debug.h"
 
 #define iabs(x)				(((x) < 0) ? -(x) : (x))
 #define CMD_BUFFER_SIZE		32
@@ -99,6 +100,16 @@ static uint8_t cmd_length;
 static uint8_t last_cmd_length;
 static int debug_accu;
 static uint8_t iomux_last_inputs[IOMUX_BYTECOUNT];
+
+static void dump_debug_registers(void) {
+	printf("CYCCNT %lu\n", DWT->CYCCNT);
+	for (int i = 0; i < 100; i++) {
+		timing_start();
+		delay_loopcnt(50);
+		uint32_t cycles = timing_end();
+		printf("Cyc %lu\n", cycles - 2);
+	}
+}
 
 static void iomux_check_inputs(void) {
 	uint8_t iomux_inputs[IOMUX_BYTECOUNT];
@@ -426,6 +437,7 @@ static void debugconsole_execute(void) {
 		printf("    adc        Gather environmental data (supply voltage, temperature) measured via ADC\n");
 		printf("    spi        Show overview of SPI status\n");
 		printf("    dma        Show overview of DMA status\n");
+		printf("    debug      Dump debug register contents\n");
 		printf("    reset      Reset the MCU entirely\n");
 	} else if (!strcmp(cmd_input, "off")) {
 		debug_mode = DEBUG_DISABLED;
@@ -487,6 +499,8 @@ static void debugconsole_execute(void) {
 		dump_spi_status("SPI3", SPI3);
 	} else if (!strcmp(cmd_input, "dma")) {
 		dump_dma_status("DMA1", DMA1, DMA1_Stream0);
+	} else if (!strcmp(cmd_input, "debug")) {
+		dump_debug_registers();
 	} else if (!strcmp(cmd_input, "reset")) {
 		stm32f4xx_reset();
 	} else if (!strcmp(cmd_input, "+")) {
