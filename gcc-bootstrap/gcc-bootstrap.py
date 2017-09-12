@@ -108,7 +108,7 @@ class Installer(object):
 	def compile(self):
 		try:
 			os.chdir(self._builddir)
-			subprocess.check_call([ "make", "-j8" ])
+			subprocess.check_call([ "make", "-j16" ])
 		finally:
 			os.chdir(self._root)
 
@@ -190,7 +190,10 @@ if (len(build_packages) == 0) or (installer.name in build_packages):
 
 installer = Installer("gdb", packages["gdb"], prefix_dir)
 if (len(build_packages) == 0) or (installer.name in build_packages):
-	installer.start(configure_options = base_options)
+	installer.start(configure_options = base_options + [
+#		"--with-auto-load-safe-path=.:$debugdir:$datadir/auto-load",
+		"--with-python=/usr/bin/python3",
+	])
 
 installer = Installer("stlink2", packages["stlink2"], prefix_dir)
 if (len(build_packages) == 0) or (installer.name in build_packages):
