@@ -69,6 +69,7 @@ static void test_get_bits(void) {
 	test_assert_int_eq(GET_BITS(0xabcdef12, 0, 8), 0x12);
 	test_assert_int_eq(GET_BITS(0xabcdef12, 8, 8), 0xef);
 	test_assert_int_eq(GET_BITS(0xabcdef12, 12, 8), 0xde);
+	test_assert_int_eq(GET_BITS(0x0ff00000, 0, 2), 0);
 	subtest_finished();
 }
 

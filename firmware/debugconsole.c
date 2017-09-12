@@ -402,7 +402,7 @@ static void dump_io(const struct gpio_definition_t *gpios, unsigned int io_count
 	printf("%d known GPIO %ss:\n", io_count, text);
 	for (int i = 0; i < io_count; i++) {
 		uint8_t moder = GET_BITS(gpios[i].gpio->MODER, 2 * gpios[i].pin_source, 2);
-		uint8_t speed = GET_BITS(gpios[i].gpio->OSPEEDR, 2 * gpios[debug_accu].pin_source, 2);
+		uint8_t speed = GET_BITS(gpios[i].gpio->OSPEEDR, 2 * gpios[i].pin_source, 2);
 		bool state;
 		if (dump_outputs) {
 			state = GET_BIT(gpios[i].gpio->ODR, gpios[i].pin_source);
