@@ -1,5 +1,28 @@
 #!/usr/bin/python3
+#
+#	flightpanel - A Cortex-M4 based USB flight panel for flight simulators.
+#	Copyright (C) 2017-2017 Johannes Bauer
+#
+#	This file is part of flightpanel.
+#
+#	flightpanel is free software; you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation; this program is ONLY licensed under
+#	version 3 of the License, later versions are explicitly excluded.
+#
+#	flightpanel is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#
+#	You should have received a copy of the GNU General Public License
+#	along with flightpanel; if not, write to the Free Software
+#	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#	Johannes Bauer <JohannesBauer@gmx.de>
+
 import gdb
+from .CM4RegisterMap import cm4reg
 
 class DebugCortexM(gdb.Command):
 	"Debugging of Cortex-M internals."
@@ -118,7 +141,7 @@ class DebugCortexM(gdb.Command):
 	def _decode_bits(cls, words, bitlen):
 		assert((32 % bitlen) == 0)
 		bitmask = (1 << bitlen) - 1
-		values_per_word = 32 / bitlen
+		values_per_word = 32 // bitlen
 		result = { }
 		for (i, word) in enumerate(words):
 			for j in range(values_per_word):
@@ -141,13 +164,10 @@ class DebugCortexM(gdb.Command):
 
 	def _cmd_irq(self, args, from_tty):
 		"""Show information about registered and pending IRQs."""
-		SCB_addr = 0xe000e000 + 0xd00		# System Control Block
-		SHPR_addr =	SCB_addr + 0x18			# System Handler Priority Register
-		SHCSR_addr = SCB_addr + 0x24		# System Handler Control and Status Register
 
-		SHPR = self._decode_bits(self._str_to_uint32_array(gdb.selected_inferior().read_memory(SHPR_addr, 4 * 3)), 8)
-		SHCSR = self._decode_bits(self._str_to_uint32_array(gdb.selected_inferior().read_memory(SHCSR_addr, 4)), 1)
-		relevant_irqs = set([ irq_no - 3 for irq_no in 3, 4, 5, 10, 11, 13, 14 ])
+		SHPR = self._decode_bits(self._str_to_uint32_array(gdb.selected_inferior().read_memory(cm4reg.SCS.SCB.SHPR.addr, 4 * 3)), 8)
+		SHCSR = self._decode_bits(self._str_to_uint32_array(gdb.selected_inferior().read_memory(cm4reg.SCS.SCB.SHCSR.addr, 4)), 1)
+		relevant_irqs = set([ irq_no - 3 for irq_no in (3, 4, 5, 10, 11, 13, 14) ])
 
 		SHCSR_bits = {
 			0:	"MEMFAULTACT",
@@ -175,17 +195,11 @@ class DebugCortexM(gdb.Command):
 		flags = [ name for (bitno, name) in sorted(SHCSR_bits.items()) if SHCSR[bitno] ]
 		print("SHCSR flags: %s" % (" ".join(flags)))
 
-		NVIC_addr = 0xe000e000 + 0x0100
-		NVIC_ISER_addr = NVIC_addr + 0x0
-		NVIC_ISPR_addr = NVIC_addr + 0x100
-		NVIC_IABR_addr = NVIC_addr + 0x200
-		NVIC_IP_addr = NVIC_addr + 0x300
 		irq_offset = 15
-
-		ISER = self._decode_bits(self._str_to_uint32_array(gdb.selected_inferior().read_memory(NVIC_addr + 0x0, 4 * 8)), 1)
-		ISPR = self._decode_bits(self._str_to_uint32_array(gdb.selected_inferior().read_memory(NVIC_addr + 0x100, 4 * 8)), 1)
-		IABR = self._decode_bits(self._str_to_uint32_array(gdb.selected_inferior().read_memory(NVIC_addr + 0x200, 4 * 8)), 1)
-		IP = self._decode_bits(self._str_to_uint32_array(gdb.selected_inferior().read_memory(NVIC_addr + 0x300, 240)), 8)
+		ISER = self._decode_bits(self._str_to_uint32_array(gdb.selected_inferior().read_memory(cm4reg.SCS.NVIC.ISER.addr, 4 * 8)), 1)
+		ISPR = self._decode_bits(self._str_to_uint32_array(gdb.selected_inferior().read_memory(cm4reg.SCS.NVIC.ISPR.addr, 4 * 8)), 1)
+		IABR = self._decode_bits(self._str_to_uint32_array(gdb.selected_inferior().read_memory(cm4reg.SCS.NVIC.IABR.addr, 4 * 8)), 1)
+		IP = self._decode_bits(self._str_to_uint32_array(gdb.selected_inferior().read_memory(cm4reg.SCS.NVIC.IP.addr, 240)), 8)
 
 		irqs_enabled = set(irq_no for (irq_no, enabled) in ISER.items() if enabled)
 		irqs_pending = set(irq_no for (irq_no, pending) in ISPR.items() if pending)
@@ -254,32 +268,41 @@ class DebugCortexM(gdb.Command):
 		gpio_name = args[0]
 		gpio_port = gpio_name[1]
 		gpio_pin = int(gpio_name[2:])
-		known_ports = {
-			"A":	0x0000,
-			"B":	0x0400,
-			"C":	0x0800,
-			"D":	0x0c00,
-			"E":	0x1000,
-			"F":	0x1400,
-			"G":	0x1800,
-			"H":	0x1c00,
-			"I":	0x2000,
-			"J":	0x2400,
-			"K":	0x2800,
-		}
-		if gpio_port not in known_ports:
-			print("Unable to determine GPIO pin offset of port %d." % (gpio_port))
+
+		gpio_unit = cm4reg.PERIPH.AHB1["GPIO" + gpio_port]
+#		gpio_break_regs = [ "ODR", "BSSR" ]
+		gpio_break_regs = [ "OSPEEDR" ]
+
+		for regname in gpio_break_regs:
+			addr = gpio_unit[regname].addr
+			print("Breaking on GPIO on Port%s (based 0x%x) register %s: 0x%x" % (gpio_port, gpio_unit.addr, regname, addr))
+			gdb.Breakpoint(spec = "*0x%x" % (addr), type = gdb.BP_WATCHPOINT)
+
+	def _cmd_gpio(self, args, from_tty):
+		"""Dump GPIO information"""
+		if len(args) != 1:
+			print("GPIO port required.")
 			return
-
-		PERIPH_BASE = 0x40000000
-		AHB1PERIPH_BASE = PERIPH_BASE + 0x00020000
-		GPIO_BASE = known_ports[gpio_port] + AHB1PERIPH_BASE
-		GPIO_ODR = GPIO_BASE + 0x14
-		GPIO_BSRR = GPIO_BASE + 0x18
-
-		print("Breaking on GPIO on Port%s (based 0x%x), pin %d." % (gpio_port, GPIO_BASE, gpio_pin))
-		gdb.Breakpoint(spec = "*0x%x" % (GPIO_ODR), type = gdb.BP_WATCHPOINT)
-		gdb.Breakpoint(spec = "*0x%x" % (GPIO_BSRR), type = gdb.BP_WATCHPOINT)
+		for gpio_port in args[0].upper():
+			moder = int.from_bytes(bytes(gdb.selected_inferior().read_memory(cm4reg.PERIPH.AHB1["GPIO" + gpio_port].MODER.addr, 4)), byteorder = "little")
+			odr = int.from_bytes(bytes(gdb.selected_inferior().read_memory(cm4reg.PERIPH.AHB1["GPIO" + gpio_port].ODR.addr, 4)), byteorder = "little")
+			ospeedr = int.from_bytes(bytes(gdb.selected_inferior().read_memory(cm4reg.PERIPH.AHB1["GPIO" + gpio_port].OSPEEDR.addr, 4)), byteorder = "little")
+			for pin in range(32):
+				mode = (moder >> (2 * pin)) & 0x3
+				speed = (ospeedr >> (2 * pin)) & 0x3
+				mode = {
+					0:	"In",
+					1:	"Out",
+					2:	"AltFnc",
+					3:	"Analog"
+				}[mode]
+				speed = {
+					0:	2,
+					1:	25,
+					2:	50,
+					3:	100,
+				}[speed]
+				print("P%s%-2d %-6s %3d MHz" % (gpio_port, pin, mode, speed))
 
 	def invoke(self, arg, from_tty):
 		if (arg == "?") or (arg == ""):
