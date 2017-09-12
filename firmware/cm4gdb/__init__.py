@@ -287,7 +287,7 @@ class DebugCortexM(gdb.Command):
 			moder = int.from_bytes(bytes(gdb.selected_inferior().read_memory(cm4reg.PERIPH.AHB1["GPIO" + gpio_port].MODER.addr, 4)), byteorder = "little")
 			odr = int.from_bytes(bytes(gdb.selected_inferior().read_memory(cm4reg.PERIPH.AHB1["GPIO" + gpio_port].ODR.addr, 4)), byteorder = "little")
 			ospeedr = int.from_bytes(bytes(gdb.selected_inferior().read_memory(cm4reg.PERIPH.AHB1["GPIO" + gpio_port].OSPEEDR.addr, 4)), byteorder = "little")
-			for pin in range(32):
+			for pin in range(16):
 				mode = (moder >> (2 * pin)) & 0x3
 				speed = (ospeedr >> (2 * pin)) & 0x3
 				mode = {
