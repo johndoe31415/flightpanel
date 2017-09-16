@@ -178,7 +178,7 @@ static void init_display_spi(void) {
 		.SPI_CPOL = SPI_CPOL_Low,
 		.SPI_CPHA = SPI_CPHA_1Edge,
 		.SPI_NSS = SPI_NSS_Soft,
-		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4,
+		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8,
 		.SPI_FirstBit = SPI_FirstBit_MSB,
 		.SPI_CRCPolynomial = 1,
 	};

@@ -34,6 +34,7 @@ void DisplaySPI_DMAStream_TX_IRQHandler(void);
 void IOMuxSPI_DMAStream_TX_IRQHandler(void);
 void IOMuxSPI_DMAStream_RX_IRQHandler(void);
 void spi_tx_data(SPI_TypeDef *SPIx, const uint8_t *data, int length);
+bool spi_dma_tx_ready(DMA_Stream_TypeDef *DMAy_Streamx_TX);
 void spi_tx_data_dma(SPI_TypeDef *SPIx, DMA_Stream_TypeDef *DMAy_Streamx, const void *data, int length);
 bool spi_dma_tx_rx_ready(DMA_Stream_TypeDef *DMAy_Streamx_TX, DMA_Stream_TypeDef *DMAy_Streamx_RX);
 void spi_tx_rx_data_dma(SPI_TypeDef *SPIx, DMA_Stream_TypeDef *DMAy_Streamx_TX, const void *tx_data, DMA_Stream_TypeDef *DMAy_Streamx_RX, void *rx_data, int length);

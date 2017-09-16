@@ -21,32 +21,34 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __FAULT_H__
-#define __FAULT_H__
+#include <misc.h>
+#include "atomic.h"
 
-/*
- r10 sl
- r11 fp
- r12 ip
- r13 sp
- r14 lr
- r15 pc
-*/
-struct fault_stack_layout_t {
-	uint32_t faultmask;
-	uint32_t psr;
-	uint32_t r4[8];
-	uint32_t r0[4];
-	uint32_t r12;		// ip
-	uint32_t r14;		// lr
-	uint32_t pc;
-	uint32_t xpsr;
-};
+void atomic_set(atomic_t *atomic, atomic_t value) {
+	__disable_irq();
+	*atomic = value;
+	__enable_irq();
+}
 
-/*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void soft_fault(const char *msg);
-void fail_assertion(const char *assertion, const char *filename, int lineno);
-void generic_fault_handler(uint32_t fault_id, const struct fault_stack_layout_t *stack_layout);
-/***************  AUTO GENERATED SECTION ENDS   ***************/
+bool atomic_set_if_false(atomic_t *atomic) {
+	bool was_set = false;
+	__disable_irq();
+	if (!*atomic) {
+		*atomic = 1;
+		was_set = true;
+	}
+	__enable_irq();
+	return was_set;
+}
 
-#endif
+void atomic_inc(atomic_t *atomic, int inc) {
+	__disable_irq();
+	*atomic += inc;
+	__enable_irq();
+}
+
+
+void atomic_dec(atomic_t *atomic, int dec) {
+	atomic_inc(atomic, -dec);
+}
+

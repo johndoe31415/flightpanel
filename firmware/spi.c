@@ -27,6 +27,8 @@
 #include "spi.h"
 #include "fncmap.h"
 #include "dsr_tasks.h"
+#include "displays.h"
+#include "fault.h"
 
 void DisplaySPI_DMAStream_TX_IRQHandler(void);
 void DisplaySPI_DMAStream_TX_IRQHandler(void) {
@@ -34,6 +36,7 @@ void DisplaySPI_DMAStream_TX_IRQHandler(void) {
 		DMA_ClearITPendingBit(DisplaySPI_DMAStream_TX, DisplaySPI_DMAStream_TX_TCIF);
 		SPI_I2S_DMACmd(DisplaySPI_SPI, SPI_I2S_DMAReq_Tx, DISABLE);
 		DMA_Cmd(DisplaySPI_DMAStream_TX, DISABLE);
+		isr_display_dma_finished();
 		dsr_mark_pending(DSR_TASK_DISPLAY_UPDATE_FINISHED);
 	}
 }
@@ -77,9 +80,14 @@ void spi_tx_data(SPI_TypeDef *SPIx, const uint8_t *data, int length) {
 	}
 }
 
+bool spi_dma_tx_ready(DMA_Stream_TypeDef *DMAy_Streamx_TX) {
+	return DMA_GetCmdStatus(DMAy_Streamx_TX) != ENABLE;
+}
+
 void spi_tx_data_dma(SPI_TypeDef *SPIx, DMA_Stream_TypeDef *DMAy_Streamx, const void *data, int length) {
 	if (DMA_GetCmdStatus(DMAy_Streamx) == ENABLE) {
 		/* Transmission still in progress. */
+		soft_fault("SPI TX fault");
 		printf("rejecting SPI transfer, DMA of SPI %p still ongoing (TX %d)\n", SPIx, DMA_GetCmdStatus(DMAy_Streamx));
 		return;
 	}

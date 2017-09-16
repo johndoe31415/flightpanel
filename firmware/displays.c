@@ -31,10 +31,13 @@
 #include "spi.h"
 #include "fncmap.h"
 #include "font.h"
+#include "atomic.h"
 
 static void displays_check_dma_schedule(void);
 
-static int8_t current_dma_update = -1;
+static atomic_t dma_running;
+static uint8_t last_updated_display;
+
 static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 	[0] = {
 		.CS_GPIO = Display1_CS_GPIO,
@@ -132,7 +135,7 @@ static const struct ssd1306_display_t displays[DISPLAY_COUNT] = {
 		.surface = &(const struct surface_t) {
 			.width = 128,
 			.height = 64,
-			.data = (uint8_t[128 * 64 / 8]) { },
+	.data = (uint8_t[128 * 64 / 8]) { },
 		},
 	},
 	[11] = {
@@ -156,26 +159,33 @@ static void displays_disable_cs(int display_index) {
 }
 
 static void display_dma_start(int display_index) {
-	current_dma_update = display_index;
-	displays_enable_cs(display_index);
-	spi_tx_data_dma(DisplaySPI_SPI, DisplaySPI_DMAStream_TX, displays[display_index].surface->data, 128 * 64 / 8);
+	/* Only start if no DMA is running right now */
+	if (atomic_set_if_false(&dma_running)) {
+		surface_dirty[display_index] = false;
+		last_updated_display = display_index;
+		displays_enable_cs(display_index);
+		spi_tx_data_dma(DisplaySPI_SPI, DisplaySPI_DMAStream_TX, displays[display_index].surface->data, 128 * 64 / 8);
+	}
+}
+
+void isr_display_dma_finished(void) {
+	displays_disable_cs(last_updated_display);
 }
 
 void dsr_display_dma_finished(void) {
-	displays_disable_cs(current_dma_update);
-	current_dma_update = -1;
+	dma_running = 0;
 	displays_check_dma_schedule();
 }
 
 static void displays_check_dma_schedule(void) {
-	if (current_dma_update != -1) {
-		/* DMA already in progress */
+	if (!spi_dma_tx_ready(DisplaySPI_DMAStream_TX)) {
+		/* Transmission in progress. */
 		return;
 	}
 	for (int i = 0; i < DISPLAY_COUNT; i++) {
-		if (surface_dirty[i]) {
-			surface_dirty[i] = false;
-			display_dma_start(i);
+		int display_index = (i + last_updated_display) % DISPLAY_COUNT;
+		if (surface_dirty[display_index]) {
+			display_dma_start(display_index);
 			return;
 		}
 	}

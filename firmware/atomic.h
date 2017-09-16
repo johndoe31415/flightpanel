@@ -21,32 +21,19 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __FAULT_H__
-#define __FAULT_H__
+#ifndef __ATOMIC_H__
+#define __ATOMIC_H__
 
-/*
- r10 sl
- r11 fp
- r12 ip
- r13 sp
- r14 lr
- r15 pc
-*/
-struct fault_stack_layout_t {
-	uint32_t faultmask;
-	uint32_t psr;
-	uint32_t r4[8];
-	uint32_t r0[4];
-	uint32_t r12;		// ip
-	uint32_t r14;		// lr
-	uint32_t pc;
-	uint32_t xpsr;
-};
+#include <stdint.h>
+#include <stdbool.h>
+
+typedef int atomic_t;
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void soft_fault(const char *msg);
-void fail_assertion(const char *assertion, const char *filename, int lineno);
-void generic_fault_handler(uint32_t fault_id, const struct fault_stack_layout_t *stack_layout);
+void atomic_set(atomic_t *atomic, atomic_t value);
+bool atomic_set_if_false(atomic_t *atomic);
+void atomic_inc(atomic_t *atomic, int inc);
+void atomic_dec(atomic_t *atomic, int inc);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif
