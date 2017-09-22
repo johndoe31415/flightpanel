@@ -35,6 +35,7 @@
 
 static void displays_check_dma_schedule(void);
 
+static bool inhibit;
 static atomic_t dma_running;
 static uint8_t last_updated_display;
 
@@ -160,7 +161,7 @@ static void displays_disable_cs(int display_index) {
 
 static void display_dma_start(int display_index) {
 	/* Only start if no DMA is running right now */
-	if (atomic_set_if_false(&dma_running)) {
+	if (!inhibit && atomic_set_if_false(&dma_running)) {
 		surface_dirty[display_index] = false;
 		last_updated_display = display_index;
 		displays_enable_cs(display_index);
@@ -201,6 +202,13 @@ const struct surface_t* displays_get_surface(int display_index) {
 }
 
 void init_displays(void) {
+	/* First disable all updates */
+	inhibit = true;
+
+	/* Then wait for any DMA to stop that might be running right now */
+	while (!spi_dma_tx_ready(DisplaySPI_DMAStream_TX));
+
+
 	/* Reset all displays. Do busy waiting here because this might be triggered
 	 * from ISR and therefore delay_millis() would deadlock. */
 	Display_RESET_set_ACTIVE();
@@ -211,5 +219,8 @@ void init_displays(void) {
 		surface_clear(displays[did].surface);
 		ssd1306_init(&displays[did]);
 	}
+
+	/* Then allow display updates again */
+	inhibit = false;
 }
 
