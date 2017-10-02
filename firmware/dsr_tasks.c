@@ -51,15 +51,19 @@ void dsr_mark_pending(enum dsr_task_t task) {
 	dsr_runtime_info[task].pending = true;
 }
 
+void execute_dsrs(void) {
+	for (int i = 0; i < NUMBER_OF_DSRS; i++) {
+		if (dsr_runtime_info[i].pending) {
+			dsr_runtime_info[i].pending = false;
+			dsr_definitions[i].callback();
+			break;
+		}
+	}
+}
+
 void execute_dsr_loop(void) {
 	while (true) {
-		for (int i = 0; i < NUMBER_OF_DSRS; i++) {
-			if (dsr_runtime_info[i].pending) {
-				dsr_runtime_info[i].pending = false;
-				dsr_definitions[i].callback();
-				break;
-			}
-		}
+		execute_dsrs();
 	}
 }
 

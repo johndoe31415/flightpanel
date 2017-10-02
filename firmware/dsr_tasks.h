@@ -47,6 +47,7 @@ enum dsr_task_t {
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 bool dsr_is_pending(enum dsr_task_t task);
 void dsr_mark_pending(enum dsr_task_t task);
+void execute_dsrs(void);
 void execute_dsr_loop(void);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
