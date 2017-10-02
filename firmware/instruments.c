@@ -360,14 +360,14 @@ void dsr_idle_task(void) {
 		iomux_output_toggle(IOMUX_OUT_AP_MASTER);
 	}
 
-	redraw_frequency_display(&redraw_com1_active, 0, com_index_to_frequency_khz(instrument_state.com1_active_index));
-	redraw_frequency_display(&redraw_com1_standby, 1, com_index_to_frequency_khz(rotary_com1.rotary.value));
-	redraw_frequency_display(&redraw_com2_active, 2, com_index_to_frequency_khz(instrument_state.com2_active_index));
-	redraw_frequency_display(&redraw_com2_standby, 3, com_index_to_frequency_khz(rotary_com2.rotary.value));
-	redraw_frequency_display(&redraw_nav1_active, 4, nav_index_to_frequency_khz(instrument_state.nav1_active_index));
-	redraw_frequency_display(&redraw_nav1_standby, 5, nav_index_to_frequency_khz(rotary_nav1.rotary.value));
-	redraw_frequency_display(&redraw_nav2_active, 6, nav_index_to_frequency_khz(instrument_state.nav2_active_index));
-	redraw_frequency_display(&redraw_nav2_standby, 7, nav_index_to_frequency_khz(rotary_nav2.rotary.value));
+	redraw_frequency_display(&redraw_com1_active, DISPLAY_COM1, com_index_to_frequency_khz(instrument_state.com1_active_index));
+	redraw_frequency_display(&redraw_com1_standby, DISPLAY_COM1_STBY, com_index_to_frequency_khz(rotary_com1.rotary.value));
+	redraw_frequency_display(&redraw_com2_active, DISPLAY_COM2, com_index_to_frequency_khz(instrument_state.com2_active_index));
+	redraw_frequency_display(&redraw_com2_standby, DISPLAY_COM2_STBY, com_index_to_frequency_khz(rotary_com2.rotary.value));
+	redraw_frequency_display(&redraw_nav1_active, DISPLAY_NAV1, nav_index_to_frequency_khz(instrument_state.nav1_active_index));
+	redraw_frequency_display(&redraw_nav1_standby, DISPLAY_NAV1_STBY, nav_index_to_frequency_khz(rotary_nav1.rotary.value));
+	redraw_frequency_display(&redraw_nav2_active, DISPLAY_NAV2, nav_index_to_frequency_khz(instrument_state.nav2_active_index));
+	redraw_frequency_display(&redraw_nav2_standby, DISPLAY_NAV2_STBY, nav_index_to_frequency_khz(rotary_nav2.rotary.value));
 }
 
 void instruments_set_by_host(const struct hid_set_report_t *report) {
