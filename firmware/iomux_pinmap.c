@@ -27,15 +27,15 @@ static const struct iomux_pin_t input_pins[IOMUX_INPUT_COUNT] = {
 		.name = "Rotary_COM2_Button",
 	},
 	{
-		.pinno = 11,
+		.pinno = 13,
 		.name = "Rotary_ATM_A",
 	},
 	{
-		.pinno = 12,
+		.pinno = 10,
 		.name = "Rotary_ATM_B",
 	},
 	{
-		.pinno = 7,
+		.pinno = 9,
 		.name = "Rotary_ATM_Button",
 	},
 	{
@@ -51,15 +51,15 @@ static const struct iomux_pin_t input_pins[IOMUX_INPUT_COUNT] = {
 		.name = "Rotary_NAV1_Button",
 	},
 	{
-		.pinno = 13,
+		.pinno = 6,
 		.name = "Rotary_NAV2_A",
 	},
 	{
-		.pinno = 9,
+		.pinno = 0,
 		.name = "Rotary_NAV2_B",
 	},
 	{
-		.pinno = 10,
+		.pinno = 1,
 		.name = "Rotary_NAV2_Button",
 	},
 	{
@@ -75,15 +75,15 @@ static const struct iomux_pin_t input_pins[IOMUX_INPUT_COUNT] = {
 		.name = "Rotary_OBS_Button",
 	},
 	{
-		.pinno = 8,
+		.pinno = 11,
 		.name = "Rotary_DME_ADF_A",
 	},
 	{
-		.pinno = 15,
+		.pinno = 12,
 		.name = "Rotary_DME_ADF_B",
 	},
 	{
-		.pinno = 14,
+		.pinno = 7,
 		.name = "Rotary_DME_ADF_Button",
 	},
 	{

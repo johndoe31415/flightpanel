@@ -9,7 +9,7 @@ struct iomux_pin_t {
 #define IOMUX_MULTIPLEXER_COUNT	9
 #define IOMUX_IO_COUNT	(IOMUX_MULTIPLEXER_COUNT * 8)	// 72
 
-// 61 inputs (11 free). ID range 7 - 71:
+// 61 inputs (11 free). ID range 0 - 71:
 #define IOMUX_INPUT_COUNT	61
 #define IOMUX_IN_Rotary_COM1_A		27
 #define IOMUX_IN_Rotary_COM1_B		28
@@ -17,21 +17,21 @@ struct iomux_pin_t {
 #define IOMUX_IN_Rotary_COM2_A		22
 #define IOMUX_IN_Rotary_COM2_B		16
 #define IOMUX_IN_Rotary_COM2_Button		17
-#define IOMUX_IN_Rotary_ATM_A		11
-#define IOMUX_IN_Rotary_ATM_B		12
-#define IOMUX_IN_Rotary_ATM_Button		7
+#define IOMUX_IN_Rotary_ATM_A		13
+#define IOMUX_IN_Rotary_ATM_B		10
+#define IOMUX_IN_Rotary_ATM_Button		9
 #define IOMUX_IN_Rotary_NAV1_A		36
 #define IOMUX_IN_Rotary_NAV1_B		34
 #define IOMUX_IN_Rotary_NAV1_Button		35
-#define IOMUX_IN_Rotary_NAV2_A		13
-#define IOMUX_IN_Rotary_NAV2_B		9
-#define IOMUX_IN_Rotary_NAV2_Button		10
+#define IOMUX_IN_Rotary_NAV2_A		6
+#define IOMUX_IN_Rotary_NAV2_B		0
+#define IOMUX_IN_Rotary_NAV2_Button		1
 #define IOMUX_IN_Rotary_OBS_A		33
 #define IOMUX_IN_Rotary_OBS_B		38
 #define IOMUX_IN_Rotary_OBS_Button		37
-#define IOMUX_IN_Rotary_DME_ADF_A		8
-#define IOMUX_IN_Rotary_DME_ADF_B		15
-#define IOMUX_IN_Rotary_DME_ADF_Button		14
+#define IOMUX_IN_Rotary_DME_ADF_A		11
+#define IOMUX_IN_Rotary_DME_ADF_B		12
+#define IOMUX_IN_Rotary_DME_ADF_Button		7
 #define IOMUX_IN_Rotary_AP_ALT_A		39
 #define IOMUX_IN_Rotary_AP_ALT_B		43
 #define IOMUX_IN_Rotary_AP_ALT_Button		32

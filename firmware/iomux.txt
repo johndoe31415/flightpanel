@@ -29,25 +29,25 @@
 16	Rotary_COM2_B
 17	Rotary_COM2_Button
 
-11	Rotary_ATM_A
-12	Rotary_ATM_B
-7	Rotary_ATM_Button
+13	Rotary_ATM_A
+10	Rotary_ATM_B
+9	Rotary_ATM_Button
 
 36	Rotary_NAV1_A
 34	Rotary_NAV1_B
 35	Rotary_NAV1_Button
 
-13	Rotary_NAV2_A
-9	Rotary_NAV2_B
-10	Rotary_NAV2_Button
+6	Rotary_NAV2_A
+0	Rotary_NAV2_B
+1	Rotary_NAV2_Button
 
 33	Rotary_OBS_A
 38	Rotary_OBS_B
 37	Rotary_OBS_Button
 
-8	Rotary_DME_ADF_A
-15	Rotary_DME_ADF_B
-14	Rotary_DME_ADF_Button
+11	Rotary_DME_ADF_A
+12	Rotary_DME_ADF_B
+7	Rotary_DME_ADF_Button
 
 39	Rotary_AP_ALT_A
 43	Rotary_AP_ALT_B
