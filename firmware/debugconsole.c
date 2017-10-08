@@ -81,25 +81,17 @@ static const struct gpio_definition_t known_gpio_inputs[] = {
 };
 #define KNOWN_GPIO_INPUT_COUNT		(sizeof(known_gpio_inputs) / sizeof(known_gpio_inputs[0]))
 
-enum debugmode_t {
-	DEBUG_DISABLED = 0,
-	DEBUG_RS232_ISR,
-	DEBUG_RS232_ECHO,
-	DEBUG_GPIO_OUTPUTS,
-	DEBUG_IOMUX_INPUTS,
-	DEBUG_IOMUX_OUTPUTS,
-	DEBUG_IOMUX_OUTPUT_PATTERN,
-	DEBUG_DISPLAY,
-	DEBUG_DELAY,
-	DEBUG_ADC_TELEMETRY,
-};
-
 static enum debugmode_t debug_mode;
 static char cmd_input[CMD_BUFFER_SIZE];
 static uint8_t cmd_length;
 static uint8_t last_cmd_length;
 static int debug_accu;
 static uint8_t iomux_last_inputs[IOMUX_BYTECOUNT];
+
+void debugmode_set(enum debugmode_t new_mode) {
+	debug_mode = new_mode;
+	debug_accu = 0;
+}
 
 static void dump_debug_registers(void) {
 	const int loopcount = 200;
@@ -218,6 +210,10 @@ static void debugconsole_print_prompt(void) {
 			fprintf(stderr, "IOMux OUT %d", debug_accu);
 			break;
 
+		case DEBUG_IOMUX_OUTPUTS_BLINK:
+			fprintf(stderr, "IOMux OUT Blink");
+			break;
+
 		case DEBUG_IOMUX_OUTPUT_PATTERN:
 			fprintf(stderr, "IOMux Pattern");
 			break;
@@ -264,6 +260,14 @@ void debugconsole_tick(void) {
 
 		case DEBUG_IOMUX_OUTPUTS:
 			iomux_output_toggle(debug_accu);
+			break;
+
+		case DEBUG_IOMUX_OUTPUTS_BLINK:
+			debug_accu++;
+			if (debug_accu == 1000) {
+				debug_accu = 0;
+			}
+			iomux_output_setall(debug_accu > 500 ? 0xff : 0x00);
 			break;
 
 		case DEBUG_IOMUX_OUTPUT_PATTERN:
@@ -430,6 +434,7 @@ static void debugconsole_execute(void) {
 		printf("    memory     Show memory statistics\n");
 		printf("    iomux-in   Dump IOMultiplexer inputs\n");
 		printf("    iomux-out  Debug IOMux outputs one-by-one. Repeat command to switch active output.\n");
+		printf("    iomux-blnk Debug IOMux outputs by blinking everything.\n");
 		printf("    iomux-ptr  Output test pattern on IOMultiplexer outputs\n");
 		printf("    display    Reset OLED displays and output test text\n");
 		printf("    delay      Issue a 10000 count delay_loopcount() and output on blue LED (PD15)\n");
@@ -439,13 +444,13 @@ static void debugconsole_execute(void) {
 		printf("    debug      Dump debug register contents\n");
 		printf("    reset      Reset the MCU entirely\n");
 	} else if (!strcmp(cmd_input, "off")) {
-		debug_mode = DEBUG_DISABLED;
+		debugmode_set(DEBUG_DISABLED);
 	} else if (!strcmp(cmd_input, "info")) {
 		debug_show_all();
 	} else if (!strcmp(cmd_input, "rs232-isr")) {
-		debug_mode = DEBUG_RS232_ISR;
+		debugmode_set(DEBUG_RS232_ISR);
 	} else if (!strcmp(cmd_input, "rs232-echo")) {
-		debug_mode = DEBUG_RS232_ECHO;
+		debugmode_set(DEBUG_RS232_ECHO);
 	} else if (!strcmp(cmd_input, "eeprom")) {
 		bool success = eeprom_dump(4);
 		printf("EEPROM dump %s.\n", success ? "successful" : "had a problem");
@@ -461,8 +466,7 @@ static void debugconsole_execute(void) {
 			iomux_disable();
 			debugconsole_reset_gpios(known_gpio_inputs, KNOWN_GPIO_INPUT_COUNT, false);
 			debugconsole_reset_gpios(known_gpio_outputs, KNOWN_GPIO_OUTPUT_COUNT, true);
-			debug_accu = 0;
-			debug_mode = DEBUG_GPIO_OUTPUTS;
+			debugmode_set(DEBUG_GPIO_OUTPUTS);
 		} else {
 			/* Increase pin */
 			debug_accu = (debug_accu + 1) % KNOWN_GPIO_OUTPUT_COUNT;
@@ -471,27 +475,25 @@ static void debugconsole_execute(void) {
 	} else if (!strcmp(cmd_input, "memory")) {
 		debug_show_memory();
 	} else if (!strcmp(cmd_input, "iomux-in")) {
-		debug_mode = DEBUG_IOMUX_INPUTS;
+		debugmode_set(DEBUG_IOMUX_INPUTS);
 	} else if (!strcmp(cmd_input, "iomux-out")) {
 		if (debug_mode != DEBUG_IOMUX_OUTPUTS) {
-			debug_accu = 0;
-			debug_mode = DEBUG_IOMUX_OUTPUTS;
+			debugmode_set(DEBUG_IOMUX_OUTPUTS);
 		} else {
 			debug_accu = (debug_accu + 1) % IOMUX_OUTPUTS;
 		}
 		iomux_output_setall(0);
+	} else if (!strcmp(cmd_input, "iomux-blnk")) {
+		debugmode_set(DEBUG_IOMUX_OUTPUTS_BLINK);
 	} else if (!strcmp(cmd_input, "iomux-ptr")) {
-		debug_accu = 0;
-		debug_mode = DEBUG_IOMUX_OUTPUT_PATTERN;
+		debugmode_set(DEBUG_IOMUX_OUTPUT_PATTERN);
 	} else if (!strcmp(cmd_input, "display")) {
-		init_displays();
-		debug_accu = 0;
-		debug_mode = DEBUG_DISPLAY;
+//		init_displays();
+		debugmode_set(DEBUG_DISPLAY);
 	} else if (!strcmp(cmd_input, "delay")) {
-		debug_mode = DEBUG_DELAY;
+		debugmode_set(DEBUG_DELAY);
 	} else if (!strcmp(cmd_input, "adc")) {
-		debug_accu = 0;
-		debug_mode = DEBUG_ADC_TELEMETRY;
+		debugmode_set(DEBUG_ADC_TELEMETRY);
 	} else if (!strcmp(cmd_input, "spi")) {
 		dump_spi_status("SPI1", SPI1);
 		dump_spi_status("SPI2", SPI2);

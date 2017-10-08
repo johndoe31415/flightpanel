@@ -50,6 +50,7 @@
 #include "debug.h"
 #include "dsr_tasks.h"
 #include "stm32f4xx_debug.h"
+#include "debugconsole.h"
 
 extern uint8_t _sflash;
 
@@ -68,6 +69,7 @@ int main(void) {
 	iomux_output_set(IOMUX_OUT_XPDR_STBY, true);
 	iomux_output_set(IOMUX_OUT_NavSrc_NAV, true);
 	dsr_mark_pending(DSR_TASK_IDLE);
+	debugmode_set(DEBUG_DISPLAY);
 	execute_dsr_loop();
 	return 0;
 }

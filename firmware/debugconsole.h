@@ -26,9 +26,24 @@
 
 #include <stdint.h>
 
+enum debugmode_t {
+	DEBUG_DISABLED = 0,
+	DEBUG_RS232_ISR,
+	DEBUG_RS232_ECHO,
+	DEBUG_GPIO_OUTPUTS,
+	DEBUG_IOMUX_INPUTS,
+	DEBUG_IOMUX_OUTPUTS,
+	DEBUG_IOMUX_OUTPUTS_BLINK,
+	DEBUG_IOMUX_OUTPUT_PATTERN,
+	DEBUG_DISPLAY,
+	DEBUG_DELAY,
+	DEBUG_ADC_TELEMETRY,
+};
+
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void dsr_execute_debug_command(void);
+void debugmode_set(enum debugmode_t new_mode);
 void debugconsole_tick(void);
+void dsr_execute_debug_command(void);
 void debugconsole_rxchar(uint8_t rxchar);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
