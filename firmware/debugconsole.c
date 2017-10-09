@@ -171,11 +171,11 @@ static void display_debug(void) {
 	struct cursor_t cursor = { 5, 35 };
 	char text[16];
 	sprintf(text, "%2d", debug_accu);
-	blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor);
+	blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor, false);
 
 	sprintf(text, "%3d", counter++);
 	cursor = (struct cursor_t){ 5, 60 };
-	blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor);
+	blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 
 	display_mark_surface_dirty(debug_accu);
 }
