@@ -42,7 +42,7 @@ static void test_font_write(void) {
 	surface_clear(&surface);
 	struct cursor_t cursor = { 0, 20 };
 
-	blit_string_to_cursor(&font_vcr_osd_mono_20, "123.456", &surface, &cursor);
+	blit_string_to_cursor(&font_vcr_osd_mono_20, "123.456", &surface, &cursor, false);
 	if (test_verbose()) {
 		surface_dump(&surface);
 	}
