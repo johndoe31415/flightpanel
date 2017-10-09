@@ -28,11 +28,15 @@
 #include "eeprom.h"
 
 static const struct configuration default_configuration = {
-	.some_value = 123,
+	.xpdr = {
+		.ident_timeout_milliseconds = 3000,
+		.edit_timeout_milliseconds = 2000,
+		.vfr_squawk = 7000,
+	},
 };
 _Static_assert((sizeof(default_configuration) % 4) == 0, "Configuration size alignment mismatch.");
 
-//static struct configuration active_configuration;
+struct configuration active_configuration;
 
 static uint32_t calculate_config_crc(const struct configuration *config) {
 	CRC_ResetDR();
@@ -40,7 +44,6 @@ static uint32_t calculate_config_crc(const struct configuration *config) {
 }
 
 void write_configuration(struct configuration *config) {
-	printf("WRITE\n");
 	config->crc32 = calculate_config_crc(config);
 	eeprom_write(0, config, sizeof(struct configuration));
 }
@@ -54,5 +57,9 @@ bool read_configuration(struct configuration *config) {
 		from_eeprom = false;
 	}
 	return from_eeprom;
+}
+
+void init_configuration(void) {
+	read_configuration(&active_configuration);
 }
 

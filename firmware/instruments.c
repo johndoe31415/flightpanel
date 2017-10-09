@@ -41,12 +41,14 @@
 #include "iomux_pinmap.h"
 #include "dsr_tasks.h"
 #include "instrument_visuals.h"
+#include "configuration.h"
 
 #define USB_REPORT_INTERVAL_MS		25
 
 static struct instrument_state_t instrument_state;
 static uint8_t usb_report_time_tick;
 static bool display_data_changed[DISPLAY_COUNT];
+extern struct configuration active_configuration;
 
 static struct rotary_encoder_with_button_t rotary_com1 = {
 	.rotary = {
@@ -356,7 +358,7 @@ static void check_vfr_number_pressed(struct button_t *button, const uint8_t digi
 	if (button->lastpress != BUTTON_NOACTION) {
 		button->lastpress = BUTTON_NOACTION;
 
-		instrument_state.xpdr.edit_timeout = 2000;
+		instrument_state.xpdr.edit_timeout = active_configuration.xpdr.edit_timeout_milliseconds;
 		if (!instrument_state.xpdr.edit_char) {
 			instrument_state.xpdr.edit_char++;
 		}
@@ -468,11 +470,11 @@ void dsr_idle_task(void) {
 	}
 	if (button_pressed(&xpdr_IDENT_button)) {
 		instrument_state.xpdr.identing = true;
-		instrument_state.xpdr.ident_timeout = 3000;
+		instrument_state.xpdr.ident_timeout = active_configuration.xpdr.ident_timeout_milliseconds;
 		display_data_changed[DISPLAY_XPDR] = true;
 	}
 	if (button_pressed(&xpdr_VFR_button)) {
-		instrument_state.xpdr.squawk = 7000;
+		instrument_state.xpdr.squawk = active_configuration.xpdr.vfr_squawk;
 		instrument_state.xpdr.edit_char = 0;
 		instrument_state.xpdr.edit_timeout = 0;
 		display_data_changed[DISPLAY_XPDR] = true;

@@ -32,6 +32,7 @@
 #include <stm32f4xx_dma.h>
 #include <stm32f4xx_i2c.h>
 
+#include "eeprom.h"
 #include "rs232.h"
 #include "rotary.h"
 #include "spi.h"
@@ -66,6 +67,7 @@ int main(void) {
 #endif
 
 	RGB_LED_Green_set_ACTIVE();
+	init_configuration();
 	init_displays();
 	iomux_output_set(IOMUX_OUT_XPDR_STBY, true);
 	iomux_output_set(IOMUX_OUT_NavSrc_NAV, true);

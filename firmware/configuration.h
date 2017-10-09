@@ -28,13 +28,18 @@
 #include <stdbool.h>
 
 struct configuration {
-	int some_value;
+	struct {
+		uint16_t ident_timeout_milliseconds;
+		uint16_t edit_timeout_milliseconds;
+		uint16_t vfr_squawk;
+	} xpdr;
 	uint32_t crc32;
 };
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void write_configuration(struct configuration *config);
 bool read_configuration(struct configuration *config);
+void init_configuration(void);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif
