@@ -69,7 +69,7 @@ int main(void) {
 	iomux_output_set(IOMUX_OUT_XPDR_STBY, true);
 	iomux_output_set(IOMUX_OUT_NavSrc_NAV, true);
 	dsr_mark_pending(DSR_TASK_IDLE);
-	debugmode_set(DEBUG_DISPLAY);
+//	debugmode_set(DEBUG_DISPLAY);
 	execute_dsr_loop();
 	return 0;
 }

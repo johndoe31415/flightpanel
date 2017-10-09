@@ -29,6 +29,7 @@
 #include "iomux.h"
 #include "debugconsole.h"
 #include "pinmap.h"
+#include "displays.h"
 
 void HAL_IncTick(void);
 
@@ -51,7 +52,6 @@ void SysTick_Handler(void) {
 	}
 	HAL_IncTick();
 	iomux_trigger();
-	//delay_loopcnt(1000);
 	hid_tick();
 	debugconsole_tick();
 }

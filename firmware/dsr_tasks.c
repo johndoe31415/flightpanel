@@ -47,16 +47,26 @@ bool dsr_is_pending(enum dsr_task_t task) {
 	return dsr_runtime_info[task].pending;
 }
 
-void dsr_mark_pending(enum dsr_task_t task) {
+void dsr_mark_pending_delayed(enum dsr_task_t task, uint32_t delay) {
 	dsr_runtime_info[task].pending = true;
+	dsr_runtime_info[task].call_delay = delay;
 }
+
+void dsr_mark_pending(enum dsr_task_t task) {
+	dsr_mark_pending_delayed(task, 0);
+}
+
 
 void execute_dsrs(void) {
 	for (int i = 0; i < NUMBER_OF_DSRS; i++) {
 		if (dsr_runtime_info[i].pending) {
-			dsr_runtime_info[i].pending = false;
-			dsr_definitions[i].callback();
-			break;
+			if (dsr_runtime_info[i].call_delay == 0) {
+				dsr_runtime_info[i].pending = false;
+				dsr_definitions[i].callback();
+				break;
+			} else {
+				dsr_runtime_info[i].call_delay--;
+			}
 		}
 	}
 }

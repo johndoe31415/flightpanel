@@ -186,41 +186,78 @@ static void init_display_spi(void) {
 	SPI_Cmd(SPI2, ENABLE);
 }
 
+
 static void init_display_spi_dma(void) {
 	/* DMA1 Stream4 Channel 0: SPI2 TX */
-	/* DMA1 Stream3 Channel 0: SPI2 RX (unused) */
+	/* DMA1 Stream3 Channel 0: SPI2 RX (dummy reads to be able to use ISR) */
 
 	// Enable DMA1 clock
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
 
 	/* TX */
-	DMA_InitTypeDef DMA_InitStructure = {
-		.DMA_Channel = DMA_Channel_0,
-		.DMA_PeripheralBaseAddr = (uint32_t)&(SPI2->DR),
-		.DMA_Memory0BaseAddr = 0,
-		.DMA_DIR = DMA_DIR_MemoryToPeripheral,
-		.DMA_BufferSize = 1,
-		.DMA_PeripheralInc = DMA_PeripheralInc_Disable,
-		.DMA_MemoryInc = DMA_MemoryInc_Enable,
-		.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte,
-		.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte,
-		.DMA_Mode = DMA_Mode_Normal,
-		.DMA_Priority = DMA_Priority_Medium,
-		.DMA_FIFOMode = DMA_FIFOMode_Disable,
-		.DMA_MemoryBurst = DMA_MemoryBurst_Single,
-		.DMA_PeripheralBurst = DMA_PeripheralBurst_Single,
-	};
-	DMA_Init(DMA1_Stream4, &DMA_InitStructure);
+	{
+		DMA_InitTypeDef DMA_InitStructure = {
+			.DMA_Channel = DMA_Channel_0,
+			.DMA_PeripheralBaseAddr = (uint32_t)&(SPI2->DR),
+			.DMA_Memory0BaseAddr = 0,
+			.DMA_DIR = DMA_DIR_MemoryToPeripheral,
+			.DMA_BufferSize = 1,
+			.DMA_PeripheralInc = DMA_PeripheralInc_Disable,
+			.DMA_MemoryInc = DMA_MemoryInc_Enable,
+			.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte,
+			.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte,
+			.DMA_Mode = DMA_Mode_Normal,
+			.DMA_Priority = DMA_Priority_Medium,
+			.DMA_FIFOMode = DMA_FIFOMode_Disable,
+			.DMA_MemoryBurst = DMA_MemoryBurst_Single,
+			.DMA_PeripheralBurst = DMA_PeripheralBurst_Single,
+		};
+		DMA_Init(DMA1_Stream4, &DMA_InitStructure);
+	}
+
+	/* RX dummy values */
+	{
+		static uint8_t display_rx_dummy;
+		DMA_InitTypeDef DMA_InitStructure = {
+			.DMA_Channel = DMA_Channel_0,
+			.DMA_PeripheralBaseAddr = (uint32_t)&(SPI2->DR),
+			.DMA_Memory0BaseAddr = (uint32_t)&display_rx_dummy,
+			.DMA_DIR = DMA_DIR_PeripheralToMemory,
+			.DMA_BufferSize = 1,
+			.DMA_PeripheralInc = DMA_PeripheralInc_Disable,
+			.DMA_MemoryInc = DMA_MemoryInc_Enable,
+			.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte,
+			.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte,
+			.DMA_Mode = DMA_Mode_Normal,
+			.DMA_Priority = DMA_Priority_Medium,
+			.DMA_FIFOMode = DMA_FIFOMode_Disable,
+			.DMA_MemoryBurst = DMA_MemoryBurst_Single,
+			.DMA_PeripheralBurst = DMA_PeripheralBurst_Single,
+		};
+		DMA_Init(DMA1_Stream3, &DMA_InitStructure);
+	}
 
 	/* Enable IRQ */
-	NVIC_InitTypeDef NVIC_InitStructure = {
-		.NVIC_IRQChannel = DMA1_Stream4_IRQn,
-		.NVIC_IRQChannelPreemptionPriority = 1,
-		.NVIC_IRQChannelSubPriority = 0,
-		.NVIC_IRQChannelCmd = ENABLE,
-	};
-	NVIC_Init(&NVIC_InitStructure);
+	{
+		NVIC_InitTypeDef NVIC_InitStructure = {
+			.NVIC_IRQChannel = DMA1_Stream4_IRQn,
+			.NVIC_IRQChannelPreemptionPriority = 1,
+			.NVIC_IRQChannelSubPriority = 0,
+			.NVIC_IRQChannelCmd = ENABLE,
+		};
+		NVIC_Init(&NVIC_InitStructure);
+	}
+	{
+		NVIC_InitTypeDef NVIC_InitStructure = {
+			.NVIC_IRQChannel = DMA1_Stream3_IRQn,
+			.NVIC_IRQChannelPreemptionPriority = 1,
+			.NVIC_IRQChannelSubPriority = 0,
+			.NVIC_IRQChannelCmd = ENABLE,
+		};
+		NVIC_Init(&NVIC_InitStructure);
+	}
 	DMA_ITConfig(DMA1_Stream4, DMA_IT_TC, ENABLE);
+	DMA_ITConfig(DMA1_Stream3, DMA_IT_TC, ENABLE);
 }
 
 

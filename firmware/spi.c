@@ -29,6 +29,7 @@
 #include "dsr_tasks.h"
 #include "displays.h"
 #include "fault.h"
+#include "pinmap.h"
 
 void DisplaySPI_DMAStream_TX_IRQHandler(void);
 void DisplaySPI_DMAStream_TX_IRQHandler(void) {
@@ -36,6 +37,15 @@ void DisplaySPI_DMAStream_TX_IRQHandler(void) {
 		DMA_ClearITPendingBit(DisplaySPI_DMAStream_TX, DisplaySPI_DMAStream_TX_TCIF);
 		SPI_I2S_DMACmd(DisplaySPI_SPI, SPI_I2S_DMAReq_Tx, DISABLE);
 		DMA_Cmd(DisplaySPI_DMAStream_TX, DISABLE);
+	}
+}
+
+void DisplaySPI_DMAStream_RX_IRQHandler(void);
+void DisplaySPI_DMAStream_RX_IRQHandler(void) {
+	if (DMA_GetITStatus(DisplaySPI_DMAStream_RX, DisplaySPI_DMAStream_RX_TCIF)) {
+		DMA_ClearITPendingBit(DisplaySPI_DMAStream_TX, DisplaySPI_DMAStream_RX_TCIF);
+		SPI_I2S_DMACmd(DisplaySPI_SPI, SPI_I2S_DMAReq_Rx, DISABLE);
+		DMA_Cmd(DisplaySPI_DMAStream_RX, DISABLE);
 		isr_display_dma_finished();
 		dsr_mark_pending(DSR_TASK_DISPLAY_UPDATE_FINISHED);
 	}
@@ -80,24 +90,6 @@ void spi_tx_data(SPI_TypeDef *SPIx, const uint8_t *data, int length) {
 	}
 }
 
-bool spi_dma_tx_ready(DMA_Stream_TypeDef *DMAy_Streamx_TX) {
-	return DMA_GetCmdStatus(DMAy_Streamx_TX) != ENABLE;
-}
-
-void spi_tx_data_dma(SPI_TypeDef *SPIx, DMA_Stream_TypeDef *DMAy_Streamx, const void *data, int length) {
-	if (DMA_GetCmdStatus(DMAy_Streamx) == ENABLE) {
-		/* Transmission still in progress. */
-		soft_fault("SPI TX fault");
-		printf("rejecting SPI transfer, DMA of SPI %p still ongoing (TX %d)\n", SPIx, DMA_GetCmdStatus(DMAy_Streamx));
-		return;
-	}
-
-	DMAy_Streamx->M0AR = (uint32_t)data;
-	DMAy_Streamx->NDTR = length;
-	DMA_Cmd(DMAy_Streamx, ENABLE);
-	SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Tx, ENABLE);
-}
-
 bool spi_dma_tx_rx_ready(DMA_Stream_TypeDef *DMAy_Streamx_TX, DMA_Stream_TypeDef *DMAy_Streamx_RX) {
 	return ((DMA_GetCmdStatus(DMAy_Streamx_TX) != ENABLE) && (DMA_GetCmdStatus(DMAy_Streamx_RX) != ENABLE));
 }
@@ -109,9 +101,13 @@ void spi_tx_rx_data_dma(SPI_TypeDef *SPIx, DMA_Stream_TypeDef *DMAy_Streamx_TX, 
 		return;
 	}
 
-	DMAy_Streamx_TX->M0AR = (uint32_t)tx_data;
+	if (tx_data) {
+		DMAy_Streamx_TX->M0AR = (uint32_t)tx_data;
+	}
 	DMAy_Streamx_TX->NDTR = length;
-	DMAy_Streamx_RX->M0AR = (uint32_t)rx_data;
+	if (rx_data) {
+		DMAy_Streamx_RX->M0AR = (uint32_t)rx_data;
+	}
 	DMAy_Streamx_RX->NDTR = length;
 
 	DMA_Cmd(DMAy_Streamx_TX, ENABLE);

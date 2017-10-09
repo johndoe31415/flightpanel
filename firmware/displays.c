@@ -33,8 +33,6 @@
 #include "font.h"
 #include "atomic.h"
 
-static void displays_check_dma_schedule(void);
-
 static bool inhibit;
 static atomic_t dma_running;
 static uint8_t last_updated_display;
@@ -165,7 +163,7 @@ static void display_dma_start(int display_index) {
 		surface_dirty[display_index] = false;
 		last_updated_display = display_index;
 		displays_enable_cs(display_index);
-		spi_tx_data_dma(DisplaySPI_SPI, DisplaySPI_DMAStream_TX, displays[display_index].surface->data, 128 * 64 / 8);
+		spi_tx_rx_data_dma(DisplaySPI_SPI, DisplaySPI_DMAStream_TX, displays[display_index].surface->data, DisplaySPI_DMAStream_RX, NULL, 128 * 64 / 8);
 	}
 }
 
@@ -178,8 +176,8 @@ void dsr_display_dma_finished(void) {
 	displays_check_dma_schedule();
 }
 
-static void displays_check_dma_schedule(void) {
-	if (!spi_dma_tx_ready(DisplaySPI_DMAStream_TX)) {
+void displays_check_dma_schedule(void) {
+	if (!spi_dma_tx_rx_ready(DisplaySPI_DMAStream_TX, DisplaySPI_DMAStream_RX)) {
 		/* Transmission in progress. */
 		return;
 	}
@@ -206,8 +204,7 @@ void init_displays(void) {
 	inhibit = true;
 
 	/* Then wait for any DMA to stop that might be running right now */
-	while (!spi_dma_tx_ready(DisplaySPI_DMAStream_TX));
-
+	while (!spi_dma_tx_rx_ready(DisplaySPI_DMAStream_TX, DisplaySPI_DMAStream_RX));
 
 	/* Reset all displays. Do busy waiting here because this might be triggered
 	 * from ISR and therefore delay_millis() would deadlock. */
@@ -223,4 +220,3 @@ void init_displays(void) {
 	/* Then allow display updates again */
 	inhibit = false;
 }
-

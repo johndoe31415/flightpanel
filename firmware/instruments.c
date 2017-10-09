@@ -274,7 +274,7 @@ static void redraw_frequency_display(bool *do_redraw, int surface_index, uint32_
 		surface_clear(surface);
 		blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor);
 		display_mark_surface_dirty(surface_index);
-		printf("%d: %s\n", surface_index, text);
+//		printf("%d: %s\n", surface_index, text);
 	}
 }
 

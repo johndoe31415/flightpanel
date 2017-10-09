@@ -31,6 +31,7 @@ typedef void (*dsr_task_callback_t)(void);
 
 struct dsr_runtime_info_t {
 	bool pending;
+	uint32_t call_delay;
 };
 struct dsr_task_definition_t {
 	dsr_task_callback_t callback;
@@ -46,6 +47,7 @@ enum dsr_task_t {
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 bool dsr_is_pending(enum dsr_task_t task);
+void dsr_mark_pending_delayed(enum dsr_task_t task, uint32_t delay);
 void dsr_mark_pending(enum dsr_task_t task);
 void execute_dsrs(void);
 void execute_dsr_loop(void);
