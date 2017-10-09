@@ -75,6 +75,15 @@ void surface_setpixel(const struct surface_t *surface, int x, int y) {
 	surface->data[byte_offset] |= (1 << bit_offset);
 }
 
+void surface_clrpixel(const struct surface_t *surface, int x, int y) {
+	if ((x < 0) || (y < 0) || (x >= surface->width) || (y >= surface->height)) {
+		return;
+	}
+	const int byte_offset = surface_pixel_byteoffset(surface, x, y);
+	const int bit_offset = surface_pixel_bitoffset(surface, x, y);
+	surface->data[byte_offset] &= ~(1 << bit_offset);
+}
+
 void surface_dump(const struct surface_t *surface) {
 	for (int y = 0; y < surface->height; y++) {
 		printf("| ");
@@ -96,3 +105,10 @@ void surface_draw_border(const struct surface_t *surface) {
 	}
 }
 
+void blit_rectangle(const struct surface_t *surface, const unsigned int xoffset, const unsigned int yoffset, const unsigned int width, const unsigned int height) {
+	for (int x = xoffset; x < xoffset + width; x++) {
+		for (int y = yoffset; y < yoffset + height; y++) {
+			surface_setpixel(surface, x, y);
+		}
+	}
+}

@@ -75,6 +75,11 @@ PB6	IO	EEPROM_SCL		init,af=I2C1
 #PD3	OUT	Dbg3
 #PD4	OUT	Dbg4
 
+# RGB LED LED
+PE4	OUT	RGB_LED_Green		init,activelow,speed=2,connect=RGB LED green
+PE5	OUT	RGB_LED_Red		init,activelow,speed=2,connect=RGB LED red
+PE6	OUT	RGB_LED_Blue		init,activelow,speed=2,connect=RGB LED blue
+
 # RS232 Debug Console
 PD5	OUT	USART_TX		init,af=USART2
 PD6	IN	USART_RX		init,af=USART2

@@ -21,27 +21,15 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __SURFACE_H__
-#define __SURFACE_H__
+#ifndef __INSTRUMENT_VISUALS_H__
+#define __INSTRUMENT_VISUALS_H__
 
-#include <stdint.h>
-#include <stdbool.h>
-#define SURFACE_ACCESSOR_LR_TB_COLBYTES
-
-struct surface_t {
-	int width, height;
-	uint8_t *data;
-};
+#include "surface.h"
+#include "instruments.h"
+#include "displays.h"
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void surface_fill(const struct surface_t *surface, uint8_t pattern);
-void surface_clear(const struct surface_t *surface);
-bool surface_getpixel(const struct surface_t *surface, int x, int y);
-void surface_setpixel(const struct surface_t *surface, int x, int y);
-void surface_clrpixel(const struct surface_t *surface, int x, int y);
-void surface_dump(const struct surface_t *surface);
-void surface_draw_border(const struct surface_t *surface);
-void blit_rectangle(const struct surface_t *surface, const unsigned int xoffset, const unsigned int yoffset, const unsigned int width, const unsigned int height);
+void redraw_display(const struct surface_t *surface, const struct instrument_state_t *istate, enum display_t display);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

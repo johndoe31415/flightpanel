@@ -24,7 +24,7 @@
 #ifndef __USB_H__
 #define __USB_H__
 
-#include "usbd_hid.h"
+#include "usb_hidreport.h"
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void OTG_FS_WKUP_IRQHandler(void);

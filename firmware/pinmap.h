@@ -1,7 +1,12 @@
 #ifndef __PINMAP_H__
 #define __PINMAP_H__
 
+#ifdef __ARM_ARCH
 #include <stm32f4xx_gpio.h>
+#else
+typedef struct {
+} GPIO_TypeDef;
+#endif
 #include "timer.h"
 
 struct gpio_definition_t {
@@ -770,6 +775,51 @@ struct gpio_definition_t {
 #define IOMux_MISO_pulse()						do { IOMux_MISO_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_MISO_set_INACTIVE(); } while (0)
 #define IOMux_MISO_npulse()						do { IOMux_MISO_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); IOMux_MISO_set_ACTIVE(); } while (0)
 #define IOMux_MISO_GPIO_Definition				{ .connect = "IOMux 8", .gpio = IOMux_MISO_GPIO, .name = "IOMux_MISO", .pin_name = "C11", .pin_source = IOMux_MISO_PinSource }
+
+// PE4: RGB_LED_Green (OUT) -- ['activelow', 'connect', 'init', 'speed']
+#define RGB_LED_Green_GPIO						GPIOE
+#define RGB_LED_Green_PinSource					GPIO_PinSource4
+#define RGB_LED_Green_Pin						GPIO_Pin_4
+#define RGB_LED_Green_set_HIGH()				RGB_LED_Green_GPIO->BSRRL = RGB_LED_Green_Pin
+#define RGB_LED_Green_set_LOW()					RGB_LED_Green_GPIO->BSRRH = RGB_LED_Green_Pin
+#define RGB_LED_Green_set_ACTIVE()				RGB_LED_Green_set_LOW()
+#define RGB_LED_Green_set_INACTIVE()			RGB_LED_Green_set_HIGH()
+#define RGB_LED_Green_get()						(!(RGB_LED_Green_GPIO->IDR & RGB_LED_Green_Pin))
+#define RGB_LED_Green_set(value)				if (value) { RGB_LED_Green_set_ACTIVE(); } else { RGB_LED_Green_set_INACTIVE(); }
+#define RGB_LED_Green_toggle()					RGB_LED_Green_GPIO->ODR ^= RGB_LED_Green_Pin
+#define RGB_LED_Green_pulse()					do { RGB_LED_Green_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); RGB_LED_Green_set_INACTIVE(); } while (0)
+#define RGB_LED_Green_npulse()					do { RGB_LED_Green_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); RGB_LED_Green_set_ACTIVE(); } while (0)
+#define RGB_LED_Green_GPIO_Definition			{ .connect = "RGB LED green", .gpio = RGB_LED_Green_GPIO, .name = "RGB_LED_Green", .pin_name = "E4", .pin_source = RGB_LED_Green_PinSource }
+
+// PE5: RGB_LED_Red (OUT) -- ['activelow', 'connect', 'init', 'speed']
+#define RGB_LED_Red_GPIO						GPIOE
+#define RGB_LED_Red_PinSource					GPIO_PinSource5
+#define RGB_LED_Red_Pin							GPIO_Pin_5
+#define RGB_LED_Red_set_HIGH()					RGB_LED_Red_GPIO->BSRRL = RGB_LED_Red_Pin
+#define RGB_LED_Red_set_LOW()					RGB_LED_Red_GPIO->BSRRH = RGB_LED_Red_Pin
+#define RGB_LED_Red_set_ACTIVE()				RGB_LED_Red_set_LOW()
+#define RGB_LED_Red_set_INACTIVE()				RGB_LED_Red_set_HIGH()
+#define RGB_LED_Red_get()						(!(RGB_LED_Red_GPIO->IDR & RGB_LED_Red_Pin))
+#define RGB_LED_Red_set(value)					if (value) { RGB_LED_Red_set_ACTIVE(); } else { RGB_LED_Red_set_INACTIVE(); }
+#define RGB_LED_Red_toggle()					RGB_LED_Red_GPIO->ODR ^= RGB_LED_Red_Pin
+#define RGB_LED_Red_pulse()						do { RGB_LED_Red_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); RGB_LED_Red_set_INACTIVE(); } while (0)
+#define RGB_LED_Red_npulse()					do { RGB_LED_Red_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); RGB_LED_Red_set_ACTIVE(); } while (0)
+#define RGB_LED_Red_GPIO_Definition				{ .connect = "RGB LED red", .gpio = RGB_LED_Red_GPIO, .name = "RGB_LED_Red", .pin_name = "E5", .pin_source = RGB_LED_Red_PinSource }
+
+// PE6: RGB_LED_Blue (OUT) -- ['activelow', 'connect', 'init', 'speed']
+#define RGB_LED_Blue_GPIO						GPIOE
+#define RGB_LED_Blue_PinSource					GPIO_PinSource6
+#define RGB_LED_Blue_Pin						GPIO_Pin_6
+#define RGB_LED_Blue_set_HIGH()					RGB_LED_Blue_GPIO->BSRRL = RGB_LED_Blue_Pin
+#define RGB_LED_Blue_set_LOW()					RGB_LED_Blue_GPIO->BSRRH = RGB_LED_Blue_Pin
+#define RGB_LED_Blue_set_ACTIVE()				RGB_LED_Blue_set_LOW()
+#define RGB_LED_Blue_set_INACTIVE()				RGB_LED_Blue_set_HIGH()
+#define RGB_LED_Blue_get()						(!(RGB_LED_Blue_GPIO->IDR & RGB_LED_Blue_Pin))
+#define RGB_LED_Blue_set(value)					if (value) { RGB_LED_Blue_set_ACTIVE(); } else { RGB_LED_Blue_set_INACTIVE(); }
+#define RGB_LED_Blue_toggle()					RGB_LED_Blue_GPIO->ODR ^= RGB_LED_Blue_Pin
+#define RGB_LED_Blue_pulse()					do { RGB_LED_Blue_set_ACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); RGB_LED_Blue_set_INACTIVE(); } while (0)
+#define RGB_LED_Blue_npulse()					do { RGB_LED_Blue_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); RGB_LED_Blue_set_ACTIVE(); } while (0)
+#define RGB_LED_Blue_GPIO_Definition			{ .connect = "RGB LED blue", .gpio = RGB_LED_Blue_GPIO, .name = "RGB_LED_Blue", .pin_name = "E6", .pin_source = RGB_LED_Blue_PinSource }
 
 // PD6: USART_RX (IN) -- ['af', 'init']
 #define USART_RX_GPIO							GPIOD

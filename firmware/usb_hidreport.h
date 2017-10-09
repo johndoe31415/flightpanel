@@ -32,7 +32,7 @@ struct hid_report_t {
 	uint16_t nav1_active, nav1_standby;
 	uint16_t nav2_active, nav2_standby;
 	uint16_t squawk;
-	uint16_t buttons;
+	uint16_t switches;
 } __attribute__ ((packed));
 
 struct hid_set_report_t {
@@ -41,6 +41,9 @@ struct hid_set_report_t {
 	uint16_t com2_active, com2_standby;
 	uint16_t nav1_active, nav1_standby;
 	uint16_t nav2_active, nav2_standby;
+	uint16_t squawk;
+	uint16_t ap_state;
 } __attribute__ ((packed));
 
 #endif
+

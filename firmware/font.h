@@ -46,7 +46,7 @@ struct cursor_t {
 };
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void blit_string_to_cursor(const struct font_t *font, const char *string, const struct surface_t *surface, struct cursor_t *cursor);
+void blit_string_to_cursor(const struct font_t *font, const char *string, const struct surface_t *surface, struct cursor_t *cursor, const bool invert);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

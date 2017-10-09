@@ -24,31 +24,33 @@
 #include "font.h"
 #include "surface.h"
 
-static void blit_glyph(const struct glyph_t *glyph, const struct surface_t *surface, int x0, int y0) {
+static void blit_glyph(const struct glyph_t *glyph, const struct surface_t *surface, int x0, int y0, const bool invert) {
 	const int glyph_rowwidth = (glyph->width + 7) / 8;
 	for (int y = 0; y < glyph->height; y++) {
 		for (int x = 0; x < glyph->width; x++) {
 			const int byte_offset = (x / 8) + (y * glyph_rowwidth);
 			const int bit_offset = x % 8;
-			const bool pixel = ((glyph->data[byte_offset] >> bit_offset) & 1) != 0;
+			const bool pixel = (((glyph->data[byte_offset] >> bit_offset) & 1) != 0) ^ invert;
 			if (pixel) {
 				surface_setpixel(surface, x0 + x + glyph->xoffset, y0 + y + glyph->yoffset);
+			} else {
+				surface_clrpixel(surface, x0 + x + glyph->xoffset, y0 + y + glyph->yoffset);
 			}
 		}
 	}
 }
 
-static void blit_glyph_to_cursor(const struct glyph_t *glyph, const struct surface_t *surface, struct cursor_t *cursor) {
-	blit_glyph(glyph, surface, cursor->x, cursor->y);
+static void blit_glyph_to_cursor(const struct glyph_t *glyph, const struct surface_t *surface, struct cursor_t *cursor, const bool invert) {
+	blit_glyph(glyph, surface, cursor->x, cursor->y, invert);
 	cursor->x += glyph->xadvance;
 }
 
-void blit_string_to_cursor(const struct font_t *font, const char *string, const struct surface_t *surface, struct cursor_t *cursor) {
+void blit_string_to_cursor(const struct font_t *font, const char *string, const struct surface_t *surface, struct cursor_t *cursor, const bool invert) {
 	while (*string) {
 		char c = *string;
 		int glyph_index = font->codepoint_to_charindex_fn(c);
 		if (glyph_index >= 0) {
-			blit_glyph_to_cursor(&font->glyphs[glyph_index], surface, cursor);
+			blit_glyph_to_cursor(&font->glyphs[glyph_index], surface, cursor, invert);
 		}
 		string++;
 	}

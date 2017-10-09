@@ -30,6 +30,7 @@
 #include "debugconsole.h"
 #include "pinmap.h"
 #include "displays.h"
+#include "dsr_tasks.h"
 
 void HAL_IncTick(void);
 
@@ -54,4 +55,5 @@ void SysTick_Handler(void) {
 	iomux_trigger();
 	hid_tick();
 	debugconsole_tick();
+	dsr_mark_pending(DSR_TASK_IDLE);
 }

@@ -29,7 +29,7 @@ import collections
 class ParseException(Exception): pass
 
 class PinmapGenerator(object):
-	_KNOWN_ATTRS = set([ "init", "pulldown", "activelow", "speed", "af", "comment", "connect" ])
+	_KNOWN_ATTRS = set([ "init", "pulldown", "activelow", "speed", "af", "comment", "connect", "initially_active" ])
 	_ENTRY_LINE = re.compile("^\s*P(?P<port>[A-Z])(?P<pin>\d+)\s+(?P<usage>[^\s]+)\s+(?P<name>[^\s]+)(\s*(?P<attributes>.+))?")
 	_PinTuple = collections.namedtuple("PinTuple", [ "lineno", "port", "pin", "usage", "name", "attributes" ])
 
@@ -129,7 +129,13 @@ class PinmapGenerator(object):
 		print("#ifndef __PINMAP_H__", file = f)
 		print("#define __PINMAP_H__", file = f)
 		print(file = f)
+
+		print("#ifdef __ARM_ARCH", file = f)
 		print("#include <stm32f4xx_gpio.h>", file = f)
+		print("#else", file = f)
+		print("typedef struct {", file = f)
+		print("} GPIO_TypeDef;", file = f)
+		print("#endif", file = f)
 		print("#include \"timer.h\"", file = f)
 		print(file = f)
 		print("struct gpio_definition_t {", file = f)
@@ -249,7 +255,14 @@ class PinmapGenerator(object):
 		print(file = f)
 
 		for ((port, mode, otype, speed, pullup), pins) in sorted(grouped_pins.items()):
+			initially_high = sorted([ pin for pin in pins if ("initially_active" in pin.attributes) ^ ("activelow" in pin.attributes) ])
+			initially_low = sorted([ pin for pin in pins if not (("initially_active" in pin.attributes) ^ ("activelow" in pin.attributes)) ])
+
+			init_bsrr = [ "%s_Pin" % (pin.name) for pin in initially_high ]
+			init_bsrr += [ "(%s_Pin << 16)" % (pin.name) for pin in initially_low ]
+
 			print("	{	// %d pin(s) on PORT%s with mode %s, otype %s, speed %s MHz and pullup %s" % (len(pins), port, mode, otype, speed, pullup), file = f)
+			print("		*((uint32_t*)(&GPIO%s->BSRRL)) = %s;" % (port, " | ".join(init_bsrr)), file = f)
 			print("		GPIO_InitTypeDef GPIO_InitStructure = {", file = f)
 			print("			.GPIO_Pin = %s," % (" | ".join("%s_Pin" % (pin.name) for pin in sorted(pins))), file = f)
 			print("			.GPIO_Mode = GPIO_Mode_%s," % (mode), file = f)

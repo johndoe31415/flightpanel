@@ -49,24 +49,32 @@ struct button_input_t {
 	enum btnaction_t *notify;
 };
 
-struct instrument_state {
-	uint16_t com1_active_index, com2_active_index;
-	uint16_t nav1_active_index, nav2_active_index;
+struct instrument_state_t {
+	uint16_t com1_active_index, com1_standby_index;
+	uint16_t com2_active_index, com2_standby_index;
+	uint16_t nav1_active_index, nav1_standby_index;
+	uint16_t nav2_active_index, nav2_standby_index;
 	uint16_t ap_altitude;
 	uint16_t ap_climbrate;
 	uint16_t ap_ias;
-	uint16_t squawk;
-	bool transponder_charly;
+	struct {
+		uint16_t squawk;
+		bool mode_charly;
+		uint8_t edit_char;
+		uint16_t edit_timeout;
+		bool identing;
+		uint16_t ident_timeout;
+	} xpdr;
 	uint16_t qnh;
 	bool ap_active;
 	bool ap_hold_altitude;
 	bool ap_hold_navigation;
 	bool ap_hold_reverse;
 	bool ap_hold_approach;
-	bool gps_nav;
+	bool navigate_by_gps;
 };
 
-struct flight_data {
+struct flight_data_t {
 	uint16_t ias;
 	uint16_t altitude;
 };
@@ -76,6 +84,7 @@ void hid_tick(void);
 void instruments_handle_inputs(void);
 void dsr_idle_task(void);
 void instruments_set_by_host(const struct hid_set_report_t *report);
+void instruments_init(void);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

@@ -21,27 +21,27 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __SURFACE_H__
-#define __SURFACE_H__
+#include <stdio.h>
+#include <instrument_visuals.h>
+#include "testbed.h"
 
-#include <stdint.h>
-#include <stdbool.h>
-#define SURFACE_ACCESSOR_LR_TB_COLBYTES
+static void test_instruments(void) {
+	subtest_start();
+	const struct surface_t surface = {
+		.width = 128,
+		.height = 64,
+		.data = (uint8_t[128 * 64 / 8]) { },
+	};
+	struct instrument_state_t istate = {
 
-struct surface_t {
-	int width, height;
-	uint8_t *data;
-};
+	};
+	redraw_display(&surface, &istate, DISPLAY_XPDR);
+	subtest_finished();
+}
 
-/*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void surface_fill(const struct surface_t *surface, uint8_t pattern);
-void surface_clear(const struct surface_t *surface);
-bool surface_getpixel(const struct surface_t *surface, int x, int y);
-void surface_setpixel(const struct surface_t *surface, int x, int y);
-void surface_clrpixel(const struct surface_t *surface, int x, int y);
-void surface_dump(const struct surface_t *surface);
-void surface_draw_border(const struct surface_t *surface);
-void blit_rectangle(const struct surface_t *surface, const unsigned int xoffset, const unsigned int yoffset, const unsigned int width, const unsigned int height);
-/***************  AUTO GENERATED SECTION ENDS   ***************/
-
-#endif
+int main(int argc, char **argv) {
+	test_start(argc, argv);
+	test_instruments();
+	test_finished();
+	return 0;
+}

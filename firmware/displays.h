@@ -26,18 +26,20 @@
 
 #define DISPLAY_COUNT		12
 
-#define DISPLAY_COM1		0
-#define DISPLAY_COM1_STBY	1
-#define DISPLAY_COM2		3
-#define DISPLAY_COM2_STBY	2
-#define DISPLAY_NAV1		4
-#define DISPLAY_NAV1_STBY	5
-#define DISPLAY_DME			6
-#define DISPLAY_NAV2		9
-#define DISPLAY_NAV2_STBY	8
-#define DISPLAY_ADF			7
-#define DISPLAY_AP			10
-#define DISPLAY_XPDR		11
+enum display_t {
+	DISPLAY_COM1 = 0,
+	DISPLAY_COM1_STBY = 1,
+	DISPLAY_COM2 = 3,
+	DISPLAY_COM2_STBY = 2,
+	DISPLAY_NAV1 = 4,
+	DISPLAY_NAV1_STBY = 5,
+	DISPLAY_DME = 6,
+	DISPLAY_NAV2 = 9,
+	DISPLAY_NAV2_STBY = 8,
+	DISPLAY_ADF = 7,
+	DISPLAY_AP = 10,
+	DISPLAY_XPDR = 11,
+};
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void isr_display_dma_finished(void);

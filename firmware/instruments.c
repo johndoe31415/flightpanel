@@ -26,13 +26,13 @@
 #include <stdbool.h>
 
 #include "instruments.h"
-#include "usb.h"
 #include "rotary.h"
 #include "displays.h"
 #include "font.h"
 #include "vcr-osd-mono-20.h"
 #include "vcr-osd-mono-30.h"
 #include "timer.h"
+#include "usb.h"
 #include "pinmap.h"
 #include "debounce.h"
 #include "iomux.h"
@@ -40,19 +40,13 @@
 #include "frequencies.h"
 #include "iomux_pinmap.h"
 #include "dsr_tasks.h"
+#include "instrument_visuals.h"
 
 #define USB_REPORT_INTERVAL_MS		25
 
-static struct instrument_state instrument_state;
+static struct instrument_state_t instrument_state;
 static uint8_t usb_report_time_tick;
-static bool redraw_com1_active = true;
-static bool redraw_com1_standby = true;
-static bool redraw_com2_active = true;
-static bool redraw_com2_standby = true;
-static bool redraw_nav1_active = true;
-static bool redraw_nav1_standby = true;
-static bool redraw_nav2_active = true;
-static bool redraw_nav2_standby = true;
+static bool display_data_changed[DISPLAY_COUNT];
 
 static struct rotary_encoder_with_button_t rotary_com1 = {
 	.rotary = {
@@ -102,41 +96,81 @@ static struct rotary_encoder_with_button_t rotary_nav2 = {
 	}
 };
 
-struct button_t radio_com1_button = {
+static struct button_t radio_com1_button = {
 	.threshold = 50,
 	.deadtime = 50,
 };
-struct button_t radio_nav1_button = {
+static struct button_t radio_nav1_button = {
 	.threshold = 50,
 	.deadtime = 50,
 };
-struct button_t radio_dme_button = {
+static struct button_t radio_dme_button = {
 	.threshold = 50,
 	.deadtime = 50,
 };
-struct button_t radio_com2_button = {
+static struct button_t radio_com2_button = {
 	.threshold = 50,
 	.deadtime = 50,
 };
-struct button_t radio_nav2_button = {
+static struct button_t radio_nav2_button = {
 	.threshold = 50,
 	.deadtime = 50,
 };
-struct button_t radio_adf_button = {
-	.threshold = 50,
-	.deadtime = 50,
-};
-
-struct button_t xpdf_mode_button = {
-	.threshold = 50,
-	.deadtime = 50,
-};
-struct button_t navsrc_button = {
+static struct button_t radio_adf_button = {
 	.threshold = 50,
 	.deadtime = 50,
 };
 
-struct button_t ap_master_button = {
+static struct button_t xpdr_mode_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+static struct button_t navsrc_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+static struct button_t ap_master_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+
+static struct button_t xpdr_0_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+static struct button_t xpdr_1_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+static struct button_t xpdr_2_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+static struct button_t xpdr_3_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+static struct button_t xpdr_4_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+static struct button_t xpdr_5_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+static struct button_t xpdr_6_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+static struct button_t xpdr_7_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+static struct button_t xpdr_VFR_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+static struct button_t xpdr_IDENT_button = {
 	.threshold = 50,
 	.deadtime = 50,
 };
@@ -206,7 +240,7 @@ static const struct button_input_t button_inputs[] = {
 		.pin = IOMUX_IN_Button_Radio_ADF,
 	},
 	{
-		.target = &xpdf_mode_button,
+		.target = &xpdr_mode_button,
 		.pin = IOMUX_IN_Button_XPDR_Mode,
 	},
 	{
@@ -216,6 +250,46 @@ static const struct button_input_t button_inputs[] = {
 	{
 		.target = &ap_master_button,
 		.pin = IOMUX_IN_Button_AP,
+	},
+	{
+		.target = &xpdr_0_button,
+		.pin = IOMUX_IN_Button_XPDR_0,
+	},
+	{
+		.target = &xpdr_1_button,
+		.pin = IOMUX_IN_Button_XPDR_1,
+	},
+	{
+		.target = &xpdr_2_button,
+		.pin = IOMUX_IN_Button_XPDR_2,
+	},
+	{
+		.target = &xpdr_3_button,
+		.pin = IOMUX_IN_Button_XPDR_3,
+	},
+	{
+		.target = &xpdr_4_button,
+		.pin = IOMUX_IN_Button_XPDR_4,
+	},
+	{
+		.target = &xpdr_5_button,
+		.pin = IOMUX_IN_Button_XPDR_5,
+	},
+	{
+		.target = &xpdr_6_button,
+		.pin = IOMUX_IN_Button_XPDR_6,
+	},
+	{
+		.target = &xpdr_7_button,
+		.pin = IOMUX_IN_Button_XPDR_7,
+	},
+	{
+		.target = &xpdr_VFR_button,
+		.pin = IOMUX_IN_Button_XPDR_VFR,
+	},
+	{
+		.target = &xpdr_IDENT_button,
+		.pin = IOMUX_IN_Button_XPDR_IDENT,
 	},
 };
 
@@ -262,22 +336,6 @@ void instruments_handle_inputs(void) {
 	}
 }
 
-static void redraw_frequency_display(bool *do_redraw, int surface_index, uint32_t frequency_khz) {
-	if (*do_redraw) {
-		*do_redraw = false;
-		const struct surface_t *surface = displays_get_surface(surface_index);
-		char text[16];
-		int mhz = frequency_khz / 1000;
-		int khz = frequency_khz % 1000;
-		sprintf(text, "%3d.%03d", mhz, khz);
-		struct cursor_t cursor = { 0, 35 };
-		surface_clear(surface);
-		blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor);
-		display_mark_surface_dirty(surface_index);
-//		printf("%d: %s\n", surface_index, text);
-	}
-}
-
 static bool button_pressed(struct button_t *button) {
 	if (button->lastpress != BUTTON_NOACTION) {
 		button->lastpress = BUTTON_NOACTION;
@@ -294,42 +352,89 @@ static bool rotary_changed(struct rotary_encoder_t *rotary) {
 	return false;
 }
 
+static void check_vfr_number_pressed(struct button_t *button, const uint8_t digit) {
+	if (button->lastpress != BUTTON_NOACTION) {
+		button->lastpress = BUTTON_NOACTION;
+
+		instrument_state.xpdr.edit_timeout = 2000;
+		if (!instrument_state.xpdr.edit_char) {
+			instrument_state.xpdr.edit_char++;
+		}
+
+		uint16_t scalar = 1;
+		switch (instrument_state.xpdr.edit_char) {
+			case 1: scalar = 1000; break;
+			case 2: scalar = 100; break;
+			case 3: scalar = 10; break;
+		}
+
+		uint8_t current_digit = (instrument_state.xpdr.squawk / scalar) % 10;
+		instrument_state.xpdr.squawk += (digit - current_digit) * scalar;
+
+		instrument_state.xpdr.edit_char++;
+		if (instrument_state.xpdr.edit_char == 5) {
+			instrument_state.xpdr.edit_char = 1;
+		}
+
+		display_data_changed[DISPLAY_XPDR] = true;
+
+	}
+}
+
+static bool timeout(uint16_t *value) {
+	if (*value) {
+		*value = *value - 1;
+		if (!*value) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void dsr_idle_task(void) {
-	dsr_mark_pending(DSR_TASK_IDLE);
-	iomux_clamp_all_outputs(iomux_get_input(IOMUX_IN_Switch_MASTER));
 	if (rotary_changed(&rotary_com1.rotary)) {
-		redraw_com1_standby = true;
+		instrument_state.com1_standby_index = rotary_com1.rotary.value;
+		display_data_changed[DISPLAY_COM1_STBY] = true;
 	}
 	if (rotary_changed(&rotary_com2.rotary)) {
-		redraw_com2_standby = true;
+		instrument_state.com2_standby_index = rotary_com2.rotary.value;
+		display_data_changed[DISPLAY_COM2_STBY] = true;
 	}
 	if (rotary_changed(&rotary_nav1.rotary)) {
-		redraw_nav1_standby = true;
+		instrument_state.nav1_standby_index = rotary_nav1.rotary.value;
+		display_data_changed[DISPLAY_NAV1_STBY] = true;
 	}
 	if (rotary_changed(&rotary_nav2.rotary)) {
-		redraw_nav2_standby = true;
+		instrument_state.nav2_standby_index = rotary_nav2.rotary.value;
+		display_data_changed[DISPLAY_NAV2_STBY] = true;
 	}
 
 	if (button_pressed(&rotary_com1.button)) {
-		swap_uint16(&rotary_com1.rotary.value, &instrument_state.com1_active_index);
-		redraw_com1_active = true;
-		redraw_com1_standby = true;
+		swap_uint16(&instrument_state.com1_standby_index, &instrument_state.com1_active_index);
+		rotary_com1.rotary.value = instrument_state.com1_standby_index;
+		display_data_changed[DISPLAY_COM1] = true;
+		display_data_changed[DISPLAY_COM1_STBY] = true;
 	}
 	if (button_pressed(&rotary_com2.button)) {
-		swap_uint16(&rotary_com2.rotary.value, &instrument_state.com2_active_index);
-		redraw_com2_active = true;
-		redraw_com2_standby = true;
+		swap_uint16(&instrument_state.com2_standby_index, &instrument_state.com2_active_index);
+		rotary_com2.rotary.value = instrument_state.com2_standby_index;
+		display_data_changed[DISPLAY_COM2] = true;
+		display_data_changed[DISPLAY_COM2_STBY] = true;
 	}
 	if (button_pressed(&rotary_nav1.button)) {
-		swap_uint16(&rotary_nav1.rotary.value, &instrument_state.nav1_active_index);
-		redraw_nav1_active = true;
-		redraw_nav1_standby = true;
+		swap_uint16(&instrument_state.nav1_standby_index, &instrument_state.nav1_active_index);
+		rotary_nav1.rotary.value = instrument_state.nav1_standby_index;
+		display_data_changed[DISPLAY_NAV1] = true;
+		display_data_changed[DISPLAY_NAV1_STBY] = true;
 	}
 	if (button_pressed(&rotary_nav2.button)) {
-		swap_uint16(&rotary_nav2.rotary.value, &instrument_state.nav2_active_index);
-		redraw_nav2_active = true;
-		redraw_nav2_standby = true;
+		swap_uint16(&instrument_state.nav2_standby_index, &instrument_state.nav2_active_index);
+		rotary_nav2.rotary.value = instrument_state.nav2_standby_index;
+		display_data_changed[DISPLAY_NAV2] = true;
+		display_data_changed[DISPLAY_NAV2_STBY] = true;
 	}
+
+
 	if (button_pressed(&radio_com1_button)) {
 		iomux_output_toggle(IOMUX_OUT_Radio_COM1);
 	}
@@ -348,45 +453,88 @@ void dsr_idle_task(void) {
 	if (button_pressed(&radio_adf_button)) {
 		iomux_output_toggle(IOMUX_OUT_Radio_ADF);
 	}
-	if (button_pressed(&xpdf_mode_button)) {
-		iomux_output_toggle(IOMUX_OUT_XPDR_STBY);
-		iomux_output_toggle(IOMUX_OUT_XPDR_C);
+	if (button_pressed(&xpdr_mode_button)) {
+		instrument_state.xpdr.mode_charly = !instrument_state.xpdr.mode_charly;
+		iomux_output_set(IOMUX_OUT_XPDR_STBY, !instrument_state.xpdr.mode_charly);
+		iomux_output_set(IOMUX_OUT_XPDR_C, instrument_state.xpdr.mode_charly);
 	}
 	if (button_pressed(&navsrc_button)) {
-		iomux_output_toggle(IOMUX_OUT_NavSrc_NAV);
-		iomux_output_toggle(IOMUX_OUT_NavSrc_GPS);
+		instrument_state.navigate_by_gps = !instrument_state.navigate_by_gps;
+		iomux_output_set(IOMUX_OUT_NavSrc_NAV, !instrument_state.navigate_by_gps);
+		iomux_output_set(IOMUX_OUT_NavSrc_GPS, instrument_state.navigate_by_gps);
 	}
 	if (button_pressed(&ap_master_button)) {
 		iomux_output_toggle(IOMUX_OUT_AP_MASTER);
 	}
+	if (button_pressed(&xpdr_IDENT_button)) {
+		instrument_state.xpdr.identing = true;
+		instrument_state.xpdr.ident_timeout = 3000;
+		display_data_changed[DISPLAY_XPDR] = true;
+	}
+	if (button_pressed(&xpdr_VFR_button)) {
+		instrument_state.xpdr.squawk = 7000;
+		instrument_state.xpdr.edit_char = 0;
+		instrument_state.xpdr.edit_timeout = 0;
+		display_data_changed[DISPLAY_XPDR] = true;
+	}
 
-	redraw_frequency_display(&redraw_com1_active, DISPLAY_COM1, com_index_to_frequency_khz(instrument_state.com1_active_index));
-	redraw_frequency_display(&redraw_com1_standby, DISPLAY_COM1_STBY, com_index_to_frequency_khz(rotary_com1.rotary.value));
-	redraw_frequency_display(&redraw_com2_active, DISPLAY_COM2, com_index_to_frequency_khz(instrument_state.com2_active_index));
-	redraw_frequency_display(&redraw_com2_standby, DISPLAY_COM2_STBY, com_index_to_frequency_khz(rotary_com2.rotary.value));
-	redraw_frequency_display(&redraw_nav1_active, DISPLAY_NAV1, nav_index_to_frequency_khz(instrument_state.nav1_active_index));
-	redraw_frequency_display(&redraw_nav1_standby, DISPLAY_NAV1_STBY, nav_index_to_frequency_khz(rotary_nav1.rotary.value));
-	redraw_frequency_display(&redraw_nav2_active, DISPLAY_NAV2, nav_index_to_frequency_khz(instrument_state.nav2_active_index));
-	redraw_frequency_display(&redraw_nav2_standby, DISPLAY_NAV2_STBY, nav_index_to_frequency_khz(rotary_nav2.rotary.value));
+	check_vfr_number_pressed(&xpdr_0_button, 0);
+	check_vfr_number_pressed(&xpdr_1_button, 1);
+	check_vfr_number_pressed(&xpdr_2_button, 2);
+	check_vfr_number_pressed(&xpdr_3_button, 3);
+	check_vfr_number_pressed(&xpdr_4_button, 4);
+	check_vfr_number_pressed(&xpdr_5_button, 5);
+	check_vfr_number_pressed(&xpdr_6_button, 6);
+	check_vfr_number_pressed(&xpdr_7_button, 7);
+
+	if (timeout(&instrument_state.xpdr.edit_timeout)) {
+		/* Entering timeout. */
+		instrument_state.xpdr.edit_char = 0;
+		display_data_changed[DISPLAY_XPDR] = true;
+	}
+
+	if (timeout(&instrument_state.xpdr.ident_timeout)) {
+		/* IDENT over */
+		instrument_state.xpdr.identing = false;
+		display_data_changed[DISPLAY_XPDR] = true;
+	}
+
+	for (int did = 0; did < DISPLAY_COUNT; did++) {
+		if (display_data_changed[did]) {
+			// Get the surface for this display index
+			display_data_changed[did] = false;
+			const struct surface_t *surface = displays_get_surface(did);
+			redraw_display(surface, &instrument_state, did);
+			display_mark_surface_dirty(did);
+		}
+	}
+}
+
+static void update_value_uint16(bool *changed, uint16_t *dest, const uint16_t src) {
+	if (*dest != src) {
+		*changed = true;
+		*dest = src;
+	}
 }
 
 void instruments_set_by_host(const struct hid_set_report_t *report) {
+	// TODO: This is broken right now
 	printf("HostSet %d %d\n", report->com1_active, report->com1_standby);
-	instrument_state.com1_active_index = report->com1_active;
-	rotary_com1.rotary.value = report->com1_standby;
-	instrument_state.com2_active_index = report->com2_active;
-	rotary_com2.rotary.value = report->com2_standby;
-	instrument_state.nav1_active_index = report->nav1_active;
-	rotary_nav1.rotary.value = report->nav1_standby;
-	instrument_state.nav2_active_index = report->nav2_active;
-	rotary_nav2.rotary.value = report->nav2_standby;
-	redraw_com1_active = true;
-	redraw_com1_standby = true;
-	redraw_com2_active = true;
-	redraw_com2_standby = true;
-	redraw_nav1_active = true;
-	redraw_nav1_standby = true;
-	redraw_nav2_active = true;
-	redraw_nav2_standby = true;
+	update_value_uint16(&display_data_changed[DISPLAY_COM1], &instrument_state.com1_active_index, report->com1_active);
+#if 0
+	update_value_uint16(&redraw_com1_standby, &rotary_com1.rotary.value, report->com1_standby);
+	update_value_uint16(&redraw_com2_active, &instrument_state.com2_active_index, report->com2_active);
+	update_value_uint16(&redraw_com2_standby, &rotary_com2.rotary.value, report->com2_standby);
+	update_value_uint16(&redraw_nav1_active, &instrument_state.nav1_active_index, report->nav1_active);
+	update_value_uint16(&redraw_nav1_standby, &rotary_nav1.rotary.value, report->nav1_standby);
+	update_value_uint16(&redraw_nav2_active, &instrument_state.nav2_active_index, report->nav2_active);
+	update_value_uint16(&redraw_nav2_standby, &rotary_nav2.rotary.value, report->nav2_standby);
+	update_value_uint16(&redraw_xpdr, &instrument_state.squawk, report->squawk);
+#endif
 }
 
+void instruments_init(void) {
+	for (int did = 0; did < DISPLAY_COUNT; did++) {
+		display_data_changed[did] = true;
+	}
+}
