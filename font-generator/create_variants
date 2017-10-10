@@ -49,9 +49,15 @@ for fontsize in fltrange(args.min_fontsize, args.max_fontsize, args.fontsize_ste
 	json_filename = "%s-%.3f.json" % (filename_prefix, fontsize)
 	if args.verbose:
 		print("Rasterizing %s with %.3f pt and %s antialiasing to %s" % (args.fontname, fontsize, args.antialias, json_filename))
-	subprocess.check_call([ "./font-rasterize", "--fontsize=%.3f" % (fontsize), "--antialias=%s" % (args.antialias), args.fontname, json_filename ])
+	cmd = [ "./font-rasterize", "--fontsize=%.3f" % (fontsize), "--antialias=%s" % (args.antialias), args.fontname, json_filename ]
+	if args.verbose:
+		print(" ".join(cmd))
+	subprocess.check_call(cmd)
 	for threshold in fltrange(args.min_threshold, args.max_threshold, args.threshold_step):
 		if args.verbose:
 			print("Applying threshold %d to rasterized font." % (threshold))
 		threshold = round(threshold)
-		subprocess.check_call([ "./json-to-c.py", "-t", str(threshold), "--filename-include-threshold", "--create-pnm", json_filename ])
+		cmd = [ "./json-to-c.py", "--force", "--threshold", str(threshold), "--filename-include-threshold", "--create-pnm", json_filename ]
+		if args.verbose:
+			print(" ".join(cmd))
+		subprocess.check_call(cmd)

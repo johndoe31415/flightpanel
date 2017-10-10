@@ -49,14 +49,20 @@ struct button_input_t {
 	enum btnaction_t *notify;
 };
 
+enum ap_hold_t {
+	HOLD_ALTITUDE = (1 << 0),
+	HOLD_IAS = (1 << 1),
+	HOLD_HEADING = (1 << 2),
+	HOLD_NAVIGATION = (1 << 3),
+	HOLD_REVERSE = (1 << 4),
+	HOLD_APPROACH = (1 << 5),
+};
+
 struct instrument_state_t {
 	uint16_t com1_active_index, com1_standby_index;
 	uint16_t com2_active_index, com2_standby_index;
 	uint16_t nav1_active_index, nav1_standby_index;
 	uint16_t nav2_active_index, nav2_standby_index;
-	uint16_t ap_altitude;
-	uint16_t ap_climbrate;
-	uint16_t ap_ias;
 	struct {
 		uint16_t squawk;
 		bool mode_charly;
@@ -66,11 +72,16 @@ struct instrument_state_t {
 		uint16_t ident_timeout;
 	} xpdr;
 	uint16_t qnh;
-	bool ap_active;
-	bool ap_hold_altitude;
-	bool ap_hold_navigation;
-	bool ap_hold_reverse;
-	bool ap_hold_approach;
+
+	struct {
+		uint16_t altitude;
+		uint16_t climbrate;
+		uint16_t ias;
+		uint16_t heading;
+
+		bool active;
+		uint8_t hold;
+	} ap;
 	bool navigate_by_gps;
 };
 

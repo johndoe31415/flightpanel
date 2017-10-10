@@ -24,7 +24,7 @@
 #include "font.h"
 #include "surface.h"
 
-static void blit_glyph(const struct glyph_t *glyph, const struct surface_t *surface, int x0, int y0, const bool invert) {
+static void blit_glyph(const struct glyph_t *glyph, const struct surface_t *surface, const int x0, const int y0, const bool invert) {
 	const int glyph_rowwidth = (glyph->width + 7) / 8;
 	for (int y = 0; y < glyph->height; y++) {
 		for (int x = 0; x < glyph->width; x++) {
@@ -47,7 +47,7 @@ static void blit_glyph_to_cursor(const struct glyph_t *glyph, const struct surfa
 
 void blit_string_to_cursor(const struct font_t *font, const char *string, const struct surface_t *surface, struct cursor_t *cursor, const bool invert) {
 	while (*string) {
-		char c = *string;
+		const unsigned int c = (unsigned int)*string;
 		int glyph_index = font->codepoint_to_charindex_fn(c);
 		if (glyph_index >= 0) {
 			blit_glyph_to_cursor(&font->glyphs[glyph_index], surface, cursor, invert);

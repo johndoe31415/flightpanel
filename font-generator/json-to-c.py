@@ -34,10 +34,80 @@ from Glyph import Glyph
 from PnmPicture import PnmPicture
 
 def parse_threshold(value):
-	value = int(value)
+	if value.startswith("0x"):
+		value = int(value, 16)
+	else:
+		value = int(value)
 	if not (1 <= value <= 255):
-		raise argparse.ArgumentError("Threshold value must be inbetween 1 and 255.")
+		raise argparse.ArgumentTypeError("Threshold value must be inbetween 1 and 255.")
 	return value
+
+class PatchCmd(object):
+	_KNOWN_CMDS = {
+		"setwidth": 1,
+		"setpixel": 2,
+		"clrpixel": 2,
+		"movex": 1,
+		"movey": 1,
+		"rename": 1,
+	}
+
+	def __init__(self, cmd):
+		cmd = cmd.split(":")
+		if len(cmd) < 2:
+			raise argparse.ArgumentTypeError("You need to specify at least a glyph and a command.")
+
+		self._glyph = cmd[0]
+		if len(self._glyph) != 1:
+			raise argparse.ArgumentTypeError("The glyph needs to be one single character.")
+
+		self._cmd = cmd[1]
+		if self._cmd not in self._KNOWN_CMDS:
+			raise argparse.ArgumentTypeError("Unknown command \"%s\" specified. Known are %s." % (self._cmd, ", ".join(self._KNOWN_CMDS)))
+
+		self._args = cmd[2:]
+		if len(self._args) != self._KNOWN_CMDS[self._cmd]:
+			raise argparse.ArgumentTypeError("Command \"%s\" requires %d arguments, %d given." % (self._cmd, self._KNOWN_CMDS[self._cmd], len(self._args)))
+
+		if self._cmd != "rename":
+			self._args = [ int(x) for x in self._args ]
+		else:
+			if len(self._args[0]) != 1:
+				raise argparse.ArgumentTypeError("The target glyph needs to be one single character.")
+
+	@property
+	def glyph(self):
+		return self._glyph
+
+	@property
+	def cmd(self):
+		return self._cmd
+
+	@property
+	def target(self):
+		assert(self._cmd in [ "rename" ])
+		return self._args[0]
+
+	@property
+	def distance(self):
+		assert(self._cmd in [ "movex", "movey" ])
+		return self._args[0]
+
+	@property
+	def x(self):
+		assert(self._cmd in [ "setpixel", "clrpixel" ])
+		return self._args[0]
+
+	@property
+	def y(self):
+		assert(self._cmd in [ "setpixel", "clrpixel" ])
+		return self._args[1]
+
+	@property
+	def width(self):
+		assert(self._cmd in [ "setwidth" ])
+		return self._args[0]
+
 
 parser = FriendlyArgumentParser()
 parser.add_argument("-t", "--threshold", metavar = "value", type = parse_threshold, default = 0x60, help = "Threshold at which pixels will be considered set. Defaults to %(default)d, must be a value between 1 and 255.")
@@ -47,11 +117,11 @@ parser.add_argument("--create-pnm", action = "store_true", help = "Create a PNM 
 parser.add_argument("--create-text", action = "store_true", help = "Create a PNM file with the given text.")
 parser.add_argument("--text", metavar = "text", help = "Render this text to the PNM file")
 parser.add_argument("--text-size", metavar = "WxH", default = "128x64", help = "When writing a text file, specifies the PNM output filesize.")
+parser.add_argument("--patch", metavar = "patchcmd", type = PatchCmd, action = "append", default = [ ], help = "Patch glyphs before rendering. Command can be either glyph:setwidth:n or glyph:setpixel:x:y or glyph:clrpixel:x:y.")
 parser.add_argument("-f", "--force", action = "store_true", help = "Overwrite .c, .h and .pnm files if they exist.")
 parser.add_argument("-v", "--verbose", action = "store_true", help = "Increase message verbosity.")
 parser.add_argument("jsonfontfile", metavar = "jsonfontfile", type = str, help = "Rasterized JSON formatted font that was output by font-rasterize.")
 args = parser.parse_args(sys.argv[1:])
-
 if args.jsonfontfile.endswith(".json"):
 	prefix = args.jsonfontfile[:-5]
 else:
@@ -87,11 +157,15 @@ if args.charset is None:
 	charset = None
 else:
 	charset = set(args.charset)
-font = Font(jsonfont["fontname"], jsonfont["fontsize"])
+font = Font(jsonfont["fontname"], jsonfont["fontsize"], jsonfont["antialias"])
 for glyphdata in jsonfont["glyphs"]:
 	glyph = Glyph(glyphdata)
 	if (charset is None) or (glyph.text in charset):
 		font.add_glyph(glyph)
+
+# Apply all patches to font
+for patch in args.patch:
+	font.patch(patch)
 
 # Then assign char IDs
 font.enumerate_glyphs()
@@ -105,6 +179,7 @@ if args.create_pnm:
 	max_width = font.max_glyph_width
 	max_height = font.max_glyph_height
 	spacing = 5
+	border = 10
 
 	glyph_count = len(font)
 	glyph_count_x = math.ceil(math.sqrt(glyph_count))
@@ -113,10 +188,10 @@ if args.create_pnm:
 
 	total_width = max_width + spacing
 	total_height = max_height + spacing
-	pic = PnmPicture.new((glyph_count_x + 1) * total_width, (glyph_count_y + 1) * total_height)
+	pic = PnmPicture.new((glyph_count_x + 1) * total_width + 2 * border, (glyph_count_y + 1) * total_height + 2 * border)
 	for (gcnt, (codepoint, bitmap)) in enumerate(sorted(bitmaps.items())):
-		ypos = ((gcnt // glyph_count_x) + 1) * total_height
-		xpos = ((gcnt % glyph_count_x) + 1) * total_width
+		ypos = ((gcnt // glyph_count_x) + 1) * total_height + border
+		xpos = ((gcnt % glyph_count_x) + 1) * total_width + border
 		bitmap.blit_to(pic, xpos, ypos)
 	pic.write_file(pnm_filename)
 
@@ -134,10 +209,15 @@ if args.create_text:
 
 
 class TemplateHelper(object):
-	def __init__(self, font, bitmaps, h_filename):
+	def __init__(self, args, font, bitmaps, h_filename):
+		self._args = args
 		self._font = font
 		self._bitmaps = bitmaps
 		self._h_filename = h_filename
+
+	@property
+	def args(self):
+		return self._args
 
 	@property
 	def font(self):
@@ -172,7 +252,7 @@ class TemplateHelper(object):
 
 		return "{ " + ", ".join("0x%02x" % (c) for c in data) + " }"
 
-helper = TemplateHelper(font, bitmaps, h_filename = h_filename)
+helper = TemplateHelper(args, font, bitmaps, h_filename = h_filename)
 lookup = mako.lookup.TemplateLookup([ "." ], strict_undefined = True)
 with open(c_filename, "w") as f:
 	f.write(lookup.get_template("template_glyph.c").render(font = helper))

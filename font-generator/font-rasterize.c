@@ -189,14 +189,17 @@ static void show_syntax(const char *pgmname, const char *errmsg) {
 	if (errmsg) {
 		fprintf(stderr, "error: %s\n\n", errmsg);
 	}
-	fprintf(stderr, "%s [--antialias=default|none|gray|subpixel|fast|good|best] [-s fontsize] (fontname) (outfile.json)\n", pgmname);
+	fprintf(stderr, "%s (--antialias=default|none|gray|subpixel|fast|good|best)\n", pgmname);
+	fprintf(stderr, "           (--fontsize=fontsize) (--verbose) [fontname] [outfile.json]\n");
 	fprintf(stderr, "\n");
-	fprintf(stderr, "  -a, --antialias=VALUE   Set the Cairo antialiasing mode for fonts to either default, none, gray,\n");
-	fprintf(stderr, "                          subpixel, fast, good or best.\n");
+	fprintf(stderr, "  -a, --antialias=VALUE   Set the Cairo antialiasing mode for fonts to either\n");
+	fprintf(stderr, "                          default, none, gray, subpixel, fast, good or best.\n");
 	fprintf(stderr, "  -s, --fontsize SIZE     Set the font size which is used.\n");
-	fprintf(stderr, "  -v                      Increase verbosity durign generation of rendered font.\n");
-	fprintf(stderr, "  (fontname)              Name of the font that should be rendered.\n");
-	fprintf(stderr, "  (outfile.json)          Name of the output JSON file.\n");
+	fprintf(stderr, "  -v, --verbose           Increase verbosity durign generation of rendered font.\n");
+	fprintf(stderr, "\n");
+	fprintf(stderr, "positional arguments:\n");
+	fprintf(stderr, "  fontname                Name of the font that should be rendered.\n");
+	fprintf(stderr, "  outfile.json            Name of the output JSON file.\n");
 }
 
 static bool parse_cmdline_options(int argc, char **argv) {
@@ -249,6 +252,19 @@ static bool parse_cmdline_options(int argc, char **argv) {
 	return true;
 }
 
+static const char *aa_string(cairo_antialias_t antialiasing_level) {
+	switch (antialiasing_level) {
+		case CAIRO_ANTIALIAS_DEFAULT:	return "CAIRO_ANTIALIAS_DEFAULT";
+		case CAIRO_ANTIALIAS_NONE:		return "CAIRO_ANTIALIAS_NONE";
+		case CAIRO_ANTIALIAS_FAST:		return "CAIRO_ANTIALIAS_FAST";
+		case CAIRO_ANTIALIAS_GOOD:		return "CAIRO_ANTIALIAS_GOOD";
+		case CAIRO_ANTIALIAS_BEST:		return "CAIRO_ANTIALIAS_BEST";
+		case CAIRO_ANTIALIAS_GRAY:		return "CAIRO_ANTIALIAS_GRAY";
+		case CAIRO_ANTIALIAS_SUBPIXEL:	return "CAIRO_ANTIALIAS_SUBPIXEL";
+	}
+	return "?";
+}
+
 int main(int argc, char **argv) {
 	if (!parse_cmdline_options(argc, argv)) {
 		show_syntax(argv[0], NULL);
@@ -262,7 +278,8 @@ int main(int argc, char **argv) {
 
 	fprintf(f, "{\n");
 	fprintf(f, "	\"fontname\": \"%s\",\n", pgmopts.fontname);
-	fprintf(f, "	\"fontsize\": \"%.3f\",\n", pgmopts.fontsize);
+	fprintf(f, "	\"fontsize\": %.3f,\n", pgmopts.fontsize);
+	fprintf(f, "	\"antialias\": \"%s\",\n", aa_string(pgmopts.antialias));
 	fprintf(f, "	\"glyphs\": [\n\t\t");
 
 	for (int i = 32; i < 127; i++) {
@@ -284,6 +301,7 @@ int main(int argc, char **argv) {
 		"ö", "Ö",
 		"ü", "Ü",
 		"ß",
+		"°", "•",
 	};
 	const int special_char_cnt = sizeof(special_chars) / sizeof(char*);
 	for (int i = 0; i < special_char_cnt; i++) {

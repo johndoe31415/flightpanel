@@ -23,44 +23,55 @@
 
 #include <stdint.h>
 #include "font.h"
-#include "${font.h_filename}"
+#include "morse-font.h"
 
 /*
- * Rasterized font: "${font.font.name}" at ${"%.3f" % (font.font.size)} pt
- * Antialiasing used: ${font.font.antialiasing}
- * Rasterization threshold: ${font.args.threshold}
- * Character set: ${font.args.charset or "all"}
+ * Rasterized font: "Helvetica" at 20.000 pt
+ * Antialiasing used: CAIRO_ANTIALIAS_GRAY
+ * Rasterization threshold: 96
+ * Character set:  •-
  */
 
 static int codepoint_to_charindex(const unsigned int codepoint) {
-	%for (id, (start, end, difference)) in enumerate(font.font.charindex_to_glyph_mapping()):
-	%if id == 0:
-	if (${font.ifcond("codepoint", start, end)}) {
-		return codepoint - ${difference};
-	%else:
-	} else if (${font.ifcond("codepoint", start, end)}) {
-		return codepoint - ${difference};
-	%endif
-	%endfor
+	if (codepoint == 32) {
+		return codepoint - 32;
+	} else if ((codepoint >= 45) && (codepoint <= 46)) {
+		return codepoint - 44;
 	} else {
 		return -1;
 	}
 }
 
-const struct font_t ${font.symbol} = {
+const struct font_t font_morse_font = {
 	.codepoint_to_charindex_fn = codepoint_to_charindex,
 	.glyphs = {
-%for (codepoint, bitmap) in font.bitmaps:
-		[${bitmap.glyph.charindex}] = { // Codepoint ${codepoint} ("${chr(codepoint)}"), char index ${bitmap.glyph.charindex}
-			.xadvance = ${bitmap.glyph.xadvance},
-			.xoffset = ${bitmap.glyph.xoffset},
-			.yoffset = ${bitmap.glyph.yoffset},
-			.width = ${bitmap.glyph.width},
-			.height = ${bitmap.glyph.height},
-			.data = (const uint8_t[]) ${font.hexarray(bitmap.data)},
+		[0] = { // Codepoint 32 (" "), char index 0
+			.xadvance = 6,
+			.xoffset = 0,
+			.yoffset = 0,
+			.width = 0,
+			.height = 0,
+			.data = (const uint8_t[]) {  },
 		},
 
-%endfor
+		[1] = { // Codepoint 45 ("-"), char index 1
+			.xadvance = 7,
+			.xoffset = 0,
+			.yoffset = -7,
+			.width = 6,
+			.height = 3,
+			.data = (const uint8_t[]) { 0x00, 0x3e, 0x00 },
+		},
+
+		[2] = { // Codepoint 46 ("."), char index 2
+			.xadvance = 7,
+			.xoffset = 1,
+			.yoffset = -9,
+			.width = 5,
+			.height = 6,
+			.data = (const uint8_t[]) { 0x00, 0x0e, 0x1f, 0x1f, 0x1f, 0x0e },
+		},
+
 	}
 };
 

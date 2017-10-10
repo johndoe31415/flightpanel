@@ -21,34 +21,48 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __FONT_H__
-#define __FONT_H__
+#include <stdio.h>
+#include "morse.h"
 
-#include <stdint.h>
-#include "surface.h"
-
-typedef int (*cp_to_charindex_t)(const unsigned int codepoint);
-
-#define CHAR_DEGREES			"\xb0"		// °
-
-struct glyph_t {
-	uint8_t xadvance;
-	int8_t xoffset, yoffset;
-	uint8_t width, height;
-	const uint8_t *data;
+static const char *morse_codes[] = {
+	[ 0] = ".-",	// A
+	[ 1] = "-...",	// B
+	[ 2] = "-.-.",	// C
+	[ 3] = "-..",	// D
+	[ 4] = ".",		// E
+	[ 5] = "..-.",	// F
+	[ 6] = "--.",	// G
+	[ 7] = "....",	// H
+	[ 8] = "..",	// I
+	[ 9] = ".---",	// J
+	[10] = "-.-",	// K
+	[11] = ".-..",	// L
+	[12] = "--",	// M
+	[13] = "-.",	// N
+	[14] = "---",	// O
+	[15] = ".--.",	// P
+	[16] = "--.-",	// Q
+	[17] = ".-.",	// R
+	[18] = "...",	// S
+	[19] = "-",		// T
+	[20] = "..-",	// U
+	[21] = "...-",	// V
+	[22] = ".--",	// W
+	[23] = "-..-",	// X
+	[24] = "-.--",	// Y
+	[25] = "--..",	// Z
 };
 
-struct font_t {
-	cp_to_charindex_t codepoint_to_charindex_fn;
-	struct glyph_t glyphs[];
-};
-
-struct cursor_t {
-	int x, y;
-};
-
-/*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void blit_string_to_cursor(const struct font_t *font, const char *string, const struct surface_t *surface, struct cursor_t *cursor, const bool invert);
-/***************  AUTO GENERATED SECTION ENDS   ***************/
-
-#endif
+const char *morse_get_code(const char letter) {
+	int index = -1;
+	if ((letter >= 'A') && (letter <= 'Z')) {
+		index = letter - 'A';
+	} else if ((letter >= 'a') && (letter <= 'z')) {
+		index = letter - 'a';
+	}
+	if (index != -1) {
+		return morse_codes[index];
+	} else {
+		return NULL;
+	}
+}

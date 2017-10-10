@@ -98,6 +98,79 @@ static struct rotary_encoder_with_button_t rotary_nav2 = {
 	}
 };
 
+static struct rotary_encoder_with_button_t rotary_obs = {
+	.rotary = {
+		.value = 0,
+		.detent_cnt = 360,
+		.wrap_around = true,
+	},
+	.button = {
+		.threshold = 50,
+		.deadtime = 50,
+	}
+};
+
+static struct rotary_encoder_with_button_t rotary_dme_adf = {
+	.rotary = {
+		.value = 0,
+		.detent_cnt = 1000,
+		.wrap_around = true,
+	},
+	.button = {
+		.threshold = 50,
+		.deadtime = 50,
+	}
+};
+
+static struct rotary_encoder_with_button_t rotary_ap_alt = {
+	.rotary = {
+		.value = 0,
+		.detent_cnt = 401,
+		.wrap_around = false,
+	},
+	.button = {
+		.threshold = 50,
+		.deadtime = 50,
+	}
+};
+
+static struct rotary_encoder_with_button_t rotary_ap_hdg = {
+	.rotary = {
+		.value = 0,
+		.detent_cnt = 360,
+		.wrap_around = true,
+	},
+	.button = {
+		.threshold = 50,
+		.deadtime = 50,
+	}
+};
+
+static struct rotary_encoder_with_button_t rotary_ap_ias = {
+	.rotary = {
+		.value = 0,
+		.detent_cnt = 300,
+		.wrap_around = false,
+	},
+	.button = {
+		.threshold = 50,
+		.deadtime = 50,
+	}
+};
+
+static struct rotary_encoder_with_button_t rotary_ap_rate = {
+	.rotary = {
+		.value = 0,
+		.detent_cnt = 31,
+		.wrap_around = false,
+	},
+	.button = {
+		.threshold = 50,
+		.deadtime = 50,
+	}
+};
+
+
 static struct button_t radio_com1_button = {
 	.threshold = 50,
 	.deadtime = 50,
@@ -135,6 +208,19 @@ static struct button_t ap_master_button = {
 	.threshold = 50,
 	.deadtime = 50,
 };
+static struct button_t ap_nav_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+static struct button_t ap_apr_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+static struct button_t ap_rev_button = {
+	.threshold = 50,
+	.deadtime = 50,
+};
+
 
 static struct button_t xpdr_0_button = {
 	.threshold = 50,
@@ -198,6 +284,36 @@ static const struct rotary_input_t rotary_inputs[] = {
 		.pin1 = IOMUX_IN_Rotary_NAV2_A,
 		.pin2 = IOMUX_IN_Rotary_NAV2_B,
 	},
+	{
+		.target = &rotary_obs.rotary,
+		.pin1 = IOMUX_IN_Rotary_OBS_A,
+		.pin2 = IOMUX_IN_Rotary_OBS_B,
+	},
+	{
+		.target = &rotary_dme_adf.rotary,
+		.pin1 = IOMUX_IN_Rotary_DME_ADF_A,
+		.pin2 = IOMUX_IN_Rotary_DME_ADF_B,
+	},
+	{
+		.target = &rotary_ap_alt.rotary,
+		.pin1 = IOMUX_IN_Rotary_AP_ALT_A,
+		.pin2 = IOMUX_IN_Rotary_AP_ALT_B,
+	},
+	{
+		.target = &rotary_ap_hdg.rotary,
+		.pin1 = IOMUX_IN_Rotary_AP_HDG_A,
+		.pin2 = IOMUX_IN_Rotary_AP_HDG_B,
+	},
+	{
+		.target = &rotary_ap_ias.rotary,
+		.pin1 = IOMUX_IN_Rotary_AP_IAS_A,
+		.pin2 = IOMUX_IN_Rotary_AP_IAS_B,
+	},
+	{
+		.target = &rotary_ap_rate.rotary,
+		.pin1 = IOMUX_IN_Rotary_AP_RATE_A,
+		.pin2 = IOMUX_IN_Rotary_AP_RATE_B,
+	},
 };
 
 static const struct button_input_t button_inputs[] = {
@@ -216,6 +332,30 @@ static const struct button_input_t button_inputs[] = {
 	{
 		.target = &rotary_nav2.button,
 		.pin = IOMUX_IN_Rotary_NAV2_Button,
+	},
+	{
+		.target = &rotary_obs.button,
+		.pin = IOMUX_IN_Rotary_OBS_Button,
+	},
+	{
+		.target = &rotary_dme_adf.button,
+		.pin = IOMUX_IN_Rotary_DME_ADF_Button,
+	},
+	{
+		.target = &rotary_ap_alt.button,
+		.pin = IOMUX_IN_Rotary_AP_ALT_Button,
+	},
+	{
+		.target = &rotary_ap_hdg.button,
+		.pin = IOMUX_IN_Rotary_AP_HDG_Button,
+	},
+	{
+		.target = &rotary_ap_ias.button,
+		.pin = IOMUX_IN_Rotary_AP_IAS_Button,
+	},
+	{
+		.target = &rotary_ap_rate.button,
+		.pin = IOMUX_IN_Rotary_AP_RATE_Button,
 	},
 	{
 		.target = &radio_com1_button,
@@ -252,6 +392,18 @@ static const struct button_input_t button_inputs[] = {
 	{
 		.target = &ap_master_button,
 		.pin = IOMUX_IN_Button_AP,
+	},
+	{
+		.target = &ap_nav_button,
+		.pin = IOMUX_IN_Button_AP_NAV,
+	},
+	{
+		.target = &ap_apr_button,
+		.pin = IOMUX_IN_Button_AP_APR,
+	},
+	{
+		.target = &ap_rev_button,
+		.pin = IOMUX_IN_Button_AP_REV,
 	},
 	{
 		.target = &xpdr_0_button,
@@ -410,6 +562,22 @@ void dsr_idle_task(void) {
 		instrument_state.nav2_standby_index = rotary_nav2.rotary.value;
 		display_data_changed[DISPLAY_NAV2_STBY] = true;
 	}
+	if (rotary_changed(&rotary_ap_alt.rotary)) {
+		instrument_state.ap.altitude = rotary_ap_alt.rotary.value * 100;
+		display_data_changed[DISPLAY_AP] = true;
+	}
+	if (rotary_changed(&rotary_ap_hdg.rotary)) {
+		instrument_state.ap.heading = rotary_ap_hdg.rotary.value;
+		display_data_changed[DISPLAY_AP] = true;
+	}
+	if (rotary_changed(&rotary_ap_ias.rotary)) {
+		instrument_state.ap.ias = rotary_ap_ias.rotary.value;
+		display_data_changed[DISPLAY_AP] = true;
+	}
+	if (rotary_changed(&rotary_ap_rate.rotary)) {
+		instrument_state.ap.climbrate = rotary_ap_rate.rotary.value * 100;
+		display_data_changed[DISPLAY_AP] = true;
+	}
 
 	if (button_pressed(&rotary_com1.button)) {
 		swap_uint16(&instrument_state.com1_standby_index, &instrument_state.com1_active_index);
@@ -466,8 +634,66 @@ void dsr_idle_task(void) {
 		iomux_output_set(IOMUX_OUT_NavSrc_GPS, instrument_state.navigate_by_gps);
 	}
 	if (button_pressed(&ap_master_button)) {
-		iomux_output_toggle(IOMUX_OUT_AP_MASTER);
+		instrument_state.ap.active = !instrument_state.ap.active;
+		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
+		display_data_changed[DISPLAY_AP] = true;
 	}
+	if (button_pressed(&ap_nav_button)) {
+		instrument_state.ap.active = !instrument_state.ap.active;
+		instrument_state.ap.hold ^= HOLD_NAVIGATION;
+		if ((instrument_state.ap.hold & HOLD_NAVIGATION) != 0) {
+			instrument_state.ap.hold &= ~(HOLD_HEADING | HOLD_APPROACH | HOLD_REVERSE);
+			instrument_state.ap.active = true;
+		}
+		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
+		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.ap.hold & HOLD_HEADING) != 0);
+		display_data_changed[DISPLAY_AP] = true;
+	}
+	if (button_pressed(&ap_apr_button)) {
+		instrument_state.ap.active = !instrument_state.ap.active;
+		instrument_state.ap.hold ^= HOLD_APPROACH;
+		if ((instrument_state.ap.hold & HOLD_APPROACH) != 0) {
+			instrument_state.ap.hold &= ~(HOLD_HEADING | HOLD_NAVIGATION | HOLD_REVERSE);
+			instrument_state.ap.active = true;
+		}
+		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
+		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.ap.hold & HOLD_HEADING) != 0);
+		display_data_changed[DISPLAY_AP] = true;
+	}
+	if (button_pressed(&ap_rev_button)) {
+		instrument_state.ap.hold ^= HOLD_REVERSE;
+		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
+		display_data_changed[DISPLAY_AP] = true;
+	}
+	if (button_pressed(&rotary_ap_alt.button)) {
+		instrument_state.ap.hold ^= HOLD_ALTITUDE;
+		if ((instrument_state.ap.hold & HOLD_ALTITUDE) != 0) {
+			instrument_state.ap.active = true;
+		}
+		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
+		iomux_output_set(IOMUX_OUT_AP_ALT, (instrument_state.ap.hold & HOLD_ALTITUDE) != 0);
+		display_data_changed[DISPLAY_AP] = true;
+	}
+	if (button_pressed(&rotary_ap_hdg.button)) {
+		instrument_state.ap.hold ^= HOLD_HEADING;
+		if ((instrument_state.ap.hold & HOLD_HEADING) != 0) {
+			instrument_state.ap.hold &= ~(HOLD_NAVIGATION | HOLD_APPROACH | HOLD_REVERSE);
+			instrument_state.ap.active = true;
+		}
+		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
+		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.ap.hold & HOLD_HEADING) != 0);
+		display_data_changed[DISPLAY_AP] = true;
+	}
+	if (button_pressed(&rotary_ap_ias.button)) {
+		instrument_state.ap.hold ^= HOLD_IAS;
+		if ((instrument_state.ap.hold & HOLD_IAS) != 0) {
+			instrument_state.ap.active = true;
+		}
+		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
+		iomux_output_set(IOMUX_OUT_AP_IAS, (instrument_state.ap.hold & HOLD_IAS) != 0);
+		display_data_changed[DISPLAY_AP] = true;
+	}
+
 	if (button_pressed(&xpdr_IDENT_button)) {
 		instrument_state.xpdr.identing = true;
 		instrument_state.xpdr.ident_timeout = active_configuration.xpdr.ident_timeout_milliseconds;

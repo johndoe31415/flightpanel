@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+#
+
+pushd .
+cd ../../font-generator
+./create_flightpanel_fonts
+cp vcr-osd-mono-20.c vcr-osd-mono-30.c ../firmware
+popd
+make uitest_instruments
+./uitest_instruments

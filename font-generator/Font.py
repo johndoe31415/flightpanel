@@ -20,10 +20,34 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 
 class Font(object):
-	def __init__(self, name, size):
+	def __init__(self, name, size, antialiasing):
 		self._name = name
 		self._size = size
+		self._antialiasing = antialiasing
 		self._glyphs = { }
+
+	@property
+	def name(self):
+		return self._name
+
+	@property
+	def size(self):
+		return self._size
+
+	@property
+	def antialiasing(self):
+		return self._antialiasing
+
+	def patch(self, patch):
+		codepoint = ord(patch.glyph)
+		if codepoint not in self._glyphs:
+			raise Exception("Patching of glyph '%s' requested, but this glyph is not part of the font." % (patch.glyph))
+		self._glyphs[codepoint].patch(patch)
+
+		if patch.cmd == "rename":
+			target_codepoint = ord(patch.target)
+			self._glyphs[target_codepoint] = self._glyphs[codepoint]
+			del self._glyphs[codepoint]
 
 	def add_glyph(self, glyph):
 		if glyph.codepoint in self._glyphs:

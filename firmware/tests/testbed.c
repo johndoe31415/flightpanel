@@ -119,7 +119,7 @@ static int test_print_summary(void) {
 	int successful_subtest_cnt = 0;
 	bool test_successful = false;
 	bool subtest_successful = false;
-	char line[256];
+	char line[1024 * 32];
 
 	print_headline("TEST SUMMARY");
 	while (fgets(line, sizeof(line) - 1, f)) {

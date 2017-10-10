@@ -85,7 +85,7 @@ class Glyph(object):
 		self._xadvance = metadata["xadvance"]
 		self._width = metadata["width"]
 		self._height = metadata["height"]
-		self._rawdata = bytes.fromhex(metadata["data"])
+		self._rawdata = bytearray.fromhex(metadata["data"])
 		self._charindex = None
 
 	@property
@@ -136,6 +136,24 @@ class Glyph(object):
 	def bitmapize(self, threshold):
 		data = [ (value >= threshold) for value in self.rawdata ]
 		return BitmapGlyph(data, self)
+
+	def patch(self, patch):
+		if patch.cmd == "setwidth":
+			self._xadvance = patch.width
+		elif patch.cmd in [ "setpixel", "clrpixel" ]:
+			offset = (patch.y * self.width) + patch.x
+			if patch.cmd == "setpixel":
+				self._rawdata[offset] = 0xff
+			else:
+				self._rawdata[offset] = 0x00
+		elif patch.cmd in [ "movex" ]:
+			self._xoffset += patch.distance
+		elif patch.cmd in [ "movey" ]:
+			self._yoffset += patch.distance
+		elif patch.cmd in [ "rename" ]:
+			self._codepoint = ord(patch.target)
+		else:
+			raise Exception(NotImplemented)
 
 	def __str__(self):
 		return "Glyph<\"%s\", CP %d, %d x %d, %d bytes>" % (self.text, self.codepoint, self.width, self.height, self.bitmap_size)

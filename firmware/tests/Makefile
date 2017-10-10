@@ -10,7 +10,7 @@ ifneq ($(USER),travis)
 # memory range interleaves with an existing memory mapping. ASan cannot proceed
 # correctly. ABORTING."), leading to a broken build. Therefore we do not run
 # sanitizers on Travis.
-CFLAGS += -pie -fPIE -fsanitize=address -fsanitize=undefined -fsanitize=leak 
+CFLAGS += -pie -fPIE -fsanitize=address -fsanitize=undefined -fsanitize=leak
 endif
 LDFLAGS :=
 
@@ -40,7 +40,7 @@ test_boundedbuffer: $(TEST_COMMON_OBJS) boundedbuffer.o
 test_telemetry: $(TEST_COMMON_OBJS) stm32f407_tempsensor.o
 test_testbed: $(TEST_COMMON_OBJS)
 test_bitwise: $(TEST_COMMON_OBJS)
-test_instruments: $(TEST_COMMON_OBJS) instrument_visuals.o frequencies.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o
+test_instruments: $(TEST_COMMON_OBJS) instrument_visuals.o frequencies.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o morse-font.o morse.o
 
 test: all
 	rm -f tests.log
@@ -65,5 +65,5 @@ clean:
 gtk_helper.o: gtk_helper.c
 	$(CC) $(CFLAGS) `pkg-config --cflags gtk+-3.0` -include testbed.h -c -o $@ $<
 
-uitest_instruments: $(TEST_COMMON_OBJS) uitest_instruments.o instrument_visuals.o frequencies.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o gtk_helper.o
+uitest_instruments: $(TEST_COMMON_OBJS) uitest_instruments.o instrument_visuals.o frequencies.o surface.o font.o vcr-osd-mono-20.o vcr-osd-mono-30.o morse-font.o morse.o gtk_helper.o
 	$(CC) $(CFLAGS) -o $@ $+ $(LDFLAGS) `pkg-config --libs gtk+-3.0`

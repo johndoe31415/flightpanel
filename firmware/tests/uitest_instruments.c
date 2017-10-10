@@ -52,6 +52,14 @@ static void test_instruments(void) {
 			.edit_char = 4,
 			.identing = true,
 		},
+		.ap = {
+			.active = true,
+			.hold = HOLD_ALTITUDE | HOLD_IAS | HOLD_HEADING,
+			.altitude = 6900,
+			.climbrate = 750,
+			.ias = 125,
+			.heading = 180,
+		},
 	};
 
 	redraw_display(&surfaces[0], &istate, DISPLAY_COM1);
