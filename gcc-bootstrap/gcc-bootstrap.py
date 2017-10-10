@@ -42,6 +42,7 @@ prefix_dir = os.getenv("HOME") + "/bin/gcc-cm4"
 os.environ["PATH"] = prefix_dir + "/bin:" + os.getenv("PATH")
 with open("environment", "w") as f:
 	print("export PS1=\"(cm4) ${PS1}\"", file = f)
+	print("export LD_LIBRARY_PATH=\"%s/lib\"" % (prefix_dir), file = f)
 	print("export PATH=\"%s/bin:${PATH}\"" % (prefix_dir), file = f)
 try:
 	os.makedirs(prefix_dir)
