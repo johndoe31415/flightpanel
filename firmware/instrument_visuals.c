@@ -37,28 +37,28 @@
 static uint32_t get_instrument_frequency_khz(const struct instrument_state_t *istate, const enum display_t display) {
 	switch (display) {
 		case DISPLAY_COM1:
-			return com_index_to_frequency_khz(istate->com1_active_index);
+			return com_index_to_frequency_khz(istate->com1.active_index);
 
 		case DISPLAY_COM1_STBY:
-			return com_index_to_frequency_khz(istate->com1_standby_index);
+			return com_index_to_frequency_khz(istate->com1.standby_index);
 
 		case DISPLAY_COM2:
-			return com_index_to_frequency_khz(istate->com2_active_index);
+			return com_index_to_frequency_khz(istate->com2.active_index);
 
 		case DISPLAY_COM2_STBY:
-			return com_index_to_frequency_khz(istate->com2_standby_index);
+			return com_index_to_frequency_khz(istate->com2.standby_index);
 
 		case DISPLAY_NAV1:
-			return nav_index_to_frequency_khz(istate->nav1_active_index);
+			return nav_index_to_frequency_khz(istate->nav1.active_index);
 
 		case DISPLAY_NAV1_STBY:
-			return nav_index_to_frequency_khz(istate->nav1_standby_index);
+			return nav_index_to_frequency_khz(istate->nav1.standby_index);
 
 		case DISPLAY_NAV2:
-			return nav_index_to_frequency_khz(istate->nav2_active_index);
+			return nav_index_to_frequency_khz(istate->nav2.active_index);
 
 		case DISPLAY_NAV2_STBY:
-			return nav_index_to_frequency_khz(istate->nav2_standby_index);
+			return nav_index_to_frequency_khz(istate->nav2.standby_index);
 
 		default:
 			return 0;
@@ -104,23 +104,29 @@ static void redraw_adf_display(const struct surface_t *surface, const struct ins
 
 	char text[16];
 	struct cursor_t cursor = { 4, 25 };
-	snprintf(text, sizeof(text), "%4d kHz", 123);
+	snprintf(text, sizeof(text), "%4d kHz", istate->adf.frequency_khz);
 	blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 
-	draw_ident(surface, "LUB");
+	draw_ident(surface, istate->adf.ident);
 }
 
 static void redraw_dme_display(const struct surface_t *surface, const struct instrument_state_t *istate) {
 	surface_clear(surface);
 
-	char text[16];
-	struct cursor_t cursor = { 4, 25 };
-	snprintf(text, sizeof(text), "%3d.%d nm", 123, 9);
-	blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
+	if (istate->dme.available) {
+		char text[16];
+		struct cursor_t cursor = { 4, 25 };
+		snprintf(text, sizeof(text), "%3d.%d nm", istate->dme.distance_tenth_nm / 10, istate->dme.distance_tenth_nm % 10);
+		blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 
-	cursor = (struct cursor_t) { 4, 55 };
-	snprintf(text, sizeof(text), "%3d kt", 231);
-	blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
+		cursor = (struct cursor_t) { 4, 55 };
+		snprintf(text, sizeof(text), "%3d kt", istate->dme.velocity);
+		blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
+	} else {
+		struct cursor_t cursor = { 28, 40 };
+		blit_string_to_cursor(&font_vcr_osd_mono_20, "No DME", surface, &cursor, false);
+		printf("%d\n", cursor.x);
+	}
 }
 
 static void redraw_ap_display(const struct surface_t *surface, const struct instrument_state_t *istate) {
@@ -142,7 +148,7 @@ static void redraw_ap_display(const struct surface_t *surface, const struct inst
 
 		{
 			struct cursor_t cursor = { 80, 54 };
-			if (istate->ap.hold & HOLD_REVERSE) {
+			if ((istate->ap.hold & HOLD_REVERSE) && (istate->ap.hold & (HOLD_HEADING | HOLD_NAVIGATION | HOLD_APPROACH)))  {
 				blit_rectangle(surface, cursor.x - 1, cursor.y - 18, (istate->ap.hold & HOLD_HEADING) ? 50 : 40, 20);
 			}
 			if (istate->ap.hold & HOLD_HEADING) {
@@ -198,9 +204,9 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 				uint32_t frequency_khz = get_instrument_frequency_khz(istate, display);
 				const char *ident = NULL;
 				if (display == DISPLAY_NAV1) {
-					ident = "LUB";
+					ident = istate->nav1_ident;
 				} else if (display == DISPLAY_NAV2) {
-					ident = "STG";
+					ident = istate->nav2_ident;
 				}
 				redraw_com_nav_display(surface, istate, frequency_khz, ident);
 			}
