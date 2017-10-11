@@ -784,7 +784,7 @@ static bool copy_if_changed(void *dst, const void *src, const unsigned int lengt
 
 static void instruments_set_by_host_report01(const struct hid_set_report_01_t *report) {
 	led_state_changed = copy_if_changed(&instrument_state.external.radio_panel, &report->radio_panel, sizeof(instrument_state.external.radio_panel)) || led_state_changed;
-	bool divisions_changed = copy_if_changed(&instrument_state.external.com_nav_divisions, &report->com_nav_divisions, sizeof(instrument_state.external.com_nav_divisions)) || led_state_changed;
+	bool divisions_changed = copy_if_changed(&instrument_state.external.com_divisions, &report->com_divisions, sizeof(instrument_state.external.com_divisions)) || led_state_changed;
 	display_data_changed[DISPLAY_COM1] = copy_if_changed(&instrument_state.external.com1.active_index, &report->com1.active_index, sizeof(instrument_state.external.com1.active_index)) || display_data_changed[DISPLAY_COM1] || divisions_changed;
 	display_data_changed[DISPLAY_COM1_STBY] = copy_if_changed(&instrument_state.external.com1.standby_index, &report->com1.standby_index, sizeof(instrument_state.external.com1.standby_index)) || display_data_changed[DISPLAY_COM1_STBY] || divisions_changed;
 	display_data_changed[DISPLAY_COM2] = copy_if_changed(&instrument_state.external.com2.active_index, &report->com2.active_index, sizeof(instrument_state.external.com2.active_index)) || display_data_changed[DISPLAY_COM2] || divisions_changed;
@@ -818,12 +818,28 @@ void instruments_set_by_host(const struct hid_set_report_t *report) {
 }
 
 void instruments_init(void) {
-	const uint8_t com_divisions = (instrument_state.external.com_nav_divisions >> 0) & 0xf;
-	const uint8_t nav_divisions = (instrument_state.external.com_nav_divisions >> 4) & 0xf;
-	rotary_com1.rotary.detent_cnt = frequency_detent_count(com_divisions);
-	rotary_com2.rotary.detent_cnt = frequency_detent_count(com_divisions);
-	rotary_nav1.rotary.detent_cnt = frequency_detent_count(nav_divisions);
-	rotary_nav2.rotary.detent_cnt = frequency_detent_count(nav_divisions);
+	instrument_state.external.com_divisions = active_configuration.instruments.com_frequency_divisions;
+	instrument_state.external.nav_divisions = active_configuration.instruments.nav_frequency_divisions;
+	instrument_state.external.ap.ias = active_configuration.instruments.ap.ias;
+	instrument_state.external.ap.altitude = active_configuration.instruments.ap.altitude;
+	instrument_state.external.ap.climbrate = active_configuration.instruments.ap.climbrate;
+	instrument_state.external.xpdr.squawk = active_configuration.instruments.squawk;
+
+	rotary_com1.rotary.detent_cnt = frequency_detent_count(instrument_state.external.com_divisions);
+	rotary_com2.rotary.detent_cnt = frequency_detent_count(instrument_state.external.com_divisions);
+	rotary_nav1.rotary.detent_cnt = frequency_detent_count(instrument_state.external.nav_divisions);
+	rotary_nav2.rotary.detent_cnt = frequency_detent_count(instrument_state.external.nav_divisions);
+
+	instrument_state.external.com1.active_index = frequency_khz_to_index(instrument_state.external.com_divisions, active_configuration.instruments.com1.active_frequency_khz);
+	instrument_state.external.com1.standby_index = frequency_khz_to_index(instrument_state.external.com_divisions, active_configuration.instruments.com1.standby_frequency_khz);
+	instrument_state.external.com2.active_index = frequency_khz_to_index(instrument_state.external.com_divisions, active_configuration.instruments.com2.active_frequency_khz);
+	instrument_state.external.com2.standby_index = frequency_khz_to_index(instrument_state.external.com_divisions, active_configuration.instruments.com2.standby_frequency_khz);
+	instrument_state.external.nav1.active_index = frequency_khz_to_index(instrument_state.external.nav_divisions, active_configuration.instruments.nav1.active_frequency_khz);
+	instrument_state.external.nav1.standby_index = frequency_khz_to_index(instrument_state.external.nav_divisions, active_configuration.instruments.nav1.standby_frequency_khz);
+	instrument_state.external.nav2.active_index = frequency_khz_to_index(instrument_state.external.nav_divisions, active_configuration.instruments.nav2.active_frequency_khz);
+	instrument_state.external.nav2.standby_index = frequency_khz_to_index(instrument_state.external.nav_divisions, active_configuration.instruments.nav2.standby_frequency_khz);
+
+	instrument_state.external.adf.frequency_khz = active_configuration.instruments.adf_frequency_khz;
 
 	led_state_changed = true;
 	for (int did = 0; did < DISPLAY_COUNT; did++) {

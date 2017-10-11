@@ -34,11 +34,18 @@ struct configuration {
 		uint16_t vfr_squawk;
 	} xpdr;
 	struct {
+		uint8_t com_frequency_divisions;
+		uint8_t nav_frequency_divisions;
+		struct {
+			uint32_t active_frequency_khz;
+			uint32_t standby_frequency_khz;
+		} com1, com2, nav1, nav2;
 		struct {
 			uint16_t ias;
 			uint16_t altitude;
 			uint16_t climbrate;
 		} ap;
+		uint16_t adf_frequency_khz;
 		uint16_t squawk;
 	} instruments;
 	uint32_t crc32;

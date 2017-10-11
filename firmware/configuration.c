@@ -39,6 +39,22 @@ static const struct configuration default_configuration = {
 			.altitude = 20,
 			.climbrate = 7,
 		},
+		.com1 = {
+			.active_frequency_khz = 118000,
+			.standby_frequency_khz = 119000,
+		},
+		.com2 = {
+			.active_frequency_khz = 120000,
+			.standby_frequency_khz = 121000,
+		},
+		.nav1 = {
+			.active_frequency_khz = 108000,
+			.standby_frequency_khz = 109000,
+		},
+		.nav2 = {
+			.active_frequency_khz = 110000,
+			.standby_frequency_khz = 111000,
+		},
 		.squawk = 7000,
 	},
 };
