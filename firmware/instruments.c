@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "instruments.h"
 #include "rotary.h"
@@ -48,6 +49,7 @@
 static struct instrument_state_t instrument_state;
 static uint8_t usb_report_time_tick;
 static bool display_data_changed[DISPLAY_COUNT];
+static bool led_state_changed;
 extern struct configuration active_configuration;
 
 static struct rotary_encoder_with_button_t rotary_com1 = {
@@ -496,12 +498,6 @@ void hid_tick(void) {
 	}
 }
 
-static void swap_uint16(uint16_t *a, uint16_t *b) {
-	uint16_t tmp = *a;
-	*a = *b;
-	*b = tmp;
-}
-
 void instruments_handle_inputs(void) {
 	for (int i = 0; i < sizeof(rotary_inputs) / sizeof(struct rotary_input_t); i++) {
 		if ((rotary_inputs[i].pin1 != PIN_INVALID) && (rotary_inputs[i].pin2 != PIN_INVALID)) {
@@ -571,41 +567,68 @@ static bool timeout(uint16_t *value) {
 	return false;
 }
 
+static void update_leds(void) {
+	/* Radio panel */
+	iomux_output_set(IOMUX_OUT_Radio_COM1, (instrument_state.external.radio_panel & RADIO_COM1) != 0);
+	iomux_output_set(IOMUX_OUT_Radio_NAV1, (instrument_state.external.radio_panel & RADIO_NAV1) != 0);
+	iomux_output_set(IOMUX_OUT_Radio_DME, (instrument_state.external.radio_panel & RADIO_DME) != 0);
+	iomux_output_set(IOMUX_OUT_Radio_COM2, (instrument_state.external.radio_panel & RADIO_COM2) != 0);
+	iomux_output_set(IOMUX_OUT_Radio_NAV2, (instrument_state.external.radio_panel & RADIO_NAV2) != 0);
+	iomux_output_set(IOMUX_OUT_Radio_ADF, (instrument_state.external.radio_panel & RADIO_ADF) != 0);
+
+	/* AP */
+	iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
+	iomux_output_set(IOMUX_OUT_AP_ALT, (instrument_state.external.ap.state & AP_HOLD_ALTITUDE) != 0);
+	iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.external.ap.state & AP_HOLD_HEADING) != 0);
+	iomux_output_set(IOMUX_OUT_AP_IAS, (instrument_state.external.ap.state & AP_HOLD_IAS) != 0);
+
+	/* Navigational source */
+	iomux_output_set(IOMUX_OUT_NavSrc_GPS, instrument_state.external.navigate_by_gps);
+	iomux_output_set(IOMUX_OUT_NavSrc_NAV, !instrument_state.external.navigate_by_gps);
+
+	/* XPDR */
+	const uint8_t xpdr_mode = instrument_state.external.xpdr.state & XPDR_MODE_MASK;
+	iomux_output_set(IOMUX_OUT_XPDR_C, xpdr_mode == XPDR_CHARLY);
+	iomux_output_set(IOMUX_OUT_XPDR_STBY, xpdr_mode == XPDR_STANDBY);
+}
+
 static void handle_radiopanel_inputs(void) {
 	if (button_pressed(&radio_com1_button)) {
+		led_state_changed = true;
 		instrument_state.external.radio_panel ^= RADIO_COM1;
-		iomux_output_set(IOMUX_OUT_Radio_COM1, (instrument_state.external.radio_panel & RADIO_COM1) != 0);
 	}
 	if (button_pressed(&radio_nav1_button)) {
+		led_state_changed = true;
 		instrument_state.external.radio_panel ^= RADIO_NAV1;
-		iomux_output_set(IOMUX_OUT_Radio_NAV1, (instrument_state.external.radio_panel & RADIO_NAV1) != 0);
 	}
 	if (button_pressed(&radio_dme_button)) {
+		led_state_changed = true;
 		instrument_state.external.radio_panel ^= RADIO_DME;
-		iomux_output_set(IOMUX_OUT_Radio_DME, (instrument_state.external.radio_panel & RADIO_DME) != 0);
 	}
 	if (button_pressed(&radio_com2_button)) {
+		led_state_changed = true;
 		instrument_state.external.radio_panel ^= RADIO_COM2;
-		iomux_output_set(IOMUX_OUT_Radio_COM2, (instrument_state.external.radio_panel & RADIO_COM2) != 0);
 	}
 	if (button_pressed(&radio_nav2_button)) {
+		led_state_changed = true;
 		instrument_state.external.radio_panel ^= RADIO_NAV2;
-		iomux_output_set(IOMUX_OUT_Radio_NAV2, (instrument_state.external.radio_panel & RADIO_NAV2) != 0);
 	}
 	if (button_pressed(&radio_adf_button)) {
+		led_state_changed = true;
 		instrument_state.external.radio_panel ^= RADIO_ADF;
-		iomux_output_set(IOMUX_OUT_Radio_ADF, (instrument_state.external.radio_panel & RADIO_ADF) != 0);
 	}
 }
 
-static void handle_comnav_inputs(struct com_nav_state_t *comnav, struct rotary_encoder_with_button_t *rotary, enum display_t active_display, enum display_t standby_display)  {
+static void handle_comnav_inputs(struct com_nav_state_t *comnav, struct rotary_encoder_with_button_t *rotary, const enum display_t active_display, const enum display_t standby_display)  {
 	if (rotary_changed(&rotary->rotary)) {
 		comnav->standby_index = rotary->rotary.value;
 		display_data_changed[standby_display] = true;
 	}
 
 	if (button_pressed(&rotary->button)) {
-		swap_uint16(&comnav->active_index, &comnav->standby_index);
+		const uint16_t old_active_index = comnav->active_index;
+		comnav->active_index = comnav->standby_index;
+		comnav->standby_index = old_active_index;
 		rotary->rotary.value = comnav->standby_index;
 		display_data_changed[active_display] = true;
 		display_data_changed[standby_display] = true;
@@ -635,8 +658,7 @@ static void handle_ap_inputs(void) {
 		if ((instrument_state.external.ap.state & AP_HOLD_ALTITUDE) != 0) {
 			instrument_state.external.ap.state |= AP_ACTIVE;
 		}
-		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
-		iomux_output_set(IOMUX_OUT_AP_ALT, (instrument_state.external.ap.state & AP_HOLD_ALTITUDE) != 0);
+		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&rotary_ap_hdg.button)) {
@@ -645,8 +667,7 @@ static void handle_ap_inputs(void) {
 			instrument_state.external.ap.state &= ~(AP_HOLD_NAVIGATION | AP_HOLD_APPROACH | AP_HOLD_REVERSE);
 			instrument_state.external.ap.state |= AP_ACTIVE;
 		}
-		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
-		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.external.ap.state & AP_HOLD_HEADING) != 0);
+		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&rotary_ap_ias.button)) {
@@ -654,14 +675,13 @@ static void handle_ap_inputs(void) {
 		if ((instrument_state.external.ap.state & AP_HOLD_IAS) != 0) {
 			instrument_state.external.ap.state |= AP_ACTIVE;
 		}
-		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
-		iomux_output_set(IOMUX_OUT_AP_IAS, (instrument_state.external.ap.state & AP_HOLD_IAS) != 0);
+		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 
 	if (button_pressed(&ap_master_button)) {
 		instrument_state.external.ap.state ^= AP_ACTIVE;
-		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
+		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&ap_nav_button)) {
@@ -670,8 +690,7 @@ static void handle_ap_inputs(void) {
 			instrument_state.external.ap.state &= ~(AP_HOLD_HEADING | AP_HOLD_APPROACH | AP_HOLD_REVERSE);
 			instrument_state.external.ap.state |= AP_ACTIVE;
 		}
-		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
-		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.external.ap.state & AP_HOLD_HEADING) != 0);
+		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&ap_apr_button)) {
@@ -680,13 +699,12 @@ static void handle_ap_inputs(void) {
 			instrument_state.external.ap.state &= ~(AP_HOLD_HEADING | AP_HOLD_NAVIGATION | AP_HOLD_REVERSE);
 			instrument_state.external.ap.state |= AP_ACTIVE;
 		}
-		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
-		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.external.ap.state & AP_HOLD_HEADING) != 0);
+		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&ap_rev_button)) {
 		instrument_state.external.ap.state ^= AP_HOLD_REVERSE;
-		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
+		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 }
@@ -700,8 +718,7 @@ static void handle_xpdr_inputs(void) {
 			mode = XPDR_STANDBY;
 		}
 		instrument_state.external.xpdr.state = (instrument_state.external.xpdr.state & ~XPDR_MODE_MASK) | mode;
-		iomux_output_set(IOMUX_OUT_XPDR_STBY, mode == XPDR_STANDBY);
-		iomux_output_set(IOMUX_OUT_XPDR_C, mode == XPDR_CHARLY);
+		led_state_changed = true;
 	}
 	if (button_pressed(&xpdr_IDENT_button)) {
 		instrument_state.external.xpdr.state |= XPDR_MODE_IDENTING;
@@ -746,8 +763,7 @@ static void handle_adf_inputs(void) {
 static void handle_nav_src_inputs(void) {
 	if (button_pressed(&navsrc_button)) {
 		instrument_state.external.navigate_by_gps = !instrument_state.external.navigate_by_gps;
-		iomux_output_set(IOMUX_OUT_NavSrc_NAV, !instrument_state.external.navigate_by_gps);
-		iomux_output_set(IOMUX_OUT_NavSrc_GPS, instrument_state.external.navigate_by_gps);
+		led_state_changed = true;
 	}
 }
 
@@ -762,6 +778,10 @@ void dsr_idle_task(void) {
 	handle_xpdr_inputs();
 	handle_nav_src_inputs();
 
+	if (led_state_changed) {
+		led_state_changed = false;
+		update_leds();
+	}
 	for (int did = 0; did < DISPLAY_COUNT; did++) {
 		if (display_data_changed[did]) {
 			// Get the surface for this display index
@@ -773,30 +793,52 @@ void dsr_idle_task(void) {
 	}
 }
 
-static void update_value_uint16(bool *changed, uint16_t *dest, const uint16_t src) {
-	if (*dest != src) {
-		*changed = true;
-		*dest = src;
+static bool copy_if_changed(void *dst, const void *src, const unsigned int length) {
+	bool changed = false;
+	if (memcmp(dst, src, length)) {
+		memcpy(dst, src, length);
+		changed = true;
 	}
+	return changed;
+}
+
+static void instruments_set_by_host_report01(const struct hid_set_report_01_t *report) {
+	led_state_changed = copy_if_changed(&instrument_state.external.radio_panel, &report->radio_panel, sizeof(instrument_state.external.radio_panel)) || led_state_changed;
+	bool raster_changed = copy_if_changed(&instrument_state.external.com_nav_raster, &report->com_nav_raster, sizeof(instrument_state.external.com_nav_raster)) || led_state_changed;
+	display_data_changed[DISPLAY_COM1] = copy_if_changed(&instrument_state.external.com1.active_index, &report->com1.active_index, sizeof(instrument_state.external.com1.active_index)) || display_data_changed[DISPLAY_COM1] || raster_changed;
+	display_data_changed[DISPLAY_COM1_STBY] = copy_if_changed(&instrument_state.external.com1.standby_index, &report->com1.standby_index, sizeof(instrument_state.external.com1.standby_index)) || display_data_changed[DISPLAY_COM1_STBY] || raster_changed;
+	display_data_changed[DISPLAY_COM2] = copy_if_changed(&instrument_state.external.com2.active_index, &report->com2.active_index, sizeof(instrument_state.external.com2.active_index)) || display_data_changed[DISPLAY_COM2] || raster_changed;
+	display_data_changed[DISPLAY_COM2_STBY] = copy_if_changed(&instrument_state.external.com2.standby_index, &report->com2.standby_index, sizeof(instrument_state.external.com2.standby_index)) || display_data_changed[DISPLAY_COM2_STBY] || raster_changed;
+	display_data_changed[DISPLAY_NAV1] = copy_if_changed(&instrument_state.external.nav1.active_index, &report->nav1.active_index, sizeof(instrument_state.external.nav1.active_index)) || display_data_changed[DISPLAY_NAV1] || raster_changed;
+	display_data_changed[DISPLAY_NAV1_STBY] = copy_if_changed(&instrument_state.external.nav1.standby_index, &report->nav1.standby_index, sizeof(instrument_state.external.nav1.standby_index)) || display_data_changed[DISPLAY_NAV1_STBY] || raster_changed;
+	display_data_changed[DISPLAY_NAV2] = copy_if_changed(&instrument_state.external.nav2.active_index, &report->nav2.active_index, sizeof(instrument_state.external.nav2.active_index)) || display_data_changed[DISPLAY_NAV2] || raster_changed;
+	display_data_changed[DISPLAY_NAV2_STBY] = copy_if_changed(&instrument_state.external.nav2.standby_index, &report->nav2.standby_index, sizeof(instrument_state.external.nav2.standby_index)) || display_data_changed[DISPLAY_NAV2_STBY] || raster_changed;
+	bool xpdr_state_changed = copy_if_changed(&instrument_state.external.xpdr, &report->xpdr, sizeof(instrument_state.external.xpdr));
+	display_data_changed[DISPLAY_XPDR] = xpdr_state_changed || display_data_changed[DISPLAY_XPDR];
+	led_state_changed = xpdr_state_changed || led_state_changed;
+	display_data_changed[DISPLAY_ADF] = copy_if_changed(&instrument_state.external.adf, &report->adf, sizeof(instrument_state.external.adf)) || display_data_changed[DISPLAY_ADF];
+	display_data_changed[DISPLAY_AP] = copy_if_changed(&instrument_state.external.ap, &report->ap, sizeof(instrument_state.external.ap)) || display_data_changed[DISPLAY_AP];
+	instrument_state.external.qnh = report->qnh;
+	led_state_changed = copy_if_changed(&instrument_state.external.navigate_by_gps, &report->navigate_by_gps, sizeof(instrument_state.external.navigate_by_gps)) || led_state_changed;
+}
+
+static void instruments_set_by_host_report02(const struct hid_set_report_02_t *report) {
+	display_data_changed[DISPLAY_NAV1] = copy_if_changed(&instrument_state.internal.ident.nav1, &report->ident.nav1, sizeof(instrument_state.internal.ident.nav1)) || display_data_changed[DISPLAY_NAV1];
+	display_data_changed[DISPLAY_NAV2] = copy_if_changed(&instrument_state.internal.ident.nav2, &report->ident.nav2, sizeof(instrument_state.internal.ident.nav2)) || display_data_changed[DISPLAY_NAV2];
+	display_data_changed[DISPLAY_ADF] = copy_if_changed(&instrument_state.internal.ident.adf, &report->ident.adf, sizeof(instrument_state.internal.ident.adf)) || display_data_changed[DISPLAY_ADF];
+	display_data_changed[DISPLAY_DME] = copy_if_changed(&instrument_state.internal.dme, &report->dme, sizeof(instrument_state.internal.dme)) || display_data_changed[DISPLAY_DME];
 }
 
 void instruments_set_by_host(const struct hid_set_report_t *report) {
-	// TODO: This is broken right now
-	printf("HostSet %d %d\n", report->com1_active, report->com1_standby);
-	update_value_uint16(&display_data_changed[DISPLAY_COM1], &instrument_state.external.com1.active_index, report->com1_active);
-#if 0
-	update_value_uint16(&redraw_com1_standby, &rotary_com1.rotary.value, report->com1_standby);
-	update_value_uint16(&redraw_com2_active, &instrument_state.com2_active_index, report->com2_active);
-	update_value_uint16(&redraw_com2_standby, &rotary_com2.rotary.value, report->com2_standby);
-	update_value_uint16(&redraw_nav1_active, &instrument_state.nav1_active_index, report->nav1_active);
-	update_value_uint16(&redraw_nav1_standby, &rotary_nav1.rotary.value, report->nav1_standby);
-	update_value_uint16(&redraw_nav2_active, &instrument_state.nav2_active_index, report->nav2_active);
-	update_value_uint16(&redraw_nav2_standby, &rotary_nav2.rotary.value, report->nav2_standby);
-	update_value_uint16(&redraw_xpdr, &instrument_state.squawk, report->squawk);
-#endif
+	if (report->report_id == 0x01) {
+		instruments_set_by_host_report01((const struct hid_set_report_01_t*)report);
+	} else if (report->report_id == 0x02) {
+		instruments_set_by_host_report02((const struct hid_set_report_02_t*)report);
+	}
 }
 
 void instruments_init(void) {
+	led_state_changed = true;
 	for (int did = 0; did < DISPLAY_COUNT; did++) {
 		display_data_changed[did] = true;
 	}

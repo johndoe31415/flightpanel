@@ -61,11 +61,7 @@ struct instrument_state_t {
 			uint16_t edit_timeout;
 			uint16_t ident_timeout;
 		} xpdr;
-		struct {
-			bool available;
-			uint16_t distance_tenth_nm;
-			uint16_t velocity;
-		} dme;
+		struct dme_info_t dme;
 	} internal;
 };
 

@@ -69,16 +69,16 @@ enum flipswitch_t {
 struct com_nav_state_t {
 	uint16_t active_index;
 	uint16_t standby_index;
-};
+} __attribute__ ((packed));
 
 struct xpdr_state_t {
 	uint8_t state;
 	uint16_t squawk;
-};
+} __attribute__ ((packed));
 
 struct adf_state_t {
 	uint16_t frequency_khz;
-};
+} __attribute__ ((packed));
 
 struct ap_state_t {
 	uint8_t state;
@@ -86,11 +86,17 @@ struct ap_state_t {
 	uint16_t climbrate;
 	uint16_t ias;
 	uint16_t heading;
+} __attribute__ ((packed));
+
+struct dme_info_t {
+	bool available;
+	uint16_t distance_tenth_nm;
+	uint16_t velocity;
 };
 
 struct hid_report_t {
 	uint8_t radio_panel;
-	uint8_t com_raster:4, nav_raster:4;
+	uint8_t com_nav_raster;
 	struct com_nav_state_t com1, com2;
 	struct com_nav_state_t nav1, nav2;
 	struct xpdr_state_t xpdr;
@@ -103,20 +109,33 @@ struct hid_report_t {
 
 struct hid_set_report_t {
 	uint8_t report_id;
-	uint16_t com1_active, com1_standby;
-	uint16_t com2_active, com2_standby;
-	uint16_t nav1_active, nav1_standby;
-	uint16_t nav2_active, nav2_standby;
-	uint16_t squawk;
-	uint16_t ap_state;
 } __attribute__ ((packed));
-
 
 struct hid_set_report_01_t {
 	uint8_t report_id;
-	uint16_t ias;
-	uint16_t altitude;
+	uint8_t radio_panel;
+	uint8_t com_nav_raster;
+	struct com_nav_state_t com1, com2;
+	struct com_nav_state_t nav1, nav2;
+	struct xpdr_state_t xpdr;
+	struct adf_state_t adf;
+	struct ap_state_t ap;
+	uint16_t qnh;
+	bool navigate_by_gps;
+} __attribute__ ((packed));
+
+struct hid_set_report_02_t {
+	uint8_t report_id;
+	struct {
+		char nav1[5], nav2[5];
+		char adf[5];
+	} ident;
+	struct dme_info_t dme;
+	struct {
+		uint16_t heading;
+		uint16_t ias;
+		uint16_t altitude;
+	} plane_parameters;
 } __attribute__ ((packed));
 
 #endif
-
