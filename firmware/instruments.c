@@ -690,15 +690,27 @@ static void handle_ap_inputs(void) {
 }
 
 static void handle_xpdr_inputs(void) {
-	if (button_pressed(&xpdr_mode_button)) {
+	if (xpdr_mode_button.lastpress != BUTTON_NOACTION) {
 		uint8_t mode = instrument_state.external.xpdr.state & XPDR_MODE_MASK;
-		if (mode == XPDR_STANDBY) {
-			mode = XPDR_CHARLY;
+
+		if (xpdr_mode_button.lastpress == BUTTON_PRESS) {
+			/* Short press */
+			if (mode == XPDR_STANDBY) {
+				mode = XPDR_CHARLY;
+			} else {
+				mode = XPDR_STANDBY;
+			}
 		} else {
-			mode = XPDR_STANDBY;
+			/* Long press */
+			if (mode == XPDR_OFF) {
+				mode = XPDR_STANDBY;
+			} else {
+				mode = XPDR_OFF;
+			}
 		}
 		instrument_state.external.xpdr.state = (instrument_state.external.xpdr.state & ~XPDR_MODE_MASK) | mode;
 		led_state_changed = true;
+		xpdr_mode_button.lastpress = BUTTON_NOACTION;
 	}
 	if (button_pressed(&xpdr_IDENT_button)) {
 		instrument_state.external.xpdr.state |= XPDR_MODE_IDENTING;
