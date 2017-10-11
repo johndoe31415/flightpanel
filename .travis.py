@@ -304,21 +304,22 @@ if (len(sys.argv) == 1) or ("u" in sys.argv[1]):
 			raise Exception("Unexpected response when trying to create_release: %s" % (result))
 
 	release = release.json()
-	msg("Updating release on GitHub to contain current timestamp")
-	result = github.edit_release(release["id"], name = "Automatic release build", body = "Automatically built by Travis CI on %s UTC." % (now_utc.strftime("%A, %Y-%m-%d %H:%M:%S")))
-	if result.status_code != 200:
-		raise Exception("Unexpected response when trying to edit_release: %s" % (result))
-
-	if "assets" in release:
-		for asset in release["assets"]:
-			if asset["name"] == asset_filename:
-				asset_id = asset["id"]
-				msg("Deleting currently uploaded GitHub asset #%s" % (asset_id))
-				result = github.release_delete_asset(asset_id)
-				if result.status_code != 204:
-					raise Exception("Unexpected response when trying to delete_release: %s" % (result))
-
-	msg("Uploading asset \"%s\" to GitHub" % (asset_filename))
-	result = github.release_upload_asset(release["upload_url"], asset_content_type, asset_filename, asset_data)
-	if result.status_code != 201:
-		raise Exception("Unexpected response when trying to upload_asset: %s" % (result))
+	msg("Temporarily not pushing tag to GitHub until bug with build system is fixed")
+#	msg("Updating release on GitHub to contain current timestamp")
+#	result = github.edit_release(release["id"], name = "Automatic release build", body = "Automatically built by Travis CI on %s UTC." % (now_utc.strftime("%A, %Y-%m-%d %H:%M:%S")))
+#	if result.status_code != 200:
+#		raise Exception("Unexpected response when trying to edit_release: %s" % (result))
+#
+#	if "assets" in release:
+#		for asset in release["assets"]:
+#			if asset["name"] == asset_filename:
+#				asset_id = asset["id"]
+#				msg("Deleting currently uploaded GitHub asset #%s" % (asset_id))
+#				result = github.release_delete_asset(asset_id)
+#				if result.status_code != 204:
+#					raise Exception("Unexpected response when trying to delete_release: %s" % (result))
+#
+#	msg("Uploading asset \"%s\" to GitHub" % (asset_filename))
+#	result = github.release_upload_asset(release["upload_url"], asset_content_type, asset_filename, asset_data)
+#	if result.status_code != 201:
+#		raise Exception("Unexpected response when trying to upload_asset: %s" % (result))
