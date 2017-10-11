@@ -24,79 +24,74 @@
 #include "testbed.h"
 #include <frequencies.h>
 
-static void test_basics(void) {
-	subtest_start();
-	test_assert_int_eq(COM_MIN_FREQUENCY_KHZ, 118000);
-	subtest_finished();
-}
+#define COM_MIN_FREQUENCY_KHZ		118000
 
 static void test_fine(void) {
 	subtest_start();
-	test_assert_int_eq(com_index_to_frequency_khz(0), COM_MIN_FREQUENCY_KHZ);
-	test_assert_int_eq(com_index_to_frequency_khz(1) , 118005);
-	test_assert_int_eq(com_index_to_frequency_khz(2) , 118010);
-	test_assert_int_eq(com_index_to_frequency_khz(3) , 118015);
-	test_assert_int_eq(com_index_to_frequency_khz(4) , 118025);
-	test_assert_int_eq(com_index_to_frequency_khz(5) , 118030);
-	test_assert_int_eq(com_index_to_frequency_khz(6) , 118035);
-	test_assert_int_eq(com_index_to_frequency_khz(7) , 118040);
-	test_assert_int_eq(com_index_to_frequency_khz(8) , 118050);
-	test_assert_int_eq(com_index_to_frequency_khz(9) , 118055);
-	test_assert_int_eq(com_index_to_frequency_khz(10), 118060);
-	test_assert_int_eq(com_index_to_frequency_khz(11), 118065);
-	test_assert_int_eq(com_index_to_frequency_khz(12), 118075);
-	test_assert_int_eq(com_index_to_frequency_khz(13), 118080);
-	test_assert_int_eq(com_index_to_frequency_khz(14), 118085);
-	test_assert_int_eq(com_index_to_frequency_khz(15), 118090);
-	test_assert_int_eq(com_index_to_frequency_khz(16), 118100);
-	test_assert_int_eq(com_index_to_frequency_khz(17), 118105);
-	test_assert_int_eq(com_index_to_frequency_khz(18), 118110);
-	test_assert_int_eq(com_index_to_frequency_khz(19), 118115);
-	test_assert_int_eq(com_index_to_frequency_khz(159), 118990);
-	test_assert_int_eq(com_index_to_frequency_khz(160), 119000);
-	test_assert_int_eq(com_index_to_frequency_khz(161), 119005);
-	test_assert_int_eq(com_index_to_frequency_khz((160 * 19) - 1), 136990);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 0), COM_MIN_FREQUENCY_KHZ);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 1) , 118005);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 2) , 118010);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 3) , 118015);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 4) , 118025);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 5) , 118030);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 6) , 118035);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 7) , 118040);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 8) , 118050);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 9) , 118055);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 10), 118060);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 11), 118065);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 12), 118075);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 13), 118080);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 14), 118085);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 15), 118090);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 16), 118100);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 17), 118105);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 18), 118110);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 19), 118115);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 159), 118990);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 160), 119000);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 161), 119005);
+	test_assert_int_eq(frequency_index_to_khz(COM_RANGE, (160 * 19) - 1), 136990);
 
 
-	test_assert_int_eq(0, com_frequency_khz_to_index(COM_MIN_FREQUENCY_KHZ));
-	test_assert_int_eq(1, com_frequency_khz_to_index(118005));
-	test_assert_int_eq(2, com_frequency_khz_to_index(118010));
-	test_assert_int_eq(3, com_frequency_khz_to_index(118015));
-	test_assert_int_eq(4, com_frequency_khz_to_index(118025));
-	test_assert_int_eq(5, com_frequency_khz_to_index(118030));
-	test_assert_int_eq(6, com_frequency_khz_to_index(118035));
-	test_assert_int_eq(7, com_frequency_khz_to_index(118040));
-	test_assert_int_eq(8, com_frequency_khz_to_index(118050));
-	test_assert_int_eq(9, com_frequency_khz_to_index(118055));
-	test_assert_int_eq(10, com_frequency_khz_to_index(118060));
-	test_assert_int_eq(11, com_frequency_khz_to_index(118065));
-	test_assert_int_eq(12, com_frequency_khz_to_index(118075));
-	test_assert_int_eq(13, com_frequency_khz_to_index(118080));
-	test_assert_int_eq(14, com_frequency_khz_to_index(118085));
-	test_assert_int_eq(15, com_frequency_khz_to_index(118090));
-	test_assert_int_eq(16, com_frequency_khz_to_index(118100));
-	test_assert_int_eq(17, com_frequency_khz_to_index(118105));
-	test_assert_int_eq(18, com_frequency_khz_to_index(118110));
-	test_assert_int_eq(19, com_frequency_khz_to_index(118115));
-	test_assert_int_eq(159, com_frequency_khz_to_index(118990));
-	test_assert_int_eq(160, com_frequency_khz_to_index(119000));
-	test_assert_int_eq(161, com_frequency_khz_to_index(119005));
-	test_assert_int_eq((160 * 19) - 1, com_frequency_khz_to_index(136990));
+	test_assert_int_eq(0, frequency_khz_to_index(COM_RANGE, COM_MIN_FREQUENCY_KHZ));
+	test_assert_int_eq(1, frequency_khz_to_index(COM_RANGE, 118005));
+	test_assert_int_eq(2, frequency_khz_to_index(COM_RANGE, 118010));
+	test_assert_int_eq(3, frequency_khz_to_index(COM_RANGE, 118015));
+	test_assert_int_eq(4, frequency_khz_to_index(COM_RANGE, 118025));
+	test_assert_int_eq(5, frequency_khz_to_index(COM_RANGE, 118030));
+	test_assert_int_eq(6, frequency_khz_to_index(COM_RANGE, 118035));
+	test_assert_int_eq(7, frequency_khz_to_index(COM_RANGE, 118040));
+	test_assert_int_eq(8, frequency_khz_to_index(COM_RANGE, 118050));
+	test_assert_int_eq(9, frequency_khz_to_index(COM_RANGE, 118055));
+	test_assert_int_eq(10, frequency_khz_to_index(COM_RANGE, 118060));
+	test_assert_int_eq(11, frequency_khz_to_index(COM_RANGE, 118065));
+	test_assert_int_eq(12, frequency_khz_to_index(COM_RANGE, 118075));
+	test_assert_int_eq(13, frequency_khz_to_index(COM_RANGE, 118080));
+	test_assert_int_eq(14, frequency_khz_to_index(COM_RANGE, 118085));
+	test_assert_int_eq(15, frequency_khz_to_index(COM_RANGE, 118090));
+	test_assert_int_eq(16, frequency_khz_to_index(COM_RANGE, 118100));
+	test_assert_int_eq(17, frequency_khz_to_index(COM_RANGE, 118105));
+	test_assert_int_eq(18, frequency_khz_to_index(COM_RANGE, 118110));
+	test_assert_int_eq(19, frequency_khz_to_index(COM_RANGE, 118115));
+	test_assert_int_eq(159, frequency_khz_to_index(COM_RANGE, 118990));
+	test_assert_int_eq(160, frequency_khz_to_index(COM_RANGE, 119000));
+	test_assert_int_eq(161, frequency_khz_to_index(COM_RANGE, 119005));
+	test_assert_int_eq((160 * 19) - 1, frequency_khz_to_index(COM_RANGE, 136990));
 	subtest_finished();
 }
 
 static void test_coarse(void) {
 	subtest_start();
 	for (int i = 0; i < 40 * 19; i++) {
-		test_assert_int_eq(com_index_to_frequency_khz(4 * i), COM_MIN_FREQUENCY_KHZ + (i * 25));
-		test_assert_int_eq(4 * i, com_frequency_khz_to_index(COM_MIN_FREQUENCY_KHZ + (i * 25)));
+		test_assert_int_eq(frequency_index_to_khz(COM_RANGE, 4 * i), COM_MIN_FREQUENCY_KHZ + (i * 25));
+		test_assert_int_eq(4 * i, frequency_khz_to_index(COM_RANGE, COM_MIN_FREQUENCY_KHZ + (i * 25)));
 	}
 	subtest_finished();
 }
 
 int main(int argc, char **argv) {
 	test_start(argc, argv);
-	test_basics();
 	test_fine();
 	test_coarse();
 	test_finished();

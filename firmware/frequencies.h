@@ -26,26 +26,26 @@
 
 #include <stdint.h>
 
-#define COM_MIN_FREQUENCY_KHZ		118000
-#define COM_BANDWIDTH_MHZ			19
-#define COM_DIVISIONS_PER_100_KHZ	16
-#define COM_DIVISIONS_PER_MHZ		(COM_DIVISIONS_PER_100_KHZ * 10)
-#define COM_DIVISIONS				(COM_BANDWIDTH_MHZ * COM_DIVISIONS_PER_MHZ)
+struct com_nav_range_definition_t {
+	unsigned int base_frequency_khz;
+	unsigned int division_count;
+	unsigned int division_value;
+	unsigned int subdivision_count;
+	const uint8_t *subdivisions;
+};
 
-#define NAV_MIN_FREQUENCY_KHZ		108000
-#define NAV_BANDWIDTH_MHZ			10
-#define NAV_DIVISIONS_PER_MHZ		20
-#define NAV_KHZ_PER_DIVISION		(1000 / NAV_DIVISIONS_PER_MHZ)
-#define NAV_DIVISIONS				(NAV_BANDWIDTH_MHZ * NAV_DIVISIONS_PER_MHZ)
+enum com_nav_range_t {
+	COM_RANGE,
+	NAV_RANGE,
+};
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
-uint32_t com_index_to_frequency_khz(int com_index);
-uint16_t com_frequency_khz_to_index(uint32_t frequency_khz);
-uint32_t nav_index_to_frequency_khz(int nav_index);
-uint16_t nav_frequency_khz_to_index(uint32_t frequency_khz);
+uint32_t frequency_index_to_khz(const enum com_nav_range_t range, const int index);
+uint32_t frequency_khz_to_index(const enum com_nav_range_t range, const uint32_t frequency_khz);
+int frequency_detent_count(const enum com_nav_range_t range);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 #ifdef __cplusplus
 }

@@ -96,7 +96,7 @@ struct dme_info_t {
 
 struct hid_report_t {
 	uint8_t radio_panel;
-	uint8_t com_nav_raster;
+	uint8_t com_nav_divisions;
 	struct com_nav_state_t com1, com2;
 	struct com_nav_state_t nav1, nav2;
 	struct xpdr_state_t xpdr;
@@ -114,7 +114,7 @@ struct hid_set_report_t {
 struct hid_set_report_01_t {
 	uint8_t report_id;
 	uint8_t radio_panel;
-	uint8_t com_nav_raster;
+	uint8_t com_nav_divisions;
 	struct com_nav_state_t com1, com2;
 	struct com_nav_state_t nav1, nav2;
 	struct xpdr_state_t xpdr;

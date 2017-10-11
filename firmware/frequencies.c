@@ -21,46 +21,59 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
+#include <stdio.h>
 #include "frequencies.h"
 #include "debug.h"
 
-static const uint8_t com_frequency_100khz_divisions[COM_DIVISIONS_PER_100_KHZ] = {
-	0, 5, 10, 15, 25, 30, 35, 40, 50, 55, 60, 65, 75, 80, 85, 90
+static const struct com_nav_range_definition_t frequency_definitions[] = {
+	[COM_RANGE] = {
+		.base_frequency_khz = 118000,
+		.division_count = 10 * 19,
+		.division_value = 100,
+		.subdivision_count = 16,
+		.subdivisions = (const uint8_t[]) { 0, 5, 10, 15, 25, 30, 35, 40, 50, 55, 60, 65, 75, 80, 85, 90 },
+	},
+	[NAV_RANGE] = {
+		.base_frequency_khz = 108000,
+		.division_count = 10 * 20,
+		.division_value = 50,
+		.subdivision_count = 0,
+		.subdivisions = NULL,
+	},
 };
 
-uint32_t com_index_to_frequency_khz(int com_index) {
-	com_index = com_index % COM_DIVISIONS;
-	int mhz = com_index / COM_DIVISIONS_PER_MHZ;
-	int division = com_index % COM_DIVISIONS_PER_MHZ;
-	int khz100 = division / COM_DIVISIONS_PER_100_KHZ;
-	int khz_index = division % COM_DIVISIONS_PER_100_KHZ;
-	uint32_t result = COM_MIN_FREQUENCY_KHZ + (1000 * mhz) + (100 * khz100) + com_frequency_100khz_divisions[khz_index];
-	debug("%d -> %d %d %d -> %u\n", com_index, mhz, khz100, khz_index, result);
-	return result;
-}
-
-uint16_t com_frequency_khz_to_index(uint32_t frequency_khz) {
-	uint32_t remainder_frequency = frequency_khz;
-	remainder_frequency = remainder_frequency - COM_MIN_FREQUENCY_KHZ;
-	int mhz = remainder_frequency / 1000;
-	remainder_frequency = remainder_frequency % 1000;
-	int khz100 = remainder_frequency / 100;
-	remainder_frequency = remainder_frequency % 100;
-	int remainder = 0;
-	for (int i = 0; i < COM_DIVISIONS_PER_100_KHZ; i++) {
-		if (com_frequency_100khz_divisions[i] == remainder_frequency) {
-			remainder = i;
-			break;
-		}
+uint32_t frequency_index_to_khz(const enum com_nav_range_t range, const int index) {
+	const struct com_nav_range_definition_t *def = (const struct com_nav_range_definition_t*)(frequency_definitions + range);
+	if (def->subdivision_count) {
+		const int division = index / def->subdivision_count;
+		const int subdivision = index % def->subdivision_count;
+		return def->base_frequency_khz + (division * def->division_value) + def->subdivisions[subdivision];
+	} else {
+		return def->base_frequency_khz + (index * def->division_value);
 	}
-	debug("%d kHz -> BASE + %d MHz + %d * 100kHz + Index[%d]\n", frequency_khz, mhz, khz100, remainder);
-	return (mhz * COM_DIVISIONS_PER_MHZ) + (khz100 * COM_DIVISIONS_PER_100_KHZ) + remainder;
 }
 
-uint32_t nav_index_to_frequency_khz(int nav_index) {
-	return NAV_MIN_FREQUENCY_KHZ + (nav_index * NAV_KHZ_PER_DIVISION);
+uint32_t frequency_khz_to_index(const enum com_nav_range_t range, const uint32_t frequency_khz) {
+	const struct com_nav_range_definition_t *def = (const struct com_nav_range_definition_t*)(frequency_definitions + range);
+	const uint32_t top_frequency_khz = frequency_khz - def->base_frequency_khz;
+
+	if (def->subdivision_count) {
+		const int division_index = top_frequency_khz / def->division_value * def->subdivision_count;
+		const int subdivision_value = top_frequency_khz % def->division_value;
+		int subdivision_index = 0;
+		for (int i = 0; i < def->subdivision_count; i++) {
+			if (subdivision_value == def->subdivisions[i]) {
+				subdivision_index = i;
+				break;
+			}
+		}
+		return division_index + subdivision_index;
+	} else {
+		return top_frequency_khz / def->division_value;
+	}
 }
 
-uint16_t nav_frequency_khz_to_index(uint32_t frequency_khz) {
-	return (frequency_khz - NAV_MIN_FREQUENCY_KHZ) / NAV_KHZ_PER_DIVISION;
+int frequency_detent_count(const enum com_nav_range_t range) {
+	const struct com_nav_range_definition_t *def = (const struct com_nav_range_definition_t*)(frequency_definitions + range);
+	return def->division_count * def->subdivision_count;
 }

@@ -54,8 +54,6 @@ extern struct configuration active_configuration;
 
 static struct rotary_encoder_with_button_t rotary_com1 = {
 	.rotary = {
-		.value = 0,
-		.detent_cnt = COM_DIVISIONS,
 		.wrap_around = true,
 	},
 	.button = {
@@ -66,8 +64,6 @@ static struct rotary_encoder_with_button_t rotary_com1 = {
 
 static struct rotary_encoder_with_button_t rotary_com2 = {
 	.rotary = {
-		.value = 0,
-		.detent_cnt = COM_DIVISIONS,
 		.wrap_around = true,
 	},
 	.button = {
@@ -78,8 +74,6 @@ static struct rotary_encoder_with_button_t rotary_com2 = {
 
 static struct rotary_encoder_with_button_t rotary_nav1 = {
 	.rotary = {
-		.value = 0,
-		.detent_cnt = NAV_DIVISIONS,
 		.wrap_around = true,
 	},
 	.button = {
@@ -90,8 +84,6 @@ static struct rotary_encoder_with_button_t rotary_nav1 = {
 
 static struct rotary_encoder_with_button_t rotary_nav2 = {
 	.rotary = {
-		.value = 0,
-		.detent_cnt = NAV_DIVISIONS,
 		.wrap_around = true,
 	},
 	.button = {
@@ -475,19 +467,7 @@ static const struct button_input_t button_inputs[] = {
 
 static void instruments_send_usb_hid_report(void) {
 	usb_report_time_tick = USB_REPORT_INTERVAL_MS;
-	struct hid_report_t hid_report = {
-#if 0
-		.com1_active = instrument_state.com1_active_index,
-		.com1_standby = instrument_state.com1_standby_index,
-		.com2_active = instrument_state.com2_active_index,
-		.com2_standby = instrument_state.com2_standby_index,
-		.nav1_active = instrument_state.nav1_active_index,
-		.nav1_standby = instrument_state.nav1_standby_index,
-		.nav2_active = instrument_state.nav2_active_index,
-		.nav2_standby = instrument_state.nav2_standby_index,
-#endif
-	};
-	usb_submit_report(&hid_report);
+	usb_submit_report(&instrument_state.external);
 }
 
 void hid_tick(void) {
@@ -804,15 +784,15 @@ static bool copy_if_changed(void *dst, const void *src, const unsigned int lengt
 
 static void instruments_set_by_host_report01(const struct hid_set_report_01_t *report) {
 	led_state_changed = copy_if_changed(&instrument_state.external.radio_panel, &report->radio_panel, sizeof(instrument_state.external.radio_panel)) || led_state_changed;
-	bool raster_changed = copy_if_changed(&instrument_state.external.com_nav_raster, &report->com_nav_raster, sizeof(instrument_state.external.com_nav_raster)) || led_state_changed;
-	display_data_changed[DISPLAY_COM1] = copy_if_changed(&instrument_state.external.com1.active_index, &report->com1.active_index, sizeof(instrument_state.external.com1.active_index)) || display_data_changed[DISPLAY_COM1] || raster_changed;
-	display_data_changed[DISPLAY_COM1_STBY] = copy_if_changed(&instrument_state.external.com1.standby_index, &report->com1.standby_index, sizeof(instrument_state.external.com1.standby_index)) || display_data_changed[DISPLAY_COM1_STBY] || raster_changed;
-	display_data_changed[DISPLAY_COM2] = copy_if_changed(&instrument_state.external.com2.active_index, &report->com2.active_index, sizeof(instrument_state.external.com2.active_index)) || display_data_changed[DISPLAY_COM2] || raster_changed;
-	display_data_changed[DISPLAY_COM2_STBY] = copy_if_changed(&instrument_state.external.com2.standby_index, &report->com2.standby_index, sizeof(instrument_state.external.com2.standby_index)) || display_data_changed[DISPLAY_COM2_STBY] || raster_changed;
-	display_data_changed[DISPLAY_NAV1] = copy_if_changed(&instrument_state.external.nav1.active_index, &report->nav1.active_index, sizeof(instrument_state.external.nav1.active_index)) || display_data_changed[DISPLAY_NAV1] || raster_changed;
-	display_data_changed[DISPLAY_NAV1_STBY] = copy_if_changed(&instrument_state.external.nav1.standby_index, &report->nav1.standby_index, sizeof(instrument_state.external.nav1.standby_index)) || display_data_changed[DISPLAY_NAV1_STBY] || raster_changed;
-	display_data_changed[DISPLAY_NAV2] = copy_if_changed(&instrument_state.external.nav2.active_index, &report->nav2.active_index, sizeof(instrument_state.external.nav2.active_index)) || display_data_changed[DISPLAY_NAV2] || raster_changed;
-	display_data_changed[DISPLAY_NAV2_STBY] = copy_if_changed(&instrument_state.external.nav2.standby_index, &report->nav2.standby_index, sizeof(instrument_state.external.nav2.standby_index)) || display_data_changed[DISPLAY_NAV2_STBY] || raster_changed;
+	bool divisions_changed = copy_if_changed(&instrument_state.external.com_nav_divisions, &report->com_nav_divisions, sizeof(instrument_state.external.com_nav_divisions)) || led_state_changed;
+	display_data_changed[DISPLAY_COM1] = copy_if_changed(&instrument_state.external.com1.active_index, &report->com1.active_index, sizeof(instrument_state.external.com1.active_index)) || display_data_changed[DISPLAY_COM1] || divisions_changed;
+	display_data_changed[DISPLAY_COM1_STBY] = copy_if_changed(&instrument_state.external.com1.standby_index, &report->com1.standby_index, sizeof(instrument_state.external.com1.standby_index)) || display_data_changed[DISPLAY_COM1_STBY] || divisions_changed;
+	display_data_changed[DISPLAY_COM2] = copy_if_changed(&instrument_state.external.com2.active_index, &report->com2.active_index, sizeof(instrument_state.external.com2.active_index)) || display_data_changed[DISPLAY_COM2] || divisions_changed;
+	display_data_changed[DISPLAY_COM2_STBY] = copy_if_changed(&instrument_state.external.com2.standby_index, &report->com2.standby_index, sizeof(instrument_state.external.com2.standby_index)) || display_data_changed[DISPLAY_COM2_STBY] || divisions_changed;
+	display_data_changed[DISPLAY_NAV1] = copy_if_changed(&instrument_state.external.nav1.active_index, &report->nav1.active_index, sizeof(instrument_state.external.nav1.active_index)) || display_data_changed[DISPLAY_NAV1] || divisions_changed;
+	display_data_changed[DISPLAY_NAV1_STBY] = copy_if_changed(&instrument_state.external.nav1.standby_index, &report->nav1.standby_index, sizeof(instrument_state.external.nav1.standby_index)) || display_data_changed[DISPLAY_NAV1_STBY] || divisions_changed;
+	display_data_changed[DISPLAY_NAV2] = copy_if_changed(&instrument_state.external.nav2.active_index, &report->nav2.active_index, sizeof(instrument_state.external.nav2.active_index)) || display_data_changed[DISPLAY_NAV2] || divisions_changed;
+	display_data_changed[DISPLAY_NAV2_STBY] = copy_if_changed(&instrument_state.external.nav2.standby_index, &report->nav2.standby_index, sizeof(instrument_state.external.nav2.standby_index)) || display_data_changed[DISPLAY_NAV2_STBY] || divisions_changed;
 	bool xpdr_state_changed = copy_if_changed(&instrument_state.external.xpdr, &report->xpdr, sizeof(instrument_state.external.xpdr));
 	display_data_changed[DISPLAY_XPDR] = xpdr_state_changed || display_data_changed[DISPLAY_XPDR];
 	led_state_changed = xpdr_state_changed || led_state_changed;
@@ -838,6 +818,13 @@ void instruments_set_by_host(const struct hid_set_report_t *report) {
 }
 
 void instruments_init(void) {
+	const uint8_t com_divisions = (instrument_state.external.com_nav_divisions >> 0) & 0xf;
+	const uint8_t nav_divisions = (instrument_state.external.com_nav_divisions >> 4) & 0xf;
+	rotary_com1.rotary.detent_cnt = frequency_detent_count(com_divisions);
+	rotary_com2.rotary.detent_cnt = frequency_detent_count(com_divisions);
+	rotary_nav1.rotary.detent_cnt = frequency_detent_count(nav_divisions);
+	rotary_nav2.rotary.detent_cnt = frequency_detent_count(nav_divisions);
+
 	led_state_changed = true;
 	for (int did = 0; did < DISPLAY_COUNT; did++) {
 		display_data_changed[did] = true;
