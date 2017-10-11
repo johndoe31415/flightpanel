@@ -77,14 +77,14 @@ void FPConnection::event_loop() {
 #endif
 		int bytes_read = hid_read(_device, (uint8_t*)&hid_report, sizeof(hid_report));
 		if (bytes_read == sizeof(hid_report)) {
-			_instrument_data.com1.freq_active_khz = com_index_to_frequency_khz(hid_report.com1_active);
-			_instrument_data.com1.freq_standby_khz = com_index_to_frequency_khz(hid_report.com1_standby);
-			_instrument_data.com2.freq_active_khz = com_index_to_frequency_khz(hid_report.com2_active);
-			_instrument_data.com2.freq_standby_khz = com_index_to_frequency_khz(hid_report.com2_standby);
-			_instrument_data.nav1.freq_active_khz = nav_index_to_frequency_khz(hid_report.nav1_active);
-			_instrument_data.nav1.freq_standby_khz = nav_index_to_frequency_khz(hid_report.nav1_standby);
-			_instrument_data.nav2.freq_active_khz = nav_index_to_frequency_khz(hid_report.nav2_active);
-			_instrument_data.nav2.freq_standby_khz = nav_index_to_frequency_khz(hid_report.nav2_standby);
+			_instrument_data.com1.freq_active_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.com_divisions, hid_report.com1.active_index);
+			_instrument_data.com1.freq_standby_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.com_divisions, hid_report.com1.standby_index);
+			_instrument_data.com2.freq_active_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.com_divisions, hid_report.com2.active_index);
+			_instrument_data.com2.freq_standby_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.com_divisions, hid_report.com2.standby_index);
+			_instrument_data.nav1.freq_active_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.nav_divisions, hid_report.nav1.active_index);
+			_instrument_data.nav1.freq_standby_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.nav_divisions, hid_report.nav1.standby_index);
+			_instrument_data.nav2.freq_active_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.nav_divisions, hid_report.nav2.active_index);
+			_instrument_data.nav2.freq_standby_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.nav_divisions, hid_report.nav2.standby_index);
 		} else {
 			fprintf(stderr, "Short read (%d of %zd), could not get full HID report.\n", bytes_read, sizeof(hid_report));
 		}
@@ -99,6 +99,8 @@ void FPConnection::put_data(const struct instrument_data_t *data, const struct c
 	struct hid_set_report_t hid_set_report;
 	std::memset(&hid_set_report, 0, sizeof(hid_set_report));
 	hid_set_report.report_id = 1;
+	// TODO this is all different now
+#if 0
 	hid_set_report.com1_active = com_frequency_khz_to_index(data->com1.freq_active_khz);
 	hid_set_report.com1_standby = com_frequency_khz_to_index(data->com1.freq_standby_khz);
 	hid_set_report.com2_active = com_frequency_khz_to_index(data->com2.freq_active_khz);
@@ -107,6 +109,7 @@ void FPConnection::put_data(const struct instrument_data_t *data, const struct c
 	hid_set_report.nav1_standby = nav_frequency_khz_to_index(data->nav1.freq_standby_khz);
 	hid_set_report.nav2_active = nav_frequency_khz_to_index(data->nav2.freq_active_khz);
 	hid_set_report.nav2_standby = nav_frequency_khz_to_index(data->nav2.freq_standby_khz);
+#endif
 #ifndef NO_REAL_DEVICE
 	int bytes_written = hid_write(_device, (const uint8_t*)&hid_set_report, sizeof(hid_set_report));
 #else
