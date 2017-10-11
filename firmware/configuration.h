@@ -33,6 +33,14 @@ struct configuration {
 		uint16_t edit_timeout_milliseconds;
 		uint16_t vfr_squawk;
 	} xpdr;
+	struct {
+		struct {
+			uint16_t ias;
+			uint16_t altitude;
+			uint16_t climbrate;
+		} ap;
+		uint16_t squawk;
+	} instruments;
 	uint32_t crc32;
 };
 

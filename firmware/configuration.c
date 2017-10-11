@@ -33,6 +33,14 @@ static const struct configuration default_configuration = {
 		.edit_timeout_milliseconds = 2000,
 		.vfr_squawk = 7000,
 	},
+	.instruments = {
+		.ap = {
+			.ias = 120,
+			.altitude = 20,
+			.climbrate = 7,
+		},
+		.squawk = 7000,
+	},
 };
 _Static_assert((sizeof(default_configuration) % 4) == 0, "Configuration size alignment mismatch.");
 
