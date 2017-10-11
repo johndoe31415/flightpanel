@@ -2,7 +2,7 @@
 
 vpath %.c ..
 
-CFLAGS := -std=c11 -Wall -Werror -Wmissing-prototypes -Wstrict-prototypes -Werror=implicit-function-declaration -O3 -I..
+CFLAGS := -std=c11 -Wall -Werror -Wmissing-prototypes -Wstrict-prototypes -Werror=implicit-function-declaration -O3 -I.. -g3
 ifneq ($(USER),travis)
 # On Travis-CI, gcc does not support "undefined" and "leak" sanitizers.
 # Furthermore (and worse, actually), there seems to be a kernel < 4.12.8

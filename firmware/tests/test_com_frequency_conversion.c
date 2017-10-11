@@ -90,10 +90,28 @@ static void test_coarse(void) {
 	subtest_finished();
 }
 
+static void test_close(void) {
+	subtest_start();
+	int last_index = -1;
+	for (int freq = 118300; freq <= 119700; freq++) {
+		int index = frequency_khz_to_index(COM_RANGE, freq);
+		if (last_index == -1) {
+			last_index = index;
+		}
+		int conv_freq = frequency_index_to_khz(COM_RANGE, index);
+		test_assert(conv_freq >= freq);
+		test_assert(last_index <= index);
+		debug("%d kHz -> %d -> %d kHz\n", freq, index, conv_freq);
+		last_index = index;
+	}
+	subtest_finished();
+}
+
 int main(int argc, char **argv) {
 	test_start(argc, argv);
 	test_fine();
 	test_coarse();
+	test_close();
 	test_finished();
 	return 0;
 }

@@ -60,9 +60,9 @@ uint32_t frequency_khz_to_index(const enum com_nav_range_t range, const uint32_t
 	if (def->subdivision_count) {
 		const int division_index = top_frequency_khz / def->division_value * def->subdivision_count;
 		const int subdivision_value = top_frequency_khz % def->division_value;
-		int subdivision_index = 0;
+		int subdivision_index = def->subdivision_count;
 		for (int i = 0; i < def->subdivision_count; i++) {
-			if (subdivision_value == def->subdivisions[i]) {
+			if (def->subdivisions[i] >= subdivision_value) {
 				subdivision_index = i;
 				break;
 			}
