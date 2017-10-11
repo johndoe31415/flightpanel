@@ -125,7 +125,6 @@ static void redraw_dme_display(const struct surface_t *surface, const struct ins
 	} else {
 		struct cursor_t cursor = { 28, 40 };
 		blit_string_to_cursor(&font_vcr_osd_mono_20, "No DME", surface, &cursor, false);
-		printf("%d\n", cursor.x);
 	}
 }
 

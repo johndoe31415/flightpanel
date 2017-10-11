@@ -69,8 +69,6 @@ int main(void) {
 	RGB_LED_Green_set_ACTIVE();
 	init_configuration();
 	init_displays();
-	iomux_output_set(IOMUX_OUT_XPDR_STBY, true);
-	iomux_output_set(IOMUX_OUT_NavSrc_NAV, true);
 	instruments_init();
 	dsr_mark_pending(DSR_TASK_IDLE);
 //	debugmode_set(DEBUG_DISPLAY);

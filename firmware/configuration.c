@@ -26,6 +26,7 @@
 #include <stm32f4xx_crc.h>
 #include "configuration.h"
 #include "eeprom.h"
+#include "frequencies.h"
 
 static const struct configuration default_configuration = {
 	.xpdr = {
@@ -34,10 +35,12 @@ static const struct configuration default_configuration = {
 		.vfr_squawk = 7000,
 	},
 	.instruments = {
+		.com_frequency_divisions = COM_RANGE,
+		.nav_frequency_divisions = NAV_RANGE,
 		.ap = {
+			.altitude = 2000,
 			.ias = 120,
-			.altitude = 20,
-			.climbrate = 7,
+			.climbrate = 700,
 		},
 		.com1 = {
 			.active_frequency_khz = 118000,

@@ -223,6 +223,7 @@ static struct button_t ap_rev_button = {
 /* Transponder buttons */
 static struct button_t xpdr_mode_button = {
 	.threshold = 50,
+	.long_threshold = 700,
 	.deadtime = 50,
 };
 static struct button_t xpdr_0_button = {
@@ -832,15 +833,11 @@ void instruments_set_by_host(const struct hid_set_report_t *report) {
 void instruments_init(void) {
 	instrument_state.external.com_divisions = active_configuration.instruments.com_frequency_divisions;
 	instrument_state.external.nav_divisions = active_configuration.instruments.nav_frequency_divisions;
+
 	instrument_state.external.ap.ias = active_configuration.instruments.ap.ias;
 	instrument_state.external.ap.altitude = active_configuration.instruments.ap.altitude;
 	instrument_state.external.ap.climbrate = active_configuration.instruments.ap.climbrate;
 	instrument_state.external.xpdr.squawk = active_configuration.instruments.squawk;
-
-	rotary_com1.rotary.detent_cnt = frequency_detent_count(instrument_state.external.com_divisions);
-	rotary_com2.rotary.detent_cnt = frequency_detent_count(instrument_state.external.com_divisions);
-	rotary_nav1.rotary.detent_cnt = frequency_detent_count(instrument_state.external.nav_divisions);
-	rotary_nav2.rotary.detent_cnt = frequency_detent_count(instrument_state.external.nav_divisions);
 
 	instrument_state.external.com1.active_index = frequency_khz_to_index(instrument_state.external.com_divisions, active_configuration.instruments.com1.active_frequency_khz);
 	instrument_state.external.com1.standby_index = frequency_khz_to_index(instrument_state.external.com_divisions, active_configuration.instruments.com1.standby_frequency_khz);
@@ -850,6 +847,14 @@ void instruments_init(void) {
 	instrument_state.external.nav1.standby_index = frequency_khz_to_index(instrument_state.external.nav_divisions, active_configuration.instruments.nav1.standby_frequency_khz);
 	instrument_state.external.nav2.active_index = frequency_khz_to_index(instrument_state.external.nav_divisions, active_configuration.instruments.nav2.active_frequency_khz);
 	instrument_state.external.nav2.standby_index = frequency_khz_to_index(instrument_state.external.nav_divisions, active_configuration.instruments.nav2.standby_frequency_khz);
+
+	rotary_com1.rotary.detent_cnt = frequency_detent_count(instrument_state.external.com_divisions);
+	rotary_com2.rotary.detent_cnt = frequency_detent_count(instrument_state.external.com_divisions);
+	rotary_nav1.rotary.detent_cnt = frequency_detent_count(instrument_state.external.nav_divisions);
+	rotary_nav2.rotary.detent_cnt = frequency_detent_count(instrument_state.external.nav_divisions);
+	rotary_ap_alt.rotary.value = instrument_state.external.ap.altitude / 100;
+	rotary_ap_ias.rotary.value = instrument_state.external.ap.ias;
+	rotary_ap_rate.rotary.value = instrument_state.external.ap.climbrate / 100;
 
 	instrument_state.external.adf.frequency_khz = active_configuration.instruments.adf_frequency_khz;
 

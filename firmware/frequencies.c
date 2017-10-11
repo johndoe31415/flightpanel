@@ -75,5 +75,5 @@ uint32_t frequency_khz_to_index(const enum com_nav_range_t range, const uint32_t
 
 int frequency_detent_count(const enum com_nav_range_t range) {
 	const struct com_nav_range_definition_t *def = (const struct com_nav_range_definition_t*)(frequency_definitions + range);
-	return def->division_count * def->subdivision_count;
+	return def->division_count * (def->subdivision_count ? def->subdivision_count : 1);
 }
