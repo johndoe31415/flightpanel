@@ -49,71 +49,24 @@ struct button_input_t {
 	enum btnaction_t *notify;
 };
 
-enum ap_hold_t {
-	HOLD_ALTITUDE = (1 << 0),
-	HOLD_IAS = (1 << 1),
-	HOLD_HEADING = (1 << 2),
-	HOLD_NAVIGATION = (1 << 3),
-	HOLD_REVERSE = (1 << 4),
-	HOLD_APPROACH = (1 << 5),
-};
-
-enum radiopanel_button_t {
-	RADIO_COM1 = (1 << 0),
-	RADIO_NAV1 = (1 << 1),
-	RADIO_DME = (1 << 2),
-	RADIO_COM2 = (1 << 3),
-	RADIO_NAV2 = (1 << 4),
-	RADIO_ADF = (1 << 5),
-};
-
-struct com_nav_state {
-	uint16_t active_index;
-	uint16_t standby_index;
-};
-
 struct instrument_state_t {
-	uint8_t radio_panel;
-	struct com_nav_state com1, com2;
-	struct com_nav_state nav1, nav2;
-	char nav1_ident[5], nav2_ident[5];
+	struct hid_report_t external;
 	struct {
-		uint16_t squawk;
-		bool mode_charly;
-		uint8_t edit_char;
-		uint16_t edit_timeout;
-		bool identing;
-		uint16_t ident_timeout;
-	} xpdr;
-	uint16_t qnh;
-
-	struct {
-		uint16_t altitude;
-		uint16_t climbrate;
-		uint16_t ias;
-		uint16_t heading;
-
-		bool active;
-		uint8_t hold;
-	} ap;
-
-	struct {
-		char ident[5];
-		uint16_t frequency_khz;
-	} adf;
-
-	struct {
-		bool available;
-		uint16_t distance_tenth_nm;
-		uint16_t velocity;
-	} dme;
-
-	bool navigate_by_gps;
-};
-
-struct flight_data_t {
-	uint16_t ias;
-	uint16_t altitude;
+		struct {
+			char nav1[5], nav2[5];
+			char adf[5];
+		} ident;
+		struct {
+			uint8_t edit_char;
+			uint16_t edit_timeout;
+			uint16_t ident_timeout;
+		} xpdr;
+		struct {
+			bool available;
+			uint16_t distance_tenth_nm;
+			uint16_t velocity;
+		} dme;
+	} internal;
 };
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/

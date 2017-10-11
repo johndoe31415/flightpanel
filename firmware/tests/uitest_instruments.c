@@ -43,22 +43,31 @@ static void test_instruments(void) {
 		{ .width = 128, .height = 64, .data = (uint8_t[128 * 64 / 8]) { }, },
 	};
 	struct instrument_state_t istate = {
-		.com1_active_index = 100,
-		.com1_standby_index = 200,
-		.com2_active_index = 300,
-		.com2_standby_index = 400,
-		.xpdr = {
-			.squawk = 7001,
-			.edit_char = 4,
-			.identing = true,
+		.external = {
+			.com1 = {
+				.active_index = 100,
+				.standby_index = 200,
+			},
+			.com2 = {
+				.active_index = 300,
+				.standby_index = 400,
+			},
+			.xpdr = {
+				.state = XPDR_CHARLY | XPDR_MODE_IDENTING,
+				.squawk = 7001,
+			},
+			.ap = {
+				.state = AP_ACTIVE | AP_HOLD_ALTITUDE | AP_HOLD_IAS | AP_HOLD_HEADING,
+				.altitude = 6900,
+				.climbrate = 750,
+				.ias = 125,
+				.heading = 180,
+			},
 		},
-		.ap = {
-			.active = true,
-			.hold = HOLD_ALTITUDE | HOLD_IAS | HOLD_HEADING,
-			.altitude = 6900,
-			.climbrate = 750,
-			.ias = 125,
-			.heading = 180,
+		.internal = {
+			.xpdr = {
+				.edit_char = 4,
+			},
 		},
 	};
 

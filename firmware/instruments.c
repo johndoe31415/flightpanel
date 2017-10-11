@@ -536,24 +536,24 @@ static void check_vfr_number_pressed(struct button_t *button, const uint8_t digi
 	if (button->lastpress != BUTTON_NOACTION) {
 		button->lastpress = BUTTON_NOACTION;
 
-		instrument_state.xpdr.edit_timeout = active_configuration.xpdr.edit_timeout_milliseconds;
-		if (!instrument_state.xpdr.edit_char) {
-			instrument_state.xpdr.edit_char++;
+		instrument_state.internal.xpdr.edit_timeout = active_configuration.xpdr.edit_timeout_milliseconds;
+		if (!instrument_state.internal.xpdr.edit_char) {
+			instrument_state.internal.xpdr.edit_char++;
 		}
 
 		uint16_t scalar = 1;
-		switch (instrument_state.xpdr.edit_char) {
+		switch (instrument_state.internal.xpdr.edit_char) {
 			case 1: scalar = 1000; break;
 			case 2: scalar = 100; break;
 			case 3: scalar = 10; break;
 		}
 
-		uint8_t current_digit = (instrument_state.xpdr.squawk / scalar) % 10;
-		instrument_state.xpdr.squawk += (digit - current_digit) * scalar;
+		uint8_t current_digit = (instrument_state.external.xpdr.squawk / scalar) % 10;
+		instrument_state.external.xpdr.squawk += (digit - current_digit) * scalar;
 
-		instrument_state.xpdr.edit_char++;
-		if (instrument_state.xpdr.edit_char == 5) {
-			instrument_state.xpdr.edit_char = 1;
+		instrument_state.internal.xpdr.edit_char++;
+		if (instrument_state.internal.xpdr.edit_char == 5) {
+			instrument_state.internal.xpdr.edit_char = 1;
 		}
 
 		display_data_changed[DISPLAY_XPDR] = true;
@@ -573,32 +573,32 @@ static bool timeout(uint16_t *value) {
 
 static void handle_radiopanel_inputs(void) {
 	if (button_pressed(&radio_com1_button)) {
-		instrument_state.radio_panel ^= RADIO_COM1;
-		iomux_output_set(IOMUX_OUT_Radio_COM1, (instrument_state.radio_panel & RADIO_COM1) != 0);
+		instrument_state.external.radio_panel ^= RADIO_COM1;
+		iomux_output_set(IOMUX_OUT_Radio_COM1, (instrument_state.external.radio_panel & RADIO_COM1) != 0);
 	}
 	if (button_pressed(&radio_nav1_button)) {
-		instrument_state.radio_panel ^= RADIO_NAV1;
-		iomux_output_set(IOMUX_OUT_Radio_NAV1, (instrument_state.radio_panel & RADIO_NAV1) != 0);
+		instrument_state.external.radio_panel ^= RADIO_NAV1;
+		iomux_output_set(IOMUX_OUT_Radio_NAV1, (instrument_state.external.radio_panel & RADIO_NAV1) != 0);
 	}
 	if (button_pressed(&radio_dme_button)) {
-		instrument_state.radio_panel ^= RADIO_DME;
-		iomux_output_set(IOMUX_OUT_Radio_DME, (instrument_state.radio_panel & RADIO_DME) != 0);
+		instrument_state.external.radio_panel ^= RADIO_DME;
+		iomux_output_set(IOMUX_OUT_Radio_DME, (instrument_state.external.radio_panel & RADIO_DME) != 0);
 	}
 	if (button_pressed(&radio_com2_button)) {
-		instrument_state.radio_panel ^= RADIO_COM2;
-		iomux_output_set(IOMUX_OUT_Radio_COM2, (instrument_state.radio_panel & RADIO_COM2) != 0);
+		instrument_state.external.radio_panel ^= RADIO_COM2;
+		iomux_output_set(IOMUX_OUT_Radio_COM2, (instrument_state.external.radio_panel & RADIO_COM2) != 0);
 	}
 	if (button_pressed(&radio_nav2_button)) {
-		instrument_state.radio_panel ^= RADIO_NAV2;
-		iomux_output_set(IOMUX_OUT_Radio_NAV2, (instrument_state.radio_panel & RADIO_NAV2) != 0);
+		instrument_state.external.radio_panel ^= RADIO_NAV2;
+		iomux_output_set(IOMUX_OUT_Radio_NAV2, (instrument_state.external.radio_panel & RADIO_NAV2) != 0);
 	}
 	if (button_pressed(&radio_adf_button)) {
-		instrument_state.radio_panel ^= RADIO_ADF;
-		iomux_output_set(IOMUX_OUT_Radio_ADF, (instrument_state.radio_panel & RADIO_ADF) != 0);
+		instrument_state.external.radio_panel ^= RADIO_ADF;
+		iomux_output_set(IOMUX_OUT_Radio_ADF, (instrument_state.external.radio_panel & RADIO_ADF) != 0);
 	}
 }
 
-static void handle_comnav_inputs(struct com_nav_state *comnav, struct rotary_encoder_with_button_t *rotary, enum display_t active_display, enum display_t standby_display)  {
+static void handle_comnav_inputs(struct com_nav_state_t *comnav, struct rotary_encoder_with_button_t *rotary, enum display_t active_display, enum display_t standby_display)  {
 	if (rotary_changed(&rotary->rotary)) {
 		comnav->standby_index = rotary->rotary.value;
 		display_data_changed[standby_display] = true;
@@ -614,98 +614,104 @@ static void handle_comnav_inputs(struct com_nav_state *comnav, struct rotary_enc
 
 static void handle_ap_inputs(void) {
 	if (rotary_changed(&rotary_ap_alt.rotary)) {
-		instrument_state.ap.altitude = rotary_ap_alt.rotary.value * 100;
+		instrument_state.external.ap.altitude = rotary_ap_alt.rotary.value * 100;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (rotary_changed(&rotary_ap_hdg.rotary)) {
-		instrument_state.ap.heading = rotary_ap_hdg.rotary.value;
+		instrument_state.external.ap.heading = rotary_ap_hdg.rotary.value;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (rotary_changed(&rotary_ap_ias.rotary)) {
-		instrument_state.ap.ias = rotary_ap_ias.rotary.value;
+		instrument_state.external.ap.ias = rotary_ap_ias.rotary.value;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (rotary_changed(&rotary_ap_rate.rotary)) {
-		instrument_state.ap.climbrate = rotary_ap_rate.rotary.value * 100;
+		instrument_state.external.ap.climbrate = rotary_ap_rate.rotary.value * 100;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 
 	if (button_pressed(&rotary_ap_alt.button)) {
-		instrument_state.ap.hold ^= HOLD_ALTITUDE;
-		if ((instrument_state.ap.hold & HOLD_ALTITUDE) != 0) {
-			instrument_state.ap.active = true;
+		instrument_state.external.ap.state ^= AP_HOLD_ALTITUDE;
+		if ((instrument_state.external.ap.state & AP_HOLD_ALTITUDE) != 0) {
+			instrument_state.external.ap.state |= AP_ACTIVE;
 		}
-		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
-		iomux_output_set(IOMUX_OUT_AP_ALT, (instrument_state.ap.hold & HOLD_ALTITUDE) != 0);
+		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
+		iomux_output_set(IOMUX_OUT_AP_ALT, (instrument_state.external.ap.state & AP_HOLD_ALTITUDE) != 0);
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&rotary_ap_hdg.button)) {
-		instrument_state.ap.hold ^= HOLD_HEADING;
-		if ((instrument_state.ap.hold & HOLD_HEADING) != 0) {
-			instrument_state.ap.hold &= ~(HOLD_NAVIGATION | HOLD_APPROACH | HOLD_REVERSE);
-			instrument_state.ap.active = true;
+		instrument_state.external.ap.state ^= AP_HOLD_HEADING;
+		if ((instrument_state.external.ap.state & AP_HOLD_HEADING) != 0) {
+			instrument_state.external.ap.state &= ~(AP_HOLD_NAVIGATION | AP_HOLD_APPROACH | AP_HOLD_REVERSE);
+			instrument_state.external.ap.state |= AP_ACTIVE;
 		}
-		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
-		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.ap.hold & HOLD_HEADING) != 0);
+		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
+		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.external.ap.state & AP_HOLD_HEADING) != 0);
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&rotary_ap_ias.button)) {
-		instrument_state.ap.hold ^= HOLD_IAS;
-		if ((instrument_state.ap.hold & HOLD_IAS) != 0) {
-			instrument_state.ap.active = true;
+		instrument_state.external.ap.state ^= AP_HOLD_IAS;
+		if ((instrument_state.external.ap.state & AP_HOLD_IAS) != 0) {
+			instrument_state.external.ap.state |= AP_ACTIVE;
 		}
-		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
-		iomux_output_set(IOMUX_OUT_AP_IAS, (instrument_state.ap.hold & HOLD_IAS) != 0);
+		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
+		iomux_output_set(IOMUX_OUT_AP_IAS, (instrument_state.external.ap.state & AP_HOLD_IAS) != 0);
 		display_data_changed[DISPLAY_AP] = true;
 	}
 
 	if (button_pressed(&ap_master_button)) {
-		instrument_state.ap.active = !instrument_state.ap.active;
-		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
+		instrument_state.external.ap.state ^= AP_ACTIVE;
+		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&ap_nav_button)) {
-		instrument_state.ap.hold ^= HOLD_NAVIGATION;
-		if ((instrument_state.ap.hold & HOLD_NAVIGATION) != 0) {
-			instrument_state.ap.hold &= ~(HOLD_HEADING | HOLD_APPROACH | HOLD_REVERSE);
-			instrument_state.ap.active = true;
+		instrument_state.external.ap.state ^= AP_HOLD_NAVIGATION;
+		if ((instrument_state.external.ap.state & AP_HOLD_NAVIGATION) != 0) {
+			instrument_state.external.ap.state &= ~(AP_HOLD_HEADING | AP_HOLD_APPROACH | AP_HOLD_REVERSE);
+			instrument_state.external.ap.state |= AP_ACTIVE;
 		}
-		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
-		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.ap.hold & HOLD_HEADING) != 0);
+		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
+		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.external.ap.state & AP_HOLD_HEADING) != 0);
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&ap_apr_button)) {
-		instrument_state.ap.hold ^= HOLD_APPROACH;
-		if ((instrument_state.ap.hold & HOLD_APPROACH) != 0) {
-			instrument_state.ap.hold &= ~(HOLD_HEADING | HOLD_NAVIGATION | HOLD_REVERSE);
-			instrument_state.ap.active = true;
+		instrument_state.external.ap.state ^= AP_HOLD_APPROACH;
+		if ((instrument_state.external.ap.state & AP_HOLD_APPROACH) != 0) {
+			instrument_state.external.ap.state &= ~(AP_HOLD_HEADING | AP_HOLD_NAVIGATION | AP_HOLD_REVERSE);
+			instrument_state.external.ap.state |= AP_ACTIVE;
 		}
-		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
-		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.ap.hold & HOLD_HEADING) != 0);
+		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
+		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.external.ap.state & AP_HOLD_HEADING) != 0);
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&ap_rev_button)) {
-		instrument_state.ap.hold ^= HOLD_REVERSE;
-		iomux_output_set(IOMUX_OUT_AP_MASTER, instrument_state.ap.active);
+		instrument_state.external.ap.state ^= AP_HOLD_REVERSE;
+		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
 		display_data_changed[DISPLAY_AP] = true;
 	}
 }
 
 static void handle_xpdr_inputs(void) {
 	if (button_pressed(&xpdr_mode_button)) {
-		instrument_state.xpdr.mode_charly = !instrument_state.xpdr.mode_charly;
-		iomux_output_set(IOMUX_OUT_XPDR_STBY, !instrument_state.xpdr.mode_charly);
-		iomux_output_set(IOMUX_OUT_XPDR_C, instrument_state.xpdr.mode_charly);
+		uint8_t mode = instrument_state.external.xpdr.state & XPDR_MODE_MASK;
+		if (mode == XPDR_STANDBY) {
+			mode = XPDR_CHARLY;
+		} else {
+			mode = XPDR_STANDBY;
+		}
+		instrument_state.external.xpdr.state = (instrument_state.external.xpdr.state & ~XPDR_MODE_MASK) | mode;
+		iomux_output_set(IOMUX_OUT_XPDR_STBY, mode == XPDR_STANDBY);
+		iomux_output_set(IOMUX_OUT_XPDR_C, mode == XPDR_CHARLY);
 	}
 	if (button_pressed(&xpdr_IDENT_button)) {
-		instrument_state.xpdr.identing = true;
-		instrument_state.xpdr.ident_timeout = active_configuration.xpdr.ident_timeout_milliseconds;
+		instrument_state.external.xpdr.state |= XPDR_MODE_IDENTING;
+		instrument_state.internal.xpdr.ident_timeout = active_configuration.xpdr.ident_timeout_milliseconds;
 		display_data_changed[DISPLAY_XPDR] = true;
 	}
 	if (button_pressed(&xpdr_VFR_button)) {
-		instrument_state.xpdr.squawk = active_configuration.xpdr.vfr_squawk;
-		instrument_state.xpdr.edit_char = 0;
-		instrument_state.xpdr.edit_timeout = 0;
+		instrument_state.external.xpdr.squawk = active_configuration.xpdr.vfr_squawk;
+		instrument_state.internal.xpdr.edit_char = 0;
+		instrument_state.internal.xpdr.edit_timeout = 0;
 		display_data_changed[DISPLAY_XPDR] = true;
 	}
 	check_vfr_number_pressed(&xpdr_0_button, 0);
@@ -717,40 +723,40 @@ static void handle_xpdr_inputs(void) {
 	check_vfr_number_pressed(&xpdr_6_button, 6);
 	check_vfr_number_pressed(&xpdr_7_button, 7);
 
-	if (timeout(&instrument_state.xpdr.edit_timeout)) {
+	if (timeout(&instrument_state.internal.xpdr.edit_timeout)) {
 		/* Entering timeout. */
-		instrument_state.xpdr.edit_char = 0;
+		instrument_state.internal.xpdr.edit_char = 0;
 		display_data_changed[DISPLAY_XPDR] = true;
 	}
 
-	if (timeout(&instrument_state.xpdr.ident_timeout)) {
+	if (timeout(&instrument_state.internal.xpdr.ident_timeout)) {
 		/* IDENT over */
-		instrument_state.xpdr.identing = false;
+		instrument_state.external.xpdr.state &= ~XPDR_MODE_IDENTING;
 		display_data_changed[DISPLAY_XPDR] = true;
 	}
 }
 
 static void handle_adf_inputs(void) {
 	if (rotary_changed(&rotary_dme_adf.rotary)) {
-		instrument_state.adf.frequency_khz = rotary_dme_adf.rotary.value;
+		instrument_state.external.adf.frequency_khz = rotary_dme_adf.rotary.value;
 		display_data_changed[DISPLAY_ADF] = true;
 	}
 }
 
 static void handle_nav_src_inputs(void) {
 	if (button_pressed(&navsrc_button)) {
-		instrument_state.navigate_by_gps = !instrument_state.navigate_by_gps;
-		iomux_output_set(IOMUX_OUT_NavSrc_NAV, !instrument_state.navigate_by_gps);
-		iomux_output_set(IOMUX_OUT_NavSrc_GPS, instrument_state.navigate_by_gps);
+		instrument_state.external.navigate_by_gps = !instrument_state.external.navigate_by_gps;
+		iomux_output_set(IOMUX_OUT_NavSrc_NAV, !instrument_state.external.navigate_by_gps);
+		iomux_output_set(IOMUX_OUT_NavSrc_GPS, instrument_state.external.navigate_by_gps);
 	}
 }
 
 void dsr_idle_task(void) {
 	handle_radiopanel_inputs();
-	handle_comnav_inputs(&instrument_state.com1, &rotary_com1, DISPLAY_COM1, DISPLAY_COM1_STBY);
-	handle_comnav_inputs(&instrument_state.com2, &rotary_com2, DISPLAY_COM2, DISPLAY_COM2_STBY);
-	handle_comnav_inputs(&instrument_state.nav1, &rotary_nav1, DISPLAY_NAV1, DISPLAY_NAV1_STBY);
-	handle_comnav_inputs(&instrument_state.nav2, &rotary_nav2, DISPLAY_NAV2, DISPLAY_NAV2_STBY);
+	handle_comnav_inputs(&instrument_state.external.com1, &rotary_com1, DISPLAY_COM1, DISPLAY_COM1_STBY);
+	handle_comnav_inputs(&instrument_state.external.com2, &rotary_com2, DISPLAY_COM2, DISPLAY_COM2_STBY);
+	handle_comnav_inputs(&instrument_state.external.nav1, &rotary_nav1, DISPLAY_NAV1, DISPLAY_NAV1_STBY);
+	handle_comnav_inputs(&instrument_state.external.nav2, &rotary_nav2, DISPLAY_NAV2, DISPLAY_NAV2_STBY);
 	handle_adf_inputs();
 	handle_ap_inputs();
 	handle_xpdr_inputs();
@@ -777,7 +783,7 @@ static void update_value_uint16(bool *changed, uint16_t *dest, const uint16_t sr
 void instruments_set_by_host(const struct hid_set_report_t *report) {
 	// TODO: This is broken right now
 	printf("HostSet %d %d\n", report->com1_active, report->com1_standby);
-	update_value_uint16(&display_data_changed[DISPLAY_COM1], &instrument_state.com1.active_index, report->com1_active);
+	update_value_uint16(&display_data_changed[DISPLAY_COM1], &instrument_state.external.com1.active_index, report->com1_active);
 #if 0
 	update_value_uint16(&redraw_com1_standby, &rotary_com1.rotary.value, report->com1_standby);
 	update_value_uint16(&redraw_com2_active, &instrument_state.com2_active_index, report->com2_active);
