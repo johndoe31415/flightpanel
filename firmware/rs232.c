@@ -29,7 +29,7 @@
 #include "debugconsole.h"
 
 #define RS232_TX_BUFSIZE		256
-#define USART_CR1_IRQ_MASK			(USART_CR1_RXNEIE | USART_CR1_TCIE)
+#define USART_CR1_IRQ_MASK		(USART_CR1_RXNEIE | USART_CR1_TCIE)
 
 static bool in_usart_irq;
 
@@ -55,7 +55,7 @@ static uint32_t rs232_buffer_lock(void) {
 	return previous_irq_mask;
 }
 
-static void rs232_buffer_unlock(uint32_t previous_irq_status) {
+static void rs232_buffer_unlock(const uint32_t previous_irq_status) {
 	USART2->CR1 |= previous_irq_status;
 }
 
@@ -98,7 +98,7 @@ void USART2_IRQHandler(void) {
 	in_usart_irq = false;
 }
 
-void rs232_transmitchar(char c) {
+void rs232_transmitchar(const char c) {
 	uint32_t irq_status = rs232_buffer_lock();
 	while (true) {
 		if (boundedbuffer_putbyte(&rs232_tx_buffer, c)) {

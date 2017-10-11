@@ -27,7 +27,7 @@
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void rs232_debug_setleds(void);
 void USART2_IRQHandler(void);
-void rs232_transmitchar(char c);
+void rs232_transmitchar(const char c);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

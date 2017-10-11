@@ -70,7 +70,7 @@ void IOMuxSPI_DMAStream_RX_IRQHandler(void) {
 	}
 }
 
-static uint8_t spi_transmit_byte(SPI_TypeDef *SPIx, uint8_t byte) {
+static uint8_t spi_transmit_byte(SPI_TypeDef *SPIx, const uint8_t byte) {
 	// Wait until SPI register flushed
 	while (SPI_I2S_GetFlagStatus(SPIx, SPI_I2S_FLAG_TXE) == RESET);
 
@@ -84,7 +84,7 @@ static uint8_t spi_transmit_byte(SPI_TypeDef *SPIx, uint8_t byte) {
 	return SPI_I2S_ReceiveData(SPIx);
 }
 
-void spi_tx_data(SPI_TypeDef *SPIx, const uint8_t *data, int length) {
+void spi_tx_data(SPI_TypeDef *SPIx, const uint8_t *data, const int length) {
 	for (int i = 0; i < length; i++) {
 		spi_transmit_byte(SPIx, data[i]);
 	}
@@ -94,7 +94,7 @@ bool spi_dma_tx_rx_ready(DMA_Stream_TypeDef *DMAy_Streamx_TX, DMA_Stream_TypeDef
 	return ((DMA_GetCmdStatus(DMAy_Streamx_TX) != ENABLE) && (DMA_GetCmdStatus(DMAy_Streamx_RX) != ENABLE));
 }
 
-void spi_tx_rx_data_dma(SPI_TypeDef *SPIx, DMA_Stream_TypeDef *DMAy_Streamx_TX, const void *tx_data, DMA_Stream_TypeDef *DMAy_Streamx_RX, void *rx_data, int length) {
+void spi_tx_rx_data_dma(SPI_TypeDef *SPIx, DMA_Stream_TypeDef *DMAy_Streamx_TX, const void *tx_data, DMA_Stream_TypeDef *DMAy_Streamx_RX, void *rx_data, const int length) {
 	if ((DMA_GetCmdStatus(DMAy_Streamx_TX) == ENABLE) || (DMA_GetCmdStatus(DMAy_Streamx_RX) == ENABLE)) {
 		/* Transmission still in progress. */
 		printf("rejecting SPI transfer, DMA of SPI %p still ongoing (TX %d, RX %d)\n", SPIx, DMA_GetCmdStatus(DMAy_Streamx_TX), DMA_GetCmdStatus(DMAy_Streamx_RX));

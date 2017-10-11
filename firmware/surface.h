@@ -34,11 +34,11 @@ struct surface_t {
 };
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void surface_fill(const struct surface_t *surface, uint8_t pattern);
+void surface_fill(const struct surface_t *surface, const uint8_t pattern);
 void surface_clear(const struct surface_t *surface);
-bool surface_getpixel(const struct surface_t *surface, int x, int y);
-void surface_setpixel(const struct surface_t *surface, int x, int y);
-void surface_clrpixel(const struct surface_t *surface, int x, int y);
+bool surface_getpixel(const struct surface_t *surface, const int x, const int y);
+void surface_setpixel(const struct surface_t *surface, const int x, const int y);
+void surface_clrpixel(const struct surface_t *surface, const int x, const int y);
 void surface_dump(const struct surface_t *surface);
 void surface_draw_border(const struct surface_t *surface);
 void blit_rectangle(const struct surface_t *surface, const unsigned int xoffset, const unsigned int yoffset, const unsigned int width, const unsigned int height);

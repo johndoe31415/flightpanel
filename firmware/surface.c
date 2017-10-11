@@ -29,7 +29,7 @@
 #include "surface.h"
 #include "debug.h"
 
-void surface_fill(const struct surface_t *surface, uint8_t pattern) {
+void surface_fill(const struct surface_t *surface, const uint8_t pattern) {
 	memset(surface->data, pattern, surface->width * surface->height / 8);
 }
 
@@ -38,26 +38,26 @@ void surface_clear(const struct surface_t *surface) {
 }
 
 #if defined(SURFACE_ACCESSOR_LR_TB_ROWBYTES)
-static int surface_pixel_byteoffset(const struct surface_t *surface, int x, int y) {
+static int surface_pixel_byteoffset(const struct surface_t *surface, const int x, const int y) {
 	return (x / 8) + (y * (surface->width / 8));
 }
 
-static int surface_pixel_bitoffset(const struct surface_t *surface, int x, int y) {
+static int surface_pixel_bitoffset(const struct surface_t *surface, const int x, const int y) {
 	return x % 8;
 }
 #elif defined(SURFACE_ACCESSOR_LR_TB_COLBYTES)
-static int surface_pixel_byteoffset(const struct surface_t *surface, int x, int y) {
+static int surface_pixel_byteoffset(const struct surface_t *surface, const int x, const int y) {
 	return (y / 8 * surface->width) + (x % surface->width);
 }
 
-static int surface_pixel_bitoffset(const struct surface_t *surface, int x, int y) {
+static int surface_pixel_bitoffset(const struct surface_t *surface, const int x, const int y) {
 	return y % 8;
 }
 #else
 #error "No surface accessor function defined."
 #endif
 
-bool surface_getpixel(const struct surface_t *surface, int x, int y) {
+bool surface_getpixel(const struct surface_t *surface, const int x, const int y) {
 	if ((x < 0) || (y < 0) || (x >= surface->width) || (y >= surface->height)) {
 		return false;
 	}
@@ -66,7 +66,7 @@ bool surface_getpixel(const struct surface_t *surface, int x, int y) {
 	return ((surface->data[byte_offset] >> bit_offset) & 1) != 0;
 }
 
-void surface_setpixel(const struct surface_t *surface, int x, int y) {
+void surface_setpixel(const struct surface_t *surface, const int x, const int y) {
 	if ((x < 0) || (y < 0) || (x >= surface->width) || (y >= surface->height)) {
 		return;
 	}
@@ -75,7 +75,7 @@ void surface_setpixel(const struct surface_t *surface, int x, int y) {
 	surface->data[byte_offset] |= (1 << bit_offset);
 }
 
-void surface_clrpixel(const struct surface_t *surface, int x, int y) {
+void surface_clrpixel(const struct surface_t *surface, const int x, const int y) {
 	if ((x < 0) || (y < 0) || (x >= surface->width) || (y >= surface->height)) {
 		return;
 	}
