@@ -22,9 +22,11 @@
 #	Johannes Bauer <JohannesBauer@gmx.de>
 
 import os
+import sys
 import datetime
 import shutil
 import subprocess
+import hashlib
 
 from .BuildManager import BuildManager
 from .WorkDir import WorkDir
@@ -60,12 +62,20 @@ class FlightpanelBuildmanager(BuildManager):
 		if not os.path.isfile(self._get_file("compiler_targz", must_exist = False)):
 			# Download and extract cache from upstream
 			try:
-				self._log.info("Downloading toolchain from CACHE_FILE_UPSTREAM_URI...")
-				self._execute([ "wget", "-o", "/dev/null", "-O", "cache.tar", os.getenv("CACHE_FILE_UPSTREAM_URI") ])
-				self._log.info("Download of toolchain finished successfully from CACHE_FILE_UPSTREAM_URI.")
+				with TimeLogger(self._log, "Downloading toolchain from CACHE_FILE_UPSTREAM_URI"):
+					self._execute([ "wget", "-o", "/dev/null", "-O", "cache.tar", os.getenv("CACHE_FILE_UPSTREAM_URI") ])
+				filesize = os.stat("cache.tar").st_size
+				self._log.info("Download of toolchain finished successfully from CACHE_FILE_UPSTREAM_URI: %d bytes", filesize)
+
+				with TimeLogger(self._log, "Hashing downloaded file"):
+					hashval = hashlib.md5()
+					with open("cache.tar", "rb") as f:
+						for chunk in iter(lambda: f.read(512 * 1024), b""):
+							hashval.update(chunk)
+				self._log.info("Download of CACHE_FILE_UPSTREAM_URI: MD5SUM is %s", hashval.hexdigest())
 			except subprocess.CalledProcessError:
 				# Catch and exit so that stacktrace does not reveal URI in log
-				self._log.info("Call to wget failed while trying to download the cache file from CACHE_FILE_UPSTREAM_URI. Omitting further details since the URI is hidden. Check that the URI is accessible (permissions?).")
+				self._log.info("Download of CACHE_FILE_UPSTREAM_URI failed. Omitting further details (keeping the URI hidden). Confirm that the URI is accessible (permissions?).")
 				sys.exit(1)
 			self._execute([ "tar", "-x", "-v", "-C", os.getenv("HOME"), "-f", "cache.tar" ])
 		else:
