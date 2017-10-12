@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <inttypes.h>
 
 #include "font.h"
 #include "vcr-osd-mono-20.h"
@@ -119,7 +120,7 @@ static void redraw_qnh_display(const struct surface_t *surface, const struct ins
 
 	cursor = (struct cursor_t) { 10, 55 };
 	const uint32_t inhg = mbar_to_inhg_hundreds(istate->external.qnh);
-	sprintf(text, "QNH %lu.%02lu", inhg / 100, inhg % 100);
+	sprintf(text, "QNH %" PRIu32 ".%02" PRIu32, inhg / 100, inhg % 100);
 	blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 }
 
