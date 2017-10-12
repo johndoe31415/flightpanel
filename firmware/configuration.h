@@ -47,6 +47,7 @@ struct configuration {
 		} ap;
 		uint16_t adf_frequency_khz;
 		uint16_t squawk;
+		uint16_t qnh;
 	} instruments;
 	uint32_t crc32;
 };

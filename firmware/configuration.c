@@ -59,6 +59,7 @@ static const struct configuration default_configuration = {
 			.standby_frequency_khz = 111000,
 		},
 		.squawk = 7000,
+		.qnh = 1000,
 	},
 };
 _Static_assert((sizeof(default_configuration) % 4) == 0, "Configuration size alignment mismatch.");

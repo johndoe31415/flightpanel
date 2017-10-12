@@ -872,6 +872,9 @@ void instruments_init(void) {
 
 	instrument_state.external.adf.frequency_khz = active_configuration.instruments.adf_frequency_khz;
 
+	instrument_state.external.qnh = active_configuration.instruments.qnh;
+	rotary_atm.rotary.value = instrument_state.external.qnh - 900;
+
 	led_state_changed = true;
 	for (int did = 0; did < DISPLAY_COUNT; did++) {
 		display_data_changed[did] = true;
