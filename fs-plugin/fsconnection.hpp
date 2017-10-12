@@ -27,6 +27,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "usb_hidreport.h"
+#include "frequencies.h"
+
+#if 0
 struct com_data_t {
 	uint32_t freq_active_khz;
 	uint32_t freq_standby_khz;
@@ -125,6 +129,39 @@ struct component_selection_t {
 	void set_flag(int at_offset) {
 		bool *ptr = (bool*)(((const uint8_t*)this) + at_offset);
 		*ptr = true;
+	}
+};
+#endif
+
+struct instrument_data_t {
+	struct hid_report_t external;
+	struct {
+		bool foo;
+	} internal;
+
+	uint32_t com1_active_freq_khz() const {
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.com1.active_index);
+	}
+	uint32_t com1_standby_freq_khz() const {
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.com1.standby_index);
+	}
+	uint32_t com2_active_freq_khz() const {
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.com2.active_index);
+	}
+	uint32_t com2_standby_freq_khz() const {
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.com2.standby_index);
+	}
+	uint32_t nav1_active_freq_khz() const {
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav1.active_index);
+	}
+	uint32_t nav1_standby_freq_khz() const {
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav1.standby_index);
+	}
+	uint32_t nav2_active_freq_khz() const {
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav2.active_index);
+	}
+	uint32_t nav2_standby_freq_khz() const {
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav2.standby_index);
 	}
 };
 

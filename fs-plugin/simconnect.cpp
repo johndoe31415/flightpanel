@@ -66,6 +66,7 @@ static uint32_t adf_frequency_bcd32_to_hz(uint32_t bcd32_value) {
 }
 
 static void simconnect_instrument_to_abstract(const struct simconnect_datatype_instruments_t *in, struct instrument_data_t *out) {
+#if 0
 	out->com1.freq_active_khz = frequency_bcd32_to_khz(in->com1_freq_active);
 	out->com1.freq_standby_khz = frequency_bcd32_to_khz(in->com1_freq_standby);
 	out->com1.tx = in->com1_tx;
@@ -126,6 +127,7 @@ static void simconnect_instrument_to_abstract(const struct simconnect_datatype_i
 	out->misc.indicated_alt_ft = round(in->indicated_alt_ft);
 	out->misc.qnh_millibar = round(in->qnh_millibar);
 	out->misc.guide_gps = in->gps_drives_nav;
+#endif
 }
 
 enum event_group_t {

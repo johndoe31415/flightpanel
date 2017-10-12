@@ -32,9 +32,7 @@ class Arbiter {
 		FSConnection *_fs_connection;
 		FPConnection *_fp_connection;
 		struct instrument_data_t _last_fs_data, _last_fp_data;
-
 		struct instrument_data_t _put_fs_data, _put_fp_data;
-		struct component_selection_t _put_fs_selection, _put_fp_selection;
 
 		void arbitrate(const struct instrument_data_t &new_fs_data, const struct instrument_data_t &new_fp_data);
 		template<typename T> void arbitrate_value(const struct instrument_data_t &new_fs_data, const struct instrument_data_t &new_fp_data, const struct arbitration_t &entry);

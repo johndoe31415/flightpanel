@@ -36,6 +36,7 @@ void EmulatedConnection::get_data(struct instrument_data_t *data) {
 }
 
 void EmulatedConnection::put_data(const struct instrument_data_t *data, const struct component_selection_t *selection) {
+#if 0
 	if (!selection || selection->com1_active) {
 		_instrument_data.com1.freq_active_khz = data->com1.freq_active_khz;
 	}
@@ -54,6 +55,7 @@ void EmulatedConnection::put_data(const struct instrument_data_t *data, const st
 		_instrument_data.com2.rx = data->com2.rx;
 		_instrument_data.com2.tx = data->com2.tx;
 	}
+#endif
 }
 
 static int rand_value(int maxvalue) {
@@ -65,13 +67,16 @@ static int rand_value(int minvalue, int maxvalue) {
 }
 
 void EmulatedConnection::randomize(struct com_data_t &com) {
+#if 0
 	com.freq_active_khz = 118000 + (25 * rand_value(19 * 40));
 	com.freq_standby_khz = 118000 + (25 * rand_value(19 * 40));
 	com.rx = true;
 	com.tx = false;
+#endif
 }
 
 void EmulatedConnection::randomize(struct nav_data_t &nav) {
+#if 0
 	memset(&nav, 0, sizeof(nav));
 	nav.freq_active_khz = 108000 + (50 * rand_value(10 * 20));
 	nav.freq_standby_khz = 108000 + (50 * rand_value(10 * 20));
@@ -82,9 +87,11 @@ void EmulatedConnection::randomize(struct nav_data_t &nav) {
 			nav.ident[i] = 'A' + rand_value(26);
 		}
 	}
+#endif
 }
 
 void EmulatedConnection::randomize(struct adf_data_t &adf) {
+#if 0
 	adf.freq_hz = 100000 + (100 * rand_value(8000));
 	if (!rand_value(4)) {
 		for (int i = 0; i < 3; i++) {
@@ -92,26 +99,32 @@ void EmulatedConnection::randomize(struct adf_data_t &adf) {
 		}
 	}
 	adf.compass_rose = rand_value(360);
+#endif
 }
 
 void EmulatedConnection::randomize(struct dme_data_t &dme) {
+#if 0
 	dme.available = rand_value(2);
 	dme.nav_id = rand_value(2) + 1;
 	if (dme.available) {
 		dme.distance_nm_tenths = rand_value(700);
 		dme.speed_kt = rand_value(120);
 	}
+#endif
 }
 
 void EmulatedConnection::randomize(struct light_data_t &lights) {
+#if 0
 	lights.beacon = rand_value(2);
 	lights.landing = rand_value(2);
 	lights.taxi = rand_value(2);
 	lights.nav = rand_value(2);
 	lights.strobe = rand_value(2);
+#endif
 }
 
 void EmulatedConnection::randomize(struct ap_data_t &ap) {
+#if 0
 	memset(&ap, 0, sizeof(ap));
 	ap.active = rand_value(2);
 	ap.climbrate_ft_per_min = (rand_value(4) * 100) + 400;
@@ -130,23 +143,29 @@ void EmulatedConnection::randomize(struct ap_data_t &ap) {
 		ap.alt_hold = rand_value(2);
 	}
 	ap.altitude_ft = 1200 + 100 * rand_value(60);
+#endif
 }
 
 void EmulatedConnection::randomize(struct transponder_data_t &xpdr) {
+#if 0
 	xpdr.squawk = 0;
 	for (int i = 0; i < 4; i++) {
 		xpdr.squawk = (10 * xpdr.squawk) + rand_value(8);
 	}
+#endif
 }
 
 void EmulatedConnection::randomize(struct misc_data_t &misc) {
+#if 0
 	misc.ias_kt = rand_value(60, 140);
 	misc.indicated_alt_ft = rand_value(800, 8000);
 	misc.qnh_millibar = rand_value(970, 1030);
 	misc.guide_gps = rand_value(2);
+#endif
 }
 
 EmulatedConnection::EmulatedConnection() {
+#if 0
 	_loop_running = false;
 	srand(time(NULL));
 	memset(&_instrument_data, 0, sizeof(_instrument_data));
@@ -165,6 +184,7 @@ EmulatedConnection::EmulatedConnection() {
 	randomize(_instrument_data.ap);
 	randomize(_instrument_data.xpdr);
 	randomize(_instrument_data.misc);
+#endif
 }
 
 EmulatedConnection::~EmulatedConnection() {

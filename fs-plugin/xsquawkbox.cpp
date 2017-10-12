@@ -68,6 +68,7 @@ static double inhg_to_millibar(double pressure_inhg) {
 }
 
 void XSquawkBoxConnection::poll_data() {
+#if 0
 	_instrument_data.com1.freq_active_khz = XPLMGetDatai(_datarefs.com1.frequency_active) * 10;
 	_instrument_data.com1.freq_standby_khz = XPLMGetDatai(_datarefs.com1.frequency_standby) * 10;
 	_instrument_data.com1.rx = XPLMGetDatai(_datarefs.com1.rx);
@@ -124,13 +125,13 @@ void XSquawkBoxConnection::poll_data() {
 	_instrument_data.ap.rev_hold = XPLMGetDatai(_datarefs.ap.rev_hold);
 	_instrument_data.ap.apr_hold = XPLMGetDatai(_datarefs.ap.apr_hold);
 	_instrument_data.ap.ias_hold = XPLMGetDatai(_datarefs.ap.ias_hold) == 2;		// Speed Mode captured (0 = off, 1 = armed)
-
 	_instrument_data.xpdr.squawk = XPLMGetDatai(_datarefs.xpdr.squawk);
 
 	_instrument_data.misc.ias_kt = XPLMGetDataf(_datarefs.misc.ias);
 	_instrument_data.misc.indicated_alt_ft = XPLMGetDataf(_datarefs.misc.altitude);
 	_instrument_data.misc.qnh_millibar = round(inhg_to_millibar(XPLMGetDataf(_datarefs.misc.barometer_setting)));
 	_instrument_data.misc.guide_gps = XPLMGetDatai(_datarefs.misc.hsi_selector) == 2; 		// 0 = NAV, 2 = GPS (HSI_selector_2: 1 = NAV, 3 = GPS)
+#endif
 }
 
 XSquawkBoxConnection::XSquawkBoxConnection() {

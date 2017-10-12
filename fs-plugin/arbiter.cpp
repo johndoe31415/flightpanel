@@ -42,6 +42,7 @@ struct arbitration_t {
 };
 
 static const struct arbitration_t arbitration[] = {
+	/*
 	{ "COM1 active frequency", ARBITRATION_UINT32_T, offsetof(struct instrument_data_t, com1.freq_active_khz), offsetof(struct component_selection_t, com1_active) },
 	{ "COM1 standby frequency", ARBITRATION_UINT32_T, offsetof(struct instrument_data_t, com1.freq_standby_khz), offsetof(struct component_selection_t, com1_standby) },
 	{ "COM2 active frequency", ARBITRATION_UINT32_T, offsetof(struct instrument_data_t, com2.freq_active_khz), offsetof(struct component_selection_t, com2_active) },
@@ -50,15 +51,18 @@ static const struct arbitration_t arbitration[] = {
 	{ "NAV1 standby frequency", ARBITRATION_UINT32_T, offsetof(struct instrument_data_t, nav1.freq_standby_khz), offsetof(struct component_selection_t, nav1_standby) },
 	{ "NAV2 active frequency", ARBITRATION_UINT32_T, offsetof(struct instrument_data_t, nav2.freq_active_khz), offsetof(struct component_selection_t, nav2_active) },
 	{ "NAV2 standby frequency", ARBITRATION_UINT32_T, offsetof(struct instrument_data_t, nav2.freq_standby_khz), offsetof(struct component_selection_t, nav2_standby) },
+	*/
 };
 
 Arbiter::Arbiter(FSConnection *fs_connection, FPConnection *fp_connection) {
 	_fs_connection = fs_connection;
 	_fp_connection = fp_connection;
 	std::memset(&_last_fs_data, 0, sizeof(struct instrument_data_t));
-	std::memset(&_last_fp_data, 0, sizeof(struct instrument_data_t));
+
+//	std::memset(&_last_fp_data, 0, sizeof(struct instrument_data_t));
 }
 
+#if 0
 template<typename T> void Arbiter::arbitrate_value(const struct instrument_data_t &new_fs_data, const struct instrument_data_t &new_fp_data, const struct arbitration_t &entry) {
 	T fs_value = new_fs_data.get_value<T>(entry.instrument_offset);
 	T fp_value = new_fp_data.get_value<T>(entry.instrument_offset);
@@ -85,12 +89,13 @@ template<typename T> void Arbiter::arbitrate_value(const struct instrument_data_
 		}
 	}
 }
+#endif
 
 void Arbiter::arbitrate(const struct instrument_data_t &new_fs_data, const struct instrument_data_t &new_fp_data) {
 	std::memset(&_put_fs_data, 0, sizeof(_put_fs_data));
-	std::memset(&_put_fs_selection, 0, sizeof(_put_fs_selection));
+//	std::memset(&_put_fs_selection, 0, sizeof(_put_fs_selection));
 	std::memset(&_put_fp_data, 0, sizeof(_put_fp_data));
-	std::memset(&_put_fp_selection, 0, sizeof(_put_fp_selection));
+//	std::memset(&_put_fp_selection, 0, sizeof(_put_fp_selection));
 	for (unsigned int i = 0; i < sizeof(arbitration) / sizeof(struct arbitration_t); i++) {
 		if (arbitration[i].arbitration_type == ARBITRATION_UINT32_T) {
 			arbitrate_value<uint32_t>(new_fs_data, new_fp_data, arbitration[i]);
@@ -98,12 +103,14 @@ void Arbiter::arbitrate(const struct instrument_data_t &new_fs_data, const struc
 			fprintf(stderr, "Unable to arbitrate type %d at index %d.\n", arbitration[i].arbitration_type, i);
 		}
 	}
+#if 0
 	if (_put_fp_selection.is_any_set()) {
 		_fp_connection->put_data(&_put_fp_data, &_put_fp_selection);
 	}
 	if (_put_fs_selection.is_any_set()) {
 		_fs_connection->put_data(&_put_fs_data, &_put_fs_selection);
 	}
+#endif
 }
 
 void Arbiter::run() {

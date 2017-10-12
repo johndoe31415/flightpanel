@@ -77,14 +77,7 @@ void FPConnection::event_loop() {
 #endif
 		int bytes_read = hid_read(_device, (uint8_t*)&hid_report, sizeof(hid_report));
 		if (bytes_read == sizeof(hid_report)) {
-			_instrument_data.com1.freq_active_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.com_divisions, hid_report.com1.active_index);
-			_instrument_data.com1.freq_standby_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.com_divisions, hid_report.com1.standby_index);
-			_instrument_data.com2.freq_active_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.com_divisions, hid_report.com2.active_index);
-			_instrument_data.com2.freq_standby_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.com_divisions, hid_report.com2.standby_index);
-			_instrument_data.nav1.freq_active_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.nav_divisions, hid_report.nav1.active_index);
-			_instrument_data.nav1.freq_standby_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.nav_divisions, hid_report.nav1.standby_index);
-			_instrument_data.nav2.freq_active_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.nav_divisions, hid_report.nav2.active_index);
-			_instrument_data.nav2.freq_standby_khz = frequency_index_to_khz((enum com_nav_range_t)hid_report.nav_divisions, hid_report.nav2.standby_index);
+			_instrument_data.external = hid_report;
 		} else {
 			fprintf(stderr, "Short read (%d of %zd), could not get full HID report.\n", bytes_read, sizeof(hid_report));
 		}
