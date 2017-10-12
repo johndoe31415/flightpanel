@@ -99,6 +99,30 @@ static void redraw_com_nav_display(const struct surface_t *surface, const struct
 	draw_ident(surface, ident);
 }
 
+#define RDIV(p, q)		(((p) + ((q) / 2)) / (q))		/* With rounding */
+static uint32_t mbar_to_inhg_hundreds(uint32_t mbar) {
+	/* inhg = mbar * 15000000 / 5079583
+	 *
+	 * Approximation to stay in 32 bit range (for up to 4867 mBar at least):
+	 * inhg = mbar * 882353 / 298799
+	 *
+	 */
+	return RDIV(mbar * 882353, 298799);
+}
+
+static void redraw_qnh_display(const struct surface_t *surface, const struct instrument_state_t *istate) {
+	surface_clear(surface);
+	char text[16];
+	sprintf(text, "%4d", istate->external.qnh);
+	struct cursor_t cursor = { 28, 28 };
+	blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor, false);
+
+	cursor = (struct cursor_t) { 10, 55 };
+	const uint32_t inhg = mbar_to_inhg_hundreds(istate->external.qnh);
+	sprintf(text, "QNH %lu.%02lu", inhg / 100, inhg % 100);
+	blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
+}
+
 static void redraw_adf_display(const struct surface_t *surface, const struct instrument_state_t *istate) {
 	surface_clear(surface);
 
@@ -199,7 +223,7 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 		case DISPLAY_NAV1_STBY:
 		case DISPLAY_NAV2:
 		case DISPLAY_NAV2_STBY:
-			{
+			if ((display != DISPLAY_QNH) || (istate->internal.screen_mplex.qnh == DEFAULT)) {
 				uint32_t frequency_khz = get_instrument_frequency_khz(istate, display);
 				const char *ident = NULL;
 				if (display == DISPLAY_NAV1) {
@@ -208,6 +232,8 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 					ident = istate->internal.ident.nav2;
 				}
 				redraw_com_nav_display(surface, istate, frequency_khz, ident);
+			} else {
+				redraw_qnh_display(surface, istate);
 			}
 			break;
 

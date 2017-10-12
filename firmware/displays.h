@@ -39,6 +39,9 @@ enum display_t {
 	DISPLAY_ADF = 7,
 	DISPLAY_AP = 10,
 	DISPLAY_XPDR = 11,
+
+	/* Multiplexed displays */
+	DISPLAY_QNH = 1,
 };
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/

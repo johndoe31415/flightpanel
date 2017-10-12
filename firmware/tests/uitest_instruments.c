@@ -63,10 +63,14 @@ static void test_instruments(void) {
 				.ias = 125,
 				.heading = 180,
 			},
+			.qnh = 1001,
 		},
 		.internal = {
 			.xpdr = {
 				.edit_char = 4,
+			},
+			.screen_mplex = {
+				.qnh = QNH,
 			},
 		},
 	};

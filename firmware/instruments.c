@@ -760,6 +760,19 @@ static void handle_nav_src_inputs(void) {
 	}
 }
 
+static void handle_qnh_inputs(void) {
+	if (rotary_changed(&rotary_atm.rotary)) {
+		instrument_state.external.qnh = rotary_atm.rotary.value + 900;
+		instrument_state.internal.screen_mplex.qnh = QNH;
+		instrument_state.internal.screen_mplex.qnh_timeout = 2000;
+		display_data_changed[DISPLAY_QNH] = true;
+	}
+	if (timeout(&instrument_state.internal.screen_mplex.qnh_timeout)) {
+		instrument_state.internal.screen_mplex.qnh = DEFAULT;
+		display_data_changed[DISPLAY_QNH] = true;
+	}
+}
+
 void dsr_idle_task(void) {
 	handle_radiopanel_inputs();
 	handle_comnav_inputs(&instrument_state.external.com1, &rotary_com1, DISPLAY_COM1, DISPLAY_COM1_STBY);
@@ -770,6 +783,7 @@ void dsr_idle_task(void) {
 	handle_ap_inputs();
 	handle_xpdr_inputs();
 	handle_nav_src_inputs();
+	handle_qnh_inputs();
 
 	if (led_state_changed) {
 		led_state_changed = false;

@@ -49,9 +49,18 @@ struct button_input_t {
 	enum btnaction_t *notify;
 };
 
+enum screen_qnh_t {
+	DEFAULT,
+	QNH,
+};
+
 struct instrument_state_t {
 	struct hid_report_t external;
 	struct {
+		struct {
+			enum screen_qnh_t qnh;
+			uint16_t qnh_timeout;
+		} screen_mplex;
 		struct {
 			char nav1[5], nav2[5];
 			char adf[5];
