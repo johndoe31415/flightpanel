@@ -34,6 +34,7 @@ struct configuration {
 		uint16_t vfr_squawk;
 	} xpdr;
 	struct {
+		uint8_t tx_radio_id;
 		uint8_t com_frequency_divisions;
 		uint8_t nav_frequency_divisions;
 		struct {

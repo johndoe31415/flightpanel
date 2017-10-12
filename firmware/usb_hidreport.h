@@ -98,6 +98,7 @@ struct hid_report_t {
 	uint8_t radio_panel;
 	uint8_t com_divisions;
 	uint8_t nav_divisions;
+	uint8_t tx_radio_id;
 	struct com_nav_state_t com1, com2;
 	struct com_nav_state_t nav1, nav2;
 	struct xpdr_state_t xpdr;

@@ -35,6 +35,7 @@ static const struct configuration default_configuration = {
 		.vfr_squawk = 7000,
 	},
 	.instruments = {
+		.tx_radio_id = 1,
 		.com_frequency_divisions = COM_RANGE,
 		.nav_frequency_divisions = NAV_RANGE,
 		.ap = {

@@ -180,6 +180,7 @@ static struct rotary_encoder_with_button_t rotary_ap_rate = {
 static struct button_t radio_com1_button = {
 	.threshold = 50,
 	.deadtime = 50,
+	.long_threshold = 700,
 };
 static struct button_t radio_nav1_button = {
 	.threshold = 50,
@@ -192,6 +193,7 @@ static struct button_t radio_dme_button = {
 static struct button_t radio_com2_button = {
 	.threshold = 50,
 	.deadtime = 50,
+	.long_threshold = 700,
 };
 static struct button_t radio_nav2_button = {
 	.threshold = 50,
@@ -574,9 +576,18 @@ static void update_leds(void) {
 }
 
 static void handle_radiopanel_inputs(void) {
-	if (button_pressed(&radio_com1_button)) {
-		led_state_changed = true;
-		instrument_state.external.radio_panel ^= RADIO_COM1;
+	if (radio_com1_button.lastpress != BUTTON_NOACTION) {
+		if (radio_com1_button.lastpress == BUTTON_PRESS) {
+			/* Short press */
+			led_state_changed = true;
+			instrument_state.external.radio_panel ^= RADIO_COM1;
+		} else {
+			/* Long press */
+			instrument_state.external.tx_radio_id = (instrument_state.external.tx_radio_id == 1) ? 0 : 1;
+			display_data_changed[DISPLAY_COM1] = true;
+			display_data_changed[DISPLAY_COM2] = true;
+		}
+		radio_com1_button.lastpress = BUTTON_NOACTION;
 	}
 	if (button_pressed(&radio_nav1_button)) {
 		led_state_changed = true;
@@ -586,9 +597,18 @@ static void handle_radiopanel_inputs(void) {
 		led_state_changed = true;
 		instrument_state.external.radio_panel ^= RADIO_DME;
 	}
-	if (button_pressed(&radio_com2_button)) {
-		led_state_changed = true;
-		instrument_state.external.radio_panel ^= RADIO_COM2;
+	if (radio_com2_button.lastpress != BUTTON_NOACTION) {
+		if (radio_com2_button.lastpress == BUTTON_PRESS) {
+			/* Short press */
+			led_state_changed = true;
+			instrument_state.external.radio_panel ^= RADIO_COM2;
+		} else {
+			/* Long press */
+			instrument_state.external.tx_radio_id = (instrument_state.external.tx_radio_id == 2) ? 0 : 2;
+			display_data_changed[DISPLAY_COM1] = true;
+			display_data_changed[DISPLAY_COM2] = true;
+		}
+		radio_com2_button.lastpress = BUTTON_NOACTION;
 	}
 	if (button_pressed(&radio_nav2_button)) {
 		led_state_changed = true;
@@ -874,6 +894,8 @@ void instruments_init(void) {
 
 	instrument_state.external.qnh = active_configuration.instruments.qnh;
 	rotary_atm.rotary.value = instrument_state.external.qnh - 900;
+
+	instrument_state.external.tx_radio_id = active_configuration.instruments.tx_radio_id;
 
 	led_state_changed = true;
 	for (int did = 0; did < DISPLAY_COUNT; did++) {

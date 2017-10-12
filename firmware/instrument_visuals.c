@@ -89,7 +89,7 @@ static void draw_ident(const struct surface_t *surface, const char *ident) {
 	}
 }
 
-static void redraw_com_nav_display(const struct surface_t *surface, const struct instrument_state_t *istate, uint32_t frequency_khz, const char *ident) {
+static void redraw_com_nav_display(const struct surface_t *surface, const struct instrument_state_t *istate, uint32_t frequency_khz, const char *ident, bool tx) {
 	char text[16];
 	int mhz = frequency_khz / 1000;
 	int khz = frequency_khz % 1000;
@@ -98,6 +98,10 @@ static void redraw_com_nav_display(const struct surface_t *surface, const struct
 	surface_clear(surface);
 	blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor, false);
 	draw_ident(surface, ident);
+	if (tx) {
+		cursor = (struct cursor_t) { 100, 60 };
+		blit_string_to_cursor(&font_vcr_osd_mono_20, "TX", surface, &cursor, false);
+	}
 }
 
 #define RDIV(p, q)		(((p) + ((q) / 2)) / (q))		/* With rounding */
@@ -227,12 +231,17 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 			if ((display != DISPLAY_QNH) || (istate->internal.screen_mplex.qnh == DEFAULT)) {
 				uint32_t frequency_khz = get_instrument_frequency_khz(istate, display);
 				const char *ident = NULL;
+				bool tx = false;
 				if (display == DISPLAY_NAV1) {
 					ident = istate->internal.ident.nav1;
 				} else if (display == DISPLAY_NAV2) {
 					ident = istate->internal.ident.nav2;
+				} else if (display == DISPLAY_COM1) {
+					tx = istate->external.tx_radio_id == 1;
+				} else if (display == DISPLAY_COM2) {
+					tx = istate->external.tx_radio_id == 2;
 				}
-				redraw_com_nav_display(surface, istate, frequency_khz, ident);
+				redraw_com_nav_display(surface, istate, frequency_khz, ident, tx);
 			} else {
 				redraw_qnh_display(surface, istate);
 			}
