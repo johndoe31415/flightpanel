@@ -47,7 +47,7 @@ static void blit_glyph_to_cursor(const struct glyph_t *glyph, const struct surfa
 
 void blit_string_to_cursor(const struct font_t *font, const char *string, const struct surface_t *surface, struct cursor_t *cursor, const bool invert) {
 	while (*string) {
-		const unsigned int c = (unsigned int)*string;
+		const unsigned int c = (*string) & 0xff;
 		int glyph_index = font->codepoint_to_charindex_fn(c);
 		if (glyph_index >= 0) {
 			blit_glyph_to_cursor(&font->glyphs[glyph_index], surface, cursor, invert);
