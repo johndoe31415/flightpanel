@@ -771,6 +771,15 @@ static void handle_adf_inputs(void) {
 		instrument_state.external.adf.frequency_khz = rotary_dme_adf.rotary.value;
 		display_data_changed[DISPLAY_ADF] = true;
 	}
+	if (button_pressed(&rotary_dme_adf.button)) {
+		if (instrument_state.external.dme_nav_source == 1) {
+			instrument_state.external.dme_nav_source = 2;
+		} else {
+			instrument_state.external.dme_nav_source = 1;
+		}
+		display_data_changed[DISPLAY_NAV1_STBY] = true;
+		display_data_changed[DISPLAY_NAV2_STBY] = true;
+	}
 }
 
 static void handle_nav_src_inputs(void) {
@@ -911,6 +920,7 @@ void instruments_init(void) {
 	rotary_atm.rotary.value = instrument_state.external.qnh - 900;
 
 	instrument_state.external.tx_radio_id = active_configuration.instruments.tx_radio_id;
+	instrument_state.external.dme_nav_source = 1;
 
 	led_state_changed = true;
 	for (int did = 0; did < DISPLAY_COUNT; did++) {

@@ -89,7 +89,7 @@ static void draw_ident(const struct surface_t *surface, const char *ident) {
 	}
 }
 
-static void redraw_com_nav_display(const struct surface_t *surface, const struct instrument_state_t *istate, uint32_t frequency_khz, const char *ident, bool tx, bool active_obs, const uint16_t *obs) {
+static void redraw_com_nav_display(const struct surface_t *surface, const struct instrument_state_t *istate, uint32_t frequency_khz, const char *ident, const char *tx_dme, bool active_obs, const uint16_t *obs) {
 	char text[16];
 	int mhz = frequency_khz / 1000;
 	int khz = frequency_khz % 1000;
@@ -98,9 +98,9 @@ static void redraw_com_nav_display(const struct surface_t *surface, const struct
 	surface_clear(surface);
 	blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor, false);
 	draw_ident(surface, ident);
-	if (tx) {
-		cursor = (struct cursor_t) { 100, 60 };
-		blit_string_to_cursor(&font_vcr_osd_mono_20, "TX", surface, &cursor, false);
+	if (tx_dme) {
+		cursor = (struct cursor_t) { 5, 60 };
+		blit_string_to_cursor(&font_vcr_osd_mono_20, tx_dme, surface, &cursor, false);
 	}
 	if (obs) {
 		cursor = (struct cursor_t) { 70, 60 };
@@ -236,7 +236,7 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 			if ((display != DISPLAY_QNH) || (istate->internal.screen_mplex.qnh == DEFAULT)) {
 				uint32_t frequency_khz = get_instrument_frequency_khz(istate, display);
 				const char *ident = NULL;
-				bool tx = false;
+				const char *tx_dme = NULL;
 				const uint16_t *obs = NULL;
 				bool active_obs = false;
 				if (display == DISPLAY_NAV1) {
@@ -244,17 +244,27 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 				} else if (display == DISPLAY_NAV2) {
 					ident = istate->internal.ident.nav2;
 				} else if (display == DISPLAY_COM1) {
-					tx = istate->external.tx_radio_id == 1;
+					if (istate->external.tx_radio_id == 1) {
+						tx_dme = "TX";
+					}
 				} else if (display == DISPLAY_COM2) {
-					tx = istate->external.tx_radio_id == 2;
+					if (istate->external.tx_radio_id == 2) {
+						tx_dme = "TX";
+					}
 				} else if (display == DISPLAY_NAV1_STBY) {
 					obs = &istate->external.nav1.obs;
 					active_obs = istate->internal.active_obs == 0;
+					if (istate->external.dme_nav_source == 1) {
+						tx_dme = "DME";
+					}
 				} else if (display == DISPLAY_NAV2_STBY) {
 					obs = &istate->external.nav2.obs;
 					active_obs = istate->internal.active_obs == 1;
+					if (istate->external.dme_nav_source == 2) {
+						tx_dme = "DME";
+					}
 				}
-				redraw_com_nav_display(surface, istate, frequency_khz, ident, tx, active_obs, obs);
+				redraw_com_nav_display(surface, istate, frequency_khz, ident, tx_dme, active_obs, obs);
 			} else {
 				redraw_qnh_display(surface, istate);
 			}

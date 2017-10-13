@@ -101,7 +101,7 @@ struct dme_info_t {
 	bool available;
 	uint16_t distance_tenth_nm;
 	uint16_t velocity;
-};
+} __attribute__ ((packed));
 
 struct hid_report_t {
 	uint8_t radio_panel;
@@ -113,6 +113,7 @@ struct hid_report_t {
 	struct xpdr_state_t xpdr;
 	struct adf_state_t adf;
 	struct ap_state_t ap;
+	uint8_t dme_nav_source;
 	uint8_t flip_switches;
 	uint16_t qnh;
 	bool navigate_by_gps;
