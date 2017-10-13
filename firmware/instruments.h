@@ -71,6 +71,7 @@ struct instrument_state_t {
 			uint16_t ident_timeout;
 		} xpdr;
 		struct dme_info_t dme;
+		uint8_t active_obs;
 	} internal;
 };
 

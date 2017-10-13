@@ -38,28 +38,28 @@
 static uint32_t get_instrument_frequency_khz(const struct instrument_state_t *istate, const enum display_t display) {
 	switch (display) {
 		case DISPLAY_COM1:
-			return frequency_index_to_khz(COM_RANGE, istate->external.com1.active_index);
+			return frequency_index_to_khz(COM_RANGE, istate->external.com1.freq.active_index);
 
 		case DISPLAY_COM1_STBY:
-			return frequency_index_to_khz(COM_RANGE, istate->external.com1.standby_index);
+			return frequency_index_to_khz(COM_RANGE, istate->external.com1.freq.standby_index);
 
 		case DISPLAY_COM2:
-			return frequency_index_to_khz(COM_RANGE, istate->external.com2.active_index);
+			return frequency_index_to_khz(COM_RANGE, istate->external.com2.freq.active_index);
 
 		case DISPLAY_COM2_STBY:
-			return frequency_index_to_khz(COM_RANGE, istate->external.com2.standby_index);
+			return frequency_index_to_khz(COM_RANGE, istate->external.com2.freq.standby_index);
 
 		case DISPLAY_NAV1:
-			return frequency_index_to_khz(NAV_RANGE, istate->external.nav1.active_index);
+			return frequency_index_to_khz(NAV_RANGE, istate->external.nav1.freq.active_index);
 
 		case DISPLAY_NAV1_STBY:
-			return frequency_index_to_khz(NAV_RANGE, istate->external.nav1.standby_index);
+			return frequency_index_to_khz(NAV_RANGE, istate->external.nav1.freq.standby_index);
 
 		case DISPLAY_NAV2:
-			return frequency_index_to_khz(NAV_RANGE, istate->external.nav2.active_index);
+			return frequency_index_to_khz(NAV_RANGE, istate->external.nav2.freq.active_index);
 
 		case DISPLAY_NAV2_STBY:
-			return frequency_index_to_khz(NAV_RANGE, istate->external.nav2.standby_index);
+			return frequency_index_to_khz(NAV_RANGE, istate->external.nav2.freq.standby_index);
 
 		default:
 			return 0;
@@ -89,7 +89,7 @@ static void draw_ident(const struct surface_t *surface, const char *ident) {
 	}
 }
 
-static void redraw_com_nav_display(const struct surface_t *surface, const struct instrument_state_t *istate, uint32_t frequency_khz, const char *ident, bool tx) {
+static void redraw_com_nav_display(const struct surface_t *surface, const struct instrument_state_t *istate, uint32_t frequency_khz, const char *ident, bool tx, bool active_obs, const uint16_t *obs) {
 	char text[16];
 	int mhz = frequency_khz / 1000;
 	int khz = frequency_khz % 1000;
@@ -101,6 +101,11 @@ static void redraw_com_nav_display(const struct surface_t *surface, const struct
 	if (tx) {
 		cursor = (struct cursor_t) { 100, 60 };
 		blit_string_to_cursor(&font_vcr_osd_mono_20, "TX", surface, &cursor, false);
+	}
+	if (obs) {
+		cursor = (struct cursor_t) { 70, 60 };
+		sprintf(text, "%s%3d" CHAR_DEGREES, active_obs ? ">" : " ", *obs);
+		blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 	}
 }
 
@@ -232,6 +237,8 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 				uint32_t frequency_khz = get_instrument_frequency_khz(istate, display);
 				const char *ident = NULL;
 				bool tx = false;
+				const uint16_t *obs = NULL;
+				bool active_obs = false;
 				if (display == DISPLAY_NAV1) {
 					ident = istate->internal.ident.nav1;
 				} else if (display == DISPLAY_NAV2) {
@@ -240,8 +247,14 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 					tx = istate->external.tx_radio_id == 1;
 				} else if (display == DISPLAY_COM2) {
 					tx = istate->external.tx_radio_id == 2;
+				} else if (display == DISPLAY_NAV1_STBY) {
+					obs = &istate->external.nav1.obs;
+					active_obs = istate->internal.active_obs == 0;
+				} else if (display == DISPLAY_NAV2_STBY) {
+					obs = &istate->external.nav2.obs;
+					active_obs = istate->internal.active_obs == 1;
 				}
-				redraw_com_nav_display(surface, istate, frequency_khz, ident, tx);
+				redraw_com_nav_display(surface, istate, frequency_khz, ident, tx, active_obs, obs);
 			} else {
 				redraw_qnh_display(surface, istate);
 			}

@@ -66,9 +66,18 @@ enum flipswitch_t {
 	SWITCH_STRB = (1 << 5),
 };
 
-struct com_nav_state_t {
+struct xcom_state_t {
 	uint16_t active_index;
 	uint16_t standby_index;
+} __attribute__ ((packed));
+
+struct com_state_t {
+	struct xcom_state_t freq;
+} __attribute__ ((packed));
+
+struct nav_state_t {
+	struct xcom_state_t freq;
+	uint16_t obs;
 } __attribute__ ((packed));
 
 struct xpdr_state_t {
@@ -99,8 +108,8 @@ struct hid_report_t {
 	uint8_t com_divisions;
 	uint8_t nav_divisions;
 	uint8_t tx_radio_id;
-	struct com_nav_state_t com1, com2;
-	struct com_nav_state_t nav1, nav2;
+	struct com_state_t com1, com2;
+	struct nav_state_t nav1, nav2;
 	struct xpdr_state_t xpdr;
 	struct adf_state_t adf;
 	struct ap_state_t ap;
@@ -118,8 +127,8 @@ struct hid_set_report_01_t {
 	uint8_t radio_panel;
 	uint8_t com_divisions;
 	uint8_t nav_divisions;
-	struct com_nav_state_t com1, com2;
-	struct com_nav_state_t nav1, nav2;
+	struct com_state_t com1, com2;
+	struct nav_state_t nav1, nav2;
 	struct xpdr_state_t xpdr;
 	struct adf_state_t adf;
 	struct ap_state_t ap;

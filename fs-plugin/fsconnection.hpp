@@ -140,28 +140,28 @@ struct instrument_data_t {
 	} internal;
 
 	uint32_t com1_active_freq_khz() const {
-		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.com1.active_index);
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.com1.freq.active_index);
 	}
 	uint32_t com1_standby_freq_khz() const {
-		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.com1.standby_index);
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.com1.freq.standby_index);
 	}
 	uint32_t com2_active_freq_khz() const {
-		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.com2.active_index);
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.com2.freq.active_index);
 	}
 	uint32_t com2_standby_freq_khz() const {
-		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.com2.standby_index);
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.com2.freq.standby_index);
 	}
 	uint32_t nav1_active_freq_khz() const {
-		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav1.active_index);
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav1.freq.active_index);
 	}
 	uint32_t nav1_standby_freq_khz() const {
-		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav1.standby_index);
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav1.freq.standby_index);
 	}
 	uint32_t nav2_active_freq_khz() const {
-		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav2.active_index);
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav2.freq.active_index);
 	}
 	uint32_t nav2_standby_freq_khz() const {
-		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav2.standby_index);
+		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav2.freq.standby_index);
 	}
 };
 

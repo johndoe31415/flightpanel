@@ -46,12 +46,16 @@ static void test_instruments(void) {
 		.external = {
 			.tx_radio_id = 1,
 			.com1 = {
-				.active_index = 100,
-				.standby_index = 200,
+				.freq = {
+					.active_index = 100,
+					.standby_index = 200,
+				},
 			},
 			.com2 = {
-				.active_index = 300,
-				.standby_index = 400,
+				.freq = {
+					.active_index = 300,
+					.standby_index = 400,
+				},
 			},
 			.xpdr = {
 				.state = XPDR_CHARLY | XPDR_MODE_IDENTING,
