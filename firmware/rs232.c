@@ -115,3 +115,9 @@ void rs232_transmitchar(const char c) {
 	send_next_byte();
 	rs232_buffer_unlock(irq_status);
 }
+
+void rs232_flush_buffer(void) {
+	while (rs232_tx_buffer.fill) {
+		USART2_IRQHandler();
+	}
+}

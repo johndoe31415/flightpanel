@@ -29,6 +29,7 @@
 #include <core_cm4.h>
 #include <stm32f4xx_pwr.h>
 #include "fault.h"
+#include "rs232.h"
 
 static const char *exception_names[] = {
 	"Illegal",
@@ -137,8 +138,8 @@ void generic_fault_handler(uint32_t fault_id, const struct fault_stack_layout_t 
 	}
 	printf("\n");
 	printf("~~~~~~~~~~~~~ Device stopped ~~~~~~~~~~~~~\n");
-	for (volatile int i = 0; i < 100000; i++);
-	PWR_EnterSTANDBYMode();
+	rs232_flush_buffer();
+//	PWR_EnterSTANDBYMode();
 	while (true);
 }
 

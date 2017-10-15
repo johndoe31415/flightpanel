@@ -28,6 +28,7 @@
 void rs232_debug_setleds(void);
 void USART2_IRQHandler(void);
 void rs232_transmitchar(const char c);
+void rs232_flush_buffer(void);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif
