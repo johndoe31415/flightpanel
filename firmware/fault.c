@@ -143,3 +143,8 @@ void generic_fault_handler(uint32_t fault_id, const struct fault_stack_layout_t 
 	while (true);
 }
 
+void cause_hard_fault(void) {
+	while (true) {
+		*((volatile int*)0x30000000) = 0;
+	}
+}

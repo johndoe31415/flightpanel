@@ -33,9 +33,13 @@
  r15 pc
 */
 struct fault_stack_layout_t {
+	/* These are pushed by the program code */
 	uint32_t faultmask;
 	uint32_t psr;
 	uint32_t r4[8];
+	uint32_t frame_lr;
+
+	/* These are pushed by the ISR handler */
 	uint32_t r0[4];
 	uint32_t r12;		// ip
 	uint32_t r14;		// lr
@@ -47,6 +51,7 @@ struct fault_stack_layout_t {
 void soft_fault(const char *msg);
 void fail_assertion(const char *assertion, const char *filename, int lineno);
 void generic_fault_handler(uint32_t fault_id, const struct fault_stack_layout_t *stack_layout);
+void cause_hard_fault(void);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

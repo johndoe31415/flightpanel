@@ -26,21 +26,25 @@
 .fpu softvfp
 .thumb
 
-.macro _faulthandler id
+.thumb_func
+.type default_fault_handler, %function
+default_fault_handler:
+.cfi_startproc
+	@ args = 0, pretend = 0, frame = 40
+	@ frame_needed = 1, uses_anonymous_args = 0
+
 	push {r4-r11}
 	mrs r0, FAULTMASK
 	mrs r1, PSR
 	push {r0-r1}
-	mov r0, \id
+	.cfi_def_cfa_offset 4 * (9 + 2)
+
+	mov r0, 0x00
 	mov r1, sp
-	b generic_fault_handler
+	bl generic_fault_handler
 	1:
 	b 1b
-.endm
-
-.type default_fault_handler, %function
-default_fault_handler:
-	_faulthandler 0x0
+.cfi_endproc
 .size default_fault_handler, .-default_fault_handler
 .global default_fault_handler
 

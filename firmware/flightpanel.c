@@ -52,6 +52,7 @@
 #include "dsr_tasks.h"
 #include "stm32f4xx_debug.h"
 #include "debugconsole.h"
+#include "fault.h"
 
 extern uint8_t _sflash;
 
@@ -72,6 +73,7 @@ int main(void) {
 	instruments_init();
 	dsr_mark_pending(DSR_TASK_IDLE);
 //	debugmode_set(DEBUG_DISPLAY);
+	cause_hard_fault();
 	execute_dsr_loop();
 	return 0;
 }
