@@ -33,7 +33,7 @@ default_fault_handler:
 	@ args = 0, pretend = 0, frame = 40
 	@ frame_needed = 1, uses_anonymous_args = 0
 
-	push {r4-r11}
+	push {r4-r11,lr}
 	mrs r0, FAULTMASK
 	mrs r1, PSR
 	push {r0-r1}
