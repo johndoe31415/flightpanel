@@ -58,12 +58,12 @@ enum xpdr_state_element_t {
 };
 
 enum flipswitch_t {
-	SWITCH_MASTER = (1 << 0),
-	SWITCH_BCN = (1 << 1),
-	SWITCH_LAND = (1 << 2),
-	SWITCH_TAXI = (1 << 3),
-	SWITCH_NAV	= (1 << 4),
-	SWITCH_STRB = (1 << 5),
+	SWITCH_BCN = (1 << 0),
+	SWITCH_LAND = (1 << 1),
+	SWITCH_TAXI = (1 << 2),
+	SWITCH_NAV	= (1 << 3),
+	SWITCH_STRB = (1 << 4),
+	SWITCH_MASTER = (1 << 5),
 };
 
 struct xcom_state_t {
