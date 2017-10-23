@@ -2,10 +2,10 @@
 # USB
 PC0	OUT	USB_PowerSwitchOn
 PD5	IN	USB_FS_OverCurrent
-PA9	IN	USB_OTG_VBUS
-PA11	IO	USB_OTG_M
-PA12	IO	USB_OTG_P
-PA10	IN	USB_OTG_ID
+PA9	IN	USB_OTG_VBUS		init,speed=2
+PA11	OUT	USB_OTG_M		init,speed=100,af=OTG_FS
+PA12	OUT	USB_OTG_P		init,speed=100,af=OTG_FS
+PA10	IN	USB_OTG_ID		init,speed=100,af=OTG_FS
 
 # User switch
 PA0	IN	UserButton		init,pulldown,speed=2

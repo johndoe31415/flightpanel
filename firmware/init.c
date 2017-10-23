@@ -359,66 +359,12 @@ static void init_iomux_spi_dma(void) {
 	DMA_ITConfig(DMA1_Stream2, DMA_IT_TC, ENABLE);
 }
 
-#if 0
 static void init_usb(void) {
-	/* VBUS = PA9, ID = PA10, D- = PA11, D+ = PA12 */
-	/* PowerSwitchOn = PC0, OverCurrent = PD5 */
-
-	// PA8 9 11 12?
-
-    /* Enable all GPIO clocks */
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-
-	/* Enable alternate USB function */
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_OTG1_FS);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_OTG1_FS);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_OTG1_FS);
-
-    /* USB Data */
-	{
-		GPIO_InitTypeDef GPIO_InitStructure = {
-			.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12           | GPIO_Pin_8 | GPIO_Pin_9,
-			.GPIO_Mode = GPIO_Mode_AF,
-			.GPIO_OType = GPIO_OType_PP,
-			.GPIO_Speed = GPIO_Speed_100MHz,
-			.GPIO_PuPd = GPIO_PuPd_NOPULL,
-		};
-		GPIO_Init(GPIOA, &GPIO_InitStructure);
-	}
-
-#if 0
-	/* VBUS */
-	{
-		GPIO_InitTypeDef GPIO_InitStructure = {
-			.GPIO_Pin = GPIO_Pin_9,
-			.GPIO_Mode = GPIO_Mode_IN,
-			.GPIO_OType = GPIO_OType_OD,
-			.GPIO_Speed = GPIO_Speed_2MHz,
-			.GPIO_PuPd = GPIO_PuPd_NOPULL,
-		};
-		GPIO_Init(GPIOA, &GPIO_InitStructure);
-	}
-#endif
-
-	/* ID */
-	{
-		GPIO_InitTypeDef GPIO_InitStructure = {
-			.GPIO_Pin = GPIO_Pin_10,
-			.GPIO_Mode = GPIO_Mode_AF,
-			.GPIO_OType = GPIO_OType_OD,
-			.GPIO_Speed = GPIO_Speed_50MHz,
-			.GPIO_PuPd = GPIO_PuPd_UP,
-		};
-		GPIO_Init(GPIOA, &GPIO_InitStructure);
-	}
-
 	/* Enable OTG Full Speed */
 	RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_OTG_FS, ENABLE);
 
 	/* Enable system configuration controller clock */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
 	/* Enable IRQ */
 	NVIC_InitTypeDef NVIC_InitStructure = {
@@ -429,7 +375,6 @@ static void init_usb(void) {
 	};
 	NVIC_Init(&NVIC_InitStructure);
 }
-#endif
 
 static void init_systick(void) {
 	SysTick_Config(RUNNING_CLK_FREQUENCY / 1000);
@@ -466,7 +411,7 @@ void SystemInit(void) {
 	init_i2c();
 	init_crc();
 //	init_debug();
-//	init_usb();
+	init_usb();
 	init_stm32f407_adc();
 	init_systick();
 	init_timer();

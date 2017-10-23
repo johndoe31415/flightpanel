@@ -9,6 +9,9 @@ void pinmap_initialize(void) {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
 
+	GPIO_PinAFConfig(GPIOA, USB_OTG_M_PinSource, GPIO_AF_OTG_FS);
+	GPIO_PinAFConfig(GPIOA, USB_OTG_P_PinSource, GPIO_AF_OTG_FS);
+	GPIO_PinAFConfig(GPIOA, USB_OTG_ID_PinSource, GPIO_AF_OTG_FS);
 	GPIO_PinAFConfig(GPIOB, Display_SCK_PinSource, GPIO_AF_SPI2);
 	GPIO_PinAFConfig(GPIOB, Display_MOSI_PinSource, GPIO_AF_SPI2);
 	GPIO_PinAFConfig(GPIOC, IOMux_SCK_PinSource, GPIO_AF_SPI3);
@@ -19,6 +22,28 @@ void pinmap_initialize(void) {
 	GPIO_PinAFConfig(GPIOD, USART_TX_PinSource, GPIO_AF_USART2);
 	GPIO_PinAFConfig(GPIOD, USART_RX_PinSource, GPIO_AF_USART2);
 
+	{	// 1 pin(s) on PORTA with mode AF, otype OD, speed 100 MHz and pullup NOPULL
+		*((uint32_t*)(&GPIOA->BSRRL)) = (USB_OTG_ID_Pin << 16);
+		GPIO_InitTypeDef GPIO_InitStructure = {
+			.GPIO_Pin = USB_OTG_ID_Pin,
+			.GPIO_Mode = GPIO_Mode_AF,
+			.GPIO_OType = GPIO_OType_OD,
+			.GPIO_Speed = GPIO_Speed_100MHz,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
+		};
+		GPIO_Init(GPIOA, &GPIO_InitStructure);
+	}
+	{	// 2 pin(s) on PORTA with mode AF, otype PP, speed 100 MHz and pullup NOPULL
+		*((uint32_t*)(&GPIOA->BSRRL)) = (USB_OTG_M_Pin << 16) | (USB_OTG_P_Pin << 16);
+		GPIO_InitTypeDef GPIO_InitStructure = {
+			.GPIO_Pin = USB_OTG_M_Pin | USB_OTG_P_Pin,
+			.GPIO_Mode = GPIO_Mode_AF,
+			.GPIO_OType = GPIO_OType_PP,
+			.GPIO_Speed = GPIO_Speed_100MHz,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
+		};
+		GPIO_Init(GPIOA, &GPIO_InitStructure);
+	}
 	{	// 1 pin(s) on PORTA with mode IN, otype OD, speed 2 MHz and pullup DOWN
 		*((uint32_t*)(&GPIOA->BSRRL)) = (UserButton_Pin << 16);
 		GPIO_InitTypeDef GPIO_InitStructure = {
@@ -27,6 +52,17 @@ void pinmap_initialize(void) {
 			.GPIO_OType = GPIO_OType_OD,
 			.GPIO_Speed = GPIO_Speed_2MHz,
 			.GPIO_PuPd = GPIO_PuPd_DOWN,
+		};
+		GPIO_Init(GPIOA, &GPIO_InitStructure);
+	}
+	{	// 1 pin(s) on PORTA with mode IN, otype OD, speed 2 MHz and pullup NOPULL
+		*((uint32_t*)(&GPIOA->BSRRL)) = (USB_OTG_VBUS_Pin << 16);
+		GPIO_InitTypeDef GPIO_InitStructure = {
+			.GPIO_Pin = USB_OTG_VBUS_Pin,
+			.GPIO_Mode = GPIO_Mode_IN,
+			.GPIO_OType = GPIO_OType_OD,
+			.GPIO_Speed = GPIO_Speed_2MHz,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
 		};
 		GPIO_Init(GPIOA, &GPIO_InitStructure);
 	}

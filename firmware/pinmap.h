@@ -76,7 +76,7 @@ struct gpio_definition_t {
 #define USART_TX_npulse()						do { USART_TX_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USART_TX_set_ACTIVE(); } while (0)
 #define USART_TX_GPIO_Definition				{ .gpio = USART_TX_GPIO, .name = "USART_TX", .pin_name = "D5", .pin_source = USART_TX_PinSource }
 
-// PA9: USB_OTG_VBUS (IN) -- []
+// PA9: USB_OTG_VBUS (IN) -- ['init', 'speed']
 #define USB_OTG_VBUS_GPIO						GPIOA
 #define USB_OTG_VBUS_PinSource					GPIO_PinSource9
 #define USB_OTG_VBUS_Pin						GPIO_Pin_9
@@ -91,7 +91,7 @@ struct gpio_definition_t {
 #define USB_OTG_VBUS_npulse()					do { USB_OTG_VBUS_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_OTG_VBUS_set_ACTIVE(); } while (0)
 #define USB_OTG_VBUS_GPIO_Definition			{ .gpio = USB_OTG_VBUS_GPIO, .name = "USB_OTG_VBUS", .pin_name = "A9", .pin_source = USB_OTG_VBUS_PinSource }
 
-// PA11: USB_OTG_M (IO) -- []
+// PA11: USB_OTG_M (OUT) -- ['af', 'init', 'speed']
 #define USB_OTG_M_GPIO							GPIOA
 #define USB_OTG_M_PinSource						GPIO_PinSource11
 #define USB_OTG_M_Pin							GPIO_Pin_11
@@ -106,7 +106,7 @@ struct gpio_definition_t {
 #define USB_OTG_M_npulse()						do { USB_OTG_M_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_OTG_M_set_ACTIVE(); } while (0)
 #define USB_OTG_M_GPIO_Definition				{ .gpio = USB_OTG_M_GPIO, .name = "USB_OTG_M", .pin_name = "A11", .pin_source = USB_OTG_M_PinSource }
 
-// PA12: USB_OTG_P (IO) -- []
+// PA12: USB_OTG_P (OUT) -- ['af', 'init', 'speed']
 #define USB_OTG_P_GPIO							GPIOA
 #define USB_OTG_P_PinSource						GPIO_PinSource12
 #define USB_OTG_P_Pin							GPIO_Pin_12
@@ -121,7 +121,7 @@ struct gpio_definition_t {
 #define USB_OTG_P_npulse()						do { USB_OTG_P_set_INACTIVE(); delay_loopcnt(LOOPCOUNT_50NS); USB_OTG_P_set_ACTIVE(); } while (0)
 #define USB_OTG_P_GPIO_Definition				{ .gpio = USB_OTG_P_GPIO, .name = "USB_OTG_P", .pin_name = "A12", .pin_source = USB_OTG_P_PinSource }
 
-// PA10: USB_OTG_ID (IN) -- []
+// PA10: USB_OTG_ID (IN) -- ['af', 'init', 'speed']
 #define USB_OTG_ID_GPIO							GPIOA
 #define USB_OTG_ID_PinSource					GPIO_PinSource10
 #define USB_OTG_ID_Pin							GPIO_Pin_10
