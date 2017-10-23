@@ -46,6 +46,7 @@
 #include "iomux_pinmap.h"
 #include "dsr_tasks.h"
 #include "stm32f4xx_debug.h"
+#include "usb_hidreport.h"
 
 #define iabs(x)				(((x) < 0) ? -(x) : (x))
 #define CMD_BUFFER_SIZE		32
@@ -81,12 +82,14 @@ static const struct gpio_definition_t known_gpio_inputs[] = {
 };
 #define KNOWN_GPIO_INPUT_COUNT		(sizeof(known_gpio_inputs) / sizeof(known_gpio_inputs[0]))
 
+extern const uint8_t _sflash, _sram, _eram, _ebss;
 static enum debugmode_t debug_mode;
 static char cmd_input[CMD_BUFFER_SIZE];
 static uint8_t cmd_length;
 static uint8_t last_cmd_length;
 static int debug_accu;
 static uint8_t iomux_last_inputs[IOMUX_BYTECOUNT];
+static bool execution_running;
 
 void debugmode_set(enum debugmode_t new_mode) {
 	debug_mode = new_mode;
@@ -441,6 +444,7 @@ static void debugconsole_execute(void) {
 		printf("    adc        Gather environmental data (supply voltage, temperature) measured via ADC\n");
 		printf("    spi        Show overview of SPI status\n");
 		printf("    dma        Show overview of DMA status\n");
+		printf("    usb        Show some minimal information about USB subunit\n");
 		printf("    debug      Dump debug register contents\n");
 		printf("    reset      Reset the MCU entirely\n");
 	} else if (!strcmp(cmd_input, "off")) {
@@ -474,6 +478,8 @@ static void debugconsole_execute(void) {
 		debugconsole_print_gpio();
 	} else if (!strcmp(cmd_input, "memory")) {
 		debug_show_memory();
+		printf("Program memory (_sflash) = %p, start of RAM (_sram) = %p, end of RAM (_eram) = %p\n", &_sflash, &_sram, &_eram);
+		printf("_ebss = %p, Sbrk = %p (malloc used %d bytes of memory) -> %d bytes of heap total\n", &_ebss, sbrk(0), (int)sbrk(0) - (int)&_ebss, (int)sbrk(0) - (int)&_sram);
 	} else if (!strcmp(cmd_input, "iomux-in")) {
 		debugmode_set(DEBUG_IOMUX_INPUTS);
 	} else if (!strcmp(cmd_input, "iomux-out")) {
@@ -500,6 +506,8 @@ static void debugconsole_execute(void) {
 		dump_spi_status("SPI3", SPI3);
 	} else if (!strcmp(cmd_input, "dma")) {
 		dump_dma_status("DMA1", DMA1, DMA1_Stream0);
+	} else if (!strcmp(cmd_input, "usb")) {
+		printf("sizeof(struct hid_report_t) = %u bytes\n", sizeof(struct hid_report_t));
 	} else if (!strcmp(cmd_input, "debug")) {
 		dump_debug_registers();
 	} else if (!strcmp(cmd_input, "reset")) {
@@ -524,6 +532,7 @@ static void debugconsole_execute(void) {
 		printf("Unrecognized command '%s'.\n", cmd_input);
 	}
 	cmd_length = 0;
+	execution_running = false;
 }
 
 void dsr_execute_debug_command(void) {
@@ -532,7 +541,7 @@ void dsr_execute_debug_command(void) {
 }
 
 void debugconsole_rxchar(uint8_t rxchar) {
-	if (dsr_is_pending(DSR_TASK_EXECUTE_DEBUG_COMMAND)) {
+	if (execution_running) {
 		/* Do not accept new characters while execution in progress */
 		return;
 	}
@@ -547,6 +556,7 @@ void debugconsole_rxchar(uint8_t rxchar) {
 		} else {
 			last_cmd_length = cmd_length;
 		}
+		execution_running = true;
 		dsr_mark_pending(DSR_TASK_EXECUTE_DEBUG_COMMAND);
 	} else if (rxchar == KEY_BACKSPACE) {
 		if (cmd_length > 0) {

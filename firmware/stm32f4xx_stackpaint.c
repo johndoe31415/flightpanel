@@ -38,20 +38,23 @@ struct stackpaint_result_t stm32fxx_get_stackpaint(void) {
 	/* Determine heap usage */
 	const unsigned int ram_word_size = result.total_ram_bytes / sizeof(uint32_t);
 	const uint32_t *ram = (const uint32_t*)&_sram;
-	for (int i = 0; i < ram_word_size; i++) {
-		if (ram[i] == 0xdeadbeef) {
+	for (int i = 0; i < ram_word_size - 1; i++) {
+		if ((ram[i] == 0xdeadbeef) && (ram[i + 1] == 0xdeadbeef)) {
 			break;
 		}
 		result.heap_used_bytes += 4;
 	}
 
 	/* Determine stack usage */
-	for (int i = ram_word_size - 1; i >= 0; i--) {
-		if (ram[i] == 0xdeadbeef) {
+	for (int i = ram_word_size - 1; i >= 1; i--) {
+		if ((ram[i] == 0xdeadbeef) && (ram[i - 1] == 0xdeadbeef)) {
 			break;
 		}
-		result.stack_used_bytes += 4;
+		result.max_stack_used_bytes += 4;
 	}
+
+	/* Approximate current stack usage */
+	result.stack_used_bytes = &_eram - (const uint8_t*)&result;
 
 #if 0
 	for (int i = 0; i < RAM_WORD_SIZE; i += 8) {

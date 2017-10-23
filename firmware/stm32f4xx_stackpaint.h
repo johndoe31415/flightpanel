@@ -28,6 +28,7 @@ struct stackpaint_result_t {
 	unsigned int total_ram_bytes;
 	unsigned int heap_used_bytes;
 	unsigned int stack_used_bytes;
+	unsigned int max_stack_used_bytes;
 };
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/

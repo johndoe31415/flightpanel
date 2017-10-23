@@ -42,7 +42,7 @@ void debug_show_compiler(void) {
 
 void debug_show_memory(void) {
 	struct stackpaint_result_t stackpaint = stm32fxx_get_stackpaint();
-	printf("%d kiB of RAM total: %d bytes of heap used, %d bytes of stack used. %d bytes free.\n", stackpaint.total_ram_bytes / 1024, stackpaint.heap_used_bytes, stackpaint.stack_used_bytes, stackpaint.total_ram_bytes - stackpaint.heap_used_bytes - stackpaint.stack_used_bytes);
+	printf("%d kiB of RAM total: %d bytes of heap used, %d bytes of stack used max (%d bytes currently). %d bytes free.\n", stackpaint.total_ram_bytes / 1024, stackpaint.heap_used_bytes, stackpaint.max_stack_used_bytes, stackpaint.stack_used_bytes, stackpaint.total_ram_bytes - stackpaint.heap_used_bytes - stackpaint.max_stack_used_bytes);
 }
 
 void debug_show_all(void) {
