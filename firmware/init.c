@@ -225,7 +225,7 @@ static void init_display_spi_dma(void) {
 			.DMA_DIR = DMA_DIR_PeripheralToMemory,
 			.DMA_BufferSize = 1,
 			.DMA_PeripheralInc = DMA_PeripheralInc_Disable,
-			.DMA_MemoryInc = DMA_MemoryInc_Enable,
+			.DMA_MemoryInc = DMA_MemoryInc_Disable,
 			.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte,
 			.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte,
 			.DMA_Mode = DMA_Mode_Normal,
