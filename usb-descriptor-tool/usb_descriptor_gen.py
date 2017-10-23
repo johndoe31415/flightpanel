@@ -46,7 +46,7 @@ class USBHidReportDescriptor(object):
 		clone._offset += index
 		return clone
 
-	def _add_item(self, enum, data):
+	def _add_item(self, enum, data, comment = None):
 		value = int(enum) << 2
 		if data is None:
 			encoding = [ ]
@@ -65,8 +65,8 @@ class USBHidReportDescriptor(object):
 		self._add_item(Item.UsagePage, usage_page)
 		return self
 
-	def add_usage(self, usage):
-		self._add_item(Item.Usage, usage)
+	def add_usage(self, usage, comment = None):
+		self._add_item(Item.Usage, usage, comment = comment)
 		return self
 
 	def add_collection(self, collection_type):
@@ -86,17 +86,16 @@ class USBHidReportDescriptor(object):
 		self._add_item(Item.ReportCount, report_count)
 		return self
 
-	def add_report_size(self, report_size):
-		if report_size > 1:
-			# Round up everything but buttons
+	def add_report_size(self, report_size, round_up = True):
+		if round_up:
 			report_size = (report_size + 7) // 8 * 8
 		self._last_report_size = report_size
 		self._add_item(Item.ReportSize, report_size)
 		return self
 
-	def add_input(self, input_flags):
+	def add_input(self, input_flags, comment = None):
 		self._report_length += self._last_report_count * self._last_report_size
-		self._add_item(Item.Input, input_flags)
+		self._add_item(Item.Input, input_flags, comment = comment)
 		return self
 
 	def add_logical_minimum(self, min_value):
@@ -115,16 +114,50 @@ class USBHidReportDescriptor(object):
 		self._add_item(Item.UnitExponent, unit_exponent)
 		return self
 
-	def add_pushbuttons(self, count, start_button = 1):
+	def add_padding_bits(self, count, comment = None):
+		self.add_report_count(1)
+		self.add_report_size(count, round_up = False)
+		self.add_input(InputOutputFeatureFlags.Constant, comment = comment)
+
+	def add_pushbuttons(self, count, start_button = 1, comment = None):
 		self.add_usage_page(UsagePage.Button)
 		self.add_usage_minimum(start_button)
 		self.add_usage_maximum(start_button + count - 1)
 		self.add_logical_minimum(0)
 		self.add_logical_maximum(1)
 		self.add_report_count(count)
-		self.add_report_size(1)
-		self.add_input(InputOutputFeatureFlags.Variable)
+		self.add_report_size(1, round_up = False)
+		self.add_input(InputOutputFeatureFlags.Variable, comment)
 		return self
+
+	def fp_add_as_button(self, text, button_count, start_button = 1):
+		padding_bits = 8 - (button_count % 8)
+		self.add_pushbuttons(button_count, start_button, comment = text)
+		if padding_bits != 8:
+			self.add_padding_bits(padding_bits, comment = "Padding (%d bit)" % (padding_bits))
+
+	def fp_add_items(self, items):
+		def _emit(values):
+			if len(values) == 0:
+				return
+			collection.add_usage_page(UsagePage.SimulationControls)
+			for (text, size_bytes) in values:
+				collection.add_usage(SimulationControls.FlightCommunication, comment = text)
+
+			size_bytes = values[0][1]
+			collection.add_logical_minimum(0)
+			collection.add_logical_maximum((256 ** size_bytes) - 1)
+			collection.add_report_count(len(values))
+			collection.add_report_size(size_bytes * 8)
+			collection.add_input(InputOutputFeatureFlags.Variable | InputOutputFeatureFlags.Volatile)
+
+		similar = [ ]
+		for (text, byte_length) in items:
+			if (len(similar) != 0) and (similar[0][1] != byte_length):
+				_emit(similar)
+				similar = [ ]
+			similar.append((text, byte_length))
+		_emit(similar)
 
 	@property
 	def report_length(self):
@@ -140,62 +173,40 @@ hid_report.add_usage_page(UsagePage.GenericDesktop)
 hid_report.add_usage(GenericDesktop.Joystick)
 collection = hid_report.add_collection(Collection.Application)
 
-collection.add_usage_page(UsagePage.SimulationControls)
 
-collection.add_usage(SimulationControls.FlightCommunication)	# VHF1
-collection.add_usage(SimulationControls.FlightCommunication)	# VHF1 STBY
-collection.add_usage(SimulationControls.FlightCommunication)	# VHF2
-collection.add_usage(SimulationControls.FlightCommunication)	# VHF2 STBY
-collection.add_usage(SimulationControls.FlightCommunication)	# NAV1
-collection.add_usage(SimulationControls.FlightCommunication)	# NAV1 STBY
-collection.add_usage(SimulationControls.FlightCommunication)	# NAV2
-collection.add_usage(SimulationControls.FlightCommunication)	# NAV2 STBY
-collection.add_logical_minimum(0)
-collection.add_logical_maximum(2047)
-collection.add_report_size(10)
-collection.add_report_count(8)
-#collection.add_unit_exponent(0)
-#collection.add_unit(0)
-collection.add_input(InputOutputFeatureFlags.Variable | InputOutputFeatureFlags.Volatile)
+collection.fp_add_as_button("Radio panel", 6)
+collection.fp_add_items([
+	("COM divisions", 1),
+	("NAV divisions", 1),
+	("TX radio ID", 1),
+	("COM1 frequency active index", 2),
+	("COM1 frequency standby index", 2),
+	("COM2 frequency active index", 2),
+	("COM2 frequency standby index", 2),
+	("NAV1 frequency active index", 2),
+	("NAV1 frequency standby index", 2),
+	("NAV1 obs", 2),
+	("NAV2 frequency active index", 2),
+	("NAV2 frequency standby index", 2),
+	("NAV2 obs", 2),
+	("XPDR state", 1),
+	("XPDR squawk", 2),
+	("ADF frequency", 2),
+	("AP state", 1),
+	("AP altitude", 2),
+	("AP climbrate", 2),
+	("AP ias", 2),
+	("AP heading", 2),
+	("DME NAV source", 1),
+])
 
-collection.add_usage(SimulationControls.FlightCommunication)	# NAV1 OBS
-collection.add_usage(SimulationControls.FlightCommunication)	# NAV2 OBS
-collection.add_usage(SimulationControls.FlightCommunication)	# ADF OBS
-collection.add_usage(SimulationControls.FlightCommunication)	# AP HDG
-collection.add_logical_minimum(0)
-collection.add_logical_maximum(359)
-collection.add_report_size(9)
-collection.add_report_count(4)
-#collection.add_unit_exponent(0)
-#collection.add_unit(0)
-collection.add_input(InputOutputFeatureFlags.Variable | InputOutputFeatureFlags.Volatile)
+collection.fp_add_as_button("Flip switches", 6, start_button = 7)
 
-collection.add_usage(SimulationControls.FlightCommunication)	# QNH
-collection.add_logical_minimum(880)
-collection.add_logical_maximum(1120)
-collection.add_report_size(8)
-collection.add_report_count(1)
-#collection.add_unit_exponent(0)
-#collection.add_unit(0)
-collection.add_input(InputOutputFeatureFlags.Variable | InputOutputFeatureFlags.Volatile)
+collection.fp_add_items([
+	("QNH", 2),
+	("Nav by GPS", 1),
+])
 
-collection.add_usage(SimulationControls.FlightCommunication)	# XPDR Squawk
-collection.add_logical_minimum(0)
-collection.add_logical_maximum(4095)
-collection.add_report_size(16)
-collection.add_report_count(1)
-#collection.add_unit_exponent(0)
-#collection.add_unit(0)
-collection.add_input(InputOutputFeatureFlags.Variable | InputOutputFeatureFlags.Volatile)
-
-# Pushbuttons:
-# 7: AP Active, NAV; APR, REV, ALT, HDG, IAS
-# 2: Transponder Charly, Ident
-# 1: NAV/GPS
-# 2: Trottle down/throttle up
-# 6: Lights
-# 6: Audio VHF1, VHF2, NAV1, NAV2, DME, ADF
-collection.add_pushbuttons(24)
 data = bytes(hid_report)
 print("// " + data.hex())
 print("// Report length %d bits = %d bytes" % (collection.report_length, (collection.report_length + 7) // 8))

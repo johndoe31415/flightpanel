@@ -79,7 +79,7 @@ struct instrument_state_t {
 void hid_tick(void);
 void instruments_handle_inputs(void);
 void dsr_idle_task(void);
-void instruments_set_by_host(const struct hid_set_report_t *report);
+void instruments_set_by_host(const union hid_set_report_t *report);
 void instruments_init(void);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 

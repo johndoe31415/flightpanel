@@ -33,7 +33,7 @@
 #define HID_EPIN_SIZE										sizeof(struct hid_report_t)
 
 #define HID_EPOUT_ADDR										0x01
-#define HID_EPOUT_SIZE										0x10
+#define HID_EPOUT_SIZE										(sizeof(union hid_set_report_t) + 10)
 
 #define HID_REQ_SET_PROTOCOL								0x0b
 #define HID_REQ_GET_PROTOCOL								0x03

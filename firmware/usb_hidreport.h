@@ -119,7 +119,7 @@ struct hid_report_t {
 	bool navigate_by_gps;
 } __attribute__ ((packed));
 
-struct hid_set_report_t {
+struct hid_set_generic_report_t {
 	uint8_t report_id;
 } __attribute__ ((packed));
 
@@ -150,5 +150,11 @@ struct hid_set_report_02_t {
 		uint16_t altitude;
 	} plane_parameters;
 } __attribute__ ((packed));
+
+union hid_set_report_t {
+	struct hid_set_generic_report_t generic;
+	struct hid_set_report_01_t r01;
+	struct hid_set_report_02_t r02;
+};
 
 #endif

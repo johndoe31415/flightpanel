@@ -32,7 +32,7 @@
 #include <firmware/frequencies.h>
 #include "fpconnection.hpp"
 
-#define NO_REAL_DEVICE
+//#define NO_REAL_DEVICE
 
 static void* event_loop_thread(void *ctx) {
 	FPConnection *connection = (FPConnection*)ctx;
@@ -44,7 +44,9 @@ FPConnection::FPConnection() : _device(NULL) {
 #ifndef NO_REAL_DEVICE
 	struct hid_device_info *info = hid_enumerate(USB_VID, USB_PID);
 	if (!info) {
-		throw std::runtime_error("Failed to hid_enumerate(): No such VID/PID.");
+		char buffer[128];
+		sprintf(buffer, "Failed to hid_enumerate(): No such VID/PID %04x:%04x", USB_VID, USB_PID);
+		throw std::runtime_error(buffer);
 	}
 
 	struct hid_device_info *current = info;
@@ -78,6 +80,9 @@ void FPConnection::event_loop() {
 		int bytes_read = hid_read(_device, (uint8_t*)&hid_report, sizeof(hid_report));
 		if (bytes_read == sizeof(hid_report)) {
 			_instrument_data.external = hid_report;
+		} else if (bytes_read == -1) {
+			fprintf(stderr, "Flight panel diconnected.\n");
+			break;
 		} else {
 			fprintf(stderr, "Short read (%d of %zd), could not get full HID report.\n", bytes_read, sizeof(hid_report));
 		}
@@ -89,9 +94,14 @@ void FPConnection::get_data(struct instrument_data_t *data) {
 }
 
 void FPConnection::put_data(const struct instrument_data_t *data, const struct component_selection_t *selection) {
-	struct hid_set_report_t hid_set_report;
+	union hid_set_report_t hid_set_report;
 	std::memset(&hid_set_report, 0, sizeof(hid_set_report));
-	hid_set_report.report_id = 1;
+	//hid_set_report.generic.report_id = 1;
+	//hid_set_report.r01.navigate_by_gps = false;
+
+	hid_set_report.generic.report_id = 2;
+	strcpy(hid_set_report.r02.ident.nav1, "BAR");
+	strcpy(hid_set_report.r02.ident.nav2, "KOO");
 	// TODO this is all different now
 #if 0
 	hid_set_report.com1_active = com_frequency_khz_to_index(data->com1.freq_active_khz);

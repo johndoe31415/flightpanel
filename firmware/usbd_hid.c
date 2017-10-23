@@ -68,10 +68,34 @@ uint8_t USBD_LangIDDesc[4] = {
 	UINT16(USBD_LANGID_STRING)
 };
 
+
 static uint8_t HIDReportDescriptor[] = {
 	0x05, 0x01,					// UsagePage(GenericDesktop)
 	0x09, 0x04,					// Usage(Joystick)
 	0xa1, 0x01,					// Collection(Application)
+		0x05, 0x09,					// UsagePage(Button)
+		0x19, 0x01,					// UsageMinimum(1)
+		0x29, 0x06,					// UsageMaximum(6)
+		0x15, 0x00,					// LogicalMinimum(0)
+		0x25, 0x01,					// LogicalMaximum(1)
+		0x95, 0x06,					// ReportCount(6)
+		0x75, 0x01,					// ReportSize(1)
+		0x81, 0x02,					// Input(Variable)
+
+		0x95, 0x01,					// ReportCount(1)
+		0x75, 0x02,					// ReportSize(2)
+		0x81, 0x01,					// Input(Constant)
+
+		0x05, 0x02,					// UsagePage(SimulationControls)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x15, 0x00,					// LogicalMinimum(0)
+		0x25, 0xff,					// LogicalMaximum(255)
+		0x95, 0x03,					// ReportCount(3)
+		0x75, 0x08,					// ReportSize(8)
+		0x81, 0x82,					// Input(Variable, Volatile)
+
 		0x05, 0x02,					// UsagePage(SimulationControls)
 		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x09, 0xbc,					// Usage(FlightCommunication)
@@ -81,31 +105,86 @@ static uint8_t HIDReportDescriptor[] = {
 		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x09, 0xbc,					// Usage(FlightCommunication)
-		0x15, 0x00,					// LogicalMinimum(0)
-		0x26, 0xff, 0x07,			// LogicalMaximum(2047)
-		0x75, 0x10,					// ReportSize(16)
-		0x95, 0x08,					// ReportCount(8)
-		0x55, 0x00,					// UnitExponent(0)
-		0x65, 0x00,					// Unit(0)
-		0x81, 0x82,					// Input(Variable, Volatile)
-
+		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x15, 0x00,					// LogicalMinimum(0)
-		0x26, 0xff, 0x0f,			// LogicalMaximum(4095)
+		0x26, 0xff, 0xff,			// LogicalMaximum(65535)
+		0x95, 0x0a,					// ReportCount(10)
 		0x75, 0x10,					// ReportSize(16)
+		0x81, 0x82,					// Input(Variable, Volatile)
+
+		0x05, 0x02,					// UsagePage(SimulationControls)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x15, 0x00,					// LogicalMinimum(0)
+		0x25, 0xff,					// LogicalMaximum(255)
 		0x95, 0x01,					// ReportCount(1)
-		0x55, 0x00,					// UnitExponent(0)
-		0x65, 0x00,					// Unit(0)
+		0x75, 0x08,					// ReportSize(8)
+		0x81, 0x82,					// Input(Variable, Volatile)
+
+		0x05, 0x02,					// UsagePage(SimulationControls)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x15, 0x00,					// LogicalMinimum(0)
+		0x26, 0xff, 0xff,			// LogicalMaximum(65535)
+		0x95, 0x02,					// ReportCount(2)
+		0x75, 0x10,					// ReportSize(16)
+		0x81, 0x82,					// Input(Variable, Volatile)
+
+		0x05, 0x02,					// UsagePage(SimulationControls)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x15, 0x00,					// LogicalMinimum(0)
+		0x25, 0xff,					// LogicalMaximum(255)
+		0x95, 0x01,					// ReportCount(1)
+		0x75, 0x08,					// ReportSize(8)
+		0x81, 0x82,					// Input(Variable, Volatile)
+
+		0x05, 0x02,					// UsagePage(SimulationControls)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x15, 0x00,					// LogicalMinimum(0)
+		0x26, 0xff, 0xff,			// LogicalMaximum(65535)
+		0x95, 0x04,					// ReportCount(4)
+		0x75, 0x10,					// ReportSize(16)
+		0x81, 0x82,					// Input(Variable, Volatile)
+
+		0x05, 0x02,					// UsagePage(SimulationControls)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x15, 0x00,					// LogicalMinimum(0)
+		0x25, 0xff,					// LogicalMaximum(255)
+		0x95, 0x01,					// ReportCount(1)
+		0x75, 0x08,					// ReportSize(8)
 		0x81, 0x82,					// Input(Variable, Volatile)
 
 		0x05, 0x09,					// UsagePage(Button)
-		0x19, 0x01,					// UsageMinimum(1)
-		0x29, 0x10,					// UsageMaximum(16)
+		0x19, 0x07,					// UsageMinimum(7)
+		0x29, 0x0c,					// UsageMaximum(12)
 		0x15, 0x00,					// LogicalMinimum(0)
 		0x25, 0x01,					// LogicalMaximum(1)
-		0x95, 0x10,					// ReportCount(16)
+		0x95, 0x06,					// ReportCount(6)
 		0x75, 0x01,					// ReportSize(1)
 		0x81, 0x02,					// Input(Variable)
+
+		0x95, 0x01,					// ReportCount(1)
+		0x75, 0x02,					// ReportSize(2)
+		0x81, 0x01,					// Input(Constant)
+
+		0x05, 0x02,					// UsagePage(SimulationControls)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x15, 0x00,					// LogicalMinimum(0)
+		0x26, 0xff, 0xff,			// LogicalMaximum(65535)
+		0x95, 0x01,					// ReportCount(1)
+		0x75, 0x10,					// ReportSize(16)
+		0x81, 0x82,					// Input(Variable, Volatile)
+
+		0x05, 0x02,					// UsagePage(SimulationControls)
+		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x15, 0x00,					// LogicalMinimum(0)
+		0x25, 0xff,					// LogicalMaximum(255)
+		0x95, 0x01,					// ReportCount(1)
+		0x75, 0x08,					// ReportSize(8)
+		0x81, 0x82,					// Input(Variable, Volatile)
 
 	0xc0,						// EndCollection
 };
@@ -205,7 +284,6 @@ static uint8_t USBD_HID_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *re
 	uint16_t len = 0;
 	uint8_t *pbuf = NULL;
 	USBD_HID_HandleTypeDef *hhid = (USBD_HID_HandleTypeDef *) pdev->pClassData;
-
 	switch (req->bmRequest & USB_REQ_TYPE_MASK) {
 		case USB_REQ_TYPE_CLASS:
 			switch (req->bRequest) {
@@ -283,7 +361,7 @@ static uint8_t USBD_HID_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum) {
 
 static uint8_t USBD_HID_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum) {
 	USBD_HID_HandleTypeDef *hhid = (USBD_HID_HandleTypeDef*)pdev->pClassData;
-	instruments_set_by_host((const struct hid_set_report_t*)hhid->out_buffer);
+	instruments_set_by_host((const union hid_set_report_t*)hhid->out_buffer);
 	USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR, hhid->out_buffer, HID_EPOUT_SIZE);
 	return USBD_OK;
 }

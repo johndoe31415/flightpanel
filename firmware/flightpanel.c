@@ -73,7 +73,6 @@ int main(void) {
 	instruments_init();
 	dsr_mark_pending(DSR_TASK_IDLE);
 //	debugmode_set(DEBUG_DISPLAY);
-	cause_hard_fault();
 	execute_dsr_loop();
 	return 0;
 }

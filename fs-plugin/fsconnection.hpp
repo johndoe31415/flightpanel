@@ -136,7 +136,9 @@ struct component_selection_t {
 struct instrument_data_t {
 	struct hid_report_t external;
 	struct {
-		bool foo;
+		struct {
+			char nav1[5], nav2[5], adf[5];
+		} ident;
 	} internal;
 
 	uint32_t com1_active_freq_khz() const {
@@ -152,16 +154,16 @@ struct instrument_data_t {
 		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.com2.freq.standby_index);
 	}
 	uint32_t nav1_active_freq_khz() const {
-		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav1.freq.active_index);
+		return frequency_index_to_khz((const enum com_nav_range_t)external.nav_divisions, external.nav1.freq.active_index);
 	}
 	uint32_t nav1_standby_freq_khz() const {
-		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav1.freq.standby_index);
+		return frequency_index_to_khz((const enum com_nav_range_t)external.nav_divisions, external.nav1.freq.standby_index);
 	}
 	uint32_t nav2_active_freq_khz() const {
-		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav2.freq.active_index);
+		return frequency_index_to_khz((const enum com_nav_range_t)external.nav_divisions, external.nav2.freq.active_index);
 	}
 	uint32_t nav2_standby_freq_khz() const {
-		return frequency_index_to_khz((const enum com_nav_range_t)external.com_divisions, external.nav2.freq.standby_index);
+		return frequency_index_to_khz((const enum com_nav_range_t)external.nav_divisions, external.nav2.freq.standby_index);
 	}
 };
 
@@ -177,8 +179,7 @@ class FSConnection {
 
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void dump_instrument_data(const struct instrument_data_t *data);
-void fsconnection_incoming_data(const struct instrument_data_t *data);
+void dump_instrument_data(FILE *f, const struct instrument_data_t *data);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

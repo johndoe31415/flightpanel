@@ -816,6 +816,16 @@ static void handle_obs_inputs(void) {
 	}
 }
 
+static void handle_switches(void) {
+	instrument_state.external.flip_switches = 0;
+	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_MASTER) ? 0 : SWITCH_MASTER;
+	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_BCN) ? 0 : SWITCH_BCN;
+	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_LAND) ? 0 : SWITCH_LAND;
+	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_TAXI) ? 0 : SWITCH_TAXI;
+	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_NAV) ? 0 : SWITCH_NAV;
+	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_STRB) ? 0 : SWITCH_STRB;
+}
+
 void dsr_idle_task(void) {
 	handle_radiopanel_inputs();
 	handle_comnav_inputs(&instrument_state.external.com1.freq, &rotary_com1, DISPLAY_COM1, DISPLAY_COM1_STBY);
@@ -828,6 +838,7 @@ void dsr_idle_task(void) {
 	handle_nav_src_inputs();
 	handle_qnh_inputs();
 	handle_obs_inputs();
+	handle_switches();
 
 	if (led_state_changed) {
 		led_state_changed = false;
@@ -878,13 +889,16 @@ static void instruments_set_by_host_report02(const struct hid_set_report_02_t *r
 	display_data_changed[DISPLAY_NAV2] = copy_if_changed(&instrument_state.internal.ident.nav2, &report->ident.nav2, sizeof(instrument_state.internal.ident.nav2)) || display_data_changed[DISPLAY_NAV2];
 	display_data_changed[DISPLAY_ADF] = copy_if_changed(&instrument_state.internal.ident.adf, &report->ident.adf, sizeof(instrument_state.internal.ident.adf)) || display_data_changed[DISPLAY_ADF];
 	display_data_changed[DISPLAY_DME] = copy_if_changed(&instrument_state.internal.dme, &report->dme, sizeof(instrument_state.internal.dme)) || display_data_changed[DISPLAY_DME];
+	instrument_state.internal.ident.nav1[3] = 0;
+	instrument_state.internal.ident.nav2[3] = 0;
+	instrument_state.internal.ident.adf[3] = 0;
 }
 
-void instruments_set_by_host(const struct hid_set_report_t *report) {
-	if (report->report_id == 0x01) {
-		instruments_set_by_host_report01((const struct hid_set_report_01_t*)report);
-	} else if (report->report_id == 0x02) {
-		instruments_set_by_host_report02((const struct hid_set_report_02_t*)report);
+void instruments_set_by_host(const union hid_set_report_t *report) {
+	if (report->generic.report_id == 0x01) {
+		instruments_set_by_host_report01(&report->r01);
+	} else if (report->generic.report_id == 0x02) {
+		instruments_set_by_host_report02(&report->r02);
 	}
 }
 

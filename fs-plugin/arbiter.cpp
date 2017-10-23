@@ -91,31 +91,52 @@ template<typename T> void Arbiter::arbitrate_value(const struct instrument_data_
 }
 #endif
 
+template<typename T> void Arbiter::arbitrate_value(bool *changed, const T &old_fs_data, const T &new_fs_data, const T &old_fp_data, const T &new_fp_data, T *authoritative_data) {
+	bool fs_changed = memcmp(&old_fs_data, &new_fs_data, sizeof(T)) != 0;
+	bool fp_changed = memcmp(&old_fp_data, &new_fp_data, sizeof(T)) != 0;
+	if (fs_changed) {
+		*authoritative_data = new_fs_data;
+		*changed = true;
+	} else if (fp_changed) {
+		*authoritative_data = new_fp_data;
+		*changed = true;
+	} else {
+		*authoritative_data = new_fs_data;
+	}
+}
+
 void Arbiter::arbitrate(const struct instrument_data_t &new_fs_data, const struct instrument_data_t &new_fp_data) {
-	std::memset(&_put_fs_data, 0, sizeof(_put_fs_data));
-//	std::memset(&_put_fs_selection, 0, sizeof(_put_fs_selection));
-	std::memset(&_put_fp_data, 0, sizeof(_put_fp_data));
-//	std::memset(&_put_fp_selection, 0, sizeof(_put_fp_selection));
-	for (unsigned int i = 0; i < sizeof(arbitration) / sizeof(struct arbitration_t); i++) {
-		if (arbitration[i].arbitration_type == ARBITRATION_UINT32_T) {
-			arbitrate_value<uint32_t>(new_fs_data, new_fp_data, arbitration[i]);
-		} else {
-			fprintf(stderr, "Unable to arbitrate type %d at index %d.\n", arbitration[i].arbitration_type, i);
-		}
+	bool send_report_01, send_report_02;
+	struct instrument_data_t authoritative_data;
+	memset(&authoritative_data, 0, sizeof(authoritative_data));
+
+	send_report_01 = false;
+	arbitrate_value(&send_report_01, _last_fs_data.external.radio_panel, new_fs_data.external.radio_panel, _last_fp_data.external.radio_panel, new_fp_data.external.radio_panel, &authoritative_data.external.radio_panel);
+	arbitrate_value(&send_report_01, _last_fs_data.external.com_divisions, new_fs_data.external.com_divisions, _last_fp_data.external.com_divisions, new_fp_data.external.com_divisions, &authoritative_data.external.com_divisions);
+	arbitrate_value(&send_report_01, _last_fs_data.external.nav_divisions, new_fs_data.external.nav_divisions, _last_fp_data.external.nav_divisions, new_fp_data.external.nav_divisions, &authoritative_data.external.nav_divisions);
+	arbitrate_value(&send_report_01, _last_fs_data.external.com1, new_fs_data.external.com1, _last_fp_data.external.com1, new_fp_data.external.com1, &authoritative_data.external.com1);
+	arbitrate_value(&send_report_01, _last_fs_data.external.com2, new_fs_data.external.com2, _last_fp_data.external.com2, new_fp_data.external.com2, &authoritative_data.external.com2);
+	arbitrate_value(&send_report_01, _last_fs_data.external.nav1, new_fs_data.external.nav1, _last_fp_data.external.nav1, new_fp_data.external.nav1, &authoritative_data.external.nav1);
+	arbitrate_value(&send_report_01, _last_fs_data.external.nav2, new_fs_data.external.nav2, _last_fp_data.external.nav2, new_fp_data.external.nav2, &authoritative_data.external.nav2);
+	arbitrate_value(&send_report_01, _last_fs_data.external.xpdr, new_fs_data.external.xpdr, _last_fp_data.external.xpdr, new_fp_data.external.xpdr, &authoritative_data.external.xpdr);
+	arbitrate_value(&send_report_01, _last_fs_data.external.adf, new_fs_data.external.adf, _last_fp_data.external.adf, new_fp_data.external.adf, &authoritative_data.external.adf);
+	arbitrate_value(&send_report_01, _last_fs_data.external.ap, new_fs_data.external.ap, _last_fp_data.external.ap, new_fp_data.external.ap, &authoritative_data.external.ap);
+	arbitrate_value(&send_report_01, _last_fs_data.external.navigate_by_gps, new_fs_data.external.navigate_by_gps, _last_fp_data.external.navigate_by_gps, new_fp_data.external.navigate_by_gps, &authoritative_data.external.navigate_by_gps);
+
+	send_report_02 = false;
+
+	if (send_report_01) {
+		dump_instrument_data(stderr, &authoritative_data);
+		_fp_connection->put_data(&authoritative_data, NULL);
 	}
-#if 0
-	if (_put_fp_selection.is_any_set()) {
-		_fp_connection->put_data(&_put_fp_data, &_put_fp_selection);
-	}
-	if (_put_fs_selection.is_any_set()) {
-		_fs_connection->put_data(&_put_fs_data, &_put_fs_selection);
-	}
-#endif
+
+
 }
 
 void Arbiter::run() {
 	bool first = true;
 	while (true) {
+		fprintf(stderr, "arbiter!\n");
 		struct instrument_data_t new_fs_data;
 		_fs_connection->get_data(&new_fs_data);
 
@@ -132,7 +153,6 @@ void Arbiter::run() {
 		_last_fs_data = new_fs_data;
 		_last_fp_data = new_fp_data;
 		sleep(1);
-		fprintf(stderr, "\n");
 	}
 }
 
