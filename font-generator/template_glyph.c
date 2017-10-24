@@ -28,7 +28,8 @@
 /*
  * Rasterized font: "${font.font.name}" at ${"%.3f" % (font.font.size)} pt
  * Antialiasing used: ${font.font.antialiasing}
- * Rasterization threshold: ${font.args.threshold}
+ * Default rasterization threshold: ${font.args.threshold}
+ * Custom rasterization thresholds: ${"None" if len(font.font.custom_thresholds) == 0 else ", ".join("'%s' = %d" % (chr(key), value) for (key, value) in sorted(font.font.custom_thresholds.items()))}
  * Character set: ${font.args.charset or "all"}
  */
 

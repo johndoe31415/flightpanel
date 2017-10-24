@@ -42,6 +42,39 @@ def parse_threshold(value):
 		raise argparse.ArgumentTypeError("Threshold value must be inbetween 1 and 255.")
 	return value
 
+class ExportCmd(object):
+	def __init__(self, cmd):
+		cmd = cmd.split(":")
+		if len(cmd) not in [ 2, 3 ]:
+			raise argparse.ArgumentTypeError("You need to specify a filename and a glyph.")
+		self._filename = cmd[0]
+		self._glyph = cmd[1]
+		if len(cmd) == 3:
+			self._mode = "bitmap"
+			self._threshold = int(cmd[2])
+		else:
+			self._mode = "gray"
+			self._threshold = None
+
+		if len(self._glyph) != 1:
+			raise argparse.ArgumentTypeError("The glyph needs to be one single character.")
+
+	@property
+	def filename(self):
+		return self._filename
+
+	@property
+	def glyph(self):
+		return self._glyph
+
+	@property
+	def mode(self):
+		return self._mode
+
+	@property
+	def threshold(self):
+		return self._threshold
+
 class PatchCmd(object):
 	_KNOWN_CMDS = {
 		"setwidth": 1,
@@ -50,20 +83,21 @@ class PatchCmd(object):
 		"movex": 1,
 		"movey": 1,
 		"rename": 1,
+		"threshold": 1,
 	}
 
 	def __init__(self, cmd):
 		cmd = cmd.split(":")
 		if len(cmd) < 2:
-			raise argparse.ArgumentTypeError("You need to specify at least a glyph and a command.")
+			raise argparse.ArgumentTypeError("You need to specify at least a command and glyph.")
 
-		self._glyph = cmd[0]
-		if len(self._glyph) != 1:
-			raise argparse.ArgumentTypeError("The glyph needs to be one single character.")
-
-		self._cmd = cmd[1]
+		self._cmd = cmd[0]
 		if self._cmd not in self._KNOWN_CMDS:
 			raise argparse.ArgumentTypeError("Unknown command \"%s\" specified. Known are %s." % (self._cmd, ", ".join(self._KNOWN_CMDS)))
+
+		self._glyph = cmd[1]
+		if len(self._glyph) != 1:
+			raise argparse.ArgumentTypeError("The glyph needs to be one single character.")
 
 		self._args = cmd[2:]
 		if len(self._args) != self._KNOWN_CMDS[self._cmd]:
@@ -108,6 +142,11 @@ class PatchCmd(object):
 		assert(self._cmd in [ "setwidth" ])
 		return self._args[0]
 
+	@property
+	def threshold(self):
+		assert(self._cmd in [ "threshold" ])
+		return self._args[0]
+
 
 parser = FriendlyArgumentParser()
 parser.add_argument("-t", "--threshold", metavar = "value", type = parse_threshold, default = 0x60, help = "Threshold at which pixels will be considered set. Defaults to %(default)d, must be a value between 1 and 255.")
@@ -118,6 +157,7 @@ parser.add_argument("--create-text", action = "store_true", help = "Create a PNM
 parser.add_argument("--text", metavar = "text", help = "Render this text to the PNM file")
 parser.add_argument("--text-size", metavar = "WxH", default = "128x64", help = "When writing a text file, specifies the PNM output filesize.")
 parser.add_argument("--patch", metavar = "patchcmd", type = PatchCmd, action = "append", default = [ ], help = "Patch glyphs before rendering. Command can be either glyph:setwidth:n or glyph:setpixel:x:y or glyph:clrpixel:x:y.")
+parser.add_argument("--export-glyph", metavar = "filename:glyph", type = ExportCmd, action = "append", default = [ ], help = "Export glyph to specified PNM filename.")
 parser.add_argument("-f", "--force", action = "store_true", help = "Overwrite .c, .h and .pnm files if they exist.")
 parser.add_argument("-v", "--verbose", action = "store_true", help = "Increase message verbosity.")
 parser.add_argument("jsonfontfile", metavar = "jsonfontfile", type = str, help = "Rasterized JSON formatted font that was output by font-rasterize.")
@@ -166,6 +206,9 @@ for glyphdata in jsonfont["glyphs"]:
 # Apply all patches to font
 for patch in args.patch:
 	font.patch(patch)
+
+for export in args.export_glyph:
+	font.export(export)
 
 # Then assign char IDs
 font.enumerate_glyphs()

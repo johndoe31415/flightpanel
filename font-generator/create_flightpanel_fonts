@@ -2,18 +2,25 @@
 #
 #
 
-./font-rasterize --antialias gray --fontsize 20 "Helvetica" morse-font.json
+./font-rasterize --antialias gray --fontsize 20 "Helvetica" symbol-font.json
 ./font-rasterize --antialias good --fontsize 20 "VCR OSD Mono" vcr-osd-mono-20.json
-./font-rasterize --antialias good --fontsize 30 "VCR OSD Mono" vcr-osd-mono-30.json
-./json-to-c.py --force --charset " •-" --patch '•:movey:1' --patch '•:rename:.' --create-pnm morse-font.json
-./json-to-c.py --force vcr-osd-mono-20.json
-./json-to-c.py --force --charset ". 0123456789 AP OFF" --threshold 0xd6 \
-	--patch '.:setwidth:13' \
-	vcr-osd-mono-30.json
+./font-rasterize --antialias good --fontsize 30 "Inconsolata" inconsolata-30.json
+
+./json-to-c.py --force --charset " •-±" \
+	--patch 'rename:•:.' \
+	--patch 'rename:±:+' \
+	--patch 'movey:.:1' \
+	--patch 'setpixel:-:5:0' \
+	--patch 'threshold:+:20' \
+	--patch 'movey:+:-2' \
+	--create-pnm symbol-font.json
+./json-to-c.py --force --create-pnm vcr-osd-mono-20.json
+./json-to-c.py --force --charset ". 0123456789" --threshold 75 --create-pnm \
+	--patch 'setwidth:.:11' \
+	--patch 'movex:.:-3' \
+	inconsolata-30.json
 
 cp vcr-osd-mono-20.c vcr-osd-mono-20.h ../firmware
-cp vcr-osd-mono-30.c vcr-osd-mono-30.h ../firmware
-cp morse-font.c morse-font.h ../firmware
+cp inconsolata-30.c inconsolata-30.h ../firmware
+cp symbol-font.c symbol-font.h ../firmware
 
-#	--patch '0:setpixel:3:15' \
-#	--patch '0:setpixel:3:16' \

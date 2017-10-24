@@ -403,6 +403,33 @@ class PnmPicture(object):
 #				self.applystencilpixel(x, y, stencil, copy)
 #		return self
 #
+	def draw_line(self, x0, y0, x1, y1, pixel):
+		dx = x1 - x0
+		dy = y1 - y0
+
+		if dx > dy:
+			iteration = range(x0, x1 + 1)
+			w = y0
+			s = abs(dy / dx)
+		else:
+			iteration = range(y0, y1 + 1)
+			w = x0
+			s = abs(dx / dy)
+
+		err = 0
+		for v in iteration:
+			if dx > dy:
+				(x, y) = (v, w)
+			else:
+				(x, y) = (w, v)
+			self.set_pixel(x, y, pixel)
+
+			err += s
+			if err >= 0.5:
+				w += 1
+				err -= 1.0
+
+
 	def __eq__(self, other):
 		return (self.width == other.width) and (self.height == other.height) and (self.img_format == other.img_format) and (self._data == other._data)
 
@@ -463,6 +490,12 @@ class FilterStencil(object):
 if __name__ == "__main__":
 	import unittest
 
+	pic = PnmPicture.new(100, 100)
+	pic.draw_line(0, 10, 40, 10, (255, 0, 0))
+	pic.draw_line(0, 0, 0, 40, (255, 0, 0))
+	pic.write_file("out.pnm")
+
+
 	class PnmPictureTest(unittest.TestCase):
 		def test_new(self):
 			img = PnmPicture.new(2, 2)
@@ -481,6 +514,7 @@ if __name__ == "__main__":
 			self.assertEqual(img.data, bytes.fromhex("ffffff d9e8f8 f2f8fd ffffff e6f0fa f7fafd ffffff ffffff ffffff"))
 
 	unittest.main()
+
 
 #	pic = PnmPicture()
 #	pic.readfile("test_rgb_bin.pnm")

@@ -28,8 +28,8 @@
 
 #include "font.h"
 #include "vcr-osd-mono-20.h"
-#include "vcr-osd-mono-30.h"
-#include "morse-font.h"
+#include "inconsolata-30.h"
+#include "symbol-font.h"
 #include "instruments.h"
 #include "instrument_visuals.h"
 #include "frequencies.h"
@@ -84,8 +84,8 @@ static void draw_ident(const struct surface_t *surface, const char *ident) {
 			cursor = (struct cursor_t) { 55, 64 };
 		}
 		const char *morse = morse_get_code(ident_char);
-		blit_string_to_cursor(&font_morse_font, morse, surface, &cursor, false);
-		blit_string_to_cursor(&font_morse_font, " ", surface, &cursor, false);
+		blit_string_to_cursor(&font_symbol_font, morse, surface, &cursor, false);
+		blit_string_to_cursor(&font_symbol_font, " ", surface, &cursor, false);
 	}
 }
 
@@ -96,7 +96,7 @@ static void redraw_com_nav_display(const struct surface_t *surface, const struct
 	sprintf(text, "%3d.%03d", mhz, khz);
 	struct cursor_t cursor = { 4, 35 };
 	surface_clear(surface);
-	blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor, false);
+	blit_string_to_cursor(&font_inconsolata_30, text, surface, &cursor, false);
 	draw_ident(surface, ident);
 	if (tx_dme) {
 		cursor = (struct cursor_t) { 5, 60 };
@@ -123,9 +123,9 @@ static uint32_t mbar_to_inhg_hundreds(uint32_t mbar) {
 static void redraw_qnh_display(const struct surface_t *surface, const struct instrument_state_t *istate) {
 	surface_clear(surface);
 	char text[16];
-	sprintf(text, "%4d", istate->external.qnh);
-	struct cursor_t cursor = { 28, 28 };
-	blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor, false);
+	sprintf(text, "%d", istate->external.qnh);
+	struct cursor_t cursor = { TEXT_CENTER, 28 };
+	blit_string_to_cursor(&font_inconsolata_30, text, surface, &cursor, false);
 
 	cursor = (struct cursor_t) { 10, 55 };
 	const uint32_t inhg = mbar_to_inhg_hundreds(istate->external.qnh);
@@ -137,8 +137,8 @@ static void redraw_adf_display(const struct surface_t *surface, const struct ins
 	surface_clear(surface);
 
 	char text[16];
-	struct cursor_t cursor = { 4, 25 };
-	snprintf(text, sizeof(text), "%4d kHz", istate->external.adf.frequency_khz);
+	struct cursor_t cursor = { TEXT_CENTER, 25 };
+	snprintf(text, sizeof(text), "%d kHz", istate->external.adf.frequency_khz);
 	blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 
 	draw_ident(surface, istate->internal.ident.adf);
@@ -149,12 +149,12 @@ static void redraw_dme_display(const struct surface_t *surface, const struct ins
 
 	if (istate->internal.dme.available) {
 		char text[16];
-		struct cursor_t cursor = { 4, 25 };
-		snprintf(text, sizeof(text), "%3d.%d nm", istate->internal.dme.distance_tenth_nm / 10, istate->internal.dme.distance_tenth_nm % 10);
+		struct cursor_t cursor = { TEXT_CENTER, 25 };
+		snprintf(text, sizeof(text), "%d.%d nm", istate->internal.dme.distance_tenth_nm / 10, istate->internal.dme.distance_tenth_nm % 10);
 		blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 
-		cursor = (struct cursor_t) { 4, 55 };
-		snprintf(text, sizeof(text), "%3d kt", istate->internal.dme.velocity);
+		cursor = (struct cursor_t) { TEXT_CENTER, 55 };
+		snprintf(text, sizeof(text), "%d kt", istate->internal.dme.velocity);
 		blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 	} else {
 		struct cursor_t cursor = { 28, 40 };
@@ -166,7 +166,7 @@ static void redraw_ap_display(const struct surface_t *surface, const struct inst
 	surface_clear(surface);
 	if (((istate->external.ap.state & AP_ACTIVE) == 0) || ((istate->external.ap.state & (AP_HOLD_ALTITUDE | AP_HOLD_IAS | AP_HOLD_HEADING | AP_HOLD_NAVIGATION | AP_HOLD_APPROACH)) == 0)) {
 		struct cursor_t cursor = { 10, 45 };
-		blit_string_to_cursor(&font_vcr_osd_mono_30, "AP OFF", surface, &cursor, false);
+		blit_string_to_cursor(&font_inconsolata_30, "AP OFF", surface, &cursor, false);
 	} else {
 		char text[16];
 		if (istate->external.ap.state & AP_HOLD_ALTITUDE) {
@@ -209,7 +209,7 @@ static void redraw_xpdr_display(const struct surface_t *surface, const struct in
 	sprintf(text, "%04d", istate->external.xpdr.squawk);
 
 	struct cursor_t cursor = { 28, 35 };
-	blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor, false);
+	blit_string_to_cursor(&font_inconsolata_30, text, surface, &cursor, false);
 
 	if (istate->internal.xpdr.edit_char) {
 		const int char_width = 18;

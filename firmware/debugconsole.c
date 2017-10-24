@@ -39,7 +39,7 @@
 #include "surface.h"
 #include "font.h"
 #include "vcr-osd-mono-20.h"
-#include "vcr-osd-mono-30.h"
+#include "inconsolata-30.h"
 #include "eeprom.h"
 #include "stm32f407_adc.h"
 #include "bitwise.h"
@@ -174,7 +174,7 @@ static void display_debug(void) {
 	struct cursor_t cursor = { 5, 35 };
 	char text[16];
 	sprintf(text, "%2d", debug_accu);
-	blit_string_to_cursor(&font_vcr_osd_mono_30, text, surface, &cursor, false);
+	blit_string_to_cursor(&font_inconsolata_30, text, surface, &cursor, false);
 
 	sprintf(text, "%3d", counter++);
 	cursor = (struct cursor_t){ 5, 60 };

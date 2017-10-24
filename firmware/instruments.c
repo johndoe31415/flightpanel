@@ -31,7 +31,7 @@
 #include "displays.h"
 #include "font.h"
 #include "vcr-osd-mono-20.h"
-#include "vcr-osd-mono-30.h"
+#include "inconsolata-30.h"
 #include "timer.h"
 #include "usb.h"
 #include "pinmap.h"

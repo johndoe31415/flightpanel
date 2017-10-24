@@ -21,11 +21,11 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __MORSE_FONT_H__
-#define __MORSE_FONT_H__
+#ifndef __SYMBOL_FONT_H__
+#define __SYMBOL_FONT_H__
 
 #include "font.h"
 
-extern const struct font_t font_morse_font;
+extern const struct font_t font_symbol_font;
 
 #endif

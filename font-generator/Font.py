@@ -25,6 +25,7 @@ class Font(object):
 		self._size = size
 		self._antialiasing = antialiasing
 		self._glyphs = { }
+		self._custom_thresholds = { }
 
 	@property
 	def name(self):
@@ -38,16 +39,29 @@ class Font(object):
 	def antialiasing(self):
 		return self._antialiasing
 
+	@property
+	def custom_thresholds(self):
+		return self._custom_thresholds
+
+	def export(self, export_cmd):
+		codepoint = ord(export_cmd.glyph)
+		glyph = self._glyphs[codepoint]
+		glyph.write_to_pnm(export_cmd)
+
 	def patch(self, patch):
 		codepoint = ord(patch.glyph)
 		if codepoint not in self._glyphs:
 			raise Exception("Patching of glyph '%s' requested, but this glyph is not part of the font." % (patch.glyph))
-		self._glyphs[codepoint].patch(patch)
 
-		if patch.cmd == "rename":
-			target_codepoint = ord(patch.target)
-			self._glyphs[target_codepoint] = self._glyphs[codepoint]
-			del self._glyphs[codepoint]
+		if patch.cmd == "threshold":
+			self._custom_thresholds[codepoint] = patch.threshold
+		else:
+			self._glyphs[codepoint].patch(patch)
+
+			if patch.cmd == "rename":
+				target_codepoint = ord(patch.target)
+				self._glyphs[target_codepoint] = self._glyphs[codepoint]
+				del self._glyphs[codepoint]
 
 	def add_glyph(self, glyph):
 		if glyph.codepoint in self._glyphs:
@@ -58,9 +72,13 @@ class Font(object):
 		for (codepoint, glyph) in sorted(self._glyphs.items()):
 			print(glyph)
 
-	def bitmapize(self, threshold):
+	def bitmapize(self, default_threshold):
 		bitmaps = { }
 		for (codepoint, glyph) in sorted(self._glyphs.items()):
+			if codepoint not in self._custom_thresholds:
+				threshold = default_threshold
+			else:
+				threshold = self._custom_thresholds[codepoint]
 			bitmap = glyph.bitmapize(threshold)
 			bitmaps[codepoint] = bitmap
 		return bitmaps

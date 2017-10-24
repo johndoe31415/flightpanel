@@ -19,6 +19,8 @@
 #
 #	Johannes Bauer <JohannesBauer@gmx.de>
 
+from PnmPicture import PnmPicture, PnmPictureFormat
+
 class BitmapGlyph(object):
 	def __init__(self, data, glyph):
 		assert(len(data) == glyph.width * glyph.height)
@@ -65,12 +67,15 @@ class BitmapGlyph(object):
 			print(line)
 		print("-" * 120)
 
-	def blit_to(self, pic, x0, y0):
+	def blit_to(self, pic, x0, y0, auto_offset = True):
 		for gy in range(self._glyph.height):
 			for gx in range(self._glyph.width):
 				if self.get_pixel(gx, gy):
-					x = x0 + self._glyph.xoffset + gx
-					y = y0 + self._glyph.yoffset + gy
+					x = x0 + gx
+					y = y0 + gy
+					if auto_offset:
+						x += self._glyph.xoffset
+						y += self._glyph.yoffset
 					pic.set_pixel(x, y, (0, 0, 0))
 
 class Glyph(object):
@@ -154,6 +159,18 @@ class Glyph(object):
 			self._codepoint = ord(patch.target)
 		else:
 			raise Exception(NotImplemented)
+
+	def write_to_pnm(self, export_cmd):
+		if export_cmd.mode == "gray":
+			pnm = PnmPicture(width = self.width, height = self.height, data = self.rawdata, img_format = PnmPictureFormat.Graymap)
+			pnm.invert()
+		elif export_cmd.mode == "bitmap":
+			pnm = PnmPicture.new(width = self.width, height = self.height)
+			bmp = self.bitmapize(export_cmd.threshold)
+			bmp.blit_to(pnm, 0, 0, auto_offset = False)
+		else:
+			raise Exception(NotImplemented)
+		pnm.write_file(export_cmd.filename)
 
 	def __str__(self):
 		return "Glyph<\"%s\", CP %d, %d x %d, %d bytes>" % (self.text, self.codepoint, self.width, self.height, self.bitmap_size)

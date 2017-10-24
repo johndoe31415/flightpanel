@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
 		"ö", "Ö",
 		"ü", "Ü",
 		"ß",
-		"°", "•",
+		"°", "•", "±",
 	};
 	const int special_char_cnt = sizeof(special_chars) / sizeof(char*);
 	for (int i = 0; i < special_char_cnt; i++) {
