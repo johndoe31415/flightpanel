@@ -27,11 +27,17 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+struct linear_mapping_t {
+	int32_t offset;
+	int32_t multiplier;
+};
+
 struct rotary_encoder_t {
 	/* These are configuration variables */
 	uint16_t value;
 	uint16_t detent_cnt;
 	bool wrap_around;
+	const struct linear_mapping_t *mapping;
 
 	/* These are output/input */
 	bool changed;
@@ -45,6 +51,8 @@ struct rotary_encoder_t {
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 bool rotary_encoder_update(struct rotary_encoder_t *rotary, bool value1, bool value2);
+int32_t rotary_getvalue(const struct rotary_encoder_t *rotary);
+void rotary_setvalue(struct rotary_encoder_t *rotary, int32_t value);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

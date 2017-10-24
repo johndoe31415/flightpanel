@@ -99,6 +99,10 @@ static struct rotary_encoder_with_button_t rotary_atm = {
 		.value = 0,
 		.detent_cnt = 201,
 		.wrap_around = false,
+		.mapping = &(struct linear_mapping_t) {
+			.multiplier = 1,
+			.offset = 900,
+		},
 	},
 	.button = {
 		.threshold = 50,
@@ -135,6 +139,10 @@ static struct rotary_encoder_with_button_t rotary_ap_alt = {
 		.value = 0,
 		.detent_cnt = 401,
 		.wrap_around = false,
+		.mapping = &(struct linear_mapping_t) {
+			.multiplier = 100,
+			.offset = 0,
+		},
 	},
 	.button = {
 		.threshold = 50,
@@ -171,6 +179,10 @@ static struct rotary_encoder_with_button_t rotary_ap_rate = {
 		.value = 0,
 		.detent_cnt = 31,
 		.wrap_around = false,
+		.mapping = &(struct linear_mapping_t) {
+			.multiplier = 100,
+			.offset = 0,
+		},
 	},
 	.button = {
 		.threshold = 50,
@@ -640,7 +652,7 @@ static void handle_radiopanel_inputs(void) {
 
 static void handle_comnav_inputs(struct xcom_state_t *comnav, struct rotary_encoder_with_button_t *rotary, const enum display_t active_display, const enum display_t standby_display)  {
 	if (rotary_changed(&rotary->rotary)) {
-		comnav->standby_index = rotary->rotary.value;
+		comnav->standby_index = rotary_getvalue(&rotary->rotary);
 		display_data_changed[standby_display] = true;
 	}
 
@@ -656,19 +668,19 @@ static void handle_comnav_inputs(struct xcom_state_t *comnav, struct rotary_enco
 
 static void handle_ap_inputs(void) {
 	if (rotary_changed(&rotary_ap_alt.rotary)) {
-		instrument_state.external.ap.altitude = rotary_ap_alt.rotary.value * 100;
+		instrument_state.external.ap.altitude = rotary_getvalue(&rotary_ap_alt.rotary);
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (rotary_changed(&rotary_ap_hdg.rotary)) {
-		instrument_state.external.ap.heading = rotary_ap_hdg.rotary.value;
+		instrument_state.external.ap.heading = rotary_getvalue(&rotary_ap_hdg.rotary);
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (rotary_changed(&rotary_ap_ias.rotary)) {
-		instrument_state.external.ap.ias = rotary_ap_ias.rotary.value;
+		instrument_state.external.ap.ias = rotary_getvalue(&rotary_ap_ias.rotary);
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (rotary_changed(&rotary_ap_rate.rotary)) {
-		instrument_state.external.ap.climbrate = rotary_ap_rate.rotary.value * 100;
+		instrument_state.external.ap.climbrate = rotary_getvalue(&rotary_ap_rate.rotary);
 		display_data_changed[DISPLAY_AP] = true;
 	}
 
@@ -787,7 +799,7 @@ static void handle_xpdr_inputs(void) {
 
 static void handle_adf_inputs(void) {
 	if (rotary_changed(&rotary_dme_adf.rotary)) {
-		instrument_state.external.adf.frequency_khz = rotary_dme_adf.rotary.value;
+		instrument_state.external.adf.frequency_khz = rotary_getvalue(&rotary_dme_adf.rotary);
 		display_data_changed[DISPLAY_ADF] = true;
 	}
 	if (button_pressed(&rotary_dme_adf.button)) {
@@ -824,7 +836,7 @@ static void handle_qnh_inputs(void) {
 static void handle_obs_inputs(void) {
 	if (rotary_changed(&rotary_obs.rotary)) {
 		uint16_t *obs = (instrument_state.internal.active_obs == 0) ? &instrument_state.external.nav1.obs : &instrument_state.external.nav2.obs;
-		*obs = rotary_obs.rotary.value;
+		*obs = rotary_getvalue(&rotary_obs.rotary);
 		display_data_changed[(instrument_state.internal.active_obs == 0) ? DISPLAY_NAV1_STBY : DISPLAY_NAV2_STBY] = true;
 	}
 	if (button_pressed(&rotary_obs.button)) {
@@ -922,6 +934,18 @@ static void instruments_set_by_host_report01(const struct hid_set_report_01_t *r
 	display_data_changed[DISPLAY_AP] = copy_if_changed(&instrument_state.external.ap, &report->ap, sizeof(instrument_state.external.ap)) || display_data_changed[DISPLAY_AP];
 	instrument_state.external.qnh = report->qnh;
 	led_state_changed = copy_if_changed(&instrument_state.external.navigate_by_gps, &report->navigate_by_gps, sizeof(instrument_state.external.navigate_by_gps)) || led_state_changed;
+
+	rotary_setvalue(&rotary_com1.rotary, instrument_state.external.com1.freq.standby_index);
+	rotary_setvalue(&rotary_com2.rotary, instrument_state.external.com2.freq.standby_index);
+	rotary_setvalue(&rotary_atm.rotary, instrument_state.external.qnh);
+	rotary_setvalue(&rotary_nav1.rotary, instrument_state.external.nav1.freq.standby_index);
+	rotary_setvalue(&rotary_nav2.rotary, instrument_state.external.nav2.freq.standby_index);
+	rotary_setvalue(&rotary_obs.rotary, (instrument_state.internal.active_obs == 0) ? instrument_state.external.nav1.obs : instrument_state.external.nav2.obs);
+	rotary_setvalue(&rotary_dme_adf.rotary, instrument_state.external.adf.frequency_khz);
+	rotary_setvalue(&rotary_ap_alt.rotary, instrument_state.external.ap.altitude);
+	rotary_setvalue(&rotary_ap_hdg.rotary, instrument_state.external.ap.heading);
+	rotary_setvalue(&rotary_ap_ias.rotary, instrument_state.external.ap.ias);
+	rotary_setvalue(&rotary_ap_rate.rotary, instrument_state.external.ap.climbrate);
 }
 
 static void instruments_set_by_host_report02(const struct hid_set_report_02_t *report) {
@@ -965,14 +989,14 @@ void instruments_init(void) {
 	rotary_com2.rotary.detent_cnt = frequency_detent_count(instrument_state.external.com_divisions);
 	rotary_nav1.rotary.detent_cnt = frequency_detent_count(instrument_state.external.nav_divisions);
 	rotary_nav2.rotary.detent_cnt = frequency_detent_count(instrument_state.external.nav_divisions);
-	rotary_ap_alt.rotary.value = instrument_state.external.ap.altitude / 100;
-	rotary_ap_ias.rotary.value = instrument_state.external.ap.ias;
-	rotary_ap_rate.rotary.value = instrument_state.external.ap.climbrate / 100;
+	rotary_setvalue(&rotary_ap_alt.rotary, instrument_state.external.ap.altitude);
+	rotary_setvalue(&rotary_ap_ias.rotary, instrument_state.external.ap.ias);
+	rotary_setvalue(&rotary_ap_rate.rotary, instrument_state.external.ap.climbrate);
 
 	instrument_state.external.adf.frequency_khz = active_configuration.instruments.adf_frequency_khz;
 
 	instrument_state.external.qnh = active_configuration.instruments.qnh;
-	rotary_atm.rotary.value = instrument_state.external.qnh - 900;
+	rotary_setvalue(&rotary_atm.rotary, instrument_state.external.qnh);
 
 	instrument_state.external.tx_radio_id = active_configuration.instruments.tx_radio_id;
 	instrument_state.external.dme_nav_source = 1;

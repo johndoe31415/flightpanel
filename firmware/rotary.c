@@ -108,3 +108,38 @@ bool rotary_encoder_update(struct rotary_encoder_t *rotary, bool value1, bool va
 
 	return changed;
 }
+
+static void rotary_setvalue_raw(struct rotary_encoder_t *rotary, int32_t value) {
+	if (rotary->wrap_around) {
+		value = value % rotary->detent_cnt;
+		if (value < 0) {
+			value += rotary->detent_cnt;
+		}
+		rotary->value = value;
+	} else {
+		if (value < 0) {
+			rotary->value = 0;
+		} else if (value >= rotary->detent_cnt) {
+			rotary->value = rotary->detent_cnt - 1;
+		} else {
+			rotary->value = value;
+		}
+	}
+}
+
+int32_t rotary_getvalue(const struct rotary_encoder_t *rotary) {
+	if (!rotary->mapping) {
+		return rotary->value;
+	} else {
+		return (rotary->value + rotary->mapping->offset) * rotary->mapping->multiplier;
+	}
+}
+
+void rotary_setvalue(struct rotary_encoder_t *rotary, int32_t value) {
+	if (!rotary->mapping) {
+		rotary_setvalue_raw(rotary, value);
+	} else {
+		rotary_setvalue_raw(rotary, (value / rotary->mapping->multiplier) - rotary->mapping->offset);
+	}
+
+}

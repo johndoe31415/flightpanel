@@ -127,11 +127,171 @@ static void test_rotary_wrap(void) {
 	subtest_finished();
 }
 
+static void test_rotary_getvalue(void) {
+	subtest_start();
+
+	{
+		struct rotary_encoder_t rotary = {
+			.detent_cnt = 101,
+			.mapping = NULL,
+		};
+		for (int i = 0; i < 101; i++) {
+			rotary.value = i;
+			test_assert_int_eq(rotary.value, rotary_getvalue(&rotary));
+		}
+	}
+
+	{
+		struct rotary_encoder_t rotary = {
+			.detent_cnt = 101,
+			.mapping = &(const struct linear_mapping_t) {
+				.offset = 0,
+				.multiplier = 1,
+			},
+		};
+		for (int i = 0; i < 101; i++) {
+			rotary.value = i;
+			test_assert_int_eq(rotary.value, rotary_getvalue(&rotary));
+		}
+	}
+
+	{
+		struct rotary_encoder_t rotary = {
+			.detent_cnt = 101,
+			.mapping = &(const struct linear_mapping_t) {
+				.offset = -50,
+				.multiplier = 3,
+			},
+		};
+		for (int i = 0; i < 101; i++) {
+			rotary.value = i;
+			test_assert_int_eq((rotary.value - 50) * 3, rotary_getvalue(&rotary));
+		}
+	}
+	subtest_finished();
+}
+
+static void test_rotary_setvalue(void) {
+	subtest_start();
+
+	{
+		struct rotary_encoder_t rotary = {
+			.detent_cnt = 101,
+			.wrap_around = false,
+			.mapping = NULL,
+		};
+		for (int i = -100; i < 200; i++) {
+			rotary_setvalue(&rotary, i);
+			if (i < 0) {
+				test_assert_int_eq(rotary.value, 0);
+			} else if (i > 100) {
+				test_assert_int_eq(rotary.value, 100);
+			} else {
+				test_assert_int_eq(rotary.value, i);
+			}
+		}
+	}
+
+	{
+		struct rotary_encoder_t rotary = {
+			.detent_cnt = 101,
+			.wrap_around = false,
+			.mapping = &(const struct linear_mapping_t) {
+				.offset = 0,
+				.multiplier = 1,
+			},
+		};
+		for (int i = -100; i < 200; i++) {
+			rotary_setvalue(&rotary, i);
+			if (i < 0) {
+				test_assert_int_eq(rotary.value, 0);
+			} else if (i > 100) {
+				test_assert_int_eq(rotary.value, 100);
+			} else {
+				test_assert_int_eq(rotary.value, i);
+			}
+		}
+	}
+
+	{
+		struct rotary_encoder_t rotary = {
+			.detent_cnt = 101,
+			.wrap_around = true,
+			.mapping = false,
+		};
+		for (int i = -7777; i < 10000; i += 50) {
+			rotary_setvalue(&rotary, i);
+			test_assert_int_eq(rotary.value, (i + 10100) % 101);
+		}
+	}
+
+	{
+		struct rotary_encoder_t rotary = {
+			.detent_cnt = 101,
+			.wrap_around = true,
+			.mapping = &(const struct linear_mapping_t) {
+				.offset = 0,
+				.multiplier = 1,
+			},
+		};
+		for (int i = -7777; i < 10000; i += 50) {
+			rotary_setvalue(&rotary, i);
+			test_assert_int_eq(rotary.value, (i + 10100) % 101);
+		}
+	}
+
+	{
+		struct rotary_encoder_t rotary = {
+			.detent_cnt = 201,
+			.wrap_around = false,
+			.mapping = &(const struct linear_mapping_t) {
+				.offset = 900,
+				.multiplier = 1,
+			},
+		};
+
+		rotary_setvalue(&rotary, 950);
+		test_assert_int_eq(rotary.value, 50);
+		test_assert_int_eq(rotary_getvalue(&rotary), 950);
+	}
+
+	{
+		struct rotary_encoder_t rotary = {
+			.detent_cnt = 201,
+			.wrap_around = false,
+			.mapping = &(const struct linear_mapping_t) {
+				.offset = 20,
+				.multiplier = 100,
+			},
+		};
+
+		rotary_setvalue(&rotary, 1500);
+		test_assert_int_eq(rotary.value, 0);
+		test_assert_int_eq(rotary_getvalue(&rotary), 2000);
+
+		rotary_setvalue(&rotary, 2500);
+		test_assert_int_eq(rotary.value, 5);
+		test_assert_int_eq(rotary_getvalue(&rotary), 2500);
+
+		rotary_setvalue(&rotary, 2599);
+		test_assert_int_eq(rotary.value, 5);
+		test_assert_int_eq(rotary_getvalue(&rotary), 2500);
+
+		rotary_setvalue(&rotary, 2600);
+		test_assert_int_eq(rotary.value, 6);
+		test_assert_int_eq(rotary_getvalue(&rotary), 2600);
+	}
+
+	subtest_finished();
+}
+
 int main(int argc, char **argv) {
 	test_start(argc, argv);
 	test_rotary_normal();
 	test_rotary_glitch();
 	test_rotary_wrap();
+	test_rotary_getvalue();
+	test_rotary_setvalue();
 	test_finished();
 	return 0;
 }
