@@ -1,0 +1,84 @@
+#!/usr/bin/python3
+#
+#	flightpanel - A Cortex-M4 based USB flight panel for flight simulators.
+#	Copyright (C) 2017-2017 Johannes Bauer
+#
+#	This file is part of flightpanel.
+#
+#	flightpanel is free software; you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation; this program is ONLY licensed under
+#	version 3 of the License, later versions are explicitly excluded.
+#
+#	flightpanel is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#
+#	You should have received a copy of the GNU General Public License
+#	along with flightpanel; if not, write to the Free Software
+#	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#	Johannes Bauer <JohannesBauer@gmx.de>
+
+import sys
+import os
+import tempfile
+import shutil
+import subprocess
+import time
+
+git_repository_basedir = os.path.realpath(os.getcwd())
+private_environment_file = git_repository_basedir + "/.private"
+if not os.path.isfile(private_environment_file):
+	print("No private environment file %s exists, not performing pre-commit hook.", file = sys.stderr)
+	sys.exit(0)
+
+with open(private_environment_file) as f:
+	local_env = { }
+	for line in f:
+		line = line.rstrip("\r\n")
+		if "=" in line:
+			(key, value) = line.split("=", maxsplit = 1)
+			local_env[key] = value
+
+def get_complete_env(local_env):
+	filter_vars = [ 
+		"GIT_AUTHOR_DATE",
+		"GIT_AUTHOR_EMAIL",
+		"GIT_AUTHOR_NAME",
+		"GIT_DIR",
+		"GIT_INDEX_FILE",
+		"GIT_PREFIX",
+	]
+	complete_env = dict(os.environ)
+	complete_env.update(local_env)
+	for filtered in filter_vars:
+		if filtered in complete_env:
+			del complete_env[filtered]
+	return complete_env
+
+with tempfile.TemporaryDirectory(prefix = "/dev/shm/") as tempdir, tempfile.NamedTemporaryFile() as patchfile:
+	# First export current HEAD
+	git_proc = subprocess.Popen([ "git", "archive", "--format=tar", "HEAD" ], stdout = subprocess.PIPE)
+	tar_proc = subprocess.Popen([ "tar", "-C", tempdir, "-x" ], stdin = git_proc.stdout)
+	tar_proc.wait()
+	if tar_proc.returncode != 0:
+		print("tar process failed.", file = sys.stderr)
+		sys.exit(1)
+
+	# Then create the patch of the would-be commit
+	with open(patchfile.name, "wb") as f:
+		subprocess.check_call([ "git", "diff", "--cached" ], stdout = f)
+	
+	# Now apply the patch to the fresh repo copy
+	os.chdir(tempdir)
+	with open(patchfile.name, "rb") as f:
+		subprocess.check_call([ "patch", "-p1" ], stdin = f)
+
+	# And try to build it.
+	cmd = [ "python3", "-m", "travis-deploy", "--parallel=16", "--do-setup", "--do-build-firmware", "--do-build-plugins" ]
+	subprocess.check_call(cmd, env = get_complete_env(local_env))
+
+print("Build successful. Letting commit proceed!", file = sys.stderr)
+sys.exit(0)

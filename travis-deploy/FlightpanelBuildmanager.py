@@ -95,13 +95,18 @@ class FlightpanelBuildmanager(BuildManager):
 			with TimeLogger(self._log, "Running bootstrap.sh script"):
 				self._execute([ "./bootstrap.sh" ])
 			with WorkDir("ext-st"), TimeLogger(self._log, "Building ST external peripheral library"):
-				self._execute([ "make", "clean", "all" ], add_env = { "CFLAGS": "-DRELEASE_BUILD" })
+				self._execute([ "make", "clean" ])
+				self._execute([ "make", "all", "-j%d" % (self._args.parallel) ], add_env = { "CFLAGS": "-DRELEASE_BUILD" })
 			with WorkDir("cube"), TimeLogger(self._log, "Building ST cube library"):
-				self._execute([ "make", "clean", "all" ], add_env = { "CFLAGS": "-DRELEASE_BUILD" })
+				self._execute([ "make", "clean" ])
+				self._execute([ "make", "all", "-j%d" % (self._args.parallel) ], add_env = { "CFLAGS": "-DRELEASE_BUILD" })
 			with TimeLogger(self._log, "Running firmware tests"):
-				self._execute([ "make", "clean", "tests" ])
+				self._execute([ "make", "clean" ])
+				self._execute([ "make", "all", "-j%d" % (self._args.parallel) ], add_env = { "CFLAGS": "-DRELEASE_BUILD" })
+				self._execute([ "make", "tests" ])
 			with TimeLogger(self._log, "Building firmware binary"):
-				self._execute([ "make", "clean", "all" ], add_env = { "CFLAGS": "-DRELEASE_BUILD" })
+				self._execute([ "make", "clean" ])
+				self._execute([ "make", "all", "-j%d" % (self._args.parallel) ], add_env = { "CFLAGS": "-DRELEASE_BUILD" })
 
 	def do_build_plugins(self):
 		with WorkDir("fs-plugin"):
@@ -113,7 +118,9 @@ class FlightpanelBuildmanager(BuildManager):
 				self._execute([ "./bootstrap-hidapi.py" ])
 			for variant in [ "linux-emulator", "linux-xplane", "windows-fsx" ]:
 				with TimeLogger(self._log, "Building connector plugin for variant %s" % (variant)):
-					self._execute([ "make", "clean", "all", "install" ], add_env = { "VARIANT": variant })
+					self._execute([ "make", "clean" ], add_env = { "VARIANT": variant })
+					self._execute([ "make", "all", "-j%d" % (self._args.parallel) ], add_env = { "VARIANT": variant })
+					self._execute([ "make", "install" ], add_env = { "VARIANT": variant })
 
 	def do_package_binaries(self):
 		self._log.info("Preparing devbuild package from all binaries and some metadata")

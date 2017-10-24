@@ -1,5 +1,6 @@
 .*.swp
 *.o
+.private
 
 __pycache__
 *.pyc

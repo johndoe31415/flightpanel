@@ -27,6 +27,7 @@ from .FriendlyArgumentParser import FriendlyArgumentParser
 from .FlightpanelBuildmanager import FlightpanelBuildmanager
 
 parser = FriendlyArgumentParser()
+parser.add_argument("--parallel", metavar = "proc_cnt", type = int, default = 1, help = "Specifies the number of concurrent processes to use during the build phase. Defaults to %(default)d.")
 parser.add_argument("--do-setup", action = "store_true", help = "Setup the working enviroment (i.e., download and/or extract the Cortex-M4 compiler)")
 parser.add_argument("--do-build-firmware", action = "store_true", help = "Build the firmware for the Cortex-M4")
 parser.add_argument("--do-build-plugins", action = "store_true", help = "Build plugins for all architectures")
