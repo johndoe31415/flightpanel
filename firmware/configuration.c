@@ -62,6 +62,9 @@ static const struct configuration default_configuration = {
 		.squawk = 7000,
 		.qnh = 1000,
 	},
+	.misc = {
+		.time_to_blank_milliseconds = 15 * 60 * 1000,
+	},
 };
 _Static_assert((sizeof(default_configuration) % 4) == 0, "Configuration size alignment mismatch.");
 

@@ -51,6 +51,7 @@ static uint8_t usb_report_time_tick;
 static bool display_data_changed[DISPLAY_COUNT];
 static bool led_state_changed;
 extern struct configuration active_configuration;
+static uint32_t milliseconds_to_blank;
 
 static struct rotary_encoder_with_button_t rotary_com1 = {
 	.rotary = {
@@ -468,6 +469,16 @@ static const struct button_input_t button_inputs[] = {
 	},
 };
 
+static void unblank(void) {
+	bool was_blanked = (milliseconds_to_blank == 0);
+	milliseconds_to_blank = active_configuration.misc.time_to_blank_milliseconds;
+	if (was_blanked) {
+		for (int i = 0; i < DISPLAY_COUNT; i++) {
+			display_data_changed[i] = true;
+		}
+	}
+}
+
 static void instruments_send_usb_hid_report(void) {
 	usb_report_time_tick = USB_REPORT_INTERVAL_MS;
 	usb_submit_report(&instrument_state.external);
@@ -497,6 +508,7 @@ void instruments_handle_inputs(void) {
 
 static bool button_pressed(struct button_t *button) {
 	if (button->lastpress != BUTTON_NOACTION) {
+		unblank();
 		button->lastpress = BUTTON_NOACTION;
 		return true;
 	}
@@ -513,6 +525,7 @@ static bool rotary_changed(struct rotary_encoder_t *rotary) {
 
 static void check_vfr_number_pressed(struct button_t *button, const uint8_t digit) {
 	if (button->lastpress != BUTTON_NOACTION) {
+		unblank();
 		button->lastpress = BUTTON_NOACTION;
 
 		instrument_state.internal.xpdr.edit_timeout = active_configuration.xpdr.edit_timeout_milliseconds;
@@ -577,6 +590,7 @@ static void update_leds(void) {
 
 static void handle_radiopanel_inputs(void) {
 	if (radio_com1_button.lastpress != BUTTON_NOACTION) {
+		unblank();
 		if (radio_com1_button.lastpress == BUTTON_PRESS) {
 			/* Short press */
 			led_state_changed = true;
@@ -598,6 +612,7 @@ static void handle_radiopanel_inputs(void) {
 		instrument_state.external.radio_panel ^= RADIO_DME;
 	}
 	if (radio_com2_button.lastpress != BUTTON_NOACTION) {
+		unblank();
 		if (radio_com2_button.lastpress == BUTTON_PRESS) {
 			/* Short press */
 			led_state_changed = true;
@@ -712,6 +727,7 @@ static void handle_ap_inputs(void) {
 
 static void handle_xpdr_inputs(void) {
 	if (xpdr_mode_button.lastpress != BUTTON_NOACTION) {
+		unblank();
 		uint8_t mode = instrument_state.external.xpdr.state & XPDR_MODE_MASK;
 
 		if (xpdr_mode_button.lastpress == BUTTON_PRESS) {
@@ -826,6 +842,20 @@ static void handle_switches(void) {
 	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_STRB) ? 0 : SWITCH_STRB;
 }
 
+static void handle_blanking(void) {
+	if (milliseconds_to_blank > 0) {
+		milliseconds_to_blank--;
+		if (milliseconds_to_blank == 0) {
+			/* Blank now! */
+			for (int i = 0; i < DISPLAY_COUNT; i++) {
+				const struct surface_t* surface = displays_get_surface(i);
+				surface_clear(surface);
+				display_mark_surface_dirty(i);
+			}
+		}
+	}
+}
+
 void dsr_idle_task(void) {
 	handle_radiopanel_inputs();
 	handle_comnav_inputs(&instrument_state.external.com1.freq, &rotary_com1, DISPLAY_COM1, DISPLAY_COM1_STBY);
@@ -839,19 +869,26 @@ void dsr_idle_task(void) {
 	handle_qnh_inputs();
 	handle_obs_inputs();
 	handle_switches();
+	handle_blanking();
 
 	if (led_state_changed) {
 		led_state_changed = false;
 		update_leds();
 	}
+
+	bool display_change = false;
 	for (int did = 0; did < DISPLAY_COUNT; did++) {
 		if (display_data_changed[did]) {
+			display_change = true;
 			// Get the surface for this display index
 			display_data_changed[did] = false;
 			const struct surface_t *surface = displays_get_surface(did);
 			redraw_display(surface, &instrument_state, did);
 			display_mark_surface_dirty(did);
 		}
+	}
+	if (display_change) {
+		unblank();
 	}
 }
 
@@ -903,6 +940,7 @@ void instruments_set_by_host(const union hid_set_report_t *report) {
 }
 
 void instruments_init(void) {
+	unblank();
 	instrument_state.external.com_divisions = active_configuration.instruments.com_frequency_divisions;
 	instrument_state.external.nav_divisions = active_configuration.instruments.nav_frequency_divisions;
 

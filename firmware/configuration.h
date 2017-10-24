@@ -50,6 +50,9 @@ struct configuration {
 		uint16_t squawk;
 		uint16_t qnh;
 	} instruments;
+	struct {
+		uint32_t time_to_blank_milliseconds;
+	} misc;
 	uint32_t crc32;
 };
 
