@@ -479,7 +479,7 @@ static void debugconsole_execute(void) {
 	} else if (!strcmp(cmd_input, "memory")) {
 		debug_show_memory();
 		printf("Program memory (_sflash) = %p, start of RAM (_sram) = %p, end of RAM (_eram) = %p\n", &_sflash, &_sram, &_eram);
-		printf("_ebss = %p, Sbrk = %p (malloc used %d bytes of memory) -> %d bytes of heap total\n", &_ebss, sbrk(0), (int)sbrk(0) - (int)&_ebss, (int)sbrk(0) - (int)&_sram);
+		printf("_ebss = %p, Sbrk = %p (malloc used %d bytes of memory) -> %d bytes of heap used total\n", &_ebss, sbrk(0), (int)sbrk(0) - (int)&_ebss, (int)sbrk(0) - (int)&_sram);
 	} else if (!strcmp(cmd_input, "iomux-in")) {
 		debugmode_set(DEBUG_IOMUX_INPUTS);
 	} else if (!strcmp(cmd_input, "iomux-out")) {
