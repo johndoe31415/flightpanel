@@ -51,6 +51,7 @@ static uint8_t usb_report_time_tick;
 static bool display_data_changed[DISPLAY_COUNT];
 static bool led_state_changed;
 extern struct configuration active_configuration;
+static bool report_via_usb = false;
 static uint32_t milliseconds_to_blank;
 
 static struct rotary_encoder_with_button_t rotary_com1 = {
@@ -481,7 +482,9 @@ static void unblank(void) {
 
 static void instruments_send_usb_hid_report(void) {
 	usb_report_time_tick = USB_REPORT_INTERVAL_MS;
-	usb_submit_report(&instrument_state.external);
+	if (report_via_usb) {
+		usb_submit_report(&instrument_state.external);
+	}
 }
 
 void hid_tick(void) {
@@ -978,4 +981,5 @@ void instruments_init(void) {
 	for (int did = 0; did < DISPLAY_COUNT; did++) {
 		display_data_changed[did] = true;
 	}
+	report_via_usb = true;
 }
