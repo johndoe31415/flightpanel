@@ -2,6 +2,7 @@
 *.o
 
 __pycache__
+*.pyc
 
 flightpanel
 flightpanel.bin
