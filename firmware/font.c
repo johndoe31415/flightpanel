@@ -45,10 +45,39 @@ static void blit_glyph_to_cursor(const struct glyph_t *glyph, const struct surfa
 	cursor->x += glyph->xadvance;
 }
 
-void blit_string_to_cursor(const struct font_t *font, const char *string, const struct surface_t *surface, struct cursor_t *cursor, const bool invert) {
+unsigned int font_determine_string_width(const struct font_t *font, const char *string) {
+	unsigned int width = 0;
 	while (*string) {
 		const unsigned int c = (*string) & 0xff;
-		int glyph_index = font->codepoint_to_charindex_fn(c);
+		const int glyph_index = font->codepoint_to_charindex_fn(c);
+		if (glyph_index >= 0) {
+			const struct glyph_t *glyph = &font->glyphs[glyph_index];
+			width += glyph->xadvance;
+		}
+		string++;
+	}
+	return width;
+}
+
+void blit_string_to_cursor(const struct font_t *font, const char *string, const struct surface_t *surface, struct cursor_t *cursor, const bool invert) {
+	if ((cursor->x == TEXT_CENTER) || (cursor->x == TEXT_RIGHT_JUSTIFY)) {
+		const unsigned int string_width = font_determine_string_width(font, string);
+		const unsigned int display_width = surface->width;
+
+		if (string_width < display_width) {
+			if (cursor->x == TEXT_CENTER) {
+				cursor->x = (display_width - string_width) / 2;
+			} else {
+				cursor->x = display_width - string_width;
+			}
+		} else {
+			/* Text does not fit. Left-adjust. */
+			cursor->x = 0;
+		}
+	}
+	while (*string) {
+		const unsigned int c = (*string) & 0xff;
+		const int glyph_index = font->codepoint_to_charindex_fn(c);
 		if (glyph_index >= 0) {
 			blit_glyph_to_cursor(&font->glyphs[glyph_index], surface, cursor, invert);
 		}

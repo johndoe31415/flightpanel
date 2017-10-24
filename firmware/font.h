@@ -31,6 +31,9 @@ typedef int (*cp_to_charindex_t)(const unsigned int codepoint);
 
 #define CHAR_DEGREES			"\xb0"		// °
 
+#define TEXT_CENTER				-1
+#define TEXT_RIGHT_JUSTIFY		-2
+
 struct glyph_t {
 	uint8_t xadvance;
 	int8_t xoffset, yoffset;
@@ -48,6 +51,7 @@ struct cursor_t {
 };
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
+unsigned int font_determine_string_width(const struct font_t *font, const char *string);
 void blit_string_to_cursor(const struct font_t *font, const char *string, const struct surface_t *surface, struct cursor_t *cursor, const bool invert);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
