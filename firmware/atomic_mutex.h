@@ -21,12 +21,15 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#include "atomic.h"
+#ifndef __ATOMIC_MUTEX_H__
+#define __ATOMIC_MUTEX_H__
 
-bool atomic_lock(atomic_t *mutex) {
-	return atomic_inc(mutex, 1);
-}
+#include <stdint.h>
+#include <stdbool.h>
 
-bool atomic_unlock(atomic_t *mutex) {
-	return atomic_dec(mutex);
-}
+typedef uint32_t atomic_t;
+
+bool atomic_inc(atomic_t *value, atomic_t max_value);
+bool atomic_dec(atomic_t *value);
+
+#endif

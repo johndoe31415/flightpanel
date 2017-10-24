@@ -159,7 +159,7 @@ static void displays_disable_cs(int display_index) {
 
 static void display_dma_start(int display_index) {
 	/* Only start if no DMA is running right now */
-	if (!inhibit && atomic_set_if_false(&dma_running)) {
+	if (!inhibit && atomic_lock(&dma_running)) {
 		surface_dirty[display_index] = false;
 		last_updated_display = display_index;
 		displays_enable_cs(display_index);
@@ -172,7 +172,7 @@ void isr_display_dma_finished(void) {
 }
 
 void dsr_display_dma_finished(void) {
-	dma_running = 0;
+	atomic_unlock(&dma_running);
 	displays_check_dma_schedule();
 }
 

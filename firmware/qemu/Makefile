@@ -17,7 +17,7 @@ CFLAGS += -I../ext-st/include -I../ext-st/include-cmsis -I../ext-st/include-cmsi
 LDFLAGS := -Tgeneric-hosted.ld
 LDFLAGS += -Wl,--gc-sections
 
-OBJS := qemu_core.o syscalls.o ivt.o corefault.o causefault.o fault.o
+OBJS := qemu_core.o syscalls.o ivt.o corefault.o causefault.o fault.o atomic2.o
 
 all: $(TARGETS)
 

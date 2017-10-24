@@ -26,9 +26,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "qemu_core.h"
+#include "../atomic2.h"
 
 uint8_t foobar[128];
 int mookoo = 0x12345678;
+
+void rs232_flush_buffer(void);
+void rs232_flush_buffer(void) {
+}
 
 void NMI_Handler(void) {
 	while (true);
@@ -50,10 +55,23 @@ void cause_fault_setregs(void);
 
 void SystemInit(void) {
 	printf("SystemInit()\n");
+
+	atomic_t atomic = 0;
+	printf("Value %ld\n", atomic);
+	printf("INC: %d\n", atomic_inc(&atomic, 1));
+	printf("Value %ld\n", atomic);
+	printf("INC: %d\n", atomic_inc(&atomic, 1));
+	printf("Value %ld\n", atomic);
+	printf("INC: %d\n", atomic_inc(&atomic, 1));
+	printf("Value %ld\n", atomic);
+
+
+	/*
 	foobar[0] = 0xaa;
 	foobar[127] = 0x55;
 	mookoo++;
 	cause_fault_setregs();
+	*/
 	while (true);
 }
 

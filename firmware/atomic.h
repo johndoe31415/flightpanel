@@ -24,16 +24,13 @@
 #ifndef __ATOMIC_H__
 #define __ATOMIC_H__
 
-#include <stdint.h>
 #include <stdbool.h>
-
-typedef int atomic_t;
+#include "atomic_mutex.h"
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
-void atomic_set(atomic_t *atomic, atomic_t value);
-bool atomic_set_if_false(atomic_t *atomic);
-void atomic_inc(atomic_t *atomic, int inc);
-void atomic_dec(atomic_t *atomic, int inc);
+bool atomic_lock(atomic_t *mutex);
+bool atomic_unlock(atomic_t *mutex);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif
+
