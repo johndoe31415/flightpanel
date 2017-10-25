@@ -44,10 +44,6 @@
 
 uint32_t SystemCoreClock = RUNNING_CLK_FREQUENCY;
 
-#define TIM3_CLK_FREQUENCY		2000
-#define TIM3_PRESCALER			(RUNNING_CLK_FREQUENCY / 2 / TIM3_CLK_FREQUENCY)
-#define TIM3_PERIOD				(TIM3_CLK_FREQUENCY - 1)
-
 #define UART_TX_PIN				GPIO_Pin_5
 #define UART_TX_GPIO_PORT		GPIOD
 #define UART_TX_GPIO_CLK		RCC_AHB1Periph_GPIOD
@@ -147,14 +143,13 @@ static void init_timer(void) {
 
 	/* Setup time base */
 	TIM_TimeBaseInitTypeDef t = {
-		.TIM_Prescaler = TIM3_PRESCALER,
+		.TIM_Prescaler = 8400,
 		.TIM_CounterMode  = TIM_CounterMode_Up,
-		.TIM_Period = TIM3_PERIOD,
+		.TIM_Period = 5000,		// 500 ms
 		.TIM_ClockDivision = TIM_CKD_DIV1,
 		.TIM_RepetitionCounter = 0,
 	};
 	TIM_TimeBaseInit(TIM3, &t);
-	TIM_Cmd(TIM3, ENABLE);
 
 	/* Enable IRQ */
 	NVIC_InitTypeDef NVIC_InitStructure = {

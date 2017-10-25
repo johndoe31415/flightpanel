@@ -41,10 +41,25 @@ void delay_millis(uint32_t millisecs) {
 	while (milli_ticks);
 }
 
+static void timeout_callback(void) {
+}
+
 void TIM3_IRQHandler(void) {
 	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET) {
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+		TIM_Cmd(TIM3, DISABLE);
+		timeout_callback();
 	}
+}
+
+void timeout_timer_enable(void) {
+	TIM_SetCounter(TIM3, 0);
+	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+	TIM_Cmd(TIM3, ENABLE);
+}
+
+void timeout_timer_disable(void) {
+	TIM_Cmd(TIM3, DISABLE);
 }
 
 void SysTick_Handler(void) {
