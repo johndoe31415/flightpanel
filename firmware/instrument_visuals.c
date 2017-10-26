@@ -224,6 +224,12 @@ static void redraw_xpdr_display(const struct surface_t *surface, const struct in
 }
 
 void redraw_display(const struct surface_t *surface, const struct instrument_state_t *istate, enum display_t display) {
+	if ((istate->external.flip_switches & SWITCH_MASTER) == 0) {
+		/* All displays off, MASTER off */
+		surface_clear(surface);
+		return;
+	}
+
 	switch (display) {
 		case DISPLAY_COM1:
 		case DISPLAY_COM1_STBY:

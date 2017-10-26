@@ -880,6 +880,17 @@ static void handle_blanking(void) {
 	}
 }
 
+static void handle_shutoff(void) {
+	static int shutoff_blink_led_period = 0;
+	if ((instrument_state.external.flip_switches & SWITCH_MASTER) == 0) {
+		iomux_output_set(IOMUX_OUT_XPDR_STBY, (shutoff_blink_led_period <= 0));
+		shutoff_blink_led_period++;
+		if (shutoff_blink_led_period > 2000) {
+			shutoff_blink_led_period = 0;
+		}
+	}
+}
+
 void dsr_idle_task(void) {
 	handle_radiopanel_inputs();
 	handle_comnav_inputs(&instrument_state.external.com1.freq, &rotary_com1, DISPLAY_COM1, DISPLAY_COM1_STBY);
@@ -895,6 +906,7 @@ void dsr_idle_task(void) {
 	handle_obs_inputs();
 	handle_switches();
 	handle_blanking();
+	handle_shutoff();
 
 	if (led_state_changed) {
 		led_state_changed = false;
