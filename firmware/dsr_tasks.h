@@ -46,6 +46,7 @@ enum dsr_task_t {
 };
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
+uint32_t get_idle_counter(void);
 bool dsr_is_pending(enum dsr_task_t task);
 void dsr_mark_pending_delayed(enum dsr_task_t task, uint32_t delay);
 void dsr_mark_pending(enum dsr_task_t task);

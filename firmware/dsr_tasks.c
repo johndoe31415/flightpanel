@@ -42,6 +42,13 @@ static const struct dsr_task_definition_t dsr_definitions[NUMBER_OF_DSRS] = {
 		.callback = dsr_execute_debug_command,
 	},
 };
+static uint32_t idle_counter;
+
+uint32_t get_idle_counter(void) {
+	uint32_t result = idle_counter;
+	idle_counter = 0;
+	return result;
+}
 
 bool dsr_is_pending(enum dsr_task_t task) {
 	return dsr_runtime_info[task].pending;
@@ -73,6 +80,7 @@ void execute_dsrs(void) {
 
 void execute_dsr_loop(void) {
 	while (true) {
+		idle_counter++;
 		execute_dsrs();
 	}
 }
