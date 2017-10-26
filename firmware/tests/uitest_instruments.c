@@ -45,7 +45,6 @@ static void test_instruments(void) {
 	struct instrument_state_t istate = {
 		.external = {
 			.tx_radio_id = 1,
-			.dme_nav_source = 1,
 			.com1 = {
 				.freq = {
 					.active_index = 100,

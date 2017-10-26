@@ -113,7 +113,6 @@ struct hid_report_t {
 	struct xpdr_state_t xpdr;
 	struct adf_state_t adf;
 	struct ap_state_t ap;
-	uint8_t dme_nav_source;
 	uint8_t flip_switches;
 	uint16_t qnh;
 	bool navigate_by_gps;

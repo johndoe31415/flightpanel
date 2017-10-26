@@ -264,15 +264,9 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 				} else if (display == DISPLAY_NAV1_STBY) {
 					obs = &istate->external.nav1.obs;
 					active_obs = istate->internal.active_obs == 0;
-					if (istate->external.dme_nav_source == 1) {
-						tx_dme = "DME";
-					}
 				} else if (display == DISPLAY_NAV2_STBY) {
 					obs = &istate->external.nav2.obs;
 					active_obs = istate->internal.active_obs == 1;
-					if (istate->external.dme_nav_source == 2) {
-						tx_dme = "DME";
-					}
 				}
 				redraw_com_nav_display(surface, istate, frequency_khz, ident, tx_dme, active_obs, obs);
 			} else {
