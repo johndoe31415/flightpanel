@@ -857,6 +857,15 @@ static void handle_switches(void) {
 	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_STRB) ? 0 : SWITCH_STRB;
 }
 
+static void handle_nav_ident_inhibit_timeouts(void) {
+	if (timeout(&instrument_state.internal.ident.nav1_ident_inhibit_timeout)) {
+		display_data_changed[DISPLAY_NAV1] = true;
+	}
+	if (timeout(&instrument_state.internal.ident.nav2_ident_inhibit_timeout)) {
+		display_data_changed[DISPLAY_NAV2] = true;
+	}
+}
+
 static void handle_blanking(void) {
 	if (milliseconds_to_blank > 0) {
 		milliseconds_to_blank--;
@@ -881,6 +890,7 @@ void dsr_idle_task(void) {
 	handle_ap_inputs();
 	handle_xpdr_inputs();
 	handle_nav_src_inputs();
+	handle_nav_ident_inhibit_timeouts();
 	handle_qnh_inputs();
 	handle_obs_inputs();
 	handle_switches();

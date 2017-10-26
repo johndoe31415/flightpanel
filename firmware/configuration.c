@@ -38,6 +38,7 @@ static const struct configuration default_configuration = {
 		.tx_radio_id = 1,
 		.com_frequency_divisions = COM_RANGE,
 		.nav_frequency_divisions = NAV_RANGE,
+		.nav_ident_inhibit_timeout = 3000,
 		.ap = {
 			.altitude = 2000,
 			.ias = 120,

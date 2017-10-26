@@ -64,6 +64,8 @@ struct instrument_state_t {
 		struct {
 			char nav1[5], nav2[5];
 			char adf[5];
+			uint16_t nav1_ident_inhibit_timeout;
+			uint16_t nav2_ident_inhibit_timeout;
 		} ident;
 		struct {
 			uint8_t edit_char;

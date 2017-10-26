@@ -37,6 +37,7 @@ struct configuration {
 		uint8_t tx_radio_id;
 		uint8_t com_frequency_divisions;
 		uint8_t nav_frequency_divisions;
+		uint16_t nav_ident_inhibit_timeout;
 		struct {
 			uint32_t active_frequency_khz;
 			uint32_t standby_frequency_khz;
