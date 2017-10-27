@@ -580,28 +580,32 @@ static bool timeout(uint16_t *value) {
 }
 
 static void update_leds(void) {
-	/* Radio panel */
-	iomux_output_set(IOMUX_OUT_Radio_COM1, (instrument_state.external.radio_panel & RADIO_COM1) != 0);
-	iomux_output_set(IOMUX_OUT_Radio_NAV1, (instrument_state.external.radio_panel & RADIO_NAV1) != 0);
-	iomux_output_set(IOMUX_OUT_Radio_DME, (instrument_state.external.radio_panel & RADIO_DME) != 0);
-	iomux_output_set(IOMUX_OUT_Radio_COM2, (instrument_state.external.radio_panel & RADIO_COM2) != 0);
-	iomux_output_set(IOMUX_OUT_Radio_NAV2, (instrument_state.external.radio_panel & RADIO_NAV2) != 0);
-	iomux_output_set(IOMUX_OUT_Radio_ADF, (instrument_state.external.radio_panel & RADIO_ADF) != 0);
+	if (instrument_state.external.flip_switches & SWITCH_MASTER) {
+		/* Radio panel */
+		iomux_output_set(IOMUX_OUT_Radio_COM1, (instrument_state.external.radio_panel & RADIO_COM1) != 0);
+		iomux_output_set(IOMUX_OUT_Radio_NAV1, (instrument_state.external.radio_panel & RADIO_NAV1) != 0);
+		iomux_output_set(IOMUX_OUT_Radio_DME, (instrument_state.external.radio_panel & RADIO_DME) != 0);
+		iomux_output_set(IOMUX_OUT_Radio_COM2, (instrument_state.external.radio_panel & RADIO_COM2) != 0);
+		iomux_output_set(IOMUX_OUT_Radio_NAV2, (instrument_state.external.radio_panel & RADIO_NAV2) != 0);
+		iomux_output_set(IOMUX_OUT_Radio_ADF, (instrument_state.external.radio_panel & RADIO_ADF) != 0);
 
-	/* AP */
-	iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
-	iomux_output_set(IOMUX_OUT_AP_ALT, (instrument_state.external.ap.state & AP_HOLD_ALTITUDE) != 0);
-	iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.external.ap.state & AP_HOLD_HEADING) != 0);
-	iomux_output_set(IOMUX_OUT_AP_IAS, (instrument_state.external.ap.state & AP_HOLD_IAS) != 0);
+		/* AP */
+		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
+		iomux_output_set(IOMUX_OUT_AP_ALT, (instrument_state.external.ap.state & AP_HOLD_ALTITUDE) != 0);
+		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.external.ap.state & AP_HOLD_HEADING) != 0);
+		iomux_output_set(IOMUX_OUT_AP_IAS, (instrument_state.external.ap.state & AP_HOLD_IAS) != 0);
 
-	/* Navigational source */
-	iomux_output_set(IOMUX_OUT_NavSrc_GPS, instrument_state.external.navigate_by_gps);
-	iomux_output_set(IOMUX_OUT_NavSrc_NAV, !instrument_state.external.navigate_by_gps);
+		/* Navigational source */
+		iomux_output_set(IOMUX_OUT_NavSrc_GPS, instrument_state.external.navigate_by_gps);
+		iomux_output_set(IOMUX_OUT_NavSrc_NAV, !instrument_state.external.navigate_by_gps);
 
-	/* XPDR */
-	const uint8_t xpdr_mode = instrument_state.external.xpdr.state & XPDR_MODE_MASK;
-	iomux_output_set(IOMUX_OUT_XPDR_C, xpdr_mode == XPDR_CHARLY);
-	iomux_output_set(IOMUX_OUT_XPDR_STBY, xpdr_mode == XPDR_STANDBY);
+		/* XPDR */
+		const uint8_t xpdr_mode = instrument_state.external.xpdr.state & XPDR_MODE_MASK;
+		iomux_output_set(IOMUX_OUT_XPDR_C, xpdr_mode == XPDR_CHARLY);
+		iomux_output_set(IOMUX_OUT_XPDR_STBY, xpdr_mode == XPDR_STANDBY);
+	} else {
+		iomux_output_setall(0);
+	}
 }
 
 static void handle_radiopanel_inputs(void) {
@@ -852,13 +856,23 @@ static void handle_obs_inputs(void) {
 }
 
 static void handle_switches(void) {
-	instrument_state.external.flip_switches = 0;
-	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_MASTER) ? 0 : SWITCH_MASTER;
-	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_BCN) ? 0 : SWITCH_BCN;
-	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_LAND) ? 0 : SWITCH_LAND;
-	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_TAXI) ? 0 : SWITCH_TAXI;
-	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_NAV) ? 0 : SWITCH_NAV;
-	instrument_state.external.flip_switches |= iomux_get_input(IOMUX_IN_Switch_STRB) ? 0 : SWITCH_STRB;
+	uint8_t new_state = 0;
+	new_state |= iomux_get_input(IOMUX_IN_Switch_MASTER) ? 0 : SWITCH_MASTER;
+	new_state |= iomux_get_input(IOMUX_IN_Switch_BCN) ? 0 : SWITCH_BCN;
+	new_state |= iomux_get_input(IOMUX_IN_Switch_LAND) ? 0 : SWITCH_LAND;
+	new_state |= iomux_get_input(IOMUX_IN_Switch_TAXI) ? 0 : SWITCH_TAXI;
+	new_state |= iomux_get_input(IOMUX_IN_Switch_NAV) ? 0 : SWITCH_NAV;
+	new_state |= iomux_get_input(IOMUX_IN_Switch_STRB) ? 0 : SWITCH_STRB;
+
+	uint8_t changed_switches = instrument_state.external.flip_switches ^ new_state;
+	instrument_state.external.flip_switches = new_state;
+	if (changed_switches & SWITCH_MASTER) {
+		/* MASTER flip switch has been updated. */
+		update_leds();
+		for (int i = 0; i < DISPLAY_COUNT; i++) {
+			display_data_changed[i] = true;
+		}
+	}
 }
 
 static void handle_nav_ident_inhibit_timeouts(void) {
