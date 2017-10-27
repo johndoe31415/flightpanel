@@ -32,8 +32,15 @@ class USBHidReportDescriptor(object):
 		self._last_report_count = None
 		self._last_report_size = None
 		self._report_length = 0
+		self._comments = { }
 
-	def _append(self, data):
+	@property
+	def comments(self):
+		return self._comments
+
+	def _append(self, data, comment = None):
+		if comment is not None:
+			self._comments[len(self._data)] = comment
 		if self._offset == 0:
 			self._data += data
 		else:
@@ -58,7 +65,7 @@ class USBHidReportDescriptor(object):
 			encoding = [ (data >> 0) & 0xff, (data >> 8) & 0xff ]
 		else:
 			raise Exception("Unsupported.")
-		self._append([ value ] + encoding)
+		self._append([ value ] + encoding, comment = comment)
 		return self
 
 	def add_usage_page(self, usage_page):
@@ -176,6 +183,7 @@ collection = hid_report.add_collection(Collection.Application)
 
 collection.fp_add_as_button("Radio panel", 6)
 collection.fp_add_items([
+	("Sequence number", 1),
 	("COM divisions", 1),
 	("NAV divisions", 1),
 	("TX radio ID", 1),
@@ -197,7 +205,6 @@ collection.fp_add_items([
 	("AP climbrate", 2),
 	("AP ias", 2),
 	("AP heading", 2),
-	("DME NAV source", 1),
 ])
 
 collection.fp_add_as_button("Flip switches", 6, start_button = 7)
@@ -212,5 +219,5 @@ print("// " + data.hex())
 print("// Report length %d bits = %d bytes" % (collection.report_length, (collection.report_length + 7) // 8))
 print()
 print("static uint8_t HIDReportDescriptor[] = {")
-DescriptorParser(base_indent = 1).dump(data)
+DescriptorParser(base_indent = 1).dump(data, comments = hid_report.comments)
 print("};")

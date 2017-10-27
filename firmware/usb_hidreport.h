@@ -29,6 +29,7 @@
 
 /* IDENT is zero-terminated, i.e., only 4 characters available */
 #define IDENT_LENGTH_BYTES			5
+
 enum ap_mode_t {
 	AP_ACTIVE = (1 << 0),
 	AP_HOLD_ALTITUDE = (1 << 1),
@@ -94,9 +95,9 @@ struct adf_state_t {
 struct ap_state_t {
 	uint8_t state;
 	uint16_t altitude;
-	uint16_t climbrate;
-	uint16_t ias;
 	uint16_t heading;
+	uint16_t ias;
+	uint16_t climbrate;
 } __attribute__ ((packed));
 
 struct dme_info_t {

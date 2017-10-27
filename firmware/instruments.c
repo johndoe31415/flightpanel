@@ -80,6 +80,7 @@ static struct rotary_encoder_with_button_t rotary_nav1 = {
 	},
 	.button = {
 		.threshold = 50,
+		.long_threshold = 700,
 		.deadtime = 50,
 	}
 };
@@ -119,6 +120,7 @@ static struct rotary_encoder_with_button_t rotary_obs = {
 	},
 	.button = {
 		.threshold = 50,
+		.long_threshold = 700,
 		.deadtime = 50,
 	}
 };
@@ -655,19 +657,36 @@ static void handle_radiopanel_inputs(void) {
 	}
 }
 
-static void handle_comnav_inputs(struct xcom_state_t *comnav, struct rotary_encoder_with_button_t *rotary, const enum display_t active_display, const enum display_t standby_display)  {
+static void swap_uint16(uint16_t *value1, uint16_t *value2) {
+	uint16_t tmp = *value1;
+	*value1 = *value2;
+	*value2 = tmp;
+}
+
+static void handle_comnav_inputs(struct xcom_state_t *comnav, struct rotary_encoder_with_button_t *rotary, const enum display_t active_display, const enum display_t standby_display, uint16_t *ident_inhibit_timeout)  {
 	if (rotary_changed(&rotary->rotary)) {
 		comnav->standby_index = rotary_getvalue(&rotary->rotary);
 		display_data_changed[standby_display] = true;
 	}
 
-	if (button_pressed(&rotary->button)) {
-		const uint16_t old_active_index = comnav->active_index;
-		comnav->active_index = comnav->standby_index;
-		comnav->standby_index = old_active_index;
-		rotary->rotary.value = comnav->standby_index;
-		display_data_changed[active_display] = true;
-		display_data_changed[standby_display] = true;
+	if (rotary->button.lastpress != BUTTON_NOACTION) {
+		if (rotary->button.lastpress == BUTTON_PRESS) {
+			/* Short button press, exchange ACTIVE <-> STBY */
+			if (comnav->active_index != comnav->standby_index) {
+				if (ident_inhibit_timeout) {
+					/* Reset IDENT value when changing frequencies */
+					*ident_inhibit_timeout = active_configuration.instruments.nav_ident_inhibit_timeout;
+				}
+				swap_uint16(&comnav->active_index, &comnav->standby_index);
+				rotary_setvalue(&rotary->rotary, comnav->standby_index);
+				display_data_changed[active_display] = true;
+				display_data_changed[standby_display] = true;
+			}
+		} else {
+			/* Short button press, exchange ACTIVE <-> STBY */
+			// TODO
+		}
+		rotary->button.lastpress = BUTTON_NOACTION;
 	}
 }
 
@@ -700,7 +719,7 @@ static void handle_ap_inputs(void) {
 	if (button_pressed(&rotary_ap_hdg.button)) {
 		instrument_state.external.ap.state ^= AP_HOLD_HEADING;
 		if ((instrument_state.external.ap.state & AP_HOLD_HEADING) != 0) {
-			instrument_state.external.ap.state &= ~(AP_HOLD_NAVIGATION | AP_HOLD_APPROACH | AP_HOLD_REVERSE);
+			instrument_state.external.ap.state &= ~(AP_HOLD_NAVIGATION | AP_HOLD_REVERSE);
 			instrument_state.external.ap.state |= AP_ACTIVE;
 		}
 		led_state_changed = true;
@@ -723,7 +742,7 @@ static void handle_ap_inputs(void) {
 	if (button_pressed(&ap_nav_button)) {
 		instrument_state.external.ap.state ^= AP_HOLD_NAVIGATION;
 		if ((instrument_state.external.ap.state & AP_HOLD_NAVIGATION) != 0) {
-			instrument_state.external.ap.state &= ~(AP_HOLD_HEADING | AP_HOLD_APPROACH | AP_HOLD_REVERSE);
+			instrument_state.external.ap.state &= ~(AP_HOLD_HEADING | AP_HOLD_REVERSE);
 			instrument_state.external.ap.state |= AP_ACTIVE;
 		}
 		led_state_changed = true;
@@ -732,7 +751,7 @@ static void handle_ap_inputs(void) {
 	if (button_pressed(&ap_apr_button)) {
 		instrument_state.external.ap.state ^= AP_HOLD_APPROACH;
 		if ((instrument_state.external.ap.state & AP_HOLD_APPROACH) != 0) {
-			instrument_state.external.ap.state &= ~(AP_HOLD_HEADING | AP_HOLD_NAVIGATION | AP_HOLD_REVERSE);
+//			instrument_state.external.ap.state &= ~(AP_HOLD_HEADING | AP_HOLD_NAVIGATION | AP_HOLD_REVERSE);
 			instrument_state.external.ap.state |= AP_ACTIVE;
 		}
 		led_state_changed = true;
@@ -847,11 +866,21 @@ static void handle_obs_inputs(void) {
 		*obs = rotary_getvalue(&rotary_obs.rotary);
 		display_data_changed[(instrument_state.internal.active_obs == 0) ? DISPLAY_NAV1_STBY : DISPLAY_NAV2_STBY] = true;
 	}
-	if (button_pressed(&rotary_obs.button)) {
-		instrument_state.internal.active_obs = !instrument_state.internal.active_obs;
-		rotary_obs.rotary.value = (instrument_state.internal.active_obs == 0) ? instrument_state.external.nav1.obs : instrument_state.external.nav2.obs;
-		display_data_changed[DISPLAY_NAV1_STBY] = true;
-		display_data_changed[DISPLAY_NAV2_STBY] = true;
+	if (rotary_obs.button.lastpress != BUTTON_NOACTION) {
+		if (rotary_obs.button.lastpress == BUTTON_PRESS) {
+			/* Short press, change which NAV is selected */
+			instrument_state.internal.active_obs = !instrument_state.internal.active_obs;
+			rotary_setvalue(&rotary_obs.rotary, (instrument_state.internal.active_obs == 0) ? instrument_state.external.nav1.obs : instrument_state.external.nav2.obs);
+			display_data_changed[DISPLAY_NAV1_STBY] = true;
+			display_data_changed[DISPLAY_NAV2_STBY] = true;
+		} else {
+			/* Long press, select back course */
+			uint16_t *obs = (instrument_state.internal.active_obs == 0) ? &instrument_state.external.nav1.obs : &instrument_state.external.nav2.obs;
+			rotary_setvalue(&rotary_obs.rotary, rotary_getvalue(&rotary_obs.rotary) + 180);
+			*obs = rotary_getvalue(&rotary_obs.rotary);
+			display_data_changed[(instrument_state.internal.active_obs == 0) ? DISPLAY_NAV1_STBY : DISPLAY_NAV2_STBY] = true;
+		}
+		rotary_obs.button.lastpress = BUTTON_NOACTION;
 	}
 }
 
@@ -911,10 +940,10 @@ static void handle_shutoff(void) {
 
 void dsr_idle_task(void) {
 	handle_radiopanel_inputs();
-	handle_comnav_inputs(&instrument_state.external.com1.freq, &rotary_com1, DISPLAY_COM1, DISPLAY_COM1_STBY);
-	handle_comnav_inputs(&instrument_state.external.com2.freq, &rotary_com2, DISPLAY_COM2, DISPLAY_COM2_STBY);
-	handle_comnav_inputs(&instrument_state.external.nav1.freq, &rotary_nav1, DISPLAY_NAV1, DISPLAY_NAV1_STBY);
-	handle_comnav_inputs(&instrument_state.external.nav2.freq, &rotary_nav2, DISPLAY_NAV2, DISPLAY_NAV2_STBY);
+	handle_comnav_inputs(&instrument_state.external.com1.freq, &rotary_com1, DISPLAY_COM1, DISPLAY_COM1_STBY, NULL);
+	handle_comnav_inputs(&instrument_state.external.com2.freq, &rotary_com2, DISPLAY_COM2, DISPLAY_COM2_STBY, NULL);
+	handle_comnav_inputs(&instrument_state.external.nav1.freq, &rotary_nav1, DISPLAY_NAV1, DISPLAY_NAV1_STBY, &instrument_state.internal.ident.nav1_ident_inhibit_timeout);
+	handle_comnav_inputs(&instrument_state.external.nav2.freq, &rotary_nav2, DISPLAY_NAV2, DISPLAY_NAV2_STBY, &instrument_state.internal.ident.nav2_ident_inhibit_timeout);
 	handle_adf_inputs();
 	handle_ap_inputs();
 	handle_xpdr_inputs();
@@ -959,18 +988,22 @@ static bool copy_if_changed(void *dst, const void *src, const unsigned int lengt
 static void instruments_set_by_host_report01(const struct hid_set_report_01_t *report) {
 	led_state_changed = copy_if_changed(&instrument_state.external.radio_panel, &report->radio_panel, sizeof(instrument_state.external.radio_panel)) || led_state_changed;
 	bool divisions_changed = copy_if_changed(&instrument_state.external.com_divisions, &report->com_divisions, sizeof(instrument_state.external.com_divisions)) || led_state_changed;
+	divisions_changed = copy_if_changed(&instrument_state.external.nav_divisions, &report->nav_divisions, sizeof(instrument_state.external.nav_divisions)) || divisions_changed;
 	display_data_changed[DISPLAY_COM1] = copy_if_changed(&instrument_state.external.com1.freq.active_index, &report->com1.freq.active_index, sizeof(instrument_state.external.com1.freq.active_index)) || display_data_changed[DISPLAY_COM1] || divisions_changed;
 	display_data_changed[DISPLAY_COM1_STBY] = copy_if_changed(&instrument_state.external.com1.freq.standby_index, &report->com1.freq.standby_index, sizeof(instrument_state.external.com1.freq.standby_index)) || display_data_changed[DISPLAY_COM1_STBY] || divisions_changed;
 	display_data_changed[DISPLAY_COM2] = copy_if_changed(&instrument_state.external.com2.freq.active_index, &report->com2.freq.active_index, sizeof(instrument_state.external.com2.freq.active_index)) || display_data_changed[DISPLAY_COM2] || divisions_changed;
 	display_data_changed[DISPLAY_COM2_STBY] = copy_if_changed(&instrument_state.external.com2.freq.standby_index, &report->com2.freq.standby_index, sizeof(instrument_state.external.com2.freq.standby_index)) || display_data_changed[DISPLAY_COM2_STBY] || divisions_changed;
 	display_data_changed[DISPLAY_NAV1] = copy_if_changed(&instrument_state.external.nav1.freq.active_index, &report->nav1.freq.active_index, sizeof(instrument_state.external.nav1.freq.active_index)) || display_data_changed[DISPLAY_NAV1] || divisions_changed;
 	display_data_changed[DISPLAY_NAV1_STBY] = copy_if_changed(&instrument_state.external.nav1.freq.standby_index, &report->nav1.freq.standby_index, sizeof(instrument_state.external.nav1.freq.standby_index)) || display_data_changed[DISPLAY_NAV1_STBY] || divisions_changed;
+	display_data_changed[DISPLAY_NAV1_STBY] = copy_if_changed(&instrument_state.external.nav1.obs, &report->nav1.obs, sizeof(instrument_state.external.nav1.obs)) || display_data_changed[DISPLAY_NAV1_STBY] || divisions_changed;
 	display_data_changed[DISPLAY_NAV2] = copy_if_changed(&instrument_state.external.nav2.freq.active_index, &report->nav2.freq.active_index, sizeof(instrument_state.external.nav2.freq.active_index)) || display_data_changed[DISPLAY_NAV2] || divisions_changed;
 	display_data_changed[DISPLAY_NAV2_STBY] = copy_if_changed(&instrument_state.external.nav2.freq.standby_index, &report->nav2.freq.standby_index, sizeof(instrument_state.external.nav2.freq.standby_index)) || display_data_changed[DISPLAY_NAV2_STBY] || divisions_changed;
+	display_data_changed[DISPLAY_NAV2_STBY] = copy_if_changed(&instrument_state.external.nav2.obs, &report->nav2.obs, sizeof(instrument_state.external.nav2.obs)) || display_data_changed[DISPLAY_NAV2_STBY] || divisions_changed;
 	bool xpdr_state_changed = copy_if_changed(&instrument_state.external.xpdr, &report->xpdr, sizeof(instrument_state.external.xpdr));
 	display_data_changed[DISPLAY_XPDR] = xpdr_state_changed || display_data_changed[DISPLAY_XPDR];
 	led_state_changed = xpdr_state_changed || led_state_changed;
 	display_data_changed[DISPLAY_ADF] = copy_if_changed(&instrument_state.external.adf, &report->adf, sizeof(instrument_state.external.adf)) || display_data_changed[DISPLAY_ADF];
+	led_state_changed = (instrument_state.external.ap.state != report->ap.state) || led_state_changed;
 	display_data_changed[DISPLAY_AP] = copy_if_changed(&instrument_state.external.ap, &report->ap, sizeof(instrument_state.external.ap)) || display_data_changed[DISPLAY_AP];
 	instrument_state.external.qnh = report->qnh;
 	led_state_changed = copy_if_changed(&instrument_state.external.navigate_by_gps, &report->navigate_by_gps, sizeof(instrument_state.external.navigate_by_gps)) || led_state_changed;

@@ -68,7 +68,6 @@ uint8_t USBD_LangIDDesc[4] = {
 	UINT16(USBD_LANGID_STRING)
 };
 
-
 static uint8_t HIDReportDescriptor[] = {
 	0x05, 0x01,					// UsagePage(GenericDesktop)
 	0x09, 0x04,					// Usage(Joystick)
@@ -90,9 +89,10 @@ static uint8_t HIDReportDescriptor[] = {
 		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x15, 0x00,					// LogicalMinimum(0)
 		0x25, 0xff,					// LogicalMaximum(255)
-		0x95, 0x03,					// ReportCount(3)
+		0x95, 0x04,					// ReportCount(4)
 		0x75, 0x08,					// ReportSize(8)
 		0x81, 0x82,					// Input(Variable, Volatile)
 
@@ -147,14 +147,6 @@ static uint8_t HIDReportDescriptor[] = {
 		0x26, 0xff, 0xff,			// LogicalMaximum(65535)
 		0x95, 0x04,					// ReportCount(4)
 		0x75, 0x10,					// ReportSize(16)
-		0x81, 0x82,					// Input(Variable, Volatile)
-
-		0x05, 0x02,					// UsagePage(SimulationControls)
-		0x09, 0xbc,					// Usage(FlightCommunication)
-		0x15, 0x00,					// LogicalMinimum(0)
-		0x25, 0xff,					// LogicalMaximum(255)
-		0x95, 0x01,					// ReportCount(1)
-		0x75, 0x08,					// ReportSize(8)
 		0x81, 0x82,					// Input(Variable, Volatile)
 
 		0x05, 0x09,					// UsagePage(Button)

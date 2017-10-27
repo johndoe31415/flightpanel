@@ -62,9 +62,11 @@ static void test_instruments(void) {
 				.squawk = 7001,
 			},
 			.ap = {
-				.state = AP_ACTIVE | AP_HOLD_ALTITUDE | AP_HOLD_IAS | AP_HOLD_HEADING,
+				//.state = AP_ACTIVE | AP_HOLD_ALTITUDE | AP_HOLD_IAS | AP_HOLD_HEADING,
+				//.state = AP_ACTIVE | AP_HOLD_ALTITUDE | AP_HOLD_IAS | AP_HOLD_NAVIGATION,
+				.state = AP_ACTIVE | AP_HOLD_ALTITUDE | AP_HOLD_IAS | AP_HOLD_APPROACH | AP_HOLD_HEADING | AP_HOLD_REVERSE,
 				.altitude = 6900,
-				.climbrate = 750,
+				.climbrate = 3000,
 				.ias = 125,
 				.heading = 180,
 			},
@@ -76,6 +78,11 @@ static void test_instruments(void) {
 			},
 			.screen_mplex = {
 				.qnh = QNH,
+			},
+			.dme = {
+				.available = 1,
+				.distance_tenth_nm = 123,
+				.velocity = 189,
 			},
 		},
 	};

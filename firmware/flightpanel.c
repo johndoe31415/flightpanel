@@ -76,5 +76,3 @@ int main(void) {
 	execute_dsr_loop();
 	return 0;
 }
-
-

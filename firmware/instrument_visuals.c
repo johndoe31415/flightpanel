@@ -164,41 +164,40 @@ static void redraw_dme_display(const struct surface_t *surface, const struct ins
 
 static void redraw_ap_display(const struct surface_t *surface, const struct instrument_state_t *istate) {
 	surface_clear(surface);
-	if (((istate->external.ap.state & AP_ACTIVE) == 0) || ((istate->external.ap.state & (AP_HOLD_ALTITUDE | AP_HOLD_IAS | AP_HOLD_HEADING | AP_HOLD_NAVIGATION | AP_HOLD_APPROACH)) == 0)) {
-		struct cursor_t cursor = { 10, 45 };
-		blit_string_to_cursor(&font_inconsolata_30, "AP OFF", surface, &cursor, false);
-	} else {
-		char text[16];
-		if (istate->external.ap.state & AP_HOLD_ALTITUDE) {
-			struct cursor_t cursor = { 0, 23 };
-			snprintf(text, sizeof(text), "FL%d", (istate->external.ap.altitude + 50) / 100);
-			blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
+	char text[16];
+	{
+		struct cursor_t cursor = { 0, 23 };
+		snprintf(text, sizeof(text), "FL%d", (istate->external.ap.altitude + 50) / 100);
+		blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 
-			cursor = (struct cursor_t) { 0, 54 };
-			snprintf(text, sizeof(text), "%+d", istate->external.ap.climbrate);
-			blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
+		cursor = (struct cursor_t) { 0, 54 };
+		blit_string_to_cursor(&font_symbol_font, "+", surface, &cursor, false);
+		snprintf(text, sizeof(text), "%d", istate->external.ap.climbrate / 100);
+		blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
+	}
+
+	{
+		struct cursor_t cursor = { 41, 54 };
+		if (istate->external.ap.state & AP_HOLD_REVERSE) {
+			blit_rectangle(surface, cursor.x - 1 + (istate->external.ap.state & AP_HOLD_APPROACH ? 0 : 35), cursor.y - 18, 128, 20);
+		}
+		if (istate->external.ap.state & AP_HOLD_APPROACH) {
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "APR", surface, &cursor, istate->external.ap.state & AP_HOLD_REVERSE);
 		}
 
-		{
-			struct cursor_t cursor = { 80, 54 };
-			if ((istate->external.ap.state & AP_HOLD_REVERSE) && (istate->external.ap.state & (AP_HOLD_HEADING | AP_HOLD_NAVIGATION | AP_HOLD_APPROACH)))  {
-				blit_rectangle(surface, cursor.x - 1, cursor.y - 18, (istate->external.ap.state & AP_HOLD_HEADING) ? 50 : 40, 20);
-			}
-			if (istate->external.ap.state & AP_HOLD_HEADING) {
-				snprintf(text, sizeof(text), "%3d" CHAR_DEGREES, istate->external.ap.heading);
-				blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, istate->external.ap.state & AP_HOLD_REVERSE);
-			} else if (istate->external.ap.state & AP_HOLD_NAVIGATION) {
-				blit_string_to_cursor(&font_vcr_osd_mono_20, "NAV", surface, &cursor, istate->external.ap.state & AP_HOLD_REVERSE);
-			} else if (istate->external.ap.state & AP_HOLD_APPROACH) {
-				blit_string_to_cursor(&font_vcr_osd_mono_20, "APR", surface, &cursor, istate->external.ap.state & AP_HOLD_REVERSE);
-			}
+		cursor = (struct cursor_t) { TEXT_RIGHT_JUSTIFY, 54 };
+		if (istate->external.ap.state & AP_HOLD_NAVIGATION) {
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "NAV", surface, &cursor, istate->external.ap.state & AP_HOLD_REVERSE);
+		} else {
+			snprintf(text, sizeof(text), "%3d" CHAR_DEGREES, istate->external.ap.heading);
+			blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, istate->external.ap.state & AP_HOLD_REVERSE);
 		}
+	}
 
-		if (istate->external.ap.state & AP_HOLD_IAS) {
-			struct cursor_t cursor = { 67, 23 };
-			snprintf(text, sizeof(text), "%3dkt", istate->external.ap.ias);
-			blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
-		}
+	{
+		struct cursor_t cursor = { 67, 23 };
+		snprintf(text, sizeof(text), "%3dkt", istate->external.ap.ias);
+		blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 	}
 }
 
@@ -213,7 +212,7 @@ static void redraw_xpdr_display(const struct surface_t *surface, const struct in
 
 	if (istate->internal.xpdr.edit_char) {
 		const int char_width = 18;
-		blit_rectangle(surface, 28 + (char_width * (istate->internal.xpdr.edit_char - 1)), 35, char_width, 2);
+		blit_rectangle(surface, 28 + (char_width * (istate->internal.xpdr.edit_char - 1)), 37, char_width, 2);
 	}
 
 	if (istate->external.xpdr.state & XPDR_MODE_IDENTING) {

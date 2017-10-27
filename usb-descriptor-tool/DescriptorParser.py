@@ -99,7 +99,7 @@ class DescriptorParser(object):
 		base = "\t" * self._base_indent
 		print("%s%s%s%s" % (base, text, spacer, comment))
 
-	def _dump_cmdcode(self, indent, cmdcode, command_word, payload):
+	def _dump_cmdcode(self, indent, cmdcode, command_word, payload, comment = None):
 		indent_str = self._indentation * indent
 		if len(payload) == 0:
 			argument = None
@@ -107,11 +107,16 @@ class DescriptorParser(object):
 			argument = sum(value << (8 * i) for (i, value) in enumerate(payload))
 		hex_string = ", ".join("0x%02x" % (c) for c in [ command_word ] + list(payload))
 		spacer = "\t\t\t"
-		self._print_line("%s%s," % (indent_str, hex_string), "// %s" % (self._stringify_cmdcode(cmdcode, argument)), target = 7 + indent)
+		code_comment = "// %s" % (self._stringify_cmdcode(cmdcode, argument))
+		if comment is not None:
+			code_comment += " [%s]" % (comment)
+		self._print_line("%s%s," % (indent_str, hex_string), code_comment, target = 7 + indent)
 		if cmdcode == Item.Input:
 			print()
 
-	def dump(self, data):
+	def dump(self, data, comments = None):
+		if comments is None:
+			comments = { }
 		self._usage_page = None
 		indent = 0
 		offset = 0
@@ -119,6 +124,7 @@ class DescriptorParser(object):
 			command = data[offset]
 			cmdcode = (data[offset] >> 2) & 0x3f
 			length = (data[offset] >> 0) & 0x03
+			comment = comments.get(offset)
 
 			offset += 1
 			if length == 0:
@@ -135,7 +141,7 @@ class DescriptorParser(object):
 
 			if cmdcode == Item.EndCollection:
 				indent -= 1
-			self._dump_cmdcode(indent, cmdcode, command, payload)
+			self._dump_cmdcode(indent, cmdcode, command, payload, comment = comment)
 			if cmdcode == Item.Collection:
 				indent += 1
 
