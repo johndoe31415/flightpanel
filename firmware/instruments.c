@@ -966,9 +966,9 @@ static void instruments_set_by_host_report02(const struct hid_set_report_02_t *r
 	display_data_changed[DISPLAY_NAV2] = copy_if_changed(&instrument_state.internal.ident.nav2, &report->ident.nav2, sizeof(instrument_state.internal.ident.nav2)) || display_data_changed[DISPLAY_NAV2];
 	display_data_changed[DISPLAY_ADF] = copy_if_changed(&instrument_state.internal.ident.adf, &report->ident.adf, sizeof(instrument_state.internal.ident.adf)) || display_data_changed[DISPLAY_ADF];
 	display_data_changed[DISPLAY_DME] = copy_if_changed(&instrument_state.internal.dme, &report->dme, sizeof(instrument_state.internal.dme)) || display_data_changed[DISPLAY_DME];
-	instrument_state.internal.ident.nav1[3] = 0;
-	instrument_state.internal.ident.nav2[3] = 0;
-	instrument_state.internal.ident.adf[3] = 0;
+	instrument_state.internal.ident.nav1[IDENT_LENGTH_BYTES - 1] = 0;
+	instrument_state.internal.ident.nav2[IDENT_LENGTH_BYTES - 1] = 0;
+	instrument_state.internal.ident.adf[IDENT_LENGTH_BYTES - 1] = 0;
 }
 
 void instruments_set_by_host(const union hid_set_report_t *report) {

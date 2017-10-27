@@ -27,6 +27,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/* IDENT is zero-terminated, i.e., only 4 characters available */
+#define IDENT_LENGTH_BYTES			5
 enum ap_mode_t {
 	AP_ACTIVE = (1 << 0),
 	AP_HOLD_ALTITUDE = (1 << 1),
@@ -139,8 +141,8 @@ struct hid_set_report_01_t {
 struct hid_set_report_02_t {
 	uint8_t report_id;
 	struct {
-		char nav1[5], nav2[5];
-		char adf[5];
+		char nav1[IDENT_LENGTH_BYTES], nav2[IDENT_LENGTH_BYTES];
+		char adf[IDENT_LENGTH_BYTES];
 	} ident;
 	struct dme_info_t dme;
 	struct {
