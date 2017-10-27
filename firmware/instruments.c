@@ -106,6 +106,7 @@ static struct rotary_encoder_with_button_t rotary_atm = {
 	},
 	.button = {
 		.threshold = 50,
+		.long_threshold = 700,
 		.deadtime = 50,
 	}
 };
@@ -811,12 +812,24 @@ static void handle_nav_src_inputs(void) {
 	}
 }
 
+static void set_qnh(uint16_t new_qnh_value) {
+	instrument_state.external.qnh = new_qnh_value;
+	instrument_state.internal.screen_mplex.qnh = QNH;
+	instrument_state.internal.screen_mplex.qnh_timeout = 2000;
+	display_data_changed[DISPLAY_QNH] = true;
+}
+
 static void handle_qnh_inputs(void) {
 	if (rotary_changed(&rotary_atm.rotary)) {
-		instrument_state.external.qnh = rotary_atm.rotary.value + 900;
-		instrument_state.internal.screen_mplex.qnh = QNH;
-		instrument_state.internal.screen_mplex.qnh_timeout = 2000;
-		display_data_changed[DISPLAY_QNH] = true;
+		set_qnh(rotary_getvalue(&rotary_atm.rotary));
+	}
+	if (rotary_atm.button.lastpress != BUTTON_NOACTION) {
+		if (rotary_atm.button.lastpress == BUTTON_LONG_PRESS) {
+			/* Long press on ATM rotary -> standard QNH 1013 */
+			rotary_setvalue(&rotary_atm.rotary, 1013);
+			set_qnh(1013);
+		}
+		rotary_atm.button.lastpress = BUTTON_NOACTION;
 	}
 	if (timeout(&instrument_state.internal.screen_mplex.qnh_timeout)) {
 		instrument_state.internal.screen_mplex.qnh = DEFAULT;
