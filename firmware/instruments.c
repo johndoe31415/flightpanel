@@ -972,6 +972,7 @@ static void instruments_set_by_host_report01(const struct hid_set_report_01_t *r
 	rotary_setvalue(&rotary_ap_hdg.rotary, instrument_state.external.ap.heading);
 	rotary_setvalue(&rotary_ap_ias.rotary, instrument_state.external.ap.ias);
 	rotary_setvalue(&rotary_ap_rate.rotary, instrument_state.external.ap.climbrate);
+	instrument_state.external.seqno = report->seqno;
 }
 
 static void instruments_set_by_host_report02(const struct hid_set_report_02_t *report) {
@@ -982,6 +983,7 @@ static void instruments_set_by_host_report02(const struct hid_set_report_02_t *r
 	instrument_state.internal.ident.nav1[IDENT_LENGTH_BYTES - 1] = 0;
 	instrument_state.internal.ident.nav2[IDENT_LENGTH_BYTES - 1] = 0;
 	instrument_state.internal.ident.adf[IDENT_LENGTH_BYTES - 1] = 0;
+	instrument_state.external.seqno = report->seqno;
 }
 
 void instruments_set_by_host(const union hid_set_report_t *report) {
@@ -989,6 +991,8 @@ void instruments_set_by_host(const union hid_set_report_t *report) {
 		instruments_set_by_host_report01(&report->r01);
 	} else if (report->generic.report_id == 0x02) {
 		instruments_set_by_host_report02(&report->r02);
+	} else {
+		printf("Unknown report 0x%02x received.\n", report->generic.report_id);
 	}
 }
 

@@ -106,6 +106,7 @@ struct dme_info_t {
 } __attribute__ ((packed));
 
 struct hid_report_t {
+	uint8_t seqno;
 	uint8_t radio_panel;
 	uint8_t com_divisions;
 	uint8_t nav_divisions;
@@ -122,10 +123,12 @@ struct hid_report_t {
 
 struct hid_set_generic_report_t {
 	uint8_t report_id;
+	uint8_t seqno;
 } __attribute__ ((packed));
 
 struct hid_set_report_01_t {
 	uint8_t report_id;
+	uint8_t seqno;
 	uint8_t radio_panel;
 	uint8_t com_divisions;
 	uint8_t nav_divisions;
@@ -140,6 +143,7 @@ struct hid_set_report_01_t {
 
 struct hid_set_report_02_t {
 	uint8_t report_id;
+	uint8_t seqno;
 	struct {
 		char nav1[IDENT_LENGTH_BYTES], nav2[IDENT_LENGTH_BYTES];
 		char adf[IDENT_LENGTH_BYTES];
