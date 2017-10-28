@@ -31,10 +31,11 @@
 #include "usb_hidreport.h"
 
 #define PIN_INVALID			255
+	#define TRANSITION_QNH 1013
 
 struct rotary_encoder_with_button_t {
 	struct rotary_encoder_t rotary;
-	struct button_t button;
+		struct button_t button;
 };
 
 struct rotary_input_t {

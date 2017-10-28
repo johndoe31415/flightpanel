@@ -695,6 +695,14 @@ static void handle_comnav_inputs(struct xcom_state_t *comnav, struct rotary_enco
 	}
 }
 
+static bool invert_ap_state(enum ap_mode_t arm_mode, enum ap_mode_t hold_mode, uint16_t cancel_modes) {
+	const bool currently_armed = (instrument_state.external.ap.state & arm_mode) != 0;
+	const bool currently_holding = (instrument_state.external.ap.state & hold_mode) != 0;
+	const bool currently_active = currently_armed || currently_holding;
+	instrument_state.external.ap.state = (instrument_state.external.ap.state & ~cancel_modes) | currently_active ? 0 : arm_mode;
+	return !currently_active;
+}
+
 static void handle_ap_inputs(void) {
 	if (rotary_changed(&rotary_ap_alt.rotary)) {
 		instrument_state.external.ap.altitude = rotary_getvalue(&rotary_ap_alt.rotary);
@@ -714,25 +722,21 @@ static void handle_ap_inputs(void) {
 	}
 
 	if (button_pressed(&rotary_ap_alt.button)) {
-		instrument_state.external.ap.state ^= AP_ALTITUDE_HOLD;
-		if ((instrument_state.external.ap.state & AP_ALTITUDE_HOLD) != 0) {
+		if (invert_ap_state(AP_ALTITUDE_ARMED, AP_ALTITUDE_HOLD, AP_VERTICAL_MODES)) {
 			instrument_state.external.ap.state |= AP_STATE_ACTIVE;
 		}
 		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&rotary_ap_hdg.button)) {
-		instrument_state.external.ap.state ^= AP_HEADING_HOLD;
-		if ((instrument_state.external.ap.state & AP_HEADING_HOLD) != 0) {
-			instrument_state.external.ap.state &= ~(AP_NAVIGATION_HOLD | AP_STATE_BACKCOURSE);
+		if (invert_ap_state(AP_HEADING_ARMED, AP_HEADING_HOLD, AP_HORIZONTAL_MODES)) {
 			instrument_state.external.ap.state |= AP_STATE_ACTIVE;
 		}
 		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&rotary_ap_ias.button)) {
-		instrument_state.external.ap.state ^= AP_IAS_HOLD;
-		if ((instrument_state.external.ap.state & AP_IAS_HOLD) != 0) {
+		if (invert_ap_state(AP_IAS_ARMED, AP_IAS_HOLD, 0)) {
 			instrument_state.external.ap.state |= AP_STATE_ACTIVE;
 		}
 		led_state_changed = true;
@@ -745,18 +749,14 @@ static void handle_ap_inputs(void) {
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&ap_nav_button)) {
-		instrument_state.external.ap.state ^= AP_NAVIGATION_HOLD;
-		if ((instrument_state.external.ap.state & AP_NAVIGATION_HOLD) != 0) {
-			instrument_state.external.ap.state &= ~(AP_HEADING_HOLD | AP_STATE_BACKCOURSE);
+		if (invert_ap_state(AP_NAVIGATION_ARMED, AP_NAVIGATION_HOLD, AP_HORIZONTAL_MODES)) {
 			instrument_state.external.ap.state |= AP_STATE_ACTIVE;
 		}
 		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&ap_apr_button)) {
-		instrument_state.external.ap.state ^= AP_GLIDESLOPE_HOLD;
-		if ((instrument_state.external.ap.state & AP_GLIDESLOPE_HOLD) != 0) {
-//			instrument_state.external.ap.state &= ~(AP_HEADING_HOLD | AP_NAVIGATION_HOLD | AP_STATE_BACKCOURSE);
+		if (invert_ap_state(AP_GLIDESLOPE_ARMED, AP_GLIDESLOPE_HOLD, AP_VERTICAL_MODES)) {
 			instrument_state.external.ap.state |= AP_STATE_ACTIVE;
 		}
 		led_state_changed = true;
@@ -853,7 +853,7 @@ static void handle_qnh_inputs(void) {
 	}
 	if (rotary_atm.button.lastpress != BUTTON_NOACTION) {
 		if (rotary_atm.button.lastpress == BUTTON_LONG_PRESS) {
-			/* Long press on ATM rotary -> standard QNH 1013 */
+			/* Long press on ATM rotary -> standard QNH 1013 mBar */
 			rotary_setvalue(&rotary_atm.rotary, 1013);
 			set_qnh(1013);
 		}
