@@ -131,7 +131,7 @@ int32_t rotary_getvalue(const struct rotary_encoder_t *rotary) {
 	if (!rotary->mapping) {
 		return rotary->value;
 	} else {
-		return (rotary->value + rotary->mapping->offset) * rotary->mapping->multiplier;
+		return (rotary->value * rotary->mapping->multiplier) + rotary->mapping->offset;
 	}
 }
 
@@ -139,7 +139,7 @@ void rotary_setvalue(struct rotary_encoder_t *rotary, int32_t value) {
 	if (!rotary->mapping) {
 		rotary_setvalue_raw(rotary, value);
 	} else {
-		rotary_setvalue_raw(rotary, (value / rotary->mapping->multiplier) - rotary->mapping->offset);
+		rotary_setvalue_raw(rotary, (value - rotary->mapping->offset) / rotary->mapping->multiplier);
 	}
 
 }

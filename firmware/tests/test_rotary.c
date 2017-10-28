@@ -165,7 +165,7 @@ static void test_rotary_getvalue(void) {
 		};
 		for (int i = 0; i < 101; i++) {
 			rotary.value = i;
-			test_assert_int_eq((rotary.value - 50) * 3, rotary_getvalue(&rotary));
+			test_assert_int_eq((rotary.value * 3) - 50, rotary_getvalue(&rotary));
 		}
 	}
 	subtest_finished();
@@ -260,7 +260,7 @@ static void test_rotary_setvalue(void) {
 			.detent_cnt = 201,
 			.wrap_around = false,
 			.mapping = &(const struct linear_mapping_t) {
-				.offset = 20,
+				.offset = 2000,
 				.multiplier = 100,
 			},
 		};
@@ -285,6 +285,34 @@ static void test_rotary_setvalue(void) {
 	subtest_finished();
 }
 
+static void test_rotary_verticalspeed(void) {
+	subtest_start();
+	struct rotary_encoder_t rotary = {
+		.value = 30,
+		.detent_cnt = 61,
+		.wrap_around = false,
+		.mapping = &(struct linear_mapping_t) {
+				.multiplier = 100,
+				.offset = -3000,
+		},
+	};
+	rotary.value = 0;
+	test_assert_int_eq(rotary_getvalue(&rotary), -3000);
+
+	rotary.value = 29;
+	test_assert_int_eq(rotary_getvalue(&rotary), -100);
+
+	rotary.value = 30;
+	test_assert_int_eq(rotary_getvalue(&rotary), 0);
+
+	rotary.value = 31;
+	test_assert_int_eq(rotary_getvalue(&rotary), 100);
+
+	rotary.value = 60;
+	test_assert_int_eq(rotary_getvalue(&rotary), 3000);
+	subtest_finished();
+}
+
 int main(int argc, char **argv) {
 	test_start(argc, argv);
 	test_rotary_normal();
@@ -292,6 +320,7 @@ int main(int argc, char **argv) {
 	test_rotary_wrap();
 	test_rotary_getvalue();
 	test_rotary_setvalue();
+	test_rotary_verticalspeed();
 	test_finished();
 	return 0;
 }

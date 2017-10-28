@@ -179,12 +179,12 @@ static struct rotary_encoder_with_button_t rotary_ap_ias = {
 
 static struct rotary_encoder_with_button_t rotary_ap_rate = {
 	.rotary = {
-		.value = 0,
-		.detent_cnt = 31,
+		.value = 30,
+		.detent_cnt = 61,
 		.wrap_around = false,
 		.mapping = &(struct linear_mapping_t) {
 			.multiplier = 100,
-			.offset = 0,
+			.offset = -3000,
 		},
 	},
 	.button = {
