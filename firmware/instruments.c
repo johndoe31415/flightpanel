@@ -742,6 +742,13 @@ static void handle_ap_inputs(void) {
 		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
+	if (button_pressed(&rotary_ap_rate.button)) {
+		if (invert_ap_state(AP_VERTICALSPEED_ARMED, AP_VERTICALSPEED_HOLD, AP_VERTICAL_MODES)) {
+			instrument_state.external.ap.state |= AP_STATE_ACTIVE;
+		}
+		led_state_changed = true;
+		display_data_changed[DISPLAY_AP] = true;
+	}
 
 	if (button_pressed(&ap_master_button)) {
 		instrument_state.external.ap.state ^= AP_STATE_ACTIVE;
