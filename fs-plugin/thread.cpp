@@ -21,27 +21,42 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __ARBITER_HPP__
-#define __ARBITER_HPP__
-
-#include <pthread.h>
-#include "fsconnection.hpp"
-#include "fpconnection.hpp"
+#include <stdexcept>
+#include <stdio.h>
+#include <unistd.h>
 #include "thread.hpp"
 
-class Arbiter : public Thread {
-	private:
-		bool _first_sync;
-		FSConnection *_fs_connection;
-		FPConnection *_fp_connection;
-		struct instrument_data_t _last_authoritative_data;
-		struct arbiter_result_t arbitrate(const struct instrument_data_t &new_fs_data, const struct instrument_data_t &new_fp_data);
-		template<typename T> void arbitrate_value(bool *update_fs, bool *update_fp, const T &old_authoritative_data, const T &new_fs_data, const T &new_fp_data, T *authoritative_data);
-		template<typename T> void arbitrate_value_unidirectional(bool *update, const T *old_data, const T *new_data, unsigned int data_size, T *authoritative_data);
-		void thread_action();
-	public:
-		Arbiter(FSConnection *fs_connection, FPConnection *fp_connection);
-};
+template<typename T> void *thread_trampoline(void *ctx) {
+	T* t = (T*)ctx;
+	t->thread_function();
+	return NULL;
+}
 
-#endif
+Thread::Thread(unsigned int thread_interval_millis) : _thread_running(false), _thread_interval_millis(thread_interval_millis) {
+}
 
+void Thread::start() {
+	if (_thread_running) {
+		throw std::runtime_error("Thread already running, cannot start again.");
+	}
+	_thread_running = true;
+	pthread_create(&_thread, NULL, thread_trampoline<Thread>, this);
+}
+
+void Thread::thread_function() {
+	while (_thread_running) {
+		thread_action();
+		usleep(_thread_interval_millis * 1000);
+	}
+}
+
+void Thread::stop() {
+	if (_thread_running) {
+		_thread_running = false;
+		pthread_join(_thread, NULL);
+	}
+}
+
+Thread::~Thread() {
+	stop();
+}

@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+#
+echo "1) windows-fsx"
+echo "2) linux-emulator"
+echo "3) linux-xplane"
+read -p "Choice: " id
+if [ "$id" == "1" ]; then
+	echo "windows-fsx" >.default_variant
+elif [ "$id" == "2" ]; then
+	echo "linux-emulator" >.default_variant
+elif [ "$id" == "3" ]; then
+	echo "linux-xplane" >.default_variant
+fi

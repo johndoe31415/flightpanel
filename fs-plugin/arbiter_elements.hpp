@@ -21,27 +21,36 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __ARBITER_HPP__
-#define __ARBITER_HPP__
+#ifndef __ARBITER_ELEMENTS_HPP__
+#define __ARBITER_ELEMENTS_HPP__
 
-#include <pthread.h>
-#include "fsconnection.hpp"
-#include "fpconnection.hpp"
-#include "thread.hpp"
+struct arbiter_elements_t {
+	bool radio_panel;
+	bool divisions;
+	bool tx_radio_id;
+	bool com1, com2;
+	bool nav1, nav2;
+	bool xpdr;
+	bool adf;
+	bool ap;
+	bool qnh;
+	bool navigate_by_gps;
+	bool flip_switches;
+	bool ident_values;
+	bool dme_values;
 
-class Arbiter : public Thread {
-	private:
-		bool _first_sync;
-		FSConnection *_fs_connection;
-		FPConnection *_fp_connection;
-		struct instrument_data_t _last_authoritative_data;
-		struct arbiter_result_t arbitrate(const struct instrument_data_t &new_fs_data, const struct instrument_data_t &new_fp_data);
-		template<typename T> void arbitrate_value(bool *update_fs, bool *update_fp, const T &old_authoritative_data, const T &new_fs_data, const T &new_fp_data, T *authoritative_data);
-		template<typename T> void arbitrate_value_unidirectional(bool *update, const T *old_data, const T *new_data, unsigned int data_size, T *authoritative_data);
-		void thread_action();
-	public:
-		Arbiter(FSConnection *fs_connection, FPConnection *fp_connection);
+	bool fp_send_report_01() const {
+		return radio_panel || divisions || tx_radio_id || com1 || com2 || nav1 || nav2 || xpdr || adf || ap || qnh || navigate_by_gps;
+	}
+
+	bool fp_send_report_02() const {
+		return ident_values || dme_values;
+	}
+};
+
+struct arbiter_result_t {
+	struct arbiter_elements_t fp;
+	struct arbiter_elements_t fs;
 };
 
 #endif
-

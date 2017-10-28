@@ -25,9 +25,9 @@
 #define __XSQUAWKBOX_HPP__
 
 #include <stdbool.h>
-#include <pthread.h>
 #include <XPLMDataAccess.h>
 #include "fsconnection.hpp"
+#include "thread.hpp"
 
 struct com_dataref_t {
 	XPLMDataRef frequency_active, frequency_standby;
@@ -57,11 +57,14 @@ struct dme_dataref_t {
 
 struct ap_dataref_t {
 	XPLMDataRef active;
+	XPLMDataRef arm_altitude;
 	XPLMDataRef altitude;
 	XPLMDataRef climbrate;
 	XPLMDataRef heading;
 	XPLMDataRef airspeed;
-	XPLMDataRef hdg_hold, nav_hold, alt_hold, rev_hold, apr_hold, ias_hold;
+	XPLMDataRef state;
+	XPLMDataRef backcourse;
+//	XPLMDataRef hdg_hold, nav_hold, alt_hold, rev_hold, apr_hold, ias_hold;
 };
 
 struct lights_dataref_t {
@@ -73,6 +76,7 @@ struct lights_dataref_t {
 };
 
 struct xpdr_dataref_t {
+	XPLMDataRef mode;
 	XPLMDataRef squawk;
 };
 
@@ -94,20 +98,20 @@ struct datarefs_t {
 	struct misc_dataref_t misc;
 };
 
-class XSquawkBoxConnection : public FSConnection {
+class XSquawkBoxConnection : public FSConnection, public Thread {
 	private:
-		bool _loop_running;
-		pthread_t _periodic_query_thread;
 		struct datarefs_t _datarefs;
 		struct instrument_data_t _instrument_data;
+		Lock _datalock, _datareflock;
+		void thread_action();
 
-		void poll_data();
+		void xplane_set_autopilot(const struct ap_state_t &ap_state);
+		void xplane_deactivate_autopilot();
 
 	public:
 		XSquawkBoxConnection();
 		virtual void get_data(struct instrument_data_t *data);
-		virtual void put_data(const struct instrument_data_t *data, const struct component_selection_t *selection);
-		void event_loop();
+		virtual void put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements);
 		~XSquawkBoxConnection();
 };
 

@@ -21,27 +21,34 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __ARBITER_HPP__
-#define __ARBITER_HPP__
+#include <stdio.h>
+#include <string.h>
+#include <XPLMPlugin.h>
+#include "fpconnect.hpp"
 
-#include <pthread.h>
-#include "fsconnection.hpp"
-#include "fpconnection.hpp"
-#include "thread.hpp"
+PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
+	fprintf(stderr, "X-Plane plugin start.\n");
+	strcpy(outName, "flightpanel");
+	strcpy(outSig, "flightpanel.main");
+	strcpy(outDesc, "Connects X-Plane to the flightpanel hardware unit.");
+	return 1;
+}
 
-class Arbiter : public Thread {
-	private:
-		bool _first_sync;
-		FSConnection *_fs_connection;
-		FPConnection *_fp_connection;
-		struct instrument_data_t _last_authoritative_data;
-		struct arbiter_result_t arbitrate(const struct instrument_data_t &new_fs_data, const struct instrument_data_t &new_fp_data);
-		template<typename T> void arbitrate_value(bool *update_fs, bool *update_fp, const T &old_authoritative_data, const T &new_fs_data, const T &new_fp_data, T *authoritative_data);
-		template<typename T> void arbitrate_value_unidirectional(bool *update, const T *old_data, const T *new_data, unsigned int data_size, T *authoritative_data);
-		void thread_action();
-	public:
-		Arbiter(FSConnection *fs_connection, FPConnection *fp_connection);
-};
+PLUGIN_API void XPluginStop(void) {
+	fprintf(stderr, "X-Plane plugin stop.\n");
+}
 
-#endif
+PLUGIN_API int XPluginEnable(void) {
+	fprintf(stderr, "X-Plane plugin enable.\n");
+	start_arbiter_thread();
+	return 1;
+}
 
+PLUGIN_API void XPluginDisable(void) {
+	fprintf(stderr, "X-Plane plugin disable.\n");
+	stop_arbiter_thread();
+}
+
+PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, void *inParam) {
+	fprintf(stderr, "X-Plane receive msg from %u: %ld (%p)\n", inFromWho, inMessage, inParam);
+}

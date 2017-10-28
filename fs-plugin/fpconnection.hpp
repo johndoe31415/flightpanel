@@ -27,25 +27,41 @@
 #include <pthread.h>
 #include <hidapi/hidapi.h>
 #include "fsconnection.hpp"
+#include "thread.hpp"
+#include "arbiter_elements.hpp"
 
 #define USB_VID		0x0483
 #define USB_PID		0x572b
 
-class FPConnection {
+class FPConnection : public Thread {
 	private:
 		hid_device *_device;
-		pthread_t _periodic_query_thread;
-		bool _run_event_loop;
+		Lock _devicelock, _datalock;
 		struct instrument_data_t _instrument_data;
+		bool _data_initialized;
+		uint8_t _last_seqno;
+		Event _data_fresh;
+
+		template<typename T> bool send_report(T *report);
+		bool connect();
+		void disconnect();
 
 	public:
 		FPConnection();
+		void thread_action();
+		void get_data(struct instrument_data_t *data);
+		void put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements);
+		void put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements, bool send_all);
+		bool data_initialized() const {
+			return _data_initialized;
+		}
+		Event& data_fresh() {
+			return _data_fresh;
+		}
 		bool connected() const {
 			return _device != NULL;
 		}
-		void event_loop();
-		void get_data(struct instrument_data_t *data);
-		void put_data(const struct instrument_data_t *data, const struct component_selection_t *selection);
+		void wait_for_ack();
 		~FPConnection();
 };
 

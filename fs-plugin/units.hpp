@@ -21,27 +21,12 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __ARBITER_HPP__
-#define __ARBITER_HPP__
+#ifndef __UNITS_HPP__
+#define __UNITS_HPP__
 
-#include <pthread.h>
-#include "fsconnection.hpp"
-#include "fpconnection.hpp"
-#include "thread.hpp"
-
-class Arbiter : public Thread {
-	private:
-		bool _first_sync;
-		FSConnection *_fs_connection;
-		FPConnection *_fp_connection;
-		struct instrument_data_t _last_authoritative_data;
-		struct arbiter_result_t arbitrate(const struct instrument_data_t &new_fs_data, const struct instrument_data_t &new_fp_data);
-		template<typename T> void arbitrate_value(bool *update_fs, bool *update_fp, const T &old_authoritative_data, const T &new_fs_data, const T &new_fp_data, T *authoritative_data);
-		template<typename T> void arbitrate_value_unidirectional(bool *update, const T *old_data, const T *new_data, unsigned int data_size, T *authoritative_data);
-		void thread_action();
-	public:
-		Arbiter(FSConnection *fs_connection, FPConnection *fp_connection);
-};
+/*************** AUTO GENERATED SECTION FOLLOWS ***************/
+double inhg_to_millibar(double pressure_inhg);
+double millibar_to_inhg(double pressure_millibar);
+/***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif
-

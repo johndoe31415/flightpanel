@@ -21,38 +21,15 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __EMULATOR_HPP__
-#define __EMULATOR_HPP__
+#include "units.hpp"
 
-#include <stdbool.h>
-#include <pthread.h>
-#include "fsconnection.hpp"
+#define MILLIBAR_PER_INHG	33.8639
 
-class EmulatedConnection : public FSConnection {
-	private:
-		pthread_t _polling_thread;
-		bool _loop_running;
+double inhg_to_millibar(double pressure_inhg) {
+	return MILLIBAR_PER_INHG * pressure_inhg;
+}
 
-		struct instrument_data_t _instrument_data;
+double millibar_to_inhg(double pressure_millibar) {
+	return pressure_millibar / MILLIBAR_PER_INHG;
+}
 
-	private:
-		void randomize(struct com_data_t &com);
-		void randomize(struct nav_data_t &nav);
-		void randomize(struct adf_data_t &adf);
-		void randomize(struct dme_data_t &dme);
-		void randomize(struct light_data_t &lights);
-		void randomize(struct ap_data_t &ap);
-		void randomize(struct transponder_data_t &xpdr);
-		void randomize(struct misc_data_t &misc);
-
-	public:
-		EmulatedConnection();
-		bool connected(void) const {
-			return true;
-		}
-		virtual void get_data(struct instrument_data_t *data);
-		virtual void put_data(const struct instrument_data_t *data, const struct component_selection_t *selection);
-		~EmulatedConnection();
-};
-
-#endif

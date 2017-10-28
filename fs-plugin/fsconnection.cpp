@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "fsconnection.hpp"
 
 static const char *xpdr_state_to_str(enum xpdr_mode_t xpdr_mode) {
@@ -34,42 +35,149 @@ static const char *xpdr_state_to_str(enum xpdr_mode_t xpdr_mode) {
 	return "?";
 }
 
-void dump_instrument_data(FILE *f, const struct instrument_data_t *data) {
-	fprintf(f, "COM1: %3d.%03d (%3d.%03d)     ", data->com1_active_freq_khz() / 1000, data->com1_active_freq_khz() % 1000, data->com1_standby_freq_khz() / 1000, data->com1_standby_freq_khz() % 1000);
-	fprintf(f, "COM2: %3d.%03d (%3d.%03d)\n", data->com2_active_freq_khz() / 1000, data->com2_active_freq_khz() % 1000, data->com2_standby_freq_khz() / 1000, data->com2_standby_freq_khz() % 1000);
-	fprintf(f, "NAV1: %3d.%03d (%3d.%03d)     ", data->nav1_active_freq_khz() / 1000, data->nav1_active_freq_khz() % 1000, data->nav1_standby_freq_khz() / 1000, data->nav1_standby_freq_khz() % 1000);
-	fprintf(f, "NAV2: %3d.%03d (%3d.%03d)\n", data->nav2_active_freq_khz() / 1000, data->nav2_active_freq_khz() % 1000, data->nav2_standby_freq_khz() / 1000, data->nav2_standby_freq_khz() % 1000);
-	fprintf(f, "OBS: NAV1 %3d deg, NAV2 %3d deg\n", data->external.nav1.obs, data->external.nav2.obs);
-	fprintf(f, "ADF %4d kHz\n", data->external.adf.frequency_khz);
-	fprintf(f, "DME NAV %d\n", data->external.dme_nav_source);
-	fprintf(f, "Squawk %04d, XPDR %s\n", data->external.xpdr.squawk, xpdr_state_to_str((enum xpdr_mode_t)data->external.xpdr.state));
-	fprintf(f, "Radios: %1s%4s  %1s%4s  Audio: %4s %4s %3s %3s\n",
-			(data->external.tx_radio_id == 1) ? ">" : "", (data->external.radio_panel & RADIO_COM1) ? "COM1" : "",
-			(data->external.tx_radio_id == 2) ? ">" : "", (data->external.radio_panel & RADIO_COM2) ? "COM2" : "",
-			(data->external.radio_panel & RADIO_NAV1) ? "NAV1" : "",
-			(data->external.radio_panel & RADIO_NAV2) ? "NAV2" : "",
-			(data->external.radio_panel & RADIO_DME) ? "DME" : "",
-			(data->external.radio_panel & RADIO_ADF) ? "ADF" : "");
-	fprintf(f, "Switches: %3s %4s %4s %3s %4s %6s\n",
-			(data->external.flip_switches & SWITCH_BCN) ? "BCN" : "",
-			(data->external.flip_switches & SWITCH_LAND) ? "LAND" : "",
-			(data->external.flip_switches & SWITCH_TAXI) ? "TAXI" : "",
-			(data->external.flip_switches & SWITCH_NAV) ? "NAV" : "",
-			(data->external.flip_switches & SWITCH_STRB) ? "STRB" : "",
-			(data->external.flip_switches & SWITCH_MASTER) ? "MASTER" : ""
-		);
-	fprintf(f, "AP: %3s, %u ft, %d ft/min, %u deg, %u kts [%3s %3s %3s %3s %3s %3s]\n",
-			data->external.ap.state & AP_ACTIVE ? "ON" : "off",
-			data->external.ap.altitude,
-			data->external.ap.climbrate,
-			data->external.ap.heading,
-			data->external.ap.ias,
-			data->external.ap.state & AP_HOLD_ALTITUDE ? "ALT" : "",
-			data->external.ap.state & AP_HOLD_HEADING ? "HDG" : "",
-			data->external.ap.state & AP_HOLD_IAS ? "IAS" : "",
-			data->external.ap.state & AP_HOLD_NAVIGATION ? "NAV" : "",
-			data->external.ap.state & AP_HOLD_APPROACH ? "APR" : "",
-			data->external.ap.state & AP_HOLD_REVERSE ? "REV" : ""
-	);
+static bool dump_instrument_data_line(int line, char buffer[256], const struct instrument_data_t &data) {
+	char *buf = buffer;
+
+	switch (line) {
+		case 0:
+			buf += sprintf(buf, "COM1: %3d.%03d (%3d.%03d)     ", data.com1_active_freq_khz() / 1000, data.com1_active_freq_khz() % 1000, data.com1_standby_freq_khz() / 1000, data.com1_standby_freq_khz() % 1000);
+			buf += sprintf(buf, "COM2: %3d.%03d (%3d.%03d)", data.com2_active_freq_khz() / 1000, data.com2_active_freq_khz() % 1000, data.com2_standby_freq_khz() / 1000, data.com2_standby_freq_khz() % 1000);
+			break;
+
+		case 1:
+			buf += sprintf(buf, "NAV1: %3d.%03d (%3d.%03d)     ", data.nav1_active_freq_khz() / 1000, data.nav1_active_freq_khz() % 1000, data.nav1_standby_freq_khz() / 1000, data.nav1_standby_freq_khz() % 1000);
+			buf += sprintf(buf, "NAV2: %3d.%03d (%3d.%03d)", data.nav2_active_freq_khz() / 1000, data.nav2_active_freq_khz() % 1000, data.nav2_standby_freq_khz() / 1000, data.nav2_standby_freq_khz() % 1000);
+			break;
+
+		case 2:
+			buf += sprintf(buf, "OBS: NAV1 %3d deg, NAV2 %3d deg", data.external.nav1.obs, data.external.nav2.obs);
+			break;
+
+		case 3:
+			buf += sprintf(buf, "ADF %4d kHz", data.external.adf.frequency_khz);
+			break;
+
+		case 4:
+			buf += sprintf(buf, "DME %-3s dist %5.1f nm, speed %3d kt", data.internal.dme.available ? "yes" : "no", (double)data.internal.dme.distance_tenth_nm / 10, data.internal.dme.velocity);
+			break;
+
+		case 5:
+			buf += sprintf(buf, "Squawk %04d, XPDR %s", data.external.xpdr.squawk, xpdr_state_to_str((enum xpdr_mode_t)data.external.xpdr.state));
+			break;
+
+		case 6:
+			buf += sprintf(buf, "Radios: %1s%4s  %1s%4s  Audio: %4s %4s %3s %3s",
+					(data.external.tx_radio_id == 1) ? ">" : "", (data.external.radio_panel & RADIO_COM1) ? "COM1" : "",
+					(data.external.tx_radio_id == 2) ? ">" : "", (data.external.radio_panel & RADIO_COM2) ? "COM2" : "",
+					(data.external.radio_panel & RADIO_NAV1) ? "NAV1" : "",
+					(data.external.radio_panel & RADIO_NAV2) ? "NAV2" : "",
+					(data.external.radio_panel & RADIO_DME) ? "DME" : "",
+					(data.external.radio_panel & RADIO_ADF) ? "ADF" : "");
+			break;
+
+		case 7:
+			buf += sprintf(buf, "Switches: %3s %4s %4s %3s %4s %6s",
+					(data.external.flip_switches & SWITCH_BCN) ? "BCN" : "",
+					(data.external.flip_switches & SWITCH_LAND) ? "LAND" : "",
+					(data.external.flip_switches & SWITCH_TAXI) ? "TAXI" : "",
+					(data.external.flip_switches & SWITCH_NAV) ? "NAV" : "",
+					(data.external.flip_switches & SWITCH_STRB) ? "STRB" : "",
+					(data.external.flip_switches & SWITCH_MASTER) ? "MASTER" : ""
+				);
+			break;
+
+		case 8:
+			buf += sprintf(buf, "AP: %3s, %5u ft, %4d ft/min, %3u°, %3u kts",
+					data.external.ap.state & AP_ACTIVE ? "ON" : "off",
+					data.external.ap.altitude,
+					data.external.ap.climbrate,
+					data.external.ap.heading,
+					data.external.ap.ias
+			);
+			break;
+
+		case 9:
+			buf += sprintf(buf, "AP: [%3s %3s %3s %3s %3s %3s]",
+					data.external.ap.state & AP_HOLD_ALTITUDE ? "ALT" : "",
+					data.external.ap.state & AP_HOLD_HEADING ? "HDG" : "",
+					data.external.ap.state & AP_HOLD_IAS ? "IAS" : "",
+					data.external.ap.state & AP_HOLD_NAVIGATION ? "NAV" : "",
+					data.external.ap.state & AP_HOLD_APPROACH ? "APR" : "",
+					data.external.ap.state & AP_HOLD_REVERSE ? "REV" : ""
+			);
+			break;
+
+		case 10:
+			buf += sprintf(buf, "NAV source: %s   QNH %4d", data.external.navigate_by_gps ? "GPS" : "NAV", data.external.qnh);
+			break;
+
+		case 11:
+			buf += sprintf(buf, "IDENTs: NAV1 %4s, NAV2 %4s, ADF %4s", data.internal.ident.nav1, data.internal.ident.nav2, data.internal.ident.adf);
+			break;
+
+		default:
+			return false;
+	}
+	return true;
 }
 
+void dump_instrument_data(FILE *f, const char *desc, const struct instrument_data_t &data) {
+	int lineno = 0;
+	char buffer[256];
+	fprintf(f, "%s:\n", desc);
+	while (dump_instrument_data_line(lineno, buffer, data)) {
+		fprintf(f, "%s\n", buffer);
+		lineno++;
+	}
+	fprintf(f, "\n");
+}
+
+void diff_instrument_data(FILE *f, const char *desc, const struct instrument_data_t &data1, const struct instrument_data_t &data2) {
+	int lineno = 0;
+	char buffer1[256], buffer2[256];
+	fprintf(f, "%s:\n", desc);
+	while (dump_instrument_data_line(lineno, buffer1, data1)) {
+		dump_instrument_data_line(lineno, buffer2, data2);
+		int len1 = strlen(buffer1);
+		int len2 = strlen(buffer2);
+		int min_len = len1 < len2 ? len1 : len2;
+
+		bool red = false;
+		for (int i = 0; i < min_len; i++) {
+			bool char_red = (buffer1[i] != buffer2[i]);
+			if (char_red != red) {
+				if (char_red) {
+					fprintf(f, "\x1b[31m");
+				} else {
+					fprintf(f, "\x1b[0m");
+				}
+				red = char_red;
+			}
+
+			fprintf(f, "%c", buffer1[i]);
+		}
+		fprintf(f, "\x1b[0m");
+		fprintf(f, "%s", buffer1 + min_len);
+		fprintf(f, "%*s", 60 - len1, "");
+
+		red = false;
+		for (int i = 0; i < min_len; i++) {
+			bool char_red = (buffer1[i] != buffer2[i]);
+			if (char_red != red) {
+				if (char_red) {
+					fprintf(f, "\x1b[31m");
+				} else {
+					fprintf(f, "\x1b[0m");
+				}
+				red = char_red;
+			}
+			fprintf(f, "%c", buffer2[i]);
+		}
+		fprintf(f, "\x1b[0m");
+		fprintf(f, "%s", buffer2 + min_len);
+		fprintf(f, "\n");
+		lineno++;
+	}
+	fprintf(f, "\n");
+
+}

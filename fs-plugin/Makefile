@@ -3,14 +3,18 @@
 vpath %.c ../firmware
 
 WINDOWS_FSX_TARGET := fpconnect.exe
-WINDOWS_FSX_OBJS := simconnect.o simconnect-events.o simconnect-datadefs.o fpconnect.res
+WINDOWS_FSX_OBJS := $(addprefix arch/fsx/,simconnect.o simconnect-events.o simconnect-datadefs.o fpconnect.res)
 LINUX_EMU_TARGET := fpconnect
-LINUX_EMU_OBJS := emulator.o
+LINUX_EMU_OBJS := $(addprefix arch/emulation/,emulator.o)
 LINUX_XPLANE_TARGET := fpconnect.so
-LINUX_XPLANE_OBJS := xsquawkbox.o xplane-datadefs.o
+LINUX_XPLANE_OBJS := $(addprefix arch/xplane/,xsquawkbox.o xplane-datadefs.o xplane_plugin.o)
+
+ifeq ($(VARIANT),)
+VARIANT := $(shell cat .default_variant)
+endif
 
 ifeq ($(VARIANT),windows-fsx)
-ifeq ($(wildcard sdk-simconnect),)
+ifeq ($(wildcard include/sdk-simconnect),)
 $(error The FSX SimConnect header files were not found. Place the SimConnect.h and SimConnect.lib in the sdk-simconnect subdirectory and try again)
 endif
 TARGET := $(WINDOWS_FSX_TARGET)
@@ -22,7 +26,7 @@ GDB := $(PREFIX)gdb
 STRIP := $(PREFIX)strip
 WINDRES := $(PREFIX)windres
 BUILDDIR := build/windows
-PLATFORM_CFLAGS := -Isdk-simconnect -DVARIANT_WINDOWS_FSX
+PLATFORM_CFLAGS := -Iinclude/sdk-simconnect -DVARIANT_WINDOWS_FSX -Iarch/fsx
 PLATFORM_LDFLAGS := -Lsdk-simconnect -lSimConnect -Lbuild/windows -lhidapi
 PLATFORM_OBJS := $(WINDOWS_FSX_OBJS)
 
@@ -35,12 +39,13 @@ AR := $(PREFIX)ar
 GDB := $(PREFIX)gdb
 STRIP := $(PREFIX)strip
 BUILDDIR := build/linux
-PLATFORM_CFLAGS := -DVARIANT_LINUX_EMU
+PLATFORM_CFLAGS := -DVARIANT_LINUX_EMU -Iarch/emulation
+PLATFORM_CFLAGS += -fsanitize=address
 PLATFORM_LDFLAGS := -Lbuild/linux -lhidapi-libusb
 PLATFORM_OBJS := $(LINUX_EMU_OBJS)
 
 else ifeq ($(VARIANT),linux-xplane)
-ifeq ($(wildcard xsquawkbox/CHeaders/XPLM/XPLMDefs.h),)
+ifeq ($(wildcard include/xsquawkbox/CHeaders/XPLM/XPLMDefs.h),)
 $(error The XSquawkBox header files were not found. Place the SDK files in the xsquawkbox subdirectory and try again)
 endif
 TARGET := $(LINUX_XPLANE_TARGET)
@@ -51,8 +56,8 @@ AR := $(PREFIX)ar
 GDB := $(PREFIX)gdb
 STRIP := $(PREFIX)strip
 BUILDDIR := build/linux
-PLATFORM_CFLAGS := -fPIC -DLIN -DVARIANT_LINUX_XPLANE -Ixsquawkbox/CHeaders/XPLM/
-PLATFORM_LDFLAGS := -Wl,--version-script=fpconnect.ld -shared -Lbuild/linux -lhidapi-libusb
+PLATFORM_CFLAGS := -fPIC -DLIN -DVARIANT_LINUX_XPLANE -Iinclude/xsquawkbox/CHeaders/XPLM/ -Iarch/xplane
+PLATFORM_LDFLAGS := -Wl,--version-script=arch/xplane/fpconnect.ld -shared -Lbuild/linux -lhidapi-libusb
 PLATFORM_OBJS := $(LINUX_XPLANE_OBJS)
 XPLANE_PATH := $(HOME)/xplane
 
@@ -60,12 +65,12 @@ else
 $(error The VARIANT environment variable needs to be either "linux-xplane", "linux-emulator" or "windows-fsx", not "$(VARIANT)")
 endif
 
-SHARED_CFLAGS := $(PLATFORM_CFLAGS) -I../firmware -I.. -Ihidapi -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -Wuninitialized -O3 -pthread -g -DDISABLE_FIRMWARE_DEBUG
+SHARED_CFLAGS := $(PLATFORM_CFLAGS) -I../firmware -I. -I.. -Ihidapi -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -Wuninitialized -O0 -pthread -g -DDISABLE_FIRMWARE_DEBUG
 CFLAGS := -std=c11 $(SHARED_CFLAGS)
 CXXFLAGS := -std=c++11 $(SHARED_CFLAGS)
 LDFLAGS := $(PLATFORM_LDFLAGS)
 
-OBJS := fpconnect.o fsconnection.o fpconnection.o arbiter.o frequencies.o $(PLATFORM_OBJS)
+OBJS := fpconnect.o fsconnection.o fpconnection.o arbiter.o frequencies.o units.o thread.o $(PLATFORM_OBJS)
 
 all: $(TARGET)
 

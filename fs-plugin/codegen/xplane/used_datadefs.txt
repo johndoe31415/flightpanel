@@ -1,0 +1,67 @@
+sim/cockpit/radios/adf1_freq_hz	int	y	10Hz	The current frequency of the first automatic direction finder.
+sim/cockpit/radios/adf2_freq_hz	int	y	10Hz	The current frequency of the second automatic direction finder.
+sim/cockpit/radios/adf1_stdby_freq_hz	int	y	10Hz	The standby frequency for the radio mentioned above for flip/flop radios.
+sim/cockpit/radios/adf2_stdby_freq_hz	int	y	10Hz	The standby frequency for the radio mentioned above for flip/flop radios.
+sim/cockpit/radios/adf1_dir_degt	float	y	deg	The relative bearing to the beacon indicated by adf1.  Use override_adf to stg.
+sim/cockpit/radios/adf2_dir_degt	float	y	deg	The relative bearing to the beacon indicated by adf2.  Use override_adf to stg.
+sim/cockpit/radios/adf1_dme_dist_m	float	y	nautical_miles	Our distance in nautical miles from the beacon tuned in on adf1.  override_dme
+sim/cockpit/radios/adf2_dme_dist_m	float	y	nautical_miles	Our distance in nautical miles from the beacon tuned in on adf2.  override_dme
+sim/cockpit/radios/adf1_dme_speed_kts	float	y	knots	Our closing speed to the beacon tuned in on adf1. override_dme
+sim/cockpit/radios/adf2_dme_speed_kts	float	y	knots	Our closing speed to the beacon tuned in on adf2. override_dme
+sim/cockpit/radios/adf1_dme_time_secs	float	y	mins	Our time to reach the beacon tuned in on adf1. override_dme  (Dataref is labeled - this has always been minutes.)
+sim/cockpit/radios/adf2_dme_time_secs	float	y	mins	Our time to reach the beacon tuned in on adf2. override_dme  (Dataref is labeled - this has always been minutes.)
+sim/cockpit/radios/adf1_cardinal_dir	float	y	degm	Magnetic heading of the compass card for ADF 1 - pilot.
+sim/cockpit/radios/adf1_cardinal_dir2	float	y	degm	Magnetic heading of the compass card for ADF 1 - copilot.
+sim/cockpit/radios/adf2_cardinal_dir	float	y	degm	Magnetic heading of the compass card for ADF 2 - pilot.
+sim/cockpit/radios/adf2_cardinal_dir2	float	y	degm	Magnetic heading of the compass card for ADF 2 - copilot.
+sim/cockpit/radios/adf1_has_dme	int	y	bool	Does this adf aid have DME?  Use override_dme to set
+sim/cockpit/radios/adf2_has_dme	int	y	bool	Does this adf aid have DME?  Use override_dme to set
+sim/cockpit/radios/dme5_has_dme	int	y	bool	Does this adf aid have DME?  Use override_dme to set
+sim/cockpit/radios/nav_com_adf_mode	int	y	int	for a multifunction receiver...0-5 for nav1,nav2,com1,com2,adf1,adf2.
+sim/cockpit/switches/RMI_l_vor_adf_selector	int	y	???	Is the left side of a VOR/ADF RMI showing the VOR or ADF
+sim/cockpit/switches/RMI_l_vor_adf_selector2	int	y	???	Is the left side of a VOR/ADF RMI showing the VOR or ADF
+sim/cockpit/switches/RMI_r_vor_adf_selector	int	y	???	Is the right side of a VOR/ADF RMI showing the VOR or ADF
+sim/cockpit/switches/RMI_r_vor_adf_selector2	int	y	???	Is the right side of a VOR/ADF RMI showing the VOR or ADF
+sim/operation/failures/rel_adf1	int	y	failure_enum	ADF 1 (only one ADF failure in 830!)
+sim/operation/failures/rel_adf2	int	y	failure_enum	ADF 2
+sim/operation/override/override_adf	int	y	boolean	Override ADF radios
+sim/cockpit2/radios/actuators/adf1_power	int	y	enum	ADF radio 1 off or on, 0 = off, 1 = antenna, 2 = on, 3 = tone, 4 = test
+sim/cockpit2/radios/actuators/adf2_power	int	y	enum	ADF radio 2 off or on, 0 = off, 1 = antenna, 2 = on, 3 = tone, 4 = test
+sim/cockpit2/radios/actuators/adf1_frequency_hz	int	y	10hertz	ADF radio 1 frequency, hz
+sim/cockpit2/radios/actuators/adf2_frequency_hz	int	y	10hertz	ADF radio 2 frequency, hz
+sim/cockpit2/radios/actuators/adf1_standby_frequency_hz	int	y	10hertz	ADF radio 1 standby frequency, hz
+sim/cockpit2/radios/actuators/adf2_standby_frequency_hz	int	y	10hertz	ADF radio 2 standby frequency, hz
+sim/cockpit2/radios/actuators/adf1_card_heading_deg_mag_pilot	float	y	degrees_magnetic	CARD selection for ADF 1, pilot side, in degrees magnetic.
+sim/cockpit2/radios/actuators/adf2_card_heading_deg_mag_pilot	float	y	degrees_magnetic	CARD selection for ADF 2, pilot side, in degrees magnetic.
+sim/cockpit2/radios/actuators/adf1_card_heading_deg_mag_copilot	float	y	degrees_magnetic	CARD selection for ADF 1, copilot side, in degrees magnetic.
+sim/cockpit2/radios/actuators/adf2_card_heading_deg_mag_copilot	float	y	degrees_magnetic	CARD selection for ADF 2, copilot side, in degrees magnetic.
+sim/cockpit2/radios/actuators/RMI_left_use_adf_pilot	int	y	enum	RMI is taking ADF (1) or VOR (0).
+sim/cockpit2/radios/actuators/RMI_left_use_adf_copilot	int	y	enum	RMI is taking ADF (1) or VOR (0).
+sim/cockpit2/radios/actuators/RMI_right_use_adf_pilot	int	y	enum	RMI is taking ADF (1) or VOR (0).
+sim/cockpit2/radios/actuators/RMI_right_use_adf_copilot	int	y	enum	RMI is taking ADF (1) or VOR (0).
+sim/cockpit2/radios/actuators/nav_com_adf_mode	int	y	enum	Frequency-to-change selection for the all-in-one radio, 0->5 are Nav1, Nav2, Com1, Com2, ADF1, ADF2.
+sim/cockpit2/radios/actuators/audio_nav_selection	int	y	enum	0=nav1,1=nav2,2=adf1,3=adf2,9=none
+sim/cockpit2/radios/actuators/audio_selection_adf1	int	y	boolean	is adf1 selected for listening
+sim/cockpit2/radios/actuators/audio_selection_adf2	int	y	boolean	is adf2 selected for listening
+sim/cockpit2/radios/actuators/audio_volume_adf1	float	y	[0..1]	Audio level (0 is off, 1 is max) for adf1 audio
+sim/cockpit2/radios/actuators/audio_volume_adf2	float	y	[0..1]	Audio level (0 is off, 1 is max) for adf2 audio
+sim/cockpit2/radios/actuators/adf1_left_frequency_hz	int	y	10hertz	Left ADF radio 1 frequency, hz
+sim/cockpit2/radios/actuators/adf2_left_frequency_hz	int	y	10hertz	Left ADF radio 2 frequency, hz
+sim/cockpit2/radios/actuators/adf1_right_frequency_hz	int	y	10hertz	Right ADF radio 1 frequency, hz
+sim/cockpit2/radios/actuators/adf2_right_frequency_hz	int	y	10hertz	Right ADF radio 2 frequency, hz
+sim/cockpit2/radios/actuators/adf1_right_is_selected	int	y	boolean	1 if right adf 1 radio is selected, 0 if left is selected
+sim/cockpit2/radios/actuators/adf2_right_is_selected	int	y	boolean	1 if right adf 2 radio is selected, 0 if left is selected
+sim/cockpit2/radios/indicators/adf1_bearing_deg_mag	float	n	degrees_magnetic	Indicated bearing to the adf1 navaid
+sim/cockpit2/radios/indicators/adf2_bearing_deg_mag	float	n	degrees_magnetic	Indicated bearing to the adf2 navaid
+sim/cockpit2/radios/indicators/adf1_relative_bearing_deg	float	n	degrees	Indicated relative bearing to the adf1 navaid
+sim/cockpit2/radios/indicators/adf2_relative_bearing_deg	float	n	degrees	Indicated relative bearing to the adf2 navaid
+sim/cockpit2/radios/indicators/adf1_has_dme	int	n	boolean	Is there a DME signal from ADF1's DME?	1 if yes, 0 if no
+sim/cockpit2/radios/indicators/adf2_has_dme	int	n	boolean	Is there a DME signal from ADF2's DME?	1 if yes, 0 if no
+sim/cockpit2/radios/indicators/adf1_dme_distance_nm	float	n	nautical_miles	adf1 DME distance in nautical miles.
+sim/cockpit2/radios/indicators/adf2_dme_distance_nm	float	n	nautical_miles	adf2 DME distance in nautical miles.
+sim/cockpit2/radios/indicators/adf1_dme_speed_kts	float	n	knots	adf1 DME speed in knots.
+sim/cockpit2/radios/indicators/adf2_dme_speed_kts	float	n	knots	adf2 DME speed in knots.
+sim/cockpit2/radios/indicators/adf1_dme_time_min	float	n	minutes	adf1 DME time in minutes.
+sim/cockpit2/radios/indicators/adf2_dme_time_min	float	n	minutes	adf2 DME time in minutes.
+sim/cockpit2/radios/indicators/adf1_nav_id	byte[500]	n	string	current selected navID - ADF 1
+sim/cockpit2/radios/indicators/adf2_nav_id	byte[500]	n	string	current selected navID - ADF 2

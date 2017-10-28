@@ -21,27 +21,39 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __ARBITER_HPP__
-#define __ARBITER_HPP__
+#ifndef __EMULATOR_HPP__
+#define __EMULATOR_HPP__
 
+#include <stdbool.h>
 #include <pthread.h>
 #include "fsconnection.hpp"
-#include "fpconnection.hpp"
-#include "thread.hpp"
 
-class Arbiter : public Thread {
+class EmulatedConnection : public FSConnection {
 	private:
-		bool _first_sync;
-		FSConnection *_fs_connection;
-		FPConnection *_fp_connection;
-		struct instrument_data_t _last_authoritative_data;
-		struct arbiter_result_t arbitrate(const struct instrument_data_t &new_fs_data, const struct instrument_data_t &new_fp_data);
-		template<typename T> void arbitrate_value(bool *update_fs, bool *update_fp, const T &old_authoritative_data, const T &new_fs_data, const T &new_fp_data, T *authoritative_data);
-		template<typename T> void arbitrate_value_unidirectional(bool *update, const T *old_data, const T *new_data, unsigned int data_size, T *authoritative_data);
-		void thread_action();
+		pthread_t _polling_thread;
+		bool _loop_running;
+
+		struct instrument_data_t _instrument_data;
+
+	private:
+		void randomize(struct com_state_t *com);
+		void randomize(struct nav_state_t *nav);
+		void randomize(struct adf_state_t *adf);
+		void randomize(struct ap_state_t *ap);
+		void randomize(struct xpdr_state_t *xpdr);
+		void randomize(struct hid_report_t *misc);
+		void randomize(struct internal_state_t *internal);
+		void randomize(char ident[IDENT_LENGTH_BYTES]);
+
 	public:
-		Arbiter(FSConnection *fs_connection, FPConnection *fp_connection);
+		EmulatedConnection();
+		bool connected(void) const {
+			return true;
+		}
+		virtual void get_data(struct instrument_data_t *data);
+		virtual void put_data(const struct instrument_data_t &data, const arbiter_elements_t &elements);
+		void poke();
+		~EmulatedConnection();
 };
 
 #endif
-

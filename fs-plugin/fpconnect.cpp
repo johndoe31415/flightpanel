@@ -26,6 +26,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <math.h>
+#include <pthread.h>
+#include <unistd.h>
 
 #include "fsconnection.hpp"
 #include "fpconnection.hpp"
@@ -49,16 +51,35 @@
 
 #endif
 
-int main(void) {
-	FSConnection *fs_connection = new FlightSimConnection();
-	FPConnection *fp_connection = new FPConnection();
+static FlightSimConnection *fs_connection;
+static FPConnection *fp_connection;
+static Arbiter *arbiter;
 
-	//fs_connection->event_loop();
-	//fp_connection->event_loop();
+void start_arbiter_thread() {
+	fs_connection = new FlightSimConnection();
+	fp_connection = new FPConnection();
+	arbiter = new Arbiter(fs_connection, fp_connection);
 
-	Arbiter arbiter(fs_connection, fp_connection);
-	arbiter.run();
+	arbiter->start();
+}
 
+void stop_arbiter_thread() {
+	delete arbiter;
 	delete fs_connection;
+	delete fp_connection;
+}
+
+#if defined(VARIANT_LINUX_EMU)
+int main(void) {
+	start_arbiter_thread();
+	fprintf(stderr, "Press return to exit...\n");
+	char buffer[256];
+	while (true) {
+		while (fgets(buffer, sizeof(buffer), stdin) == NULL);
+		fs_connection->poke();
+	}
+	fprintf(stderr, "Exiting!\n");
+	stop_arbiter_thread();
 	return 0;
 }
+#endif

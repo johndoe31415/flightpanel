@@ -32,21 +32,30 @@
 #include <firmware/frequencies.h>
 #include "fpconnection.hpp"
 
-//#define NO_REAL_DEVICE
-
-static void* event_loop_thread(void *ctx) {
-	FPConnection *connection = (FPConnection*)ctx;
-	connection->event_loop();
-	return NULL;
+FPConnection::FPConnection() : Thread(500), _device(NULL), _data_initialized(false), _last_seqno(0x55) {
+	std::memset(&_instrument_data, 0, sizeof(struct instrument_data_t));
+	start();
 }
 
-FPConnection::FPConnection() : _device(NULL) {
-#ifndef NO_REAL_DEVICE
+void FPConnection::disconnect() {
+	LockGuard guard(_devicelock, "disconnect");
+	if (_device) {
+		hid_close(_device);
+		_device = NULL;
+		_data_initialized = false;
+	}
+}
+
+bool FPConnection::connect() {
+	LockGuard guard(_devicelock, "connect");
+	if (_device) {
+		return true;
+	}
+
 	struct hid_device_info *info = hid_enumerate(USB_VID, USB_PID);
 	if (!info) {
-		char buffer[128];
-		sprintf(buffer, "Failed to hid_enumerate(): No such VID/PID %04x:%04x", USB_VID, USB_PID);
-		throw std::runtime_error(buffer);
+		fprintf(stderr, "Failed to hid_enumerate(): No such VID/PID %04x:%04x\n", USB_VID, USB_PID );
+		return false;
 	}
 
 	struct hid_device_info *current = info;
@@ -61,71 +70,124 @@ FPConnection::FPConnection() : _device(NULL) {
 	_device = hid_open(info->vendor_id, info->product_id, info->serial_number);
 	hid_free_enumeration(info);
 	if (!_device) {
-		throw std::runtime_error("Failed to hid_open().");
+		fprintf(stderr, "Failed to hid_open().\n");
+		return false;
 	}
-#endif
-
-	std::memset(&_instrument_data, 0, sizeof(struct instrument_data_t));
-	pthread_create(&_periodic_query_thread, NULL, event_loop_thread, this);
+	fprintf(stderr, "Successfully connected to flightpanel.\n");
+	return true;
 }
 
-void FPConnection::event_loop() {
-	_run_event_loop = true;
-	while (_run_event_loop) {
-		struct hid_report_t hid_report;
-#ifdef NO_REAL_DEVICE
-		usleep(100 * 1000);
-		continue;
-#endif
-		int bytes_read = hid_read(_device, (uint8_t*)&hid_report, sizeof(hid_report));
+void FPConnection::thread_action() {
+	if (!connect()) {
+		return;
+	}
+
+	struct hid_report_t hid_report;
+	while (thread_running()) {
+		hid_device *device;
+		{
+			LockGuard guard(_devicelock, "thread_action");
+			device = _device;
+			if (!device) {
+				break;
+			}
+		}
+		int bytes_read = hid_read(device, (uint8_t*)&hid_report, sizeof(hid_report));
 		if (bytes_read == sizeof(hid_report)) {
+			LockGuard guard(_datalock);
 			_instrument_data.external = hid_report;
+			_data_fresh.set();
 		} else if (bytes_read == -1) {
 			fprintf(stderr, "Flight panel diconnected.\n");
-			break;
+			disconnect();
 		} else {
 			fprintf(stderr, "Short read (%d of %zd), could not get full HID report.\n", bytes_read, sizeof(hid_report));
+			disconnect();
 		}
 	}
 }
 
 void FPConnection::get_data(struct instrument_data_t *data) {
+	LockGuard guard(_datalock);
 	memcpy(data, &_instrument_data, sizeof(*data));
 }
 
-void FPConnection::put_data(const struct instrument_data_t *data, const struct component_selection_t *selection) {
-	union hid_set_report_t hid_set_report;
-	std::memset(&hid_set_report, 0, sizeof(hid_set_report));
-	//hid_set_report.generic.report_id = 1;
-	//hid_set_report.r01.navigate_by_gps = false;
-
-	hid_set_report.generic.report_id = 2;
-	strcpy(hid_set_report.r02.ident.nav1, "BAR");
-	strcpy(hid_set_report.r02.ident.nav2, "KOO");
-	// TODO this is all different now
-#if 0
-	hid_set_report.com1_active = com_frequency_khz_to_index(data->com1.freq_active_khz);
-	hid_set_report.com1_standby = com_frequency_khz_to_index(data->com1.freq_standby_khz);
-	hid_set_report.com2_active = com_frequency_khz_to_index(data->com2.freq_active_khz);
-	hid_set_report.com2_standby = com_frequency_khz_to_index(data->com2.freq_standby_khz);
-	hid_set_report.nav1_active = nav_frequency_khz_to_index(data->nav1.freq_active_khz);
-	hid_set_report.nav1_standby = nav_frequency_khz_to_index(data->nav1.freq_standby_khz);
-	hid_set_report.nav2_active = nav_frequency_khz_to_index(data->nav2.freq_active_khz);
-	hid_set_report.nav2_standby = nav_frequency_khz_to_index(data->nav2.freq_standby_khz);
-#endif
-#ifndef NO_REAL_DEVICE
-	int bytes_written = hid_write(_device, (const uint8_t*)&hid_set_report, sizeof(hid_set_report));
-#else
-	int bytes_written = sizeof(hid_set_report);
-#endif
-	if (bytes_written != sizeof(hid_set_report)) {
-		fprintf(stderr, "Sending HID report error: tried sending %zd bytes, but %d went through.\n", sizeof(hid_set_report), bytes_written);
+template<typename T> bool FPConnection::send_report(T *report) {
+	hid_device *device;
+	{
+		LockGuard guard(_devicelock, "connect");
+		device = _device;
+		if (!device) {
+			return false;
+		}
+		_last_seqno++;
+		report->seqno = _last_seqno;
 	}
+	int bytes_written = hid_write(device, (const uint8_t*)report, sizeof(*report));
+	if (bytes_written != sizeof(*report)) {
+		fprintf(stderr, "Sending HID report error: tried sending %zd bytes, but %d went through.\n", sizeof(*report), bytes_written);
+		disconnect();
+		return false;
+	}
+	return true;
+}
+
+void FPConnection::put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements, bool send_all) {
+	if (!connect()) {
+		return;
+	}
+
+	if (send_all || elements.fp_send_report_01()) {
+		fprintf(stderr, "Sending report #1\n");
+		struct hid_set_report_01_t report;
+		std::memset(&report, 0, sizeof(report));
+		report.report_id = 1;
+		report.radio_panel = data.external.radio_panel;
+		report.com_divisions = data.external.com_divisions;
+		report.nav_divisions = data.external.nav_divisions;
+		report.com1 = data.external.com1;
+		report.com2 = data.external.com2;
+		report.nav1 = data.external.nav1;
+		report.nav2 = data.external.nav2;
+		report.xpdr = data.external.xpdr;
+		report.adf = data.external.adf;
+		report.ap = data.external.ap;
+		report.qnh = data.external.qnh;
+		report.navigate_by_gps = data.external.navigate_by_gps;
+		if (send_report(&report)) {
+			_instrument_data.external = data.external;
+		}
+	}
+	if (send_all || elements.fp_send_report_02()) {
+		fprintf(stderr, "Sending report #2\n");
+		struct hid_set_report_02_t report;
+		std::memset(&report, 0, sizeof(report));
+		report.report_id = 2;
+		memcpy(&report.ident.nav1, &data.internal.ident.nav1, IDENT_LENGTH_BYTES);
+		memcpy(&report.ident.nav2, &data.internal.ident.nav2, IDENT_LENGTH_BYTES);
+		memcpy(&report.ident.adf, &data.internal.ident.adf, IDENT_LENGTH_BYTES);
+		memcpy(&report.dme, &data.internal.dme, sizeof(data.internal.dme));
+		if (send_report(&report)) {
+			_instrument_data.internal = data.internal;
+		}
+	}
+	_data_initialized = true;
+	_data_fresh.reset();
+}
+
+void FPConnection::put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements) {
+	put_data(data, elements, !_data_initialized);
+}
+
+void FPConnection::wait_for_ack() {
+	while (_instrument_data.external.seqno != _last_seqno) {
+		fprintf(stderr, "waiting for %x (currently %x)... \n", _last_seqno, _instrument_data.external.seqno);
+		usleep(10 * 1000);
+	}
+	fprintf(stderr, "done\n");
 }
 
 FPConnection::~FPConnection() {
-	_run_event_loop = false;
-	pthread_join(_periodic_query_thread, NULL);
-	hid_close(_device);
+	disconnect();
 }
 
