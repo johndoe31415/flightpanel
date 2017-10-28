@@ -290,35 +290,35 @@ static const struct iomux_pin_t output_pins[IOMUX_OUTPUT_COUNT] = {
 		.name = "XPDR_STBY",
 	},
 	{
-		.pinno = 1,
-		.name = "AP_HDG_Green",
-	},
-	{
-		.pinno = 2,
-		.name = "AP_HDG_Red",
-	},
-	{
-		.pinno = 3,
+		.pinno = 52,
 		.name = "AP_ALT_Green",
 	},
 	{
-		.pinno = 4,
+		.pinno = 53,
 		.name = "AP_ALT_Red",
 	},
 	{
-		.pinno = 5,
+		.pinno = 50,
+		.name = "AP_HDG_Green",
+	},
+	{
+		.pinno = 51,
+		.name = "AP_HDG_Red",
+	},
+	{
+		.pinno = 54,
 		.name = "AP_IAS_Green",
 	},
 	{
-		.pinno = 6,
+		.pinno = 55,
 		.name = "AP_IAS_Red",
 	},
 	{
-		.pinno = 7,
+		.pinno = 48,
 		.name = "AP_RATE_Green",
 	},
 	{
-		.pinno = 8,
+		.pinno = 49,
 		.name = "AP_RATE_Red",
 	},
 	{

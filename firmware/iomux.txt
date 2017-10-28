@@ -15,14 +15,14 @@
 66	XPDR_C
 67	XPDR_STBY
 
-1	AP_HDG_Green
-2	AP_HDG_Red
-3	AP_ALT_Green
-4	AP_ALT_Red
-5	AP_IAS_Green
-6	AP_IAS_Red
-7	AP_RATE_Green
-8	AP_RATE_Red
+52	AP_ALT_Green
+53	AP_ALT_Red
+50	AP_HDG_Green
+51	AP_HDG_Red
+54	AP_IAS_Green
+55	AP_IAS_Red
+48	AP_RATE_Green
+49	AP_RATE_Red
 71	AP_MASTER
 
 * In
