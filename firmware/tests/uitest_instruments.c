@@ -62,15 +62,14 @@ static void test_instruments(void) {
 				.squawk = 7001,
 			},
 			.ap = {
-				//.state = AP_ACTIVE | AP_HOLD_ALTITUDE | AP_HOLD_IAS | AP_HOLD_HEADING,
-				//.state = AP_ACTIVE | AP_HOLD_ALTITUDE | AP_HOLD_IAS | AP_HOLD_NAVIGATION,
-				.state = AP_ACTIVE | AP_HOLD_ALTITUDE | AP_HOLD_IAS | AP_HOLD_APPROACH | AP_HOLD_HEADING | AP_HOLD_REVERSE,
+				.state = AP_STATE_ACTIVE | AP_ALTITUDE_HOLD | AP_IAS_HOLD,
 				.altitude = 6900,
-				.climbrate = 3000,
+				.climbrate = 0,
 				.ias = 125,
 				.heading = 180,
 			},
 			.qnh = 1001,
+			.flip_switches = SWITCH_MASTER,
 		},
 		.internal = {
 			.xpdr = {

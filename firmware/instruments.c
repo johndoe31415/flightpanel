@@ -592,10 +592,15 @@ static void update_leds(void) {
 		iomux_output_set(IOMUX_OUT_Radio_ADF, (instrument_state.external.radio_panel & RADIO_ADF) != 0);
 
 		/* AP */
-		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_ACTIVE) != 0);
-		iomux_output_set(IOMUX_OUT_AP_ALT, (instrument_state.external.ap.state & AP_HOLD_ALTITUDE) != 0);
-		iomux_output_set(IOMUX_OUT_AP_HDG, (instrument_state.external.ap.state & AP_HOLD_HEADING) != 0);
-		iomux_output_set(IOMUX_OUT_AP_IAS, (instrument_state.external.ap.state & AP_HOLD_IAS) != 0);
+		iomux_output_set(IOMUX_OUT_AP_MASTER, (instrument_state.external.ap.state & AP_STATE_ACTIVE) != 0);
+		iomux_output_set(IOMUX_OUT_AP_ALT_Green, (instrument_state.external.ap.state & AP_ALTITUDE_ARMED) != 0);
+		iomux_output_set(IOMUX_OUT_AP_ALT_Red, (instrument_state.external.ap.state & AP_ALTITUDE_HOLD) != 0);
+		iomux_output_set(IOMUX_OUT_AP_HDG_Green, (instrument_state.external.ap.state & AP_HEADING_ARMED) != 0);
+		iomux_output_set(IOMUX_OUT_AP_HDG_Red, (instrument_state.external.ap.state & AP_HEADING_HOLD) != 0);
+		iomux_output_set(IOMUX_OUT_AP_IAS_Green, (instrument_state.external.ap.state & AP_IAS_ARMED) != 0);
+		iomux_output_set(IOMUX_OUT_AP_IAS_Red, (instrument_state.external.ap.state & AP_IAS_HOLD) != 0);
+		iomux_output_set(IOMUX_OUT_AP_RATE_Green, (instrument_state.external.ap.state & AP_VERTICALSPEED_ARMED) != 0);
+		iomux_output_set(IOMUX_OUT_AP_RATE_Red, (instrument_state.external.ap.state & AP_VERTICALSPEED_HOLD) != 0);
 
 		/* Navigational source */
 		iomux_output_set(IOMUX_OUT_NavSrc_GPS, instrument_state.external.navigate_by_gps);
@@ -709,56 +714,56 @@ static void handle_ap_inputs(void) {
 	}
 
 	if (button_pressed(&rotary_ap_alt.button)) {
-		instrument_state.external.ap.state ^= AP_HOLD_ALTITUDE;
-		if ((instrument_state.external.ap.state & AP_HOLD_ALTITUDE) != 0) {
-			instrument_state.external.ap.state |= AP_ACTIVE;
+		instrument_state.external.ap.state ^= AP_ALTITUDE_HOLD;
+		if ((instrument_state.external.ap.state & AP_ALTITUDE_HOLD) != 0) {
+			instrument_state.external.ap.state |= AP_STATE_ACTIVE;
 		}
 		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&rotary_ap_hdg.button)) {
-		instrument_state.external.ap.state ^= AP_HOLD_HEADING;
-		if ((instrument_state.external.ap.state & AP_HOLD_HEADING) != 0) {
-			instrument_state.external.ap.state &= ~(AP_HOLD_NAVIGATION | AP_HOLD_REVERSE);
-			instrument_state.external.ap.state |= AP_ACTIVE;
+		instrument_state.external.ap.state ^= AP_HEADING_HOLD;
+		if ((instrument_state.external.ap.state & AP_HEADING_HOLD) != 0) {
+			instrument_state.external.ap.state &= ~(AP_NAVIGATION_HOLD | AP_STATE_BACKCOURSE);
+			instrument_state.external.ap.state |= AP_STATE_ACTIVE;
 		}
 		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&rotary_ap_ias.button)) {
-		instrument_state.external.ap.state ^= AP_HOLD_IAS;
-		if ((instrument_state.external.ap.state & AP_HOLD_IAS) != 0) {
-			instrument_state.external.ap.state |= AP_ACTIVE;
+		instrument_state.external.ap.state ^= AP_IAS_HOLD;
+		if ((instrument_state.external.ap.state & AP_IAS_HOLD) != 0) {
+			instrument_state.external.ap.state |= AP_STATE_ACTIVE;
 		}
 		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 
 	if (button_pressed(&ap_master_button)) {
-		instrument_state.external.ap.state ^= AP_ACTIVE;
+		instrument_state.external.ap.state ^= AP_STATE_ACTIVE;
 		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&ap_nav_button)) {
-		instrument_state.external.ap.state ^= AP_HOLD_NAVIGATION;
-		if ((instrument_state.external.ap.state & AP_HOLD_NAVIGATION) != 0) {
-			instrument_state.external.ap.state &= ~(AP_HOLD_HEADING | AP_HOLD_REVERSE);
-			instrument_state.external.ap.state |= AP_ACTIVE;
+		instrument_state.external.ap.state ^= AP_NAVIGATION_HOLD;
+		if ((instrument_state.external.ap.state & AP_NAVIGATION_HOLD) != 0) {
+			instrument_state.external.ap.state &= ~(AP_HEADING_HOLD | AP_STATE_BACKCOURSE);
+			instrument_state.external.ap.state |= AP_STATE_ACTIVE;
 		}
 		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&ap_apr_button)) {
-		instrument_state.external.ap.state ^= AP_HOLD_APPROACH;
-		if ((instrument_state.external.ap.state & AP_HOLD_APPROACH) != 0) {
-//			instrument_state.external.ap.state &= ~(AP_HOLD_HEADING | AP_HOLD_NAVIGATION | AP_HOLD_REVERSE);
-			instrument_state.external.ap.state |= AP_ACTIVE;
+		instrument_state.external.ap.state ^= AP_GLIDESLOPE_HOLD;
+		if ((instrument_state.external.ap.state & AP_GLIDESLOPE_HOLD) != 0) {
+//			instrument_state.external.ap.state &= ~(AP_HEADING_HOLD | AP_NAVIGATION_HOLD | AP_STATE_BACKCOURSE);
+			instrument_state.external.ap.state |= AP_STATE_ACTIVE;
 		}
 		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&ap_rev_button)) {
-		instrument_state.external.ap.state ^= AP_HOLD_REVERSE;
+		instrument_state.external.ap.state ^= AP_STATE_BACKCOURSE;
 		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}

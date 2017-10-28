@@ -74,8 +74,8 @@ struct iomux_pin_t {
 #define IOMUX_IN_Switch_MASTER		66
 
 
-// 14 outputs (58 free). ID range 58 - 71:
-#define IOMUX_OUTPUT_COUNT	14
+// 19 outputs (53 free). ID range 1 - 71:
+#define IOMUX_OUTPUT_COUNT	19
 #define IOMUX_OUT_Radio_ADF		58
 #define IOMUX_OUT_Radio_NAV2		59
 #define IOMUX_OUT_Radio_COM2		60
@@ -86,9 +86,14 @@ struct iomux_pin_t {
 #define IOMUX_OUT_NavSrc_NAV		65
 #define IOMUX_OUT_XPDR_C		66
 #define IOMUX_OUT_XPDR_STBY		67
-#define IOMUX_OUT_AP_IAS		68
-#define IOMUX_OUT_AP_HDG		69
-#define IOMUX_OUT_AP_ALT		70
+#define IOMUX_OUT_AP_HDG_Green		1
+#define IOMUX_OUT_AP_HDG_Red		2
+#define IOMUX_OUT_AP_ALT_Green		3
+#define IOMUX_OUT_AP_ALT_Red		4
+#define IOMUX_OUT_AP_IAS_Green		5
+#define IOMUX_OUT_AP_IAS_Red		6
+#define IOMUX_OUT_AP_RATE_Green		7
+#define IOMUX_OUT_AP_RATE_Red		8
 #define IOMUX_OUT_AP_MASTER		71
 
 const struct iomux_pin_t *iomux_get_input_description(int pin_no);

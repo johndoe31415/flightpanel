@@ -31,13 +31,22 @@
 #define IDENT_LENGTH_BYTES			5
 
 enum ap_mode_t {
-	AP_ACTIVE = (1 << 0),
-	AP_HOLD_ALTITUDE = (1 << 1),
-	AP_HOLD_IAS = (1 << 2),
-	AP_HOLD_HEADING = (1 << 3),
-	AP_HOLD_NAVIGATION = (1 << 4),
-	AP_HOLD_REVERSE = (1 << 5),
-	AP_HOLD_APPROACH = (1 << 6),
+	AP_STATE_ACTIVE = (1 << 0),
+	AP_STATE_BACKCOURSE = (1 << 1),
+	AP_ALTITUDE_ARMED = (1 << 2),
+	AP_ALTITUDE_HOLD = (1 << 3),
+	AP_IAS_ARMED = (1 << 4),
+	AP_IAS_HOLD = (1 << 5),
+	AP_HEADING_ARMED = (1 << 6),
+	AP_HEADING_HOLD = (1 << 7),
+	AP_NAVIGATION_ARMED = (1 << 8),
+	AP_NAVIGATION_HOLD = (1 << 9),
+	AP_GLIDEGLOPE_ARMED = (1 << 10),
+	AP_GLIDESLOPE_HOLD = (1 << 11),
+	AP_LOCALIZER_ARMED = (1 << 12),
+	AP_LOCALIZER_HOLD = (1 << 13),
+	AP_VERTICALSPEED_ARMED = (1 << 14),
+	AP_VERTICALSPEED_HOLD = (1 << 15),
 };
 
 enum radiopanel_button_t {
@@ -93,11 +102,11 @@ struct adf_state_t {
 } __attribute__ ((packed));
 
 struct ap_state_t {
-	uint8_t state;
+	uint16_t state;
 	uint16_t altitude;
 	uint16_t heading;
 	uint16_t ias;
-	uint16_t climbrate;
+	int16_t climbrate;
 } __attribute__ ((packed));
 
 struct dme_info_t {

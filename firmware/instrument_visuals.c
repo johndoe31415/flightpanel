@@ -171,26 +171,29 @@ static void redraw_ap_display(const struct surface_t *surface, const struct inst
 		blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 
 		cursor = (struct cursor_t) { 0, 54 };
-		blit_string_to_cursor(&font_symbol_font, "+", surface, &cursor, false);
-		snprintf(text, sizeof(text), "%d", istate->external.ap.climbrate / 100);
+		if (istate->external.ap.climbrate != 0) {
+			snprintf(text, sizeof(text), "%+d", istate->external.ap.climbrate / 100);
+		} else {
+			snprintf(text, sizeof(text), "0");
+		}
 		blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 	}
 
 	{
 		struct cursor_t cursor = { 41, 54 };
-		if (istate->external.ap.state & AP_HOLD_REVERSE) {
-			blit_rectangle(surface, cursor.x - 1 + (istate->external.ap.state & AP_HOLD_APPROACH ? 0 : 35), cursor.y - 18, 128, 20);
+		if (istate->external.ap.state & AP_STATE_BACKCOURSE) {
+			blit_rectangle(surface, cursor.x - 1 + (istate->external.ap.state & AP_GLIDESLOPE_HOLD ? 0 : 35), cursor.y - 18, 128, 20);
 		}
-		if (istate->external.ap.state & AP_HOLD_APPROACH) {
-			blit_string_to_cursor(&font_vcr_osd_mono_20, "APR", surface, &cursor, istate->external.ap.state & AP_HOLD_REVERSE);
+		if (istate->external.ap.state & AP_GLIDESLOPE_HOLD) {
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "APR", surface, &cursor, istate->external.ap.state & AP_STATE_BACKCOURSE);
 		}
 
 		cursor = (struct cursor_t) { TEXT_RIGHT_JUSTIFY, 54 };
-		if (istate->external.ap.state & AP_HOLD_NAVIGATION) {
-			blit_string_to_cursor(&font_vcr_osd_mono_20, "NAV", surface, &cursor, istate->external.ap.state & AP_HOLD_REVERSE);
+		if (istate->external.ap.state & AP_NAVIGATION_HOLD) {
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "NAV", surface, &cursor, istate->external.ap.state & AP_STATE_BACKCOURSE);
 		} else {
 			snprintf(text, sizeof(text), "%3d" CHAR_DEGREES, istate->external.ap.heading);
-			blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, istate->external.ap.state & AP_HOLD_REVERSE);
+			blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, istate->external.ap.state & AP_STATE_BACKCOURSE);
 		}
 	}
 
