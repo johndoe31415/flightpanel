@@ -16,7 +16,7 @@ cache:
     directories:
         - $HOME/.cache/flightpanel
 
-script: python3 -m travis-deploy --build-everything
+script: python3 -m travis-deploy --build-everything --parallel 2
 
 env:
     global:
