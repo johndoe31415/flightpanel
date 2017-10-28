@@ -77,21 +77,21 @@ void EmulatedConnection::randomize(struct adf_state_t *adf) {
 void EmulatedConnection::randomize(struct ap_state_t *ap) {
 	ap->state = 0;
 	if (rand_percentage(75)) {
-		ap->state |= AP_ACTIVE;
+		ap->state |= AP_STATE_ACTIVE;
 	}
 	if (rand_percentage(25)) {
-		ap->state |= AP_HOLD_ALTITUDE;
+		ap->state |= AP_ALTITUDE_HOLD;
 	}
 	if (rand_percentage(25)) {
-		ap->state |= AP_HOLD_IAS;
+		ap->state |= AP_IAS_HOLD;
 	}
 	if (rand_percentage(25)) {
 		if (rand_percentage(25)) {
-			ap->state |= AP_HOLD_HEADING;
+			ap->state |= AP_HEADING_HOLD;
 		} else if (rand_percentage(25)) {
-			ap->state |= AP_HOLD_NAVIGATION;
+			ap->state |= AP_LOCALIZER_HOLD;
 		} else if (rand_percentage(25)) {
-			ap->state |= AP_HOLD_APPROACH;
+			ap->state |= AP_GLIDESLOPE_HOLD;
 		}
 	}
 	ap->climbrate = (rand_value(5) * 100) + 200;

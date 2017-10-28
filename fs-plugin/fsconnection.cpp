@@ -88,7 +88,7 @@ static bool dump_instrument_data_line(int line, char buffer[256], const struct i
 
 		case 8:
 			buf += sprintf(buf, "AP: %3s, %5u ft, %4d ft/min, %3u°, %3u kts",
-					data.external.ap.state & AP_ACTIVE ? "ON" : "off",
+					data.external.ap.state & AP_STATE_ACTIVE ? "ON" : "off",
 					data.external.ap.altitude,
 					data.external.ap.climbrate,
 					data.external.ap.heading,
@@ -97,13 +97,14 @@ static bool dump_instrument_data_line(int line, char buffer[256], const struct i
 			break;
 
 		case 9:
-			buf += sprintf(buf, "AP: [%3s %3s %3s %3s %3s %3s]",
-					data.external.ap.state & AP_HOLD_ALTITUDE ? "ALT" : "",
-					data.external.ap.state & AP_HOLD_HEADING ? "HDG" : "",
-					data.external.ap.state & AP_HOLD_IAS ? "IAS" : "",
-					data.external.ap.state & AP_HOLD_NAVIGATION ? "NAV" : "",
-					data.external.ap.state & AP_HOLD_APPROACH ? "APR" : "",
-					data.external.ap.state & AP_HOLD_REVERSE ? "REV" : ""
+			buf += sprintf(buf, "AP: [%3s %3s %3s %2s %3s %3s %2s]",
+					data.external.ap.state & AP_ALTITUDE_ARMED ? "alt" : (data.external.ap.state & AP_ALTITUDE_HOLD ? "ALT" : ""),
+					data.external.ap.state & AP_HEADING_ARMED ? "hdg" : (data.external.ap.state & AP_HEADING_HOLD ? "HDG" : ""),
+					data.external.ap.state & AP_IAS_ARMED ? "ias" : (data.external.ap.state & AP_IAS_HOLD ? "IAS" : ""),
+					data.external.ap.state & AP_VERTICALSPEED_ARMED ? "vs" : (data.external.ap.state & AP_VERTICALSPEED_HOLD ? "VS" : ""),
+					data.external.ap.state & AP_NAVIGATION_ARMED ? "nav" : (data.external.ap.state & AP_NAVIGATION_HOLD ? "NAV" : ""),
+					data.external.ap.state & AP_LOCALIZER_ARMED ? "loc" : (data.external.ap.state & AP_LOCALIZER_HOLD ? "LOC" : ""),
+					data.external.ap.state & AP_GLIDESLOPE_ARMED ? "gs" : (data.external.ap.state & AP_GLIDESLOPE_HOLD ? "GS" : "")
 			);
 			break;
 

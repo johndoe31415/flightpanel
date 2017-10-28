@@ -122,10 +122,14 @@ struct arbiter_result_t Arbiter::arbitrate(const struct instrument_data_t &new_f
 	_fp_connection->put_data(authoritative_data, result.fp);
 	_fs_connection->put_data(authoritative_data, result.fs);
 
-	diff_instrument_data(stderr, "Flightpanel", _last_authoritative_data, new_fp_data);
-	diff_instrument_data(stderr, "Flightsim", _last_authoritative_data, new_fs_data);
-	dump_instrument_data(stderr, "Authoritative", authoritative_data);
-	fprintf(stderr, "======================================================================\n");
+	bool any_change = memcmp(&authoritative_data, &_last_authoritative_data, sizeof(authoritative_data))
+		|| memcmp(&new_fs_data, &_last_authoritative_data, sizeof(authoritative_data));
+	if (any_change) {
+		diff_instrument_data(stderr, "Flightpanel", _last_authoritative_data, new_fp_data);
+		diff_instrument_data(stderr, "Flightsim", _last_authoritative_data, new_fs_data);
+		dump_instrument_data(stderr, "Authoritative", authoritative_data);
+		fprintf(stderr, "======================================================================\n");
+	}
 
 	_last_authoritative_data = authoritative_data;
 	return result;
@@ -146,17 +150,24 @@ void Arbiter::thread_action() {
 		fprintf(stderr, "FP is not fresh, timed out.\n");
 		return;
 	}
+
+	struct instrument_data_t new_fp_data;
+	_fp_connection->get_data(&new_fp_data);
+
+	if ((new_fp_data.external.flip_switches & SWITCH_MASTER) == 0) {
+		/* FP is off, do not arbitrate! */
+		_first_sync = true;
+		return;
+	}
+
 	struct instrument_data_t new_fs_data;
 	_fs_connection->get_data(&new_fs_data);
 
-	if (!_fp_connection->data_initialized()) {
+	if (!_fp_connection->data_initialized() || _first_sync) {
 		struct arbiter_elements_t dummy;
 		_fp_connection->put_data(new_fs_data, dummy, true);
 		_fp_connection->wait_for_ack();
 	}
-
-	struct instrument_data_t new_fp_data;
-	_fp_connection->get_data(&new_fp_data);
 
 	arbitrate(new_fs_data, new_fp_data);
 	_first_sync = false;

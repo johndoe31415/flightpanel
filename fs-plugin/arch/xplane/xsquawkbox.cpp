@@ -42,7 +42,7 @@ enum XPAutopilotState {
 	WingLevelerEngaged = (1 << 2),
 	AirspeedHoldWithPitchEngaged = (1 << 3),
 	VVIClimbEngaged = (1 << 4),
-	AltitudeHoldArm = (1 << 5),
+	AltitudeHoldArmed = (1 << 5),
 	FlightLevelChangeEngaged = (1 << 6),
 	PitchSyncEngaged = (1 << 7),
 	HNAVArmed = (1 << 8),
@@ -65,7 +65,7 @@ static void dump_xplane_ap_state(int ap_state) {
 	if (ap_state & WingLevelerEngaged) fprintf(stderr, "WingLevelerEngaged ");
 	if (ap_state & AirspeedHoldWithPitchEngaged) fprintf(stderr, "AirspeedHoldWithPitchEngaged ");
 	if (ap_state & VVIClimbEngaged) fprintf(stderr, "VVIClimbEngaged ");
-	if (ap_state & AltitudeHoldArm) fprintf(stderr, "AltitudeHoldArm ");
+	if (ap_state & AltitudeHoldArmed) fprintf(stderr, "AltitudeHoldArmed ");
 	if (ap_state & FlightLevelChangeEngaged) fprintf(stderr, "FlightLevelChangeEngaged ");
 	if (ap_state & PitchSyncEngaged) fprintf(stderr, "PitchSyncEngaged ");
 	if (ap_state & HNAVArmed) fprintf(stderr, "HNAVArmed ");
@@ -227,13 +227,17 @@ void XSquawkBoxConnection::thread_action() {
 	}
 	dump_xplane_ap_state(xplane_ap_state);
 	_instrument_data.external.ap.state = 0;
-	_instrument_data.external.ap.state |= (xplane_ap_active == 2) ? AP_ACTIVE : 0;
-	_instrument_data.external.ap.state |= ((xplane_ap_state & AltitudeHoldEngaged) || (xplane_ap_state & VVIClimbEngaged)) ? AP_HOLD_ALTITUDE : 0;
-	_instrument_data.external.ap.state |= (xplane_ap_state & HeadingHoldEngaged) ? AP_HOLD_HEADING : 0;
-	_instrument_data.external.ap.state |= (xplane_ap_state & AutothrottleEngaged) ? AP_HOLD_IAS : 0;
-	_instrument_data.external.ap.state |= ((xplane_ap_state & HNAVArmed) || (xplane_ap_state & HNAVEngaged)) ? AP_HOLD_NAVIGATION : 0;
-	_instrument_data.external.ap.state |= ((xplane_ap_state & GlideslopeArmed) || (xplane_ap_state & GlideslopeEngaged)) ? AP_HOLD_APPROACH : 0;
-	_instrument_data.external.ap.state |= XPLMGetDatai(_datarefs.ap.backcourse) ? AP_HOLD_REVERSE : 0;
+	_instrument_data.external.ap.state |= (xplane_ap_active == 2) ? AP_STATE_ACTIVE : 0;
+	_instrument_data.external.ap.state |= (xplane_ap_state & AltitudeHoldEngaged) ? AP_ALTITUDE_HOLD : 0;
+	_instrument_data.external.ap.state |= (xplane_ap_state & AltitudeHoldArmed) ? AP_ALTITUDE_ARMED : 0;
+	_instrument_data.external.ap.state |= (xplane_ap_state & VVIClimbEngaged) ? AP_VERTICALSPEED_HOLD : 0;
+	_instrument_data.external.ap.state |= (xplane_ap_state & HeadingHoldEngaged) ? AP_HEADING_HOLD : 0;
+	_instrument_data.external.ap.state |= (xplane_ap_state & AutothrottleEngaged) ? AP_IAS_HOLD : 0;
+	_instrument_data.external.ap.state |= (xplane_ap_state & HNAVEngaged) ? AP_LOCALIZER_HOLD : 0;
+	_instrument_data.external.ap.state |= (xplane_ap_state & HNAVArmed) ? AP_LOCALIZER_ARMED : 0;
+	_instrument_data.external.ap.state |= (xplane_ap_state & GlideslopeEngaged) ? AP_GLIDESLOPE_HOLD : 0;
+	_instrument_data.external.ap.state |= (xplane_ap_state & GlideslopeArmed) ? AP_GLIDESLOPE_ARMED : 0;
+	_instrument_data.external.ap.state |= XPLMGetDatai(_datarefs.ap.backcourse) ? AP_STATE_BACKCOURSE : 0;
 
 	_instrument_data.external.ap.altitude = round(XPLMGetDataf(_datarefs.ap.arm_altitude));
 	_instrument_data.external.ap.heading = round(XPLMGetDataf(_datarefs.ap.heading));
@@ -287,7 +291,7 @@ void XSquawkBoxConnection::xplane_set_autopilot(const struct ap_state_t &ap_stat
 	xplane_deactivate_autopilot();
 
 	double climbrate = ap_state.climbrate;
-	if (ap_state.state & AP_HOLD_ALTITUDE) {
+	if ((ap_state.state & AP_ALTITUDE_ARMED) || (ap_state.state & AP_ALTITUDE_HOLD)) {
 		double current_altitude = XPLMGetDataf(_datarefs.misc.altitude);
 		double height_difference = ap_state.altitude - current_altitude;
 		if ((height_difference > -100) && (height_difference < 100)) {
@@ -298,21 +302,22 @@ void XSquawkBoxConnection::xplane_set_autopilot(const struct ap_state_t &ap_stat
 			/* Larger height difference. Use VS mode and capture altitude
 			 * automatically */
 			XPLMSetDatai(_datarefs.ap.state, VVIClimbEngaged);
-			if (height_difference < 0) {
-				/* Sink */
-				climbrate = -climbrate;
+			if ((height_difference < 0) ^ (climbrate < 0)) {
+				/* Climbrate points into the wrong direction. Do not invert,
+				 * but set to zero (user needs to fix this). */
+				climbrate = 0;
 			}
 		}
 	}
-	if (ap_state.state & AP_HOLD_IAS) {
+	if ((ap_state.state & AP_IAS_ARMED) || (ap_state.state & AP_IAS_HOLD)) {
 		XPLMSetDatai(_datarefs.ap.state, AutothrottleEngaged);
 	}
-	if (ap_state.state & AP_HOLD_HEADING) {
+	if ((ap_state.state & AP_HEADING_ARMED) || (ap_state.state & AP_HEADING_HOLD)) {
 		XPLMSetDatai(_datarefs.ap.state, HeadingHoldEngaged);
-	} else if (ap_state.state & AP_HOLD_NAVIGATION) {
+	} else if ((ap_state.state & AP_LOCALIZER_ARMED) || (ap_state.state & AP_LOCALIZER_HOLD)) {
 		XPLMSetDatai(_datarefs.ap.state, HNAVArmed);
 	}
-	if (ap_state.state & AP_HOLD_APPROACH) {
+	if ((ap_state.state & AP_GLIDESLOPE_ARMED) || (ap_state.state & AP_GLIDESLOPE_HOLD)) {
 		XPLMSetDatai(_datarefs.ap.state, GlideslopeArmed);
 	}
 
@@ -322,7 +327,7 @@ void XSquawkBoxConnection::xplane_set_autopilot(const struct ap_state_t &ap_stat
 	XPLMSetDataf(_datarefs.ap.heading, ap_state.heading);
 
 	/* AP master */
-	XPLMSetDatai(_datarefs.ap.active, (ap_state.state & AP_ACTIVE) ? 2 : 1);
+	XPLMSetDatai(_datarefs.ap.active, (ap_state.state & AP_STATE_ACTIVE) ? 2 : 1);
 }
 
 void XSquawkBoxConnection::put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements) {
