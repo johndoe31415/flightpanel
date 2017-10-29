@@ -183,9 +183,7 @@ collection = hid_report.add_collection(Collection.Application)
 
 collection.fp_add_items([
 	("Sequence number", 1),
-])
-collection.fp_add_as_button("Radio panel", 6)
-collection.fp_add_items([
+	("Radio panel", 1),
 	("COM divisions", 1),
 	("NAV divisions", 1),
 	("TX radio ID", 1),
@@ -207,9 +205,7 @@ collection.fp_add_items([
 	("AP heading", 2),
 	("AP IAS", 2),
 	("AP climbrate", 2),
-])
-collection.fp_add_as_button("Flip switches", 6, start_button = 7)
-collection.fp_add_items([
+	("Flip switches", 1),
 	("QNH", 2),
 	("Nav by GPS", 1),
 ])
