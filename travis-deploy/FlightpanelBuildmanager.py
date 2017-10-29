@@ -110,10 +110,13 @@ class FlightpanelBuildmanager(BuildManager):
 
 	def do_build_plugins(self):
 		with WorkDir("fs-plugin"):
-			self._log.info("Extracting SimConnect header files")
-			self._execute([ "tar", "xfz", self._get_file("sdk_simconnect_targz", must_exist = True) ])
-			self._log.info("Extracting XSquawkbox header files")
-			self._execute([ "tar", "xfz", self._get_file("xsquawkbox_targz", must_exist = True) ])
+			if not os.path.isdir("include"):
+				os.mkdir("include")
+			with WorkDir("include"):
+				self._log.info("Extracting SimConnect header files")
+				self._execute([ "tar", "xfz", self._get_file("sdk_simconnect_targz", must_exist = True) ])
+				self._log.info("Extracting XSquawkbox header files")
+				self._execute([ "tar", "xfz", self._get_file("xsquawkbox_targz", must_exist = True) ])
 			with TimeLogger(self._log, "Bootstrapping libhidapi"):
 				self._execute([ "./bootstrap-hidapi.py" ])
 			for variant in [ "linux-emulator", "linux-xplane", "windows-fsx" ]:

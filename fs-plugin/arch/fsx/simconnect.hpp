@@ -40,7 +40,7 @@ class SimConnectConnection : public FSConnection {
 	public:
 		SimConnectConnection();
 		virtual void get_data(struct instrument_data_t *data);
-		virtual void put_data(const struct instrument_data_t *data, const struct component_selection_t *selection);
+		virtual void put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements);
 		void event_loop();
 		void simconnect_callback(SIMCONNECT_RECV *pData, DWORD cbData);
 		virtual ~SimConnectConnection();

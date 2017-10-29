@@ -69,14 +69,16 @@ void stop_arbiter_thread() {
 	delete fp_connection;
 }
 
-#if defined(VARIANT_LINUX_EMU)
+#if defined(VARIANT_LINUX_EMU) || defined(VARIANT_WINDOWS_FSX)
 int main(void) {
 	start_arbiter_thread();
 	fprintf(stderr, "Press return to exit...\n");
 	char buffer[256];
 	while (true) {
 		while (fgets(buffer, sizeof(buffer), stdin) == NULL);
+#if defined(VARIANT_LINUX_EMU)
 		fs_connection->poke();
+#endif
 	}
 	fprintf(stderr, "Exiting!\n");
 	stop_arbiter_thread();

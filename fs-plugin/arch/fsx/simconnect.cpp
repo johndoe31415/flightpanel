@@ -193,7 +193,7 @@ void SimConnectConnection::get_data(struct instrument_data_t *data) {
 	memcpy(data, &_instrument_data, sizeof(struct instrument_data_t));
 }
 
-void SimConnectConnection::put_data(const struct instrument_data_t *data, const struct component_selection_t *selection) {
+void SimConnectConnection::put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements) {
 }
 
 static void* event_loop_thread(void *ctx) {

@@ -27,7 +27,7 @@ STRIP := $(PREFIX)strip
 WINDRES := $(PREFIX)windres
 BUILDDIR := build/windows
 PLATFORM_CFLAGS := -Iinclude/sdk-simconnect -DVARIANT_WINDOWS_FSX -Iarch/fsx
-PLATFORM_LDFLAGS := -Lsdk-simconnect -lSimConnect -Lbuild/windows -lhidapi
+PLATFORM_LDFLAGS := -Linclude/sdk-simconnect -lSimConnect -Lbuild/windows -lhidapi
 PLATFORM_OBJS := $(WINDOWS_FSX_OBJS)
 
 else ifeq ($(VARIANT),linux-emulator)
@@ -65,7 +65,7 @@ else
 $(error The VARIANT environment variable needs to be either "linux-xplane", "linux-emulator" or "windows-fsx", not "$(VARIANT)")
 endif
 
-SHARED_CFLAGS := $(PLATFORM_CFLAGS) -I../firmware -I. -I.. -Ihidapi -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -Wuninitialized -O0 -pthread -g -DDISABLE_FIRMWARE_DEBUG
+SHARED_CFLAGS := $(PLATFORM_CFLAGS) -I../firmware -I. -I.. -Ihidapi -Wall -Werror=implicit-function-declaration -Werror=format-extra-args -Werror=format -Wuninitialized -O3 -pthread -g -DDISABLE_FIRMWARE_DEBUG
 CFLAGS := -std=c11 $(SHARED_CFLAGS)
 CXXFLAGS := -std=c++11 $(SHARED_CFLAGS)
 LDFLAGS := $(PLATFORM_LDFLAGS)
@@ -111,6 +111,6 @@ valgrind: $(TARGET)
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-fpconnect.res: fpconnect.rc
+arch/fsx/fpconnect.res: arch/fsx/fpconnect.rc
 	$(WINDRES) --input $< --output $@ --output-format=coff
 
