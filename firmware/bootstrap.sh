@@ -93,6 +93,8 @@ rm -f "${CUBE_SUBDIR}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_conf
 cp -n "${CUBE_SUBDIR}/Projects/STM32F4-Discovery/Demonstrations/Inc/usbd_conf.h" .
 cp -n "${CUBE_SUBDIR}/Projects/STM32F4-Discovery/Demonstrations/Src/usbd_conf.c" .
 sed -i 's/\(NVIC_SetPriority\s*(\s*SysTick_IRQn.*\)/\/\/\0    \/\/ Disable high prio systick because of USART2 deadlock/g' usbd_conf.c
+sed -i 's/void HAL_PCD_MspInit(PCD_HandleTypeDef \*hpcd)/void UNUSED_HAL_PCD_MspInit(PCD_HandleTypeDef \*hpcd)    \/\/ Initialization happens in init.c/g' usbd_conf.c
+sed -i 's/\r$//g;' usbd_conf.c		# Fix DOS line endings
 sed "s/.*#define assert_param.*//g;" "${CUBE_SUBDIR}/Projects/STM32F401-Discovery/Examples/BSP/Inc/stm32f4xx_hal_conf.h" >stm32f4xx_hal_conf.h
 sed -i "s/.*#define assert_param.*//g;" "${CUBE_SUBDIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_utils.c"
 ln -fs "${CUBE_SUBDIR}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/" include-core
