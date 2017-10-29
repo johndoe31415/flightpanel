@@ -28,6 +28,7 @@
 #include <math.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <stdexcept>
 
 #include "logging.hpp"
 #include "fsconnection.hpp"
@@ -71,7 +72,7 @@ void stop_arbiter_thread() {
 }
 
 #if defined(VARIANT_LINUX_EMU) || defined(VARIANT_WINDOWS_FSX)
-int main(void) {
+static void start_arbiter(void) {
 	start_arbiter_thread();
 	logmsg(LLVL_INFO, "Press return to exit...");
 	char buffer[256];
@@ -86,6 +87,15 @@ int main(void) {
 	}
 	logmsg(LLVL_INFO, "Exiting!");
 	stop_arbiter_thread();
+}
+
+int main(void) {
+	try {
+		start_arbiter();
+	} catch (const std::runtime_error &exception) {
+		logmsg(LLVL_FATAL, "Execution failed with exception: %s", exception.what());
+		return 1;
+	}
 	return 0;
 }
 #endif

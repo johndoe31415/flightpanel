@@ -37,6 +37,7 @@
 
 FPConnection::FPConnection() : Thread(500), _device(NULL), _data_initialized(false), _last_seqno(0x55) {
 	std::memset(&_instrument_data, 0, sizeof(struct instrument_data_t));
+	hid_init();
 	start();
 }
 
@@ -96,9 +97,7 @@ void FPConnection::thread_action() {
 				break;
 			}
 		}
-		logmsg(LLVL_DEBUG, "Reading from flightpanel...");
-		int bytes_read = hid_read(device, (uint8_t*)&hid_report, sizeof(hid_report));
-		logmsg(LLVL_INFO, "FP read %d bytes", bytes_read);
+		int bytes_read = hid_read(device, (uint8_t*)&hid_report, sizeof(struct hid_report_t));
 		if (bytes_read == sizeof(hid_report)) {
 			LockGuard guard(_datalock);
 			_instrument_data.external = hid_report;
@@ -107,7 +106,7 @@ void FPConnection::thread_action() {
 			logmsg(LLVL_INFO, "Flight panel diconnected.");
 			disconnect();
 		} else {
-			logmsg(LLVL_INFO, "Short read (%d of %" PRIsizet "), could not get full HID report.", bytes_read, sizeof(hid_report));
+			logmsg(LLVL_INFO, "Short read (%d bytes read, %" PRIsizet " bytes in structure), could not get full HID report.", bytes_read, sizeof(hid_report));
 			disconnect();
 		}
 	}
@@ -131,8 +130,8 @@ template<typename T> bool FPConnection::send_report(T *report) {
 	}
 	int bytes_written = hid_write(device, (const uint8_t*)report, sizeof(*report));
 	if (bytes_written != sizeof(*report)) {
-		logmsg(LLVL_INFO, "Sending HID report error: tried sending %" PRIsizet " bytes, but %d went through.", sizeof(*report), bytes_written);
-		disconnect();
+		logmsg(LLVL_ERROR, "Sending HID report error: tried sending %" PRIsizet " bytes, but %d went through.", sizeof(*report), bytes_written);
+		//disconnect();
 		return false;
 	}
 	return true;
@@ -194,5 +193,6 @@ void FPConnection::wait_for_ack() {
 
 FPConnection::~FPConnection() {
 	disconnect();
+	hid_exit();
 }
 

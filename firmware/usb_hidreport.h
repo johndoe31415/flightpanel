@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 /* IDENT is zero-terminated, i.e., only 4 characters available */
 #define IDENT_LENGTH_BYTES			5
@@ -89,6 +90,9 @@ enum flipswitch_t {
 	SWITCH_MASTER = (1 << 5),
 };
 
+// Mingw __attribute__ ((packed)) is broken, need to use pragma instead
+#pragma pack(1)
+
 struct xcom_state_t {
 	uint16_t active_index;
 	uint16_t standby_index;
@@ -142,6 +146,9 @@ struct hid_report_t {
 	bool navigate_by_gps;
 } __attribute__ ((packed));
 
+//#define sassert(cond)			static_assert((cond), #cond)
+//sassert(sizeof(struct hid_report_t) == 5 + (2 * 4) + (2 * 6) + 3 + 2 + 10 + 1 + 2 + 1);
+
 struct hid_set_generic_report_t {
 	uint8_t report_id;
 	uint8_t seqno;
@@ -161,6 +168,7 @@ struct hid_set_report_01_t {
 	uint16_t qnh;
 	bool navigate_by_gps;
 } __attribute__ ((packed));
+//sassert(sizeof(struct hid_set_report_01_t) == 5 + (2 * 4) + (2 * 6) + 3 + 2 + 10 + 2 + 1);
 
 struct hid_set_report_02_t {
 	uint8_t report_id;
@@ -176,6 +184,8 @@ struct hid_set_report_02_t {
 		uint16_t altitude;
 	} plane_parameters;
 } __attribute__ ((packed));
+
+#pragma pack(0)
 
 union hid_set_report_t {
 	struct hid_set_generic_report_t generic;

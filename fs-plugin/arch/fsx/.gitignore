@@ -1,0 +1,4 @@
+# Ignore all binary artifacts of FSX-plugin
+bin
+fsx-plugin.depend
+fsx-plugin.layout
