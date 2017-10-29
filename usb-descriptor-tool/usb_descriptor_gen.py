@@ -181,9 +181,11 @@ hid_report.add_usage(GenericDesktop.Joystick)
 collection = hid_report.add_collection(Collection.Application)
 
 
-collection.fp_add_as_button("Radio panel", 6)
 collection.fp_add_items([
 	("Sequence number", 1),
+])
+collection.fp_add_as_button("Radio panel", 6)
+collection.fp_add_items([
 	("COM divisions", 1),
 	("NAV divisions", 1),
 	("TX radio ID", 1),
@@ -200,15 +202,13 @@ collection.fp_add_items([
 	("XPDR state", 1),
 	("XPDR squawk", 2),
 	("ADF frequency", 2),
-	("AP state", 1),
+	("AP state", 2),
 	("AP altitude", 2),
-	("AP climbrate", 2),
-	("AP ias", 2),
 	("AP heading", 2),
+	("AP IAS", 2),
+	("AP climbrate", 2),
 ])
-
 collection.fp_add_as_button("Flip switches", 6, start_button = 7)
-
 collection.fp_add_items([
 	("QNH", 2),
 	("Nav by GPS", 1),
