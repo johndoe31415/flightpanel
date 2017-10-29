@@ -37,3 +37,8 @@ class GitUtils(object):
 	def get_rev(cls):
 		git_rev = subprocess.check_output([ "git", "describe", "--abbrev=10", "--dirty", "--always" ]).decode("utf-8").rstrip("\r\n ")
 		return git_rev
+
+if __name__ == "__main__":
+	print("Repo clean: %s" % (GitUtils.repo_is_clean()))
+	print("Repo dirty: %s" % (GitUtils.repo_is_dirty()))
+	print("Repo rev  : %s" % (GitUtils.get_rev()))
