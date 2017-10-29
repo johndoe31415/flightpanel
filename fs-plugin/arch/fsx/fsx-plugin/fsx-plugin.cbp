@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="fsx-plugin" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/fsx-plugin" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/fsx-plugin" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-std=c++11" />
+			<Add option="-fexceptions" />
+			<Add option="-std=c11" />
+			<Add option="-DVARIANT_WINDOWS_FSX" />
+			<Add option="-D_XOPEN_SOURCE=500" />
+			<Add option="-D_GNU_SOURCE" />
+			<Add option="-D_POSIX_TIMERS" />
+			<Add directory="../../../../fs-plugin" />
+			<Add directory="../../fsx" />
+			<Add directory="../../../.." />
+			<Add directory="../../../hidapi" />
+			<Add directory="../../../include/sdk-simconnect" />
+		</Compiler>
+		<Linker>
+			<Add library="../../../hidapi/windows/.libs/libhidapi.dll.a" />
+			<Add library="../../../include/sdk-simconnect/SimConnect.lib" />
+		</Linker>
+		<Unit filename="../../../../firmware/frequencies.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../arbiter.cpp" />
+		<Unit filename="../../../arbiter.hpp" />
+		<Unit filename="../../../arbiter_elements.hpp" />
+		<Unit filename="../../../fpconnect.cpp" />
+		<Unit filename="../../../fpconnect.hpp" />
+		<Unit filename="../../../fpconnection.cpp" />
+		<Unit filename="../../../fpconnection.hpp" />
+		<Unit filename="../../../fsconnection.cpp" />
+		<Unit filename="../../../fsconnection.hpp" />
+		<Unit filename="../../../inttypes_emulation.h" />
+		<Unit filename="../../../logging.cpp" />
+		<Unit filename="../../../logging.hpp" />
+		<Unit filename="../../../osdeps.cpp" />
+		<Unit filename="../../../osdeps.hpp" />
+		<Unit filename="../../../thread.cpp" />
+		<Unit filename="../../../thread.hpp" />
+		<Unit filename="../../../units.cpp" />
+		<Unit filename="../../../units.hpp" />
+		<Unit filename="../simconnect-datadefs.cpp" />
+		<Unit filename="../simconnect-datadefs.hpp" />
+		<Unit filename="../simconnect-events.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../simconnect-events.h" />
+		<Unit filename="../simconnect.cpp" />
+		<Unit filename="../simconnect.hpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

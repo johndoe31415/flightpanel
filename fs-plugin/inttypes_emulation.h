@@ -24,16 +24,20 @@
 #ifndef __INTTYPES_EMULATION__
 #define __INTTYPES_EMULATION__
 
-#if defined(VARIANT_WINDOWS)
+#if defined(VARIANT_WINDOWS_FSX)
 
 #define PRId64			"I64d"
 #define PRIu64			"I64u"
 #define PRIi64			"I64i"
 #define PRIx64			"I64x"
 
-#elif defined(VARIANT_LINUX)
+#define PRIsizet		"d"
+
+#else
 
 #include <inttypes.h>
+
+#define PRIsizet		"zd"
 
 #endif
 

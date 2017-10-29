@@ -27,8 +27,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "usb_hidreport.h"
-#include "frequencies.h"
+#include <firmware/usb_hidreport.h>
+#include <firmware/frequencies.h>
 #include "arbiter_elements.hpp"
 #include "thread.hpp"
 

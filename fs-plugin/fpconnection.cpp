@@ -30,7 +30,10 @@
 #include <hidapi/hidapi.h>
 #include <firmware/usb_hidreport.h>
 #include <firmware/frequencies.h>
+#include "inttypes_emulation.h"
 #include "fpconnection.hpp"
+#include "osdeps.hpp"
+#include "logging.hpp"
 
 FPConnection::FPConnection() : Thread(500), _device(NULL), _data_initialized(false), _last_seqno(0x55) {
 	std::memset(&_instrument_data, 0, sizeof(struct instrument_data_t));
@@ -52,28 +55,29 @@ bool FPConnection::connect() {
 		return true;
 	}
 
+	logmsg(LLVL_INFO, "Trying to connect to flightpanel...");
 	struct hid_device_info *info = hid_enumerate(USB_VID, USB_PID);
 	if (!info) {
-		fprintf(stderr, "Failed to hid_enumerate(): No such VID/PID %04x:%04x\n", USB_VID, USB_PID );
+		logmsg(LLVL_INFO, "Failed to hid_enumerate(): No such VID/PID %04x:%04x", USB_VID, USB_PID );
 		return false;
 	}
 
 	struct hid_device_info *current = info;
 	while (current) {
 		if (current->serial_number == NULL) {
-			fprintf(stderr, "Warning: No serial number provided, do you have rights to the node at %s?\n", current->path);
+			logmsg(LLVL_INFO, "Warning: No serial number provided, do you have rights to the node at %s?", current->path);
 		}
-		fprintf(stderr, "%04x:%04x: %ls : %ls, serial %ls\n", current->vendor_id, current->product_id, current->manufacturer_string, current->product_string, current->serial_number);
+		logmsg(LLVL_INFO, "%04x:%04x: %ls : %ls, serial %ls", current->vendor_id, current->product_id, current->manufacturer_string, current->product_string, current->serial_number);
 		current = current->next;
 	}
 
 	_device = hid_open(info->vendor_id, info->product_id, info->serial_number);
 	hid_free_enumeration(info);
 	if (!_device) {
-		fprintf(stderr, "Failed to hid_open().\n");
+		logmsg(LLVL_INFO, "Failed to hid_open().");
 		return false;
 	}
-	fprintf(stderr, "Successfully connected to flightpanel.\n");
+	logmsg(LLVL_INFO, "Successfully connected to flightpanel.");
 	return true;
 }
 
@@ -92,16 +96,18 @@ void FPConnection::thread_action() {
 				break;
 			}
 		}
+		logmsg(LLVL_DEBUG, "Reading from flightpanel...");
 		int bytes_read = hid_read(device, (uint8_t*)&hid_report, sizeof(hid_report));
+		logmsg(LLVL_INFO, "FP read %d bytes", bytes_read);
 		if (bytes_read == sizeof(hid_report)) {
 			LockGuard guard(_datalock);
 			_instrument_data.external = hid_report;
 			_data_fresh.set();
 		} else if (bytes_read == -1) {
-			fprintf(stderr, "Flight panel diconnected.\n");
+			logmsg(LLVL_INFO, "Flight panel diconnected.");
 			disconnect();
 		} else {
-			fprintf(stderr, "Short read (%d of %zd), could not get full HID report.\n", bytes_read, sizeof(hid_report));
+			logmsg(LLVL_INFO, "Short read (%d of %" PRIsizet "), could not get full HID report.", bytes_read, sizeof(hid_report));
 			disconnect();
 		}
 	}
@@ -125,7 +131,7 @@ template<typename T> bool FPConnection::send_report(T *report) {
 	}
 	int bytes_written = hid_write(device, (const uint8_t*)report, sizeof(*report));
 	if (bytes_written != sizeof(*report)) {
-		fprintf(stderr, "Sending HID report error: tried sending %zd bytes, but %d went through.\n", sizeof(*report), bytes_written);
+		logmsg(LLVL_INFO, "Sending HID report error: tried sending %" PRIsizet " bytes, but %d went through.", sizeof(*report), bytes_written);
 		disconnect();
 		return false;
 	}
@@ -138,7 +144,7 @@ void FPConnection::put_data(const struct instrument_data_t &data, const struct a
 	}
 
 	if (send_all || elements.fp_send_report_01()) {
-		fprintf(stderr, "Sending report #1\n");
+		logmsg(LLVL_INFO, "Sending report #1");
 		struct hid_set_report_01_t report;
 		std::memset(&report, 0, sizeof(report));
 		report.report_id = 1;
@@ -159,7 +165,7 @@ void FPConnection::put_data(const struct instrument_data_t &data, const struct a
 		}
 	}
 	if (send_all || elements.fp_send_report_02()) {
-		fprintf(stderr, "Sending report #2\n");
+		logmsg(LLVL_INFO, "Sending report #2");
 		struct hid_set_report_02_t report;
 		std::memset(&report, 0, sizeof(report));
 		report.report_id = 2;
@@ -181,10 +187,9 @@ void FPConnection::put_data(const struct instrument_data_t &data, const struct a
 
 void FPConnection::wait_for_ack() {
 	while (_instrument_data.external.seqno != _last_seqno) {
-		fprintf(stderr, "waiting for %x (currently %x)... \n", _last_seqno, _instrument_data.external.seqno);
-		usleep(10 * 1000);
+		//logmsg(LLVL_INFO, "Waiting for FP seqno %x (currently %x)...", _last_seqno, _instrument_data.external.seqno);
+		sleep_millis(10);
 	}
-	fprintf(stderr, "done\n");
 }
 
 FPConnection::~FPConnection() {

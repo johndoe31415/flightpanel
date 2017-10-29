@@ -46,7 +46,7 @@ void Thread::start() {
 void Thread::thread_function() {
 	while (_thread_running) {
 		thread_action();
-		usleep(_thread_interval_millis * 1000);
+		sleep_millis(_thread_interval_millis);
 	}
 }
 

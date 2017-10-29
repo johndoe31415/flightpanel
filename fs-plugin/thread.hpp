@@ -25,6 +25,7 @@
 #define __THREAD_HPP__
 
 #include <pthread.h>
+#include "osdeps.hpp"
 
 class Lock {
 	private:
@@ -72,13 +73,33 @@ class Event {
 			_state = false;
 		}
 
-		bool wait() {
+		bool wait(unsigned int timeout_millis = 2000) {
+			/* Separate millseconds and seconds */
+			unsigned int timeout_seconds = timeout_millis / 1000;
+			timeout_millis = timeout_millis % 1000;
+
+			/* Add timeout to current time */
+			struct timespec timeout;
+			now(&timeout);
+
+			timeout.tv_sec += timeout_seconds;
+            timeout.tv_nsec += timeout_millis * 1000000;
+
+            /* Wrap around nanoseconds */
+            timeout.tv_sec += timeout.tv_nsec / 1000000000;
+            timeout.tv_nsec = timeout.tv_nsec % 1000000000;
+
+			bool success = true;
 			pthread_mutex_lock(&_mutex);
 			while (!_state) {
-				pthread_cond_wait(&_cond, &_mutex);
+				if (pthread_cond_timedwait(&_cond, &_mutex, &timeout)) {
+					/* Timeout */
+					success = false;
+					break;
+				}
 			}
 			pthread_mutex_unlock(&_mutex);
-			return true;
+			return success;
 		}
 
 		~Event() {

@@ -30,6 +30,7 @@
 #include <stddef.h>
 
 #include "arbiter.hpp"
+#include "logging.hpp"
 
 Arbiter::Arbiter(FSConnection *fs_connection, FPConnection *fp_connection) : Thread(100) {
 	_first_sync = true;
@@ -59,8 +60,6 @@ template<typename T> void Arbiter::arbitrate_value_unidirectional(bool *update, 
 		*update = true;
 	}
 }
-
-
 
 struct arbiter_result_t Arbiter::arbitrate(const struct instrument_data_t &new_fs_data, const struct instrument_data_t &new_fp_data) {
 	struct arbiter_result_t result;
@@ -138,19 +137,21 @@ struct arbiter_result_t Arbiter::arbitrate(const struct instrument_data_t &new_f
 void Arbiter::thread_action() {
 	if (!_fp_connection->connected()) {
 		/* Do not arbitrate if no FP connection present! */
+		logmsg(LLVL_INFO, "Flightpanel not connected.");
 		_first_sync = true;
 		return;
 	}
 
 	if (!_fs_connection->data_fresh().wait()) {
-		fprintf(stderr, "FS is not fresh, timed out.\n");
+		logmsg(LLVL_INFO, "FS is not fresh, timed out.");
 		return;
 	}
 	if (!_fp_connection->data_fresh().wait()) {
-		fprintf(stderr, "FP is not fresh, timed out.\n");
+		logmsg(LLVL_INFO, "FP is not fresh, timed out.");
 		return;
 	}
 
+	logmsg(LLVL_INFO, "Got data.");
 	struct instrument_data_t new_fp_data;
 	_fp_connection->get_data(&new_fp_data);
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/python3
 #
 #	flightpanel - A Cortex-M4 based USB flight panel for flight simulators.
 #	Copyright (C) 2017-2017 Johannes Bauer
@@ -21,5 +21,19 @@
 #
 #	Johannes Bauer <JohannesBauer@gmx.de>
 
+import os
+import re
 
-sed -i 's/\r$//g;' "$1"
+def remove_crlf(filename):
+	with open(filename) as f:
+		text = f.read()
+	with open(filename, "w") as f:
+		f.write(text)
+
+for (basedir, subdirs, files) in os.walk("."):
+	if not basedir.endswith("/"):
+		basedir += "/"
+	for filename in files:
+		if filename.endswith(".cpp") or filename.endswith(".hpp") or filename.endswith(".h") or filename.endswith(".c"):
+			fullfilename = basedir + filename
+			remove_crlf(fullfilename)

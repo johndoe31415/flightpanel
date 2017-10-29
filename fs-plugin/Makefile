@@ -70,7 +70,7 @@ CFLAGS := -std=c11 $(SHARED_CFLAGS)
 CXXFLAGS := -std=c++11 $(SHARED_CFLAGS)
 LDFLAGS := $(PLATFORM_LDFLAGS)
 
-OBJS := fpconnect.o fsconnection.o fpconnection.o arbiter.o frequencies.o units.o thread.o $(PLATFORM_OBJS)
+OBJS := fpconnect.o fsconnection.o fpconnection.o arbiter.o frequencies.o units.o thread.o logging.o osdeps.o $(PLATFORM_OBJS)
 
 all: $(TARGET)
 

@@ -21,29 +21,19 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __SIMCONNECT_HPP__
-#define __SIMCONNECT_HPP__
+#ifndef __LOGGING_H__
+#define __LOGGING_H__
 
-#include <stdbool.h>
-#include <pthread.h>
-#include <windows.h>
-#include "SimConnect.h"
-#include "fsconnection.hpp"
-#include "thread.hpp"
-
-class SimConnectConnection : public FSConnection, public Thread {
-	private:
-		HANDLE _simconnect_handle;
-		struct instrument_data_t _instrument_data;
-
-	public:
-		SimConnectConnection();
-		void get_data(struct instrument_data_t *data);
-		void put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements);
-		void thread_action();
-		void event_loop();
-		void simconnect_callback(SIMCONNECT_RECV *pData, DWORD cbData);
-		virtual ~SimConnectConnection();
+enum logtype_t {
+	LLVL_DEBUG,
+	LLVL_INFO,
+	LLVL_WARNING,
+	LLVL_ERROR,
+	LLVL_FATAL,
 };
+
+/*************** AUTO GENERATED SECTION FOLLOWS ***************/
+void logmsg(enum logtype_t llvl, const char *msg, ...);
+/***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

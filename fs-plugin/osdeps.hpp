@@ -21,29 +21,14 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __SIMCONNECT_HPP__
-#define __SIMCONNECT_HPP__
+#ifndef __OSDEPS_H__
+#define __OSDEPS_H__
 
-#include <stdbool.h>
-#include <pthread.h>
-#include <windows.h>
-#include "SimConnect.h"
-#include "fsconnection.hpp"
-#include "thread.hpp"
+#include <time.h>
 
-class SimConnectConnection : public FSConnection, public Thread {
-	private:
-		HANDLE _simconnect_handle;
-		struct instrument_data_t _instrument_data;
-
-	public:
-		SimConnectConnection();
-		void get_data(struct instrument_data_t *data);
-		void put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements);
-		void thread_action();
-		void event_loop();
-		void simconnect_callback(SIMCONNECT_RECV *pData, DWORD cbData);
-		virtual ~SimConnectConnection();
-};
+/*************** AUTO GENERATED SECTION FOLLOWS ***************/
+void sleep_millis(unsigned int millis);
+void now(struct timespec *ts);
+/***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

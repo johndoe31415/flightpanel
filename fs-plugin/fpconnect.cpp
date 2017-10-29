@@ -29,6 +29,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
+#include "logging.hpp"
 #include "fsconnection.hpp"
 #include "fpconnection.hpp"
 #include "arbiter.hpp"
@@ -72,15 +73,18 @@ void stop_arbiter_thread() {
 #if defined(VARIANT_LINUX_EMU) || defined(VARIANT_WINDOWS_FSX)
 int main(void) {
 	start_arbiter_thread();
-	fprintf(stderr, "Press return to exit...\n");
+	logmsg(LLVL_INFO, "Press return to exit...");
 	char buffer[256];
 	while (true) {
 		while (fgets(buffer, sizeof(buffer), stdin) == NULL);
 #if defined(VARIANT_LINUX_EMU)
 		fs_connection->poke();
+#else
+		logmsg(LLVL_INFO, "Interrupted by keypress.");
+		break;
 #endif
 	}
-	fprintf(stderr, "Exiting!\n");
+	logmsg(LLVL_INFO, "Exiting!");
 	stop_arbiter_thread();
 	return 0;
 }
