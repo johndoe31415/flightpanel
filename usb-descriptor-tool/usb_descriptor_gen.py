@@ -197,10 +197,7 @@ collection = hid_report.add_collection(Collection.Application)
 collection.add_report_id(1)
 collection.fp_add_items([
 	("Sequence number", 1),
-])
-collection.fp_add_as_button("Radio panel", 6)
-#	("Radio panel", 1),
-collection.fp_add_items([
+	("Radio panel", 1),
 	("COM divisions", 1),
 	("NAV divisions", 1),
 	("TX radio ID", 1),
