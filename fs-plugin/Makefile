@@ -3,7 +3,7 @@
 vpath %.c ../firmware
 
 WINDOWS_FSX_TARGET := fpconnect.exe
-WINDOWS_FSX_OBJS := $(addprefix arch/fsx/,simconnect.o simconnect-events.o simconnect-datadefs.o fpconnect.res)
+WINDOWS_FSX_OBJS := $(addprefix arch/fsx/,simconnect.o simconnect-events.o simconnect-datadefs.o bcd.o fpconnect.res)
 LINUX_EMU_TARGET := fpconnect
 LINUX_EMU_OBJS := $(addprefix arch/emulation/,emulator.o)
 LINUX_XPLANE_TARGET := fpconnect.so

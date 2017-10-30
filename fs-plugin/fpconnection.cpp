@@ -34,8 +34,9 @@
 #include "fpconnection.hpp"
 #include "osdeps.hpp"
 #include "logging.hpp"
+#include "globals.hpp"
 
-FPConnection::FPConnection() : Thread(500), _device(NULL), _data_initialized(false), _last_seqno(0x55) {
+FPConnection::FPConnection() : Thread(FLIGHTPANEL_THREAD_INTERVAL_MILLIS), _device(NULL), _data_initialized(false), _last_seqno(0x55) {
 	std::memset(&_instrument_data, 0, sizeof(struct instrument_data_t));
 	hid_init();
 	start();
@@ -59,7 +60,7 @@ bool FPConnection::connect() {
 	logmsg(LLVL_INFO, "Trying to connect to flightpanel...");
 	struct hid_device_info *info = hid_enumerate(USB_VID, USB_PID);
 	if (!info) {
-		logmsg(LLVL_INFO, "Failed to hid_enumerate(): No such VID/PID %04x:%04x", USB_VID, USB_PID );
+		logmsg(LLVL_INFO, "Failed to hid_enumerate(): No such VID/PID %04x:%04x", USB_VID, USB_PID);
 		return false;
 	}
 
@@ -73,9 +74,10 @@ bool FPConnection::connect() {
 	}
 
 	_device = hid_open(info->vendor_id, info->product_id, info->serial_number);
+	logmsg(LLVL_DEBUG, "hid_open() of %04x:%04x (serial %ls)", info->vendor_id, info->product_id, info->serial_number);
 	hid_free_enumeration(info);
 	if (!_device) {
-		logmsg(LLVL_INFO, "Failed to hid_open().");
+		logmsg(LLVL_INFO, "Failed to hid_open(). Is the flightpanel already claimed by another application?");
 		return false;
 	}
 	logmsg(LLVL_INFO, "Successfully connected to flightpanel.");
@@ -103,7 +105,7 @@ void FPConnection::thread_action() {
 			_instrument_data.external = hid_report;
 			_data_fresh.set();
 		} else if (bytes_read == -1) {
-			logmsg(LLVL_INFO, "Flight panel diconnected.");
+			logmsg(LLVL_INFO, "Flight panel diconnected (read -1 bytes): %s", hid_error(device));
 			disconnect();
 		} else {
 			logmsg(LLVL_INFO, "Short read (%d bytes read, %" PRIsizet " bytes in structure), could not get full HID report.", bytes_read, sizeof(hid_report));
@@ -129,9 +131,9 @@ template<typename T> bool FPConnection::send_report(T *report) {
 		report->seqno = _last_seqno;
 	}
 	int bytes_written = hid_write(device, (const uint8_t*)report, sizeof(*report));
-	if (bytes_written != sizeof(*report)) {
-		logmsg(LLVL_ERROR, "Sending HID report error: tried sending %" PRIsizet " bytes, but %d went through.", sizeof(*report), bytes_written);
-		//disconnect();
+	if (bytes_written < sizeof(*report)) {
+		logmsg(LLVL_ERROR, "Sending HID report error: tried sending %" PRIsizet " bytes, but %d went through: %ls", sizeof(*report), bytes_written, hid_error(device));
+		disconnect();
 		return false;
 	}
 	return true;

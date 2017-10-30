@@ -21,29 +21,40 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __SIMCONNECT_HPP__
-#define __SIMCONNECT_HPP__
+#include <stdint.h>
+#include "bcd.hpp"
 
-#include <stdbool.h>
-#include <pthread.h>
-#include <windows.h>
-#include "SimConnect.h"
-#include "fsconnection.hpp"
-#include "thread.hpp"
+uint32_t bcd_to_decimal(uint32_t bcd_value) {
+	uint32_t result = 0;
+	uint32_t value = 1;
+	while (bcd_value) {
+		uint8_t digit = bcd_value & 0xf;
+		result += digit * value;
+		value *= 10;
+		bcd_value >>= 4;
+	}
+	return result;
+}
 
-class SimConnectConnection : public FSConnection, public Thread {
-	private:
-		HANDLE _simconnect_handle;
-		struct instrument_data_t _instrument_data;
-		Lock _datalock;
-		void thread_action();
+uint32_t decimal_to_bcd(uint32_t decimal_value) {
+	uint32_t result = 0;
+	uint32_t divisor = 1000000000;
+	while (divisor) {
+		uint8_t digit = decimal_value / divisor;
+		decimal_value = decimal_value % divisor;
+		result = (result << 4) | digit;
+		divisor /= 10;
+	}
+	return result;
+}
 
-	public:
-		SimConnectConnection();
-		void get_data(struct instrument_data_t *data);
-		void put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements);
-		void simconnect_callback(SIMCONNECT_RECV *pData, DWORD cbData);
-		virtual ~SimConnectConnection();
-};
 
+#ifdef BCD_DEBUG
+#include <stdio.h>
+
+int main() {
+	fprintf(stderr, "%d\n", bcd_to_decimal(0x123456));
+	fprintf(stderr, "%x\n", decimal_to_bcd(123456));
+	return 0;
+}
 #endif

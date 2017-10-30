@@ -23,7 +23,7 @@
 
 #include "osdeps.hpp"
 
-#ifdef __windows
+#ifdef _WIN32
 
 #include <windows.h>
 #include <pthread_time.h>

@@ -29,10 +29,11 @@
 #include <string.h>
 #include <stddef.h>
 
+#include "globals.hpp"
 #include "arbiter.hpp"
 #include "logging.hpp"
 
-Arbiter::Arbiter(FSConnection *fs_connection, FPConnection *fp_connection) : Thread(100) {
+Arbiter::Arbiter(FSConnection *fs_connection, FPConnection *fp_connection) : Thread(ARBITER_THREAD_INTERVAL_MILLIS) {
 	_first_sync = true;
 	_fs_connection = fs_connection;
 	_fp_connection = fp_connection;
@@ -124,8 +125,8 @@ struct arbiter_result_t Arbiter::arbitrate(const struct instrument_data_t &new_f
 	bool any_change = memcmp(&authoritative_data, &_last_authoritative_data, sizeof(authoritative_data))
 		|| memcmp(&new_fs_data, &_last_authoritative_data, sizeof(authoritative_data));
 	if (any_change) {
-		diff_instrument_data(stderr, "Flightpanel", _last_authoritative_data, new_fp_data);
-		diff_instrument_data(stderr, "Flightsim", _last_authoritative_data, new_fs_data);
+		diff_instrument_data(stderr, "Flightpanel last / current", _last_authoritative_data, new_fp_data);
+		diff_instrument_data(stderr, "Flightsim last / current", _last_authoritative_data, new_fs_data);
 		dump_instrument_data(stderr, "Authoritative", authoritative_data);
 		fprintf(stderr, "======================================================================\n");
 	}
@@ -137,7 +138,7 @@ struct arbiter_result_t Arbiter::arbitrate(const struct instrument_data_t &new_f
 void Arbiter::thread_action() {
 	if (!_fp_connection->connected()) {
 		/* Do not arbitrate if no FP connection present! */
-		logmsg(LLVL_INFO, "Flightpanel not connected.");
+		//logmsg(LLVL_INFO, "Flightpanel not connected.");
 		_first_sync = true;
 		return;
 	}
@@ -151,7 +152,6 @@ void Arbiter::thread_action() {
 		return;
 	}
 
-	logmsg(LLVL_INFO, "Got data.");
 	struct instrument_data_t new_fp_data;
 	_fp_connection->get_data(&new_fp_data);
 

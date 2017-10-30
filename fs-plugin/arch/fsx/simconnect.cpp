@@ -35,18 +35,9 @@
 #include "fsconnection.hpp"
 #include "simconnect.hpp"
 #include "logging.hpp"
+#include "globals.hpp"
+#include "bcd.hpp"
 
-static uint32_t bcd_to_decimal(uint32_t bcd_value) {
-	uint32_t result = 0;
-	uint32_t value = 1;
-	while (bcd_value) {
-		uint8_t digit = bcd_value & 0xf;
-		result += digit * value;
-		value *= 10;
-		bcd_value >>= 4;
-	}
-	return result;
-}
 
 #if 0
 static uint32_t frequency_bcd16_to_khz(uint32_t bcd16_value) {
@@ -66,69 +57,98 @@ static uint32_t adf_frequency_bcd32_to_hz(uint32_t bcd32_value) {
 	return bcd_to_decimal(bcd32_value) / 10;
 }
 
-static void simconnect_instrument_to_abstract(const struct simconnect_datatype_instruments_t *in, struct instrument_data_t *out) {
-#if 0
-	out->com1.freq_active_khz = frequency_bcd32_to_khz(in->com1_freq_active);
-	out->com1.freq_standby_khz = frequency_bcd32_to_khz(in->com1_freq_standby);
-	out->com1.tx = in->com1_tx;
-	out->com2.freq_active_khz = frequency_bcd32_to_khz(in->com2_freq_active);
-	out->com2.freq_standby_khz = frequency_bcd32_to_khz(in->com2_freq_standby);
-	out->com2.tx = in->com2_tx;
-	if (in->com_all_rx) {
-		out->com1.rx = true;
-		out->com2.rx = true;
-	} else {
-		out->com1.rx = out->com1.tx;
-		out->com2.rx = out->com2.tx;
+static void simconnect_instrument_to_abstract(const struct simconnect_datatype_instruments_t &in, struct instrument_data_t *out) {
+	memset(out, 0, sizeof(struct instrument_data_t));
+
+	out->external.radio_panel |= in.com1_tx ? RADIO_COM1 : 0;
+	out->external.radio_panel |= in.com2_tx ? RADIO_COM2 : 0;
+	out->external.radio_panel |= in.nav1_sound ? RADIO_NAV1 : 0;
+	out->external.radio_panel |= in.nav2_sound ? RADIO_NAV2 : 0;
+	out->external.radio_panel |= in.dme_sound ? RADIO_DME : 0;
+	out->external.radio_panel |= in.adf_sound ? RADIO_ADF : 0;
+
+	out->external.com_divisions = COM_RANGE;
+	out->external.nav_divisions = NAV_RANGE;
+	out->external.tx_radio_id = 1;
+
+	out->external.com1.freq.active_index = frequency_khz_to_index((enum com_nav_range_t)out->external.com_divisions, frequency_bcd32_to_khz(in.com1_freq_active));
+	out->external.com1.freq.standby_index = frequency_khz_to_index((enum com_nav_range_t)out->external.com_divisions, frequency_bcd32_to_khz(in.com1_freq_standby));
+	out->external.com2.freq.active_index = frequency_khz_to_index((enum com_nav_range_t)out->external.com_divisions, frequency_bcd32_to_khz(in.com2_freq_active));
+	out->external.com2.freq.standby_index = frequency_khz_to_index((enum com_nav_range_t)out->external.com_divisions, frequency_bcd32_to_khz(in.com2_freq_standby));
+
+	out->external.nav1.freq.active_index = frequency_khz_to_index((enum com_nav_range_t)out->external.nav_divisions, frequency_bcd32_to_khz(in.nav1_freq_active));
+	out->external.nav1.freq.standby_index = frequency_khz_to_index((enum com_nav_range_t)out->external.nav_divisions, frequency_bcd32_to_khz(in.nav1_freq_standby));
+	out->external.nav1.obs = round(in.nav1_obs_deg);
+	out->external.nav2.freq.active_index = frequency_khz_to_index((enum com_nav_range_t)out->external.nav_divisions, frequency_bcd32_to_khz(in.nav2_freq_active));
+	out->external.nav2.freq.standby_index = frequency_khz_to_index((enum com_nav_range_t)out->external.nav_divisions, frequency_bcd32_to_khz(in.nav2_freq_standby));
+	out->external.nav2.obs = round(in.nav2_obs_deg);
+
+	out->external.xpdr.state = XPDR_STANDBY;		// TODO: Get those from IvAp
+	out->external.xpdr.squawk = bcd_to_decimal(in.xpdr_squawk);
+
+	out->external.flip_switches |= (in.light_states & 0x0001) ? SWITCH_NAV : 0;
+	out->external.flip_switches |= (in.light_states & 0x0002) ? SWITCH_BCN : 0;
+	out->external.flip_switches |= (in.light_states & 0x0004) ? SWITCH_LAND : 0;
+	out->external.flip_switches |= (in.light_states & 0x0008) ? SWITCH_TAXI : 0;
+	out->external.flip_switches |= (in.light_states & 0x0010) ? SWITCH_STRB : 0;
+
+	out->external.adf.frequency_khz = adf_frequency_bcd32_to_hz(in.adf_freq_active) / 1000;
+
+	out->external.ap.state |= in.ap_master ? AP_STATE_ACTIVE : 0;
+	out->external.ap.state |= in.ap_hdg_hold ? AP_HEADING_HOLD : 0;
+	out->external.ap.state |= in.ap_nav_hold ? AP_NAVIGATION_HOLD : 0;
+	out->external.ap.state |= in.ap_apr_hold ? AP_GLIDESLOPE_HOLD : 0;
+	out->external.ap.state |= in.ap_rev_hold ? AP_STATE_BACKCOURSE : 0;
+	out->external.ap.state |= in.ap_alt_hold ? AP_ALTITUDE_HOLD : 0;
+	out->external.ap.state |= in.ap_ias_hold ? AP_IAS_HOLD : 0;
+	out->external.ap.altitude = round(in.ap_altitude_ft);
+	out->external.ap.heading = round(in.ap_heading_deg);
+	out->external.ap.ias = 0;		// TODO
+
+	out->external.qnh = round(in.qnh_millibar);
+	out->external.navigate_by_gps = in.gps_drives_nav;
+
+//	out->ap.climbrate_ft_per_min = round(in->ap_climbrate_ft_per_min);
+//	out->internal.dme.nav_id = in.dme_selected;
+
+
+	out->internal.dme.available = in.dme_speed >= 0;
+	if (out->internal.dme.available) {
+		out->internal.dme.distance_tenth_nm = round(in.dme_distance * 10);
+		out->internal.dme.velocity = round(in.dme_speed);
 	}
 
-	out->nav1.freq_active_khz = frequency_bcd32_to_khz(in->nav1_freq_active);
-	out->nav1.freq_standby_khz = frequency_bcd32_to_khz(in->nav1_freq_standby);
-	out->nav1.obs = round(in->nav1_obs_deg);
-	out->nav1.sound = in->nav1_sound;
-	memcpy(out->nav1.ident, in->nav1_ident, 8);
+	memcpy(out->internal.ident.nav1, in.nav1_ident, IDENT_LENGTH_BYTES);
+	memcpy(out->internal.ident.nav2, in.nav2_ident, IDENT_LENGTH_BYTES);
+	memcpy(out->internal.ident.adf, in.adf_ident, IDENT_LENGTH_BYTES);
 
-	out->nav2.freq_active_khz = frequency_bcd32_to_khz(in->nav2_freq_active);
-	out->nav2.freq_standby_khz = frequency_bcd32_to_khz(in->nav2_freq_standby);
-	out->nav2.obs = round(in->nav2_obs_deg);
-	out->nav2.sound = in->nav2_sound;
-	memcpy(out->nav2.ident, in->nav2_ident, 8);
+	fprintf(stderr, "FSX GET NAV1 %d\n", out->external.nav1.freq.standby_index);
 
-	out->adf.freq_hz = adf_frequency_bcd32_to_hz(in->adf_freq_active);
+	#if 0
 	out->adf.compass_rose = round(in->adf_compass_rose_deg);
-	out->adf.sound = in->adf_sound;
-	memcpy(out->adf.ident, in->adf_ident, 8);
-
-	out->dme.nav_id = in->dme_selected;
-	out->dme.available = ((out->dme.nav_id == 1) && (in->dme_nav1)) || ((out->dme.nav_id == 2) && (in->dme_nav2));
-	out->dme.distance_nm_tenths = round(in->dme_distance * 10);
-	out->dme.speed_kt = round(in->dme_speed);
-	out->dme.sound = in->dme_sound;
-
-	out->xpdr.squawk = bcd_to_decimal(in->xpdr_squawk);
-
-	out->lights.nav = (in->light_states & 0x0001);
-	out->lights.beacon = (in->light_states & 0x0002);
-	out->lights.landing = (in->light_states & 0x0004);
-	out->lights.taxi = (in->light_states & 0x0008);
-	out->lights.strobe = (in->light_states & 0x0010);
-
-	out->ap.active = in->ap_master;
-	out->ap.altitude_ft = round(in->ap_altitude_ft);
-	out->ap.climbrate_ft_per_min = round(in->ap_climbrate_ft_per_min);
-	out->ap.heading = round(in->ap_heading_deg);
-	out->ap.hdg_hold = in->ap_hdg_hold;
-	out->ap.nav_hold = in->ap_nav_hold;
-	out->ap.apr_hold = in->ap_apr_hold;
-	out->ap.rev_hold = in->ap_rev_hold;
-	out->ap.alt_hold = in->ap_alt_hold;
-	out->ap.ias_hold = in->ap_ias_hold;
-
 	out->misc.ias_kt = round(in->ias);
 	out->misc.indicated_alt_ft = round(in->indicated_alt_ft);
-	out->misc.qnh_millibar = round(in->qnh_millibar);
-	out->misc.guide_gps = in->gps_drives_nav;
-#endif
+	#endif
+}
+
+void SimConnectConnection::put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements) {
+	if (elements.nav1) {
+		SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_NAV1_RADIO_SET, decimal_to_bcd(frequency_index_to_khz((enum com_nav_range_t)data.external.nav_divisions, data.external.nav1.freq.active_index) / 10), SIMCONNECT_GROUP_PRIORITY_HIGHEST_MASKABLE, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
+		SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_NAV1_STBY_SET, decimal_to_bcd(frequency_index_to_khz((enum com_nav_range_t)data.external.nav_divisions, data.external.nav1.freq.standby_index) / 10), SIMCONNECT_GROUP_PRIORITY_HIGHEST_MASKABLE, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
+		SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_VOR1_SET, data.external.nav1.obs, SIMCONNECT_GROUP_PRIORITY_HIGHEST_MASKABLE, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
+	}
+
+	/* Flush simconnect queue */
+	#if 1
+	uint8_t buffer[1024];
+	SIMCONNECT_RECV *temp = (SIMCONNECT_RECV*)buffer;
+	DWORD bufsize = sizeof(buffer);
+	while (SimConnect_GetNextDispatch(_simconnect_handle, &temp, &bufsize) == S_OK) {
+		fprintf(stderr, "FLUSH\n");
+	}
+	#endif
+
+	_data_fresh.reset();
 }
 
 enum event_group_t {
@@ -176,12 +196,15 @@ void SimConnectConnection::simconnect_callback(SIMCONNECT_RECV *pData, DWORD cbD
 			if (SIMCONNECT_DATATYPE_INSTRUMENTS_DATUM_COUNT != pObjData->dwDefineCount) {
 				logmsg(LLVL_INFO, "Warning: expected %u datums, but received %lu.", SIMCONNECT_DATATYPE_INSTRUMENTS_DATUM_COUNT, pObjData->dwDefineCount);
 			}
-			struct instrument_data_t abstract_data;
-			memset(&abstract_data, 0, sizeof(abstract_data));
-			simconnect_instrument_to_abstract(simconnect_data, &_instrument_data);
 
-			logmsg(LLVL_INFO, "RXINS");
+			struct instrument_data_t instrument_data;
+			simconnect_instrument_to_abstract(*simconnect_data, &instrument_data);
+			{
+				LockGuard guard(_datalock);
+				_instrument_data = instrument_data;
+			}
 			_data_fresh.set();
+//			sleep_millis(1000);
 		} else {
 			logmsg(LLVL_INFO, "Recevied unhandled data for request 0x%lx", pObjData->dwRequestID);
 		}
@@ -197,38 +220,13 @@ void SimConnectConnection::get_data(struct instrument_data_t *data) {
 	memcpy(data, &_instrument_data, sizeof(struct instrument_data_t));
 }
 
-void SimConnectConnection::put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements) {
-}
-
-static void* event_loop_thread(void *ctx) {
-	SimConnectConnection *connection = (SimConnectConnection*)ctx;
-	connection->event_loop();
-	return NULL;
-}
-
-void SimConnectConnection::event_loop() {
-	SimConnect_RequestDataOnSimObjectType(_simconnect_handle, REQUEST_DATADEF_INFO, DATADEF_INFO, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
-	SimConnect_RequestDataOnSimObjectType(_simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
-
-
-	/*
-	while (_loop_running) {
-		SimConnect_RequestDataOnSimObjectType(_simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
-		SimConnect_CallDispatch(_simconnect_handle, simconnect_callback_wrapper, this);
-		sleep_millis(10);
-	}
-	*/
-
-	/* Clean up loop thread */
-//	pthread_join(_periodic_query_thread, NULL);
-}
-
 void SimConnectConnection::thread_action() {
+	//SimConnect_RequestDataOnSimObjectType(_simconnect_handle, REQUEST_DATADEF_INFO, DATADEF_INFO, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 	SimConnect_RequestDataOnSimObjectType(_simconnect_handle, REQUEST_DATADEF_INSTRUMENTS, DATADEF_INSTRUMENTS, 0, SIMCONNECT_SIMOBJECT_TYPE_USER);
 	SimConnect_CallDispatch(_simconnect_handle, simconnect_callback_wrapper, this);
 }
 
-SimConnectConnection::SimConnectConnection() : Thread(1000) {
+SimConnectConnection::SimConnectConnection() : Thread(FLIGHTSIM_THREAD_INTERVAL_MILLIS) {
 	_simconnect_handle = NULL;
 
 	if (SUCCEEDED(SimConnect_Open(&_simconnect_handle, "Flight Panel", NULL, 0, 0, 0))) {
@@ -252,7 +250,9 @@ SimConnectConnection::SimConnectConnection() : Thread(1000) {
 		throw std::runtime_error("Connection to flight simulator via SimConnect failed.");
 	}
 
-	/* Start thread that polls the status every second */
+	memset(&_instrument_data, 0, sizeof(_instrument_data));
+
+	/* Start thread that polls the status periodically */
 	start();
 }
 

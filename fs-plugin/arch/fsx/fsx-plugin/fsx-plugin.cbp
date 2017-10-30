@@ -7,7 +7,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/Debug/fsx-plugin" prefix_auto="1" extension_auto="1" />
+				<Option output="../../../build/windows/fsx-plugin-dbg" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -16,7 +16,7 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/Release/fsx-plugin" prefix_auto="1" extension_auto="1" />
+				<Option output="../../../build/windows/fsx-plugin" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -44,7 +44,7 @@
 			<Add directory="../../../include/sdk-simconnect" />
 		</Compiler>
 		<Linker>
-			<Add library="../../../hidapi/windows/.libs/libhidapi.dll.a" />
+			<Add library="../../../build/windows/libhidapi.dll.a" />
 			<Add library="../../../include/sdk-simconnect/SimConnect.lib" />
 		</Linker>
 		<Unit filename="../../../../firmware/frequencies.c">
@@ -68,6 +68,8 @@
 		<Unit filename="../../../thread.hpp" />
 		<Unit filename="../../../units.cpp" />
 		<Unit filename="../../../units.hpp" />
+		<Unit filename="../bcd.cpp" />
+		<Unit filename="../bcd.hpp" />
 		<Unit filename="../simconnect-datadefs.cpp" />
 		<Unit filename="../simconnect-datadefs.hpp" />
 		<Unit filename="../simconnect-events.c">
@@ -79,7 +81,10 @@
 		<Extensions>
 			<code_completion />
 			<envvars />
-			<debugger />
+			<debugger>
+				<search_path add="..\..\..\hidapi\hidapi" />
+				<search_path add="..\..\..\hidapi\windows" />
+			</debugger>
 			<lib_finder disable_auto="1" />
 		</Extensions>
 	</Project>

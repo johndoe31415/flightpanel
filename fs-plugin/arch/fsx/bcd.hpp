@@ -21,29 +21,12 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __SIMCONNECT_HPP__
-#define __SIMCONNECT_HPP__
+#ifndef __BCD_HPP__
+#define __BCD_HPP__
 
-#include <stdbool.h>
-#include <pthread.h>
-#include <windows.h>
-#include "SimConnect.h"
-#include "fsconnection.hpp"
-#include "thread.hpp"
+#include <stdint.h>
 
-class SimConnectConnection : public FSConnection, public Thread {
-	private:
-		HANDLE _simconnect_handle;
-		struct instrument_data_t _instrument_data;
-		Lock _datalock;
-		void thread_action();
-
-	public:
-		SimConnectConnection();
-		void get_data(struct instrument_data_t *data);
-		void put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements);
-		void simconnect_callback(SIMCONNECT_RECV *pData, DWORD cbData);
-		virtual ~SimConnectConnection();
-};
+uint32_t bcd_to_decimal(uint32_t bcd_value);
+uint32_t decimal_to_bcd(uint32_t decimal_value);
 
 #endif

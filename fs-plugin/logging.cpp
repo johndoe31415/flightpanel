@@ -36,4 +36,5 @@ void logmsg(enum logtype_t llvl, const char *msg, ...) {
     vfprintf(stderr, msg, args);
     fprintf(stderr, "\n");
     va_end(args);
+    fflush(stderr);
 }

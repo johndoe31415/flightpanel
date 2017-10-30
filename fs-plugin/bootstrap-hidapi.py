@@ -37,21 +37,19 @@ if not os.path.isdir("hidapi"):
 os.chdir("hidapi")
 for (host_params, src_dir, dst_dir) in [
 		#([ ], "libusb/.libs/", "linux" ),
-		([ "--host=i686-w64-mingw32" ], "windows/.libs/", "windows" ),
+		([ "--host=i686-w64-mingw32", "--enable-shared" ], "windows/.libs/", "windows" ),
+		#([ "--host=x86_64-w64-mingw32", "--enable-shared" ], "windows/.libs/", "windows" ),
 	]:
-	print("Building libhid for %s (configure parameters: %s) in %s" % (dst_dir, str(host_params), os.getcwd()))
+	install_dir = os.path.realpath("../build/" + dst_dir)
+	try:
+		shutil.rmtree(install_dir)
+	except FileNotFoundError:
+		pass
+	os.makedirs(install_dir)
+	print("Building libhid for %s (configure parameters: %s) in %s, installing in %s" % (dst_dir, str(host_params), os.getcwd(), install_dir))
 	subprocess.check_call([ "git", "clean", "-dfx" ])
 	subprocess.check_call([ "./bootstrap" ])
-	subprocess.check_call([ "./configure" ] + host_params)
+	subprocess.check_call([ "./configure", "--bindir", install_dir, "--libdir", install_dir ] + host_params)
 	subprocess.check_call([ "make" ])
-
-	for filename in os.listdir(src_dir):
-		src_file = src_dir + filename
-		dst_dir = "../build/" + dst_dir + "/"
-		try:
-			os.makedirs(dst_dir)
-		except FileExistsError:
-			pass
-		dst_file =  dst_dir + filename
-		os.rename(src_file, dst_file)
-
+	shutil.copy("windows/.libs/libhidapi-0.dll", install_dir)
+	shutil.copy("windows/.libs/libhidapi.dll.a", install_dir)

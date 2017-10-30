@@ -87,7 +87,7 @@ static bool dump_instrument_data_line(int line, char buffer[256], const struct i
 			break;
 
 		case 8:
-			buf += sprintf(buf, "AP: %3s, %5u ft, %4d ft/min, %3u°, %3u kts",
+			buf += sprintf(buf, "AP: %3s, %5u ft, %4d ft/min, %3u', %3u kts",
 					data.external.ap.state & AP_STATE_ACTIVE ? "ON" : "off",
 					data.external.ap.altitude,
 					data.external.ap.climbrate,
