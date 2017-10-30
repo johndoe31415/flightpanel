@@ -1,2 +1,4 @@
 include
 .default_variant
+hid-test
+hid-test.exe
