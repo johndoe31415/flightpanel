@@ -74,7 +74,7 @@ class DescriptorParser(object):
 				else:
 					return "%s(%d) ?" % (cmdcode.name, argument)
 
-			elif cmdcode == Item.Input:
+			elif cmdcode in [ Item.Input, Item.Output ]:
 				self._reports.append((self._report_cnt, self._report_size))
 				return "%s(%s)" % (cmdcode.name, self._decode_input_bitfield(argument, only_set = True))
 			else:
@@ -111,7 +111,7 @@ class DescriptorParser(object):
 		if comment is not None:
 			code_comment += " [%s]" % (comment)
 		self._print_line("%s%s," % (indent_str, hex_string), code_comment, target = 7 + indent)
-		if cmdcode == Item.Input:
+		if cmdcode in [ Item.Input, Item.Output ]:
 			print()
 
 	def dump(self, data, comments = None):

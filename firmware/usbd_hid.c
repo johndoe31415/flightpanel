@@ -72,15 +72,35 @@ static uint8_t HIDReportDescriptor[] = {
 	0x05, 0x01,					// UsagePage(GenericDesktop)
 	0x09, 0x04,					// Usage(Joystick)
 	0xa1, 0x01,					// Collection(Application)
+		0x85, 0x01,					// ReportID(1)
 		0x05, 0x02,					// UsagePage(SimulationControls)
 		0x09, 0xbc,					// Usage(FlightCommunication)
-		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x15, 0x00,					// LogicalMinimum(0)
+		0x25, 0xff,					// LogicalMaximum(255)
+		0x95, 0x01,					// ReportCount(1)
+		0x75, 0x08,					// ReportSize(8)
+		0x81, 0x82,					// Input(Variable, Volatile)
+
+		0x05, 0x09,					// UsagePage(Button)
+		0x19, 0x01,					// UsageMinimum(1)
+		0x29, 0x06,					// UsageMaximum(6)
+		0x15, 0x00,					// LogicalMinimum(0)
+		0x25, 0x01,					// LogicalMaximum(1)
+		0x95, 0x06,					// ReportCount(6)
+		0x75, 0x01,					// ReportSize(1)
+		0x81, 0x02,					// Input(Variable)
+
+		0x95, 0x01,					// ReportCount(1)
+		0x75, 0x02,					// ReportSize(2)
+		0x81, 0x01,					// Input(Constant)
+
+		0x05, 0x02,					// UsagePage(SimulationControls)
 		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x15, 0x00,					// LogicalMinimum(0)
 		0x25, 0xff,					// LogicalMaximum(255)
-		0x95, 0x05,					// ReportCount(5)
+		0x95, 0x03,					// ReportCount(3)
 		0x75, 0x08,					// ReportSize(8)
 		0x81, 0x82,					// Input(Variable, Volatile)
 
@@ -147,6 +167,20 @@ static uint8_t HIDReportDescriptor[] = {
 		0x75, 0x08,					// ReportSize(8)
 		0x81, 0x82,					// Input(Variable, Volatile)
 
+		0x85, 0x02,					// ReportID(2)
+		0x05, 0x01,					// UsagePage(GenericDesktop)
+		0x09, 0x00,					// Usage(Undefined)
+		0x95, 0x2a,					// ReportCount(42)
+		0x75, 0x08,					// ReportSize(8)
+		0x91, 0x02,					// Output(Variable)
+
+		0x85, 0x03,					// ReportID(3)
+		0x05, 0x01,					// UsagePage(GenericDesktop)
+		0x09, 0x00,					// Usage(Undefined)
+		0x95, 0x1b,					// ReportCount(27)
+		0x75, 0x08,					// ReportSize(8)
+		0x91, 0x02,					// Output(Variable)
+
 	0xc0,						// EndCollection
 };
 #define HID_REPORT_DESCRIPTOR_SIZE_BYTES					sizeof(HIDReportDescriptor)
@@ -180,8 +214,8 @@ static uint8_t USBD_HID_CfgDesc[USB_HID_CONFIGURATION_DESCRIPTOR_SIZE_BYTES] = {
 	DESCRIPTOR_TYPE_HID,														/* bDescriptorType */
 	UINT16(0x111),																/* bcdHID */
 	BCOUNTRY_CODE_UNSUPPORTED,													/* bCountryCode */
-	1,																			/* bNumDescriptors*/
-	DESCRIPTOR_TYPE_HID_REPORT,													/* bDescriptorType*/
+	2,																			/* bNumDescriptors */
+	DESCRIPTOR_TYPE_HID_REPORT,													/* bDescriptorType */
 	UINT16(HID_REPORT_DESCRIPTOR_SIZE_BYTES),									/* wItemLength */
 
 	// Endpoint Descriptor Interrupt IN
@@ -244,24 +278,24 @@ static uint8_t USBD_HID_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx) {
 static uint8_t USBD_HID_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req) {
 	uint16_t len = 0;
 	uint8_t *pbuf = NULL;
-	USBD_HID_HandleTypeDef *hhid = (USBD_HID_HandleTypeDef *) pdev->pClassData;
+	USBD_HID_HandleTypeDef *hhid = (USBD_HID_HandleTypeDef *)pdev->pClassData;
 	switch (req->bmRequest & USB_REQ_TYPE_MASK) {
 		case USB_REQ_TYPE_CLASS:
 			switch (req->bRequest) {
 				case HID_REQ_SET_PROTOCOL:
-					hhid->Protocol = (uint8_t) (req->wValue);
+					hhid->Protocol = (uint8_t)(req->wValue);
 					break;
 
 				case HID_REQ_GET_PROTOCOL:
-					USBD_CtlSendData(pdev, (uint8_t *) & hhid->Protocol, 1);
+					USBD_CtlSendData(pdev, (uint8_t *)&hhid->Protocol, 1);
 					break;
 
 				case HID_REQ_SET_IDLE:
-					hhid->IdleState = (uint8_t) (req->wValue >> 8);
+					hhid->IdleState = (uint8_t)(req->wValue >> 8);
 					break;
 
 				case HID_REQ_GET_IDLE:
-					USBD_CtlSendData(pdev, (uint8_t *) & hhid->IdleState, 1);
+					USBD_CtlSendData(pdev, (uint8_t *)&hhid->IdleState, 1);
 					break;
 
 				default:
@@ -280,18 +314,20 @@ static uint8_t USBD_HID_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *re
 						uint8_t hid_descriptor_length = USBD_HID_CfgDesc[USB_HID_DESCRIPTOR_OFFSET];
 						pbuf = USBD_HID_CfgDesc + USB_HID_DESCRIPTOR_OFFSET;
 						len = MIN(hid_descriptor_length, req->wLength);
+					} else {
+						printf("Unknown descriptor requested: 0x%x\n", req->wValue);
+						break;
 					}
 
 					USBD_CtlSendData(pdev, pbuf, len);
-
 					break;
 
 				case USB_REQ_GET_INTERFACE:
-					USBD_CtlSendData(pdev, (uint8_t *) & hhid->AltSetting, 1);
+					USBD_CtlSendData(pdev, (uint8_t *)&hhid->AltSetting, 1);
 					break;
 
 				case USB_REQ_SET_INTERFACE:
-					hhid->AltSetting = (uint8_t) (req->wValue);
+					hhid->AltSetting = (uint8_t)(req->wValue);
 					break;
 			}
 	}

@@ -61,5 +61,6 @@ void init_usb_late(void) {
  * stack) */
 void usb_submit_report(const struct hid_report_t *report) {
 	memcpy(&send_report, report, sizeof(struct hid_report_t));
+	send_report.report_id = 1;
 	USBD_HID_SendReport(&USBD_Device, &send_report);
 }

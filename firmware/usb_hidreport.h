@@ -131,6 +131,7 @@ struct dme_info_t {
 } __attribute__ ((packed));
 
 struct hid_report_t {
+	uint8_t report_id;
 	uint8_t seqno;
 	uint8_t radio_panel;
 	uint8_t com_divisions;
@@ -154,7 +155,7 @@ struct hid_set_generic_report_t {
 	uint8_t seqno;
 } __attribute__ ((packed));
 
-struct hid_set_report_01_t {
+struct hid_set_report_02_t {
 	uint8_t report_id;
 	uint8_t seqno;
 	uint8_t radio_panel;
@@ -168,9 +169,9 @@ struct hid_set_report_01_t {
 	uint16_t qnh;
 	bool navigate_by_gps;
 } __attribute__ ((packed));
-//sassert(sizeof(struct hid_set_report_01_t) == 5 + (2 * 4) + (2 * 6) + 3 + 2 + 10 + 2 + 1);
+//sassert(sizeof(struct hid_set_report_02_t) == 5 + (2 * 4) + (2 * 6) + 3 + 2 + 10 + 2 + 1);
 
-struct hid_set_report_02_t {
+struct hid_set_report_03_t {
 	uint8_t report_id;
 	uint8_t seqno;
 	struct {
@@ -189,8 +190,8 @@ struct hid_set_report_02_t {
 
 union hid_set_report_t {
 	struct hid_set_generic_report_t generic;
-	struct hid_set_report_01_t r01;
 	struct hid_set_report_02_t r02;
+	struct hid_set_report_03_t r03;
 };
 
 #endif

@@ -142,11 +142,11 @@ void FPConnection::put_data(const struct instrument_data_t &data, const struct a
 		return;
 	}
 
-	if (send_all || elements.fp_send_report_01()) {
-		logmsg(LLVL_INFO, "Sending report #1");
-		struct hid_set_report_01_t report;
+	if (send_all || elements.fp_send_report_02()) {
+		logmsg(LLVL_INFO, "Sending report #2");
+		struct hid_set_report_02_t report;
 		std::memset(&report, 0, sizeof(report));
-		report.report_id = 1;
+		report.report_id = 2;
 		report.radio_panel = data.external.radio_panel;
 		report.com_divisions = data.external.com_divisions;
 		report.nav_divisions = data.external.nav_divisions;
@@ -163,11 +163,11 @@ void FPConnection::put_data(const struct instrument_data_t &data, const struct a
 			_instrument_data.external = data.external;
 		}
 	}
-	if (send_all || elements.fp_send_report_02()) {
-		logmsg(LLVL_INFO, "Sending report #2");
-		struct hid_set_report_02_t report;
+	if (send_all || elements.fp_send_report_03()) {
+		logmsg(LLVL_INFO, "Sending report #3");
+		struct hid_set_report_03_t report;
 		std::memset(&report, 0, sizeof(report));
-		report.report_id = 2;
+		report.report_id = 3;
 		memcpy(&report.ident.nav1, &data.internal.ident.nav1, IDENT_LENGTH_BYTES);
 		memcpy(&report.ident.nav2, &data.internal.ident.nav2, IDENT_LENGTH_BYTES);
 		memcpy(&report.ident.adf, &data.internal.ident.adf, IDENT_LENGTH_BYTES);

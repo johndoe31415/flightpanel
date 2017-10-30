@@ -985,7 +985,7 @@ static bool copy_if_changed(void *dst, const void *src, const unsigned int lengt
 	return changed;
 }
 
-static void instruments_set_by_host_report01(const struct hid_set_report_01_t *report) {
+static void instruments_set_by_host_report02(const struct hid_set_report_02_t *report) {
 	led_state_changed = copy_if_changed(&instrument_state.external.radio_panel, &report->radio_panel, sizeof(instrument_state.external.radio_panel)) || led_state_changed;
 	bool divisions_changed = copy_if_changed(&instrument_state.external.com_divisions, &report->com_divisions, sizeof(instrument_state.external.com_divisions)) || led_state_changed;
 	divisions_changed = copy_if_changed(&instrument_state.external.nav_divisions, &report->nav_divisions, sizeof(instrument_state.external.nav_divisions)) || divisions_changed;
@@ -1022,7 +1022,7 @@ static void instruments_set_by_host_report01(const struct hid_set_report_01_t *r
 	instrument_state.external.seqno = report->seqno;
 }
 
-static void instruments_set_by_host_report02(const struct hid_set_report_02_t *report) {
+static void instruments_set_by_host_report03(const struct hid_set_report_03_t *report) {
 	display_data_changed[DISPLAY_NAV1] = copy_if_changed(&instrument_state.internal.ident.nav1, &report->ident.nav1, sizeof(instrument_state.internal.ident.nav1)) || display_data_changed[DISPLAY_NAV1];
 	display_data_changed[DISPLAY_NAV2] = copy_if_changed(&instrument_state.internal.ident.nav2, &report->ident.nav2, sizeof(instrument_state.internal.ident.nav2)) || display_data_changed[DISPLAY_NAV2];
 	display_data_changed[DISPLAY_ADF] = copy_if_changed(&instrument_state.internal.ident.adf, &report->ident.adf, sizeof(instrument_state.internal.ident.adf)) || display_data_changed[DISPLAY_ADF];
@@ -1034,10 +1034,10 @@ static void instruments_set_by_host_report02(const struct hid_set_report_02_t *r
 }
 
 void instruments_set_by_host(const union hid_set_report_t *report) {
-	if (report->generic.report_id == 0x01) {
-		instruments_set_by_host_report01(&report->r01);
-	} else if (report->generic.report_id == 0x02) {
+	if (report->generic.report_id == 0x02) {
 		instruments_set_by_host_report02(&report->r02);
+	} else if (report->generic.report_id == 0x03) {
+		instruments_set_by_host_report03(&report->r03);
 	} else {
 		printf("Unknown report 0x%02x received.\n", report->generic.report_id);
 	}

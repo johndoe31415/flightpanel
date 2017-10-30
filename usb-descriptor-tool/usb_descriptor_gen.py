@@ -100,9 +100,18 @@ class USBHidReportDescriptor(object):
 		self._add_item(Item.ReportSize, report_size)
 		return self
 
+	def add_report_id(self, report_id):
+		self._add_item(Item.ReportID, report_id)
+		return self
+
 	def add_input(self, input_flags, comment = None):
 		self._report_length += self._last_report_count * self._last_report_size
 		self._add_item(Item.Input, input_flags, comment = comment)
+		return self
+
+	def add_output(self, output_flags, comment = None):
+		self._report_length += self._last_report_count * self._last_report_size
+		self._add_item(Item.Output, output_flags, comment = comment)
 		return self
 
 	def add_logical_minimum(self, min_value):
@@ -136,6 +145,11 @@ class USBHidReportDescriptor(object):
 		self.add_report_size(1, round_up = False)
 		self.add_input(InputOutputFeatureFlags.Variable, comment)
 		return self
+
+	def add_output_bytes(self, count, comment = None):
+		self.add_report_count(count)
+		self.add_report_size(8)
+		self.add_output(InputOutputFeatureFlags.Variable, comment = comment)
 
 	def fp_add_as_button(self, text, button_count, start_button = 1):
 		padding_bits = 8 - (button_count % 8)
@@ -180,10 +194,13 @@ hid_report.add_usage_page(UsagePage.GenericDesktop)
 hid_report.add_usage(GenericDesktop.Joystick)
 collection = hid_report.add_collection(Collection.Application)
 
-
+collection.add_report_id(1)
 collection.fp_add_items([
 	("Sequence number", 1),
-	("Radio panel", 1),
+])
+collection.fp_add_as_button("Radio panel", 6)
+#	("Radio panel", 1),
+collection.fp_add_items([
 	("COM divisions", 1),
 	("NAV divisions", 1),
 	("TX radio ID", 1),
@@ -209,6 +226,16 @@ collection.fp_add_items([
 	("QNH", 2),
 	("Nav by GPS", 1),
 ])
+
+collection.add_report_id(2)
+collection.add_usage_page(UsagePage.GenericDesktop)
+collection.add_usage(GenericDesktop.Undefined)
+collection.add_output_bytes(42)
+
+collection.add_report_id(3)
+collection.add_usage_page(UsagePage.GenericDesktop)
+collection.add_usage(GenericDesktop.Undefined)
+collection.add_output_bytes(27)
 
 data = bytes(hid_report)
 print("// " + data.hex())

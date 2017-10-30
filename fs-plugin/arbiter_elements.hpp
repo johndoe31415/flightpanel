@@ -39,11 +39,11 @@ struct arbiter_elements_t {
 	bool ident_values;
 	bool dme_values;
 
-	bool fp_send_report_01() const {
+	bool fp_send_report_02() const {
 		return radio_panel || divisions || tx_radio_id || com1 || com2 || nav1 || nav2 || xpdr || adf || ap || qnh || navigate_by_gps;
 	}
 
-	bool fp_send_report_02() const {
+	bool fp_send_report_03() const {
 		return ident_values || dme_values;
 	}
 };

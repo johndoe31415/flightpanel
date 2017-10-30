@@ -24,19 +24,24 @@
 /*
  * Linux:
  *		gcc -Wall -I ../firmware -I hidapi -o hid-test hid-test.c -lhidapi-libusb && ./hid-test
+ *
+ * DOS:
+ *		i686-w64-mingw32-gcc -Wall -I ../firmware -I hidapi -o hid-test.exe hid-test.c -lhidapi -Lbuild/windows && ./hid-test.exe
  */
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <usb_hidreport.h>
 #include <hidapi/hidapi.h>
 
 #define USB_VID		0x0483
 #define USB_PID		0x572b
 
-int main(void) {
+int main(int argc, char **argv) {
 	struct hid_device_info *info = hid_enumerate(USB_VID, USB_PID);
 	if (!info) {
-		fprintf(stderr, "Enumeration failed.\n");
+		fprintf(stderr, "Enumeration failed. No such device VID:PID %04x:%04x\n", USB_VID, USB_PID);
 		return 1;
 	}
 
@@ -63,21 +68,44 @@ int main(void) {
 		if (bytes_read == sizeof(struct hid_report_t)) {
 			fprintf(stderr, "Read OBS1/2: %d %d\n", hid_report.nav1.obs, hid_report.nav2.obs);
 		} else {
-			fprintf(stderr, "Unexpected read: %d bytes read, %d expected.\n", bytes_read, sizeof(struct hid_report_t));
+			fprintf(stderr, "Unexpected read: %d bytes read, %d expected.\n", bytes_read, (int)sizeof(struct hid_report_t));
 		}
 	}
 
 	for (int i = 0; i < 50; i++) {
-		struct hid_set_report_01_t set_report;
+		struct hid_set_report_02_t set_report;
 		memset(&set_report, 0, sizeof(set_report));
-		set_report.report_id = 1;
+		set_report.report_id = 2;
 		set_report.nav1.obs = i;
 		set_report.nav2.obs = 100 + i;
 		fprintf(stderr, "Set OBS1/2: %d %d\n", set_report.nav1.obs, set_report.nav2.obs);
-		int bytes_written = hid_write(device, (uint8_t*)&set_report, sizeof(struct hid_set_report_01_t));
-		if (bytes_written != sizeof(struct hid_set_report_01_t)) {
-			fprintf(stderr, "Unexpected write: %d bytes written, %d expected.\n", bytes_written, sizeof(struct hid_set_report_01_t));
+		int bytes_written = hid_write(device, (uint8_t*)&set_report, sizeof(struct hid_set_report_02_t));
+		if (bytes_written != sizeof(struct hid_set_report_02_t)) {
+			fprintf(stderr, "Unexpected write: %d bytes written, %d expected.\n", bytes_written, (int)sizeof(struct hid_set_report_02_t));
 		}
+	}
+
+	if (argc == 2) {
+		int maxlen = atoi(argv[1]);
+		fprintf(stderr, "Brute forcing up to length of %d\n", maxlen);
+		uint8_t buffer[maxlen];
+		memset(buffer, 0, sizeof(buffer));
+
+		int failed = 0;
+		int success = 0;
+		for (int len = 0; len < sizeof(buffer); len++) {
+			for (int i = 0; i < 5; i++) {
+				buffer[0] = i;
+				int bytes_written = hid_write(device, buffer, len);
+				if (bytes_written != -1) {
+					fprintf(stderr, "Success! Wrote %d bytes (length %d) at report %d\n", bytes_written, len, i);
+					success++;
+				} else {
+					failed++;
+				}
+			}
+		}
+		fprintf(stderr, "%d failed transmissions, %d successful ones.\n", failed, success);
 	}
 
 	return 0;
