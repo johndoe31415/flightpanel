@@ -25,6 +25,7 @@
 #define __FREQUENCIES_H__
 
 #include <stdint.h>
+#include "usb_hidreport.h"
 
 struct com_nav_range_definition_t {
 	unsigned int base_frequency_khz;
@@ -32,11 +33,6 @@ struct com_nav_range_definition_t {
 	unsigned int division_value;
 	unsigned int subdivision_count;
 	const uint8_t *subdivisions;
-};
-
-enum com_nav_range_t {
-	COM_RANGE,
-	NAV_RANGE,
 };
 
 #ifdef __cplusplus

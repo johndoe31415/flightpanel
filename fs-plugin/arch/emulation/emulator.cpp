@@ -29,6 +29,7 @@
 #include <stddef.h>
 #include <unistd.h>
 #include <string.h>
+#include <usb_hidreport.h>
 #include "emulator.hpp"
 
 void EmulatedConnection::get_data(struct instrument_data_t *data) {
@@ -149,6 +150,8 @@ EmulatedConnection::EmulatedConnection() {
 	memset(&_instrument_data, 0, sizeof(_instrument_data));
 	randomize(&_instrument_data.internal);
 	randomize(&_instrument_data.external);
+	_instrument_data.external.com_divisions = COM_RANGE_25KHZ;
+	_instrument_data.external.nav_divisions = NAV_RANGE;
 	randomize(&_instrument_data.external.com1);
 	randomize(&_instrument_data.external.com2);
 	randomize(&_instrument_data.external.nav1);

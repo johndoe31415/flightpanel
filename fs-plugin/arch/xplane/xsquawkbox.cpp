@@ -200,7 +200,7 @@ void XSquawkBoxConnection::thread_action() {
 	_instrument_data.external.radio_panel |= XPLMGetDatai(_datarefs.dme.sound) ? RADIO_DME : 0;
 	_instrument_data.external.radio_panel |= XPLMGetDatai(_datarefs.adf.sound) ? RADIO_ADF : 0;
 
-	_instrument_data.external.com_divisions = COM_RANGE;
+	_instrument_data.external.com_divisions = COM_RANGE_5KHZ;
 	_instrument_data.external.nav_divisions = NAV_RANGE;
 
 	_instrument_data.external.com1.freq.active_index = frequency_khz_to_index((enum com_nav_range_t)_instrument_data.external.com_divisions, XPLMGetDatai(_datarefs.com1.frequency_active));

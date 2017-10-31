@@ -38,28 +38,28 @@
 static uint32_t get_instrument_frequency_khz(const struct instrument_state_t *istate, const enum display_t display) {
 	switch (display) {
 		case DISPLAY_COM1:
-			return frequency_index_to_khz(COM_RANGE, istate->external.com1.freq.active_index);
+			return frequency_index_to_khz(istate->external.com_divisions, istate->external.com1.freq.active_index);
 
 		case DISPLAY_COM1_STBY:
-			return frequency_index_to_khz(COM_RANGE, istate->external.com1.freq.standby_index);
+			return frequency_index_to_khz(istate->external.com_divisions, istate->external.com1.freq.standby_index);
 
 		case DISPLAY_COM2:
-			return frequency_index_to_khz(COM_RANGE, istate->external.com2.freq.active_index);
+			return frequency_index_to_khz(istate->external.com_divisions, istate->external.com2.freq.active_index);
 
 		case DISPLAY_COM2_STBY:
-			return frequency_index_to_khz(COM_RANGE, istate->external.com2.freq.standby_index);
+			return frequency_index_to_khz(istate->external.com_divisions, istate->external.com2.freq.standby_index);
 
 		case DISPLAY_NAV1:
-			return frequency_index_to_khz(NAV_RANGE, istate->external.nav1.freq.active_index);
+			return frequency_index_to_khz(istate->external.nav_divisions, istate->external.nav1.freq.active_index);
 
 		case DISPLAY_NAV1_STBY:
-			return frequency_index_to_khz(NAV_RANGE, istate->external.nav1.freq.standby_index);
+			return frequency_index_to_khz(istate->external.nav_divisions, istate->external.nav1.freq.standby_index);
 
 		case DISPLAY_NAV2:
-			return frequency_index_to_khz(NAV_RANGE, istate->external.nav2.freq.active_index);
+			return frequency_index_to_khz(istate->external.nav_divisions, istate->external.nav2.freq.active_index);
 
 		case DISPLAY_NAV2_STBY:
-			return frequency_index_to_khz(NAV_RANGE, istate->external.nav2.freq.standby_index);
+			return frequency_index_to_khz(istate->external.nav_divisions, istate->external.nav2.freq.standby_index);
 
 		default:
 			return 0;

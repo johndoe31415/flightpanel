@@ -26,12 +26,19 @@
 #include "debug.h"
 
 static const struct com_nav_range_definition_t frequency_definitions[] = {
-	[COM_RANGE] = {
+	[COM_RANGE_5KHZ] = {
 		.base_frequency_khz = 118000,
 		.division_count = 10 * 19,
 		.division_value = 100,
 		.subdivision_count = 16,
 		.subdivisions = (const uint8_t[]) { 0, 5, 10, 15, 25, 30, 35, 40, 50, 55, 60, 65, 75, 80, 85, 90 },
+	},
+	[COM_RANGE_25KHZ] = {
+		.base_frequency_khz = 118000,
+		.division_count = 40 * 19,
+		.division_value = 25,
+		.subdivision_count = 0,
+		.subdivisions = NULL,
 	},
 	[NAV_RANGE] = {
 		.base_frequency_khz = 108000,

@@ -31,6 +31,12 @@
 /* IDENT is zero-terminated, i.e., only 4 characters available */
 #define IDENT_LENGTH_BYTES			5
 
+enum com_nav_range_t {
+	COM_RANGE_5KHZ,
+	COM_RANGE_25KHZ,
+	NAV_RANGE,
+};
+
 enum ap_mode_t {
 	AP_STATE_ACTIVE = (1 << 0),
 	AP_STATE_BACKCOURSE = (1 << 1),

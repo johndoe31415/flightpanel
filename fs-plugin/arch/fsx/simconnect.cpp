@@ -70,7 +70,7 @@ static void simconnect_instrument_to_abstract(const struct simconnect_datatype_i
 	out->external.radio_panel |= in.dme_sound ? RADIO_DME : 0;
 	out->external.radio_panel |= in.adf_sound ? RADIO_ADF : 0;
 
-	out->external.com_divisions = COM_RANGE;
+	out->external.com_divisions = COM_RANGE_25KHZ;
 	out->external.nav_divisions = NAV_RANGE;
 	out->external.tx_radio_id = in.com1_tx ? 1 : 2;
 

@@ -27,6 +27,7 @@
 #include "configuration.h"
 #include "eeprom.h"
 #include "frequencies.h"
+#include "usb_hidreport.h"
 
 static const struct configuration default_configuration = {
 	.xpdr = {
@@ -36,7 +37,7 @@ static const struct configuration default_configuration = {
 	},
 	.instruments = {
 		.tx_radio_id = 1,
-		.com_frequency_divisions = COM_RANGE,
+		.com_frequency_divisions = COM_RANGE_25KHZ,
 		.nav_frequency_divisions = NAV_RANGE,
 		.nav_ident_inhibit_timeout = 3000,
 		.ap = {
