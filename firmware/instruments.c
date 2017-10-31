@@ -161,6 +161,7 @@ static struct rotary_encoder_with_button_t rotary_ap_hdg = {
 	},
 	.button = {
 		.threshold = 50,
+		.long_threshold = 700,
 		.deadtime = 50,
 	}
 };
@@ -726,9 +727,15 @@ static void handle_ap_inputs(void) {
 		led_state_changed = true;
 		display_data_changed[DISPLAY_AP] = true;
 	}
-	if (button_pressed(&rotary_ap_hdg.button)) {
-		invert_ap_state(AP_HEADING_ARMED, AP_HEADING_HOLD, AP_HORIZONTAL_MODES);
-		led_state_changed = true;
+	if (rotary_ap_hdg.button.lastpress != BUTTON_NOACTION) {
+		if (rotary_ap_hdg.button.lastpress == BUTTON_PRESS) {
+			invert_ap_state(AP_HEADING_ARMED, AP_HEADING_HOLD, AP_HORIZONTAL_MODES);
+			led_state_changed = true;
+		} else {
+			instrument_state.external.ap.heading = (instrument_state.external.ap.heading + 180) % 360;
+			rotary_setvalue(&rotary_ap_hdg.rotary, instrument_state.external.ap.heading);
+		}
+		rotary_ap_hdg.button.lastpress = BUTTON_NOACTION;
 		display_data_changed[DISPLAY_AP] = true;
 	}
 	if (button_pressed(&rotary_ap_ias.button)) {
