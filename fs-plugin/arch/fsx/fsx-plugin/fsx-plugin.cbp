@@ -59,6 +59,7 @@
 		<Unit filename="../../../fpconnection.hpp" />
 		<Unit filename="../../../fsconnection.cpp" />
 		<Unit filename="../../../fsconnection.hpp" />
+		<Unit filename="../../../globals.hpp" />
 		<Unit filename="../../../inttypes_emulation.h" />
 		<Unit filename="../../../logging.cpp" />
 		<Unit filename="../../../logging.hpp" />

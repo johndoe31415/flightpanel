@@ -133,12 +133,20 @@ void dump_instrument_data(FILE *f, const char *desc, const struct instrument_dat
 	fprintf(f, "\n");
 }
 
-void diff_instrument_data(FILE *f, const char *desc, const struct instrument_data_t &data1, const struct instrument_data_t &data2) {
+void diff_instrument_data(FILE *f, const char *desc, const struct instrument_data_t &data1, const struct instrument_data_t &data2, bool show_everything) {
 	int lineno = 0;
 	char buffer1[256], buffer2[256];
 	fprintf(f, "%s:\n", desc);
+	bool difference = false;
 	while (dump_instrument_data_line(lineno, buffer1, data1)) {
 		dump_instrument_data_line(lineno, buffer2, data2);
+		lineno++;
+
+		if ((!show_everything) && (!strcmp(buffer1, buffer2))) {
+			continue;
+		}
+
+		difference = true;
 		int len1 = strlen(buffer1);
 		int len2 = strlen(buffer2);
 		int min_len = len1 < len2 ? len1 : len2;
@@ -177,7 +185,9 @@ void diff_instrument_data(FILE *f, const char *desc, const struct instrument_dat
 		fprintf(f, "\x1b[0m");
 		fprintf(f, "%s", buffer2 + min_len);
 		fprintf(f, "\n");
-		lineno++;
+	}
+	if ((!show_everything) && (!difference)) {
+		fprintf(f, "No differences.\n");
 	}
 	fprintf(f, "\n");
 

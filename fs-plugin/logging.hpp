@@ -21,8 +21,10 @@
  *	Johannes Bauer <JohannesBauer@gmx.de>
 **/
 
-#ifndef __LOGGING_H__
-#define __LOGGING_H__
+#ifndef __LOGGING_HPP__
+#define __LOGGING_HPP__
+
+#include "thread.hpp"
 
 enum logtype_t {
 	LLVL_DEBUG,
@@ -33,6 +35,7 @@ enum logtype_t {
 };
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
+Lock& get_logging_lock();
 void logmsg(enum logtype_t llvl, const char *msg, ...);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 

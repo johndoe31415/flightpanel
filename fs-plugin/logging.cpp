@@ -1,4 +1,4 @@
-/**
+/*
  *	flightpanel - A Cortex-M4 based USB flight panel for flight simulators.
  *	Copyright (C) 2017-2017 Johannes Bauer
  *
@@ -28,7 +28,14 @@
 
 static class Lock logging_lock;
 
+Lock& get_logging_lock() {
+	return logging_lock;
+}
+
 void logmsg(enum logtype_t llvl, const char *msg, ...) {
+	if (llvl == LLVL_DEBUG) {
+		return;
+	}
 	LockGuard guard(logging_lock);
 
 	va_list args;

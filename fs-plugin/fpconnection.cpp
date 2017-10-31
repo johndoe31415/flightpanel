@@ -57,17 +57,17 @@ bool FPConnection::connect() {
 		return true;
 	}
 
-	logmsg(LLVL_INFO, "Trying to connect to flightpanel...");
+	logmsg(LLVL_DEBUG, "Trying to connect to flightpanel...");
 	struct hid_device_info *info = hid_enumerate(USB_VID, USB_PID);
 	if (!info) {
-		logmsg(LLVL_INFO, "Failed to hid_enumerate(): No such VID/PID %04x:%04x", USB_VID, USB_PID);
+		logmsg(LLVL_ERROR, "Failed to hid_enumerate(): No such VID/PID %04x:%04x", USB_VID, USB_PID);
 		return false;
 	}
 
 	struct hid_device_info *current = info;
 	while (current) {
 		if (current->serial_number == NULL) {
-			logmsg(LLVL_INFO, "Warning: No serial number provided, do you have rights to the node at %s?", current->path);
+			logmsg(LLVL_ERROR, "Warning: No serial number provided, do you have rights to the node at %s?", current->path);
 		}
 		logmsg(LLVL_INFO, "%04x:%04x: %ls : %ls, serial %ls", current->vendor_id, current->product_id, current->manufacturer_string, current->product_string, current->serial_number);
 		current = current->next;
@@ -77,7 +77,7 @@ bool FPConnection::connect() {
 	logmsg(LLVL_DEBUG, "hid_open() of %04x:%04x (serial %ls)", info->vendor_id, info->product_id, info->serial_number);
 	hid_free_enumeration(info);
 	if (!_device) {
-		logmsg(LLVL_INFO, "Failed to hid_open(). Is the flightpanel already claimed by another application?");
+		logmsg(LLVL_ERROR, "Failed to hid_open(). Is the flightpanel already claimed by another application?");
 		return false;
 	}
 	logmsg(LLVL_INFO, "Successfully connected to flightpanel.");
@@ -85,6 +85,7 @@ bool FPConnection::connect() {
 }
 
 void FPConnection::thread_action() {
+
 	if (!connect()) {
 		return;
 	}
@@ -105,10 +106,10 @@ void FPConnection::thread_action() {
 			_instrument_data.external = hid_report;
 			_data_fresh.set();
 		} else if (bytes_read == -1) {
-			logmsg(LLVL_INFO, "Flight panel diconnected (read -1 bytes): %s", hid_error(device));
+			logmsg(LLVL_ERROR, "Flight panel diconnected (read -1 bytes): %s", hid_error(device));
 			disconnect();
 		} else {
-			logmsg(LLVL_INFO, "Short read (%d bytes read, %" PRIsizet " bytes in structure), could not get full HID report.", bytes_read, sizeof(hid_report));
+			logmsg(LLVL_ERROR, "Short read (%d bytes read, %" PRIsizet " bytes in structure), could not get full HID report.", bytes_read, sizeof(hid_report));
 			disconnect();
 		}
 	}
@@ -122,7 +123,7 @@ void FPConnection::get_data(struct instrument_data_t *data) {
 template<typename T> bool FPConnection::send_report(T *report) {
 	hid_device *device;
 	{
-		LockGuard guard(_devicelock, "connect");
+		LockGuard guard(_devicelock, "flightpanel connect");
 		device = _device;
 		if (!device) {
 			return false;
@@ -131,8 +132,9 @@ template<typename T> bool FPConnection::send_report(T *report) {
 		report->seqno = _last_seqno;
 	}
 	int bytes_written = hid_write(device, (const uint8_t*)report, sizeof(*report));
-	if (bytes_written < sizeof(*report)) {
-		logmsg(LLVL_ERROR, "Sending HID report error: tried sending %" PRIsizet " bytes, but %d went through: %ls", sizeof(*report), bytes_written, hid_error(device));
+    const int expect_bytes_written = (int)sizeof(*report);
+	if (bytes_written < expect_bytes_written) {
+		logmsg(LLVL_ERROR, "Sending HID report error: tried sending %" PRIsizet " bytes, but %d went through: %ls", expect_bytes_written, bytes_written, hid_error(device));
 		disconnect();
 		return false;
 	}
@@ -145,7 +147,7 @@ void FPConnection::put_data(const struct instrument_data_t &data, const struct a
 	}
 
 	if (send_all || elements.fp_send_report_02()) {
-		logmsg(LLVL_INFO, "Sending report #2");
+		logmsg(LLVL_DEBUG, "Flightpanel sending report #2");
 		struct hid_set_report_02_t report;
 		std::memset(&report, 0, sizeof(report));
 		report.report_id = 2;
@@ -166,7 +168,7 @@ void FPConnection::put_data(const struct instrument_data_t &data, const struct a
 		}
 	}
 	if (send_all || elements.fp_send_report_03()) {
-		logmsg(LLVL_INFO, "Sending report #3");
+		logmsg(LLVL_DEBUG, "Flightpanel sending report #3");
 		struct hid_set_report_03_t report;
 		std::memset(&report, 0, sizeof(report));
 		report.report_id = 3;
@@ -188,7 +190,7 @@ void FPConnection::put_data(const struct instrument_data_t &data, const struct a
 
 void FPConnection::wait_for_ack() {
 	while (_instrument_data.external.seqno != _last_seqno) {
-		//logmsg(LLVL_INFO, "Waiting for FP seqno %x (currently %x)...", _last_seqno, _instrument_data.external.seqno);
+		//logmsg(LLVL_DEBUG, "Waiting for FP seqno %x (currently %x)...", _last_seqno, _instrument_data.external.seqno);
 		sleep_millis(10);
 	}
 }

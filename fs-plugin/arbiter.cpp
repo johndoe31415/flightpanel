@@ -69,6 +69,8 @@ struct arbiter_result_t Arbiter::arbitrate(const struct instrument_data_t &new_f
 	struct instrument_data_t authoritative_data;
 	memset(&authoritative_data, 0, sizeof(authoritative_data));
 
+	logmsg(LLVL_DEBUG, "Starting arbitratation");
+
 	arbitrate_value(&result.fs.radio_panel, &result.fp.radio_panel, _last_authoritative_data.external.radio_panel, new_fs_data.external.radio_panel, new_fp_data.external.radio_panel, &authoritative_data.external.radio_panel);
 	arbitrate_value(&result.fs.divisions, &result.fp.divisions, _last_authoritative_data.external.com_divisions, new_fs_data.external.com_divisions, new_fp_data.external.com_divisions, &authoritative_data.external.com_divisions);
 	arbitrate_value(&result.fs.divisions, &result.fp.divisions, _last_authoritative_data.external.nav_divisions, new_fs_data.external.nav_divisions, new_fp_data.external.nav_divisions, &authoritative_data.external.nav_divisions);
@@ -124,21 +126,25 @@ struct arbiter_result_t Arbiter::arbitrate(const struct instrument_data_t &new_f
 
 	bool any_change = memcmp(&authoritative_data, &_last_authoritative_data, sizeof(authoritative_data))
 		|| memcmp(&new_fs_data, &_last_authoritative_data, sizeof(authoritative_data));
+
 	if (any_change) {
-		diff_instrument_data(stderr, "Flightpanel last / current", _last_authoritative_data, new_fp_data);
-		diff_instrument_data(stderr, "Flightsim last / current", _last_authoritative_data, new_fs_data);
+		LockGuard guard(get_logging_lock());
+		diff_instrument_data(stderr, "Flightpanel last / current", _last_authoritative_data, new_fp_data, false);
+		diff_instrument_data(stderr, "Flightsim last / current", _last_authoritative_data, new_fs_data, false);
 		dump_instrument_data(stderr, "Authoritative", authoritative_data);
-		fprintf(stderr, "======================================================================\n");
+		fprintf(stderr, "==================================================================================================================================================================\n");
+		fflush(stderr);
 	}
 
 	_last_authoritative_data = authoritative_data;
+
 	return result;
 }
 
 void Arbiter::thread_action() {
 	if (!_fp_connection->connected()) {
 		/* Do not arbitrate if no FP connection present! */
-		//logmsg(LLVL_INFO, "Flightpanel not connected.");
+		logmsg(LLVL_INFO, "Flightpanel not connected.");
 		_first_sync = true;
 		return;
 	}
@@ -147,10 +153,12 @@ void Arbiter::thread_action() {
 		logmsg(LLVL_INFO, "FS is not fresh, timed out.");
 		return;
 	}
+
 	if (!_fp_connection->data_fresh().wait()) {
 		logmsg(LLVL_INFO, "FP is not fresh, timed out.");
 		return;
 	}
+
 
 	struct instrument_data_t new_fp_data;
 	_fp_connection->get_data(&new_fp_data);

@@ -96,7 +96,7 @@ class FSConnection {
 
 /*************** AUTO GENERATED SECTION FOLLOWS ***************/
 void dump_instrument_data(FILE *f, const char *desc, const struct instrument_data_t &data);
-void diff_instrument_data(FILE *f, const char *desc, const struct instrument_data_t &data1, const struct instrument_data_t &data2);
+void diff_instrument_data(FILE *f, const char *desc, const struct instrument_data_t &data1, const struct instrument_data_t &data2, bool show_everything);
 /***************  AUTO GENERATED SECTION ENDS   ***************/
 
 #endif

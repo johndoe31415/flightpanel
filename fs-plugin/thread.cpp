@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "thread.hpp"
+#include "logging.hpp"
 
 template<typename T> void *thread_trampoline(void *ctx) {
 	T* t = (T*)ctx;
@@ -51,6 +52,7 @@ void Thread::thread_function() {
 }
 
 void Thread::stop() {
+	logmsg(LLVL_INFO, "Thread stopped.");
 	if (_thread_running) {
 		_thread_running = false;
 		pthread_join(_thread, NULL);
