@@ -40,6 +40,8 @@ void simconnect_datadefs_register_instruments(void *hSimConnect, int group_id) {
 	SimConnect_AddToDataDefinition(hSimConnect, group_id, "ADF CARD", "Degrees", SIMCONNECT_DATATYPE_FLOAT64);
 	SimConnect_AddToDataDefinition(hSimConnect, group_id, "NAV DMESPEED:1", "Knots", SIMCONNECT_DATATYPE_FLOAT64);
 	SimConnect_AddToDataDefinition(hSimConnect, group_id, "NAV DME:1", "Nautical miles", SIMCONNECT_DATATYPE_FLOAT64);
+	SimConnect_AddToDataDefinition(hSimConnect, group_id, "NAV DMESPEED:2", "Knots", SIMCONNECT_DATATYPE_FLOAT64);
+	SimConnect_AddToDataDefinition(hSimConnect, group_id, "NAV DME:2", "Nautical miles", SIMCONNECT_DATATYPE_FLOAT64);
 	SimConnect_AddToDataDefinition(hSimConnect, group_id, "AUTOPILOT HEADING LOCK DIR", "Degrees", SIMCONNECT_DATATYPE_FLOAT64);
 	SimConnect_AddToDataDefinition(hSimConnect, group_id, "AUTOPILOT ALTITUDE LOCK VAR", "Feet", SIMCONNECT_DATATYPE_FLOAT64);
 	SimConnect_AddToDataDefinition(hSimConnect, group_id, "AUTOPILOT VERTICAL HOLD VAR", "Feet/minute", SIMCONNECT_DATATYPE_FLOAT64);

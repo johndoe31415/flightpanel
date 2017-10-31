@@ -106,11 +106,11 @@ def read_datadefs(filename):
 events = read_events("used_events.txt")
 datadefs = read_datadefs("used_datadefs.txt")
 lookup = mako.lookup.TemplateLookup([ "." ], strict_undefined = True)
-with open("../simconnect-events.c", "w") as f:
+with open("../../arch/fsx/simconnect-events.c", "w") as f:
 	f.write(lookup.get_template("template_enum.c").render(events = events))
-with open("../simconnect-events.h", "w") as f:
+with open("../../arch/fsx/simconnect-events.h", "w") as f:
 	f.write(lookup.get_template("template_enum.h").render(events = events))
-with open("../simconnect-datadefs.cpp", "w") as f:
+with open("../../arch/fsx/simconnect-datadefs.cpp", "w") as f:
 	f.write(lookup.get_template("template_datadefs.cpp").render(datadefs = datadefs))
-with open("../simconnect-datadefs.hpp", "w") as f:
+with open("../../arch/fsx/simconnect-datadefs.hpp", "w") as f:
 	f.write(lookup.get_template("template_datadefs.hpp").render(datadefs = datadefs))

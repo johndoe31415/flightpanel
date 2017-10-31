@@ -73,6 +73,7 @@ static void simconnect_instrument_to_abstract(const struct simconnect_datatype_i
 	out->external.com_divisions = COM_RANGE_25KHZ;
 	out->external.nav_divisions = NAV_RANGE;
 	out->external.tx_radio_id = in.com1_tx ? 1 : 2;
+	out->external.dme_nav_id = in.dme_selected;
 
 	out->external.com1.freq.active_index = frequency_khz_to_index((enum com_nav_range_t)out->external.com_divisions, frequency_bcd32_to_khz(in.com1_freq_active));
 	out->external.com1.freq.standby_index = frequency_khz_to_index((enum com_nav_range_t)out->external.com_divisions, frequency_bcd32_to_khz(in.com1_freq_standby));
@@ -116,10 +117,19 @@ static void simconnect_instrument_to_abstract(const struct simconnect_datatype_i
 //	out->internal.dme.nav_id = in.dme_selected;
 
 
-	out->internal.dme.available = in.dme_speed >= 0;
+	double dme_speed, dme_distance;
+	if (in.dme_selected == 1) {
+		dme_speed = in.dme1_speed;
+		dme_distance = in.dme1_distance;
+	} else {
+		dme_speed = in.dme2_speed;
+		dme_distance = in.dme2_distance;
+	}
+
+	out->internal.dme.available = dme_speed >= 0;
 	if (out->internal.dme.available) {
-		out->internal.dme.distance_tenth_nm = round(in.dme_distance * 10);
-		out->internal.dme.velocity = round(in.dme_speed);
+		out->internal.dme.distance_tenth_nm = round(dme_distance * 10);
+		out->internal.dme.velocity = round(dme_speed);
 	}
 
 	memcpy(out->internal.ident.nav1, in.nav1_ident, IDENT_LENGTH_BYTES);
@@ -135,27 +145,22 @@ static void simconnect_instrument_to_abstract(const struct simconnect_datatype_i
 
 void SimConnectConnection::put_data(const struct instrument_data_t &data, const struct arbiter_elements_t &elements) {
 	if (elements.radio_panel || elements.tx_radio_id) {
-
-		if (data.external.radio_panel & (RADIO_COM1 | RADIO_COM2)) {
-			/* Some COM is active */
+		SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_COM_RECEIVE_ALL_SET, ((data.external.radio_panel & (RADIO_COM1 | RADIO_COM2)) == (RADIO_COM1 | RADIO_COM2)) ? 1 : 0, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
+		if (data.external.tx_radio_id == 2) {
 			SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_COM1_TRANSMIT_SELECT, (data.external.tx_radio_id == 1) ? 1 : 0, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
 			SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_COM2_TRANSMIT_SELECT, (data.external.tx_radio_id == 2) ? 1 : 0, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
-
-			/* Both radios active for listening */
-			SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_COM_RECEIVE_ALL_SET, ((data.external.radio_panel & (RADIO_COM1 | RADIO_COM2)) == (RADIO_COM1 | RADIO_COM2)) ? 1 : 0, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
-
 		} else {
-			/* All radios off */
-			SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_COM1_TRANSMIT_SELECT, 0, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
-			SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_COM2_TRANSMIT_SELECT, 0, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
-			SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_COM_RECEIVE_ALL_SET, 0, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
+			SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_COM2_TRANSMIT_SELECT, (data.external.tx_radio_id == 2) ? 1 : 0, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
+			SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_COM1_TRANSMIT_SELECT, (data.external.tx_radio_id == 1) ? 1 : 0, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
 		}
 
 		SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_RADIO_VOR1_IDENT_SET, (data.external.radio_panel & RADIO_NAV1) ? 1 : 0, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
 		SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_RADIO_VOR2_IDENT_SET, (data.external.radio_panel & RADIO_NAV2) ? 1 : 0, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
 		SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_RADIO_ADF_IDENT_SET, (data.external.radio_panel & RADIO_ADF) ? 1 : 0, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
 		SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_RADIO_SELECTED_DME_IDENT_SET, (data.external.radio_panel & RADIO_DME) ? 1 : 0, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
-
+	}
+	if (elements.dme_nav_id) {
+		SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_DME_SELECT, data.external.dme_nav_id, SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
 	}
 	if (elements.com1) {
 		SimConnect_TransmitClientEvent(_simconnect_handle, SIMCONNECT_OBJECT_ID_USER, EVENT_COM_RADIO_SET, decimal_to_bcd(frequency_index_to_khz((enum com_nav_range_t)data.external.com_divisions, data.external.com1.freq.active_index) / 10), SIMCONNECT_GROUP_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);

@@ -5,14 +5,14 @@ information	TITLE	String256	title
 
 ################################################################
 
-instruments	COM ACTIVE FREQUENCY:1	Frequency BCD32	vhf1_freq_active
-instruments	COM STANDBY FREQUENCY:1	Frequency BCD32	vhf1_freq_standby
-instruments	COM TRANSMIT:1	Bool	vhf1_tx
+instruments	COM ACTIVE FREQUENCY:1	Frequency BCD32	com1_freq_active
+instruments	COM STANDBY FREQUENCY:1	Frequency BCD32	com1_freq_standby
+instruments	COM TRANSMIT:1	Bool	com1_tx
 
-instruments	COM ACTIVE FREQUENCY:2	Frequency BCD32	vhf2_freq_active
-instruments	COM STANDBY FREQUENCY:2	Frequency BCD32	vhf2_freq_standby
-instruments	COM TRANSMIT:2	Bool	vhf2_tx
-instruments	COM RECEIVE ALL	Bool	vhf_all_rx
+instruments	COM ACTIVE FREQUENCY:2	Frequency BCD32	com2_freq_active
+instruments	COM STANDBY FREQUENCY:2	Frequency BCD32	com2_freq_standby
+instruments	COM TRANSMIT:2	Bool	com2_tx
+instruments	COM RECEIVE ALL	Bool	com_all_rx
 
 instruments	NAV ACTIVE FREQUENCY:1	Frequency BCD32	nav1_freq_active
 instruments	NAV STANDBY FREQUENCY:1	Frequency BCD32	nav1_freq_standby
@@ -32,8 +32,10 @@ instruments	ADF SOUND:1	Bool	adf_sound
 instruments	ADF IDENT:1	ICAO code	adf_ident
 instruments	ADF CARD	Degrees	adf_compass_rose_deg
 
-instruments	NAV DMESPEED:1	Knots	dme_speed
-instruments	NAV DME:1	Nautical miles	dme_distance
+instruments	NAV DMESPEED:1	Knots	dme1_speed
+instruments	NAV DME:1	Nautical miles	dme1_distance
+instruments	NAV DMESPEED:2	Knots	dme2_speed
+instruments	NAV DME:2	Nautical miles	dme2_distance
 instruments	DME SOUND:1	Bool	dme_sound
 instruments	SELECTED DME	Number	dme_selected
 instruments	NAV HAS NAV:1	Bool	dme_nav1

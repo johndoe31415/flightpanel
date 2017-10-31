@@ -39,8 +39,10 @@ struct simconnect_datatype_instruments_t {
 	double nav2_obs_deg;
 	char adf_ident[8];
 	double adf_compass_rose_deg;
-	double dme_speed;
-	double dme_distance;
+	double dme1_speed;
+	double dme1_distance;
+	double dme2_speed;
+	double dme2_distance;
 	double ap_heading_deg;
 	double ap_altitude_ft;
 	double ap_climbrate_ft_per_min;
@@ -77,8 +79,8 @@ struct simconnect_datatype_instruments_t {
 	int32_t ap_ias_hold;
 	int32_t gps_drives_nav;
 } __attribute__((packed));
-static_assert(sizeof(struct simconnect_datatype_instruments_t) == 228, "struct simconnect_datatype_instruments_t incorrectly packed.");
-#define SIMCONNECT_DATATYPE_INSTRUMENTS_DATUM_COUNT			43
+static_assert(sizeof(struct simconnect_datatype_instruments_t) == 244, "struct simconnect_datatype_instruments_t incorrectly packed.");
+#define SIMCONNECT_DATATYPE_INSTRUMENTS_DATUM_COUNT			45
 
 
 void simconnect_datadefs_register_information(void *hSimConnect, int group_id);
