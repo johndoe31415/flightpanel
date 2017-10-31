@@ -227,7 +227,7 @@ collection.fp_add_items([
 collection.add_report_id(2)
 collection.add_usage_page(UsagePage.GenericDesktop)
 collection.add_usage(GenericDesktop.Undefined)
-collection.add_output_bytes(42)
+collection.add_output_bytes(43)
 
 collection.add_report_id(3)
 collection.add_usage_page(UsagePage.GenericDesktop)

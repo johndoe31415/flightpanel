@@ -151,7 +151,7 @@ static uint8_t HIDReportDescriptor[] = {
 		0x85, 0x02,					// ReportID(2)
 		0x05, 0x01,					// UsagePage(GenericDesktop)
 		0x09, 0x00,					// Usage(Undefined)
-		0x95, 0x2a,					// ReportCount(42)
+		0x95, 0x2b,					// ReportCount(43)
 		0x75, 0x08,					// ReportSize(8)
 		0x91, 0x02,					// Output(Variable)
 

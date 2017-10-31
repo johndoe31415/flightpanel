@@ -45,7 +45,7 @@ static int rand_value(int maxvalue) {
 }
 
 static int rand_value(int minvalue, int maxvalue) {
-	return rand_value(maxvalue - minvalue) + minvalue;
+	return rand_value(maxvalue - minvalue + 1) + minvalue;
 }
 
 static double rand_double(double scalar) {
@@ -152,6 +152,7 @@ EmulatedConnection::EmulatedConnection() {
 	randomize(&_instrument_data.external);
 	_instrument_data.external.com_divisions = COM_RANGE_25KHZ;
 	_instrument_data.external.nav_divisions = NAV_RANGE;
+	_instrument_data.external.tx_radio_id = rand_value(1, 2);
 	randomize(&_instrument_data.external.com1);
 	randomize(&_instrument_data.external.com2);
 	randomize(&_instrument_data.external.nav1);

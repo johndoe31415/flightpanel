@@ -989,10 +989,15 @@ static void instruments_set_by_host_report02(const struct hid_set_report_02_t *r
 	led_state_changed = copy_if_changed(&instrument_state.external.radio_panel, &report->radio_panel, sizeof(instrument_state.external.radio_panel)) || led_state_changed;
 	bool divisions_changed = copy_if_changed(&instrument_state.external.com_divisions, &report->com_divisions, sizeof(instrument_state.external.com_divisions)) || led_state_changed;
 	divisions_changed = copy_if_changed(&instrument_state.external.nav_divisions, &report->nav_divisions, sizeof(instrument_state.external.nav_divisions)) || divisions_changed;
-	display_data_changed[DISPLAY_COM1] = copy_if_changed(&instrument_state.external.com1.freq.active_index, &report->com1.freq.active_index, sizeof(instrument_state.external.com1.freq.active_index)) || display_data_changed[DISPLAY_COM1] || divisions_changed;
+	bool active_radio_changed = false;
+	if ((report->tx_radio_id == 1) || (report->tx_radio_id == 2)) {
+		active_radio_changed = copy_if_changed(&instrument_state.external.tx_radio_id, &report->tx_radio_id, sizeof(instrument_state.external.tx_radio_id));
+	}
+	display_data_changed[DISPLAY_COM1] = copy_if_changed(&instrument_state.external.com1.freq.active_index, &report->com1.freq.active_index, sizeof(instrument_state.external.com1.freq.active_index)) || display_data_changed[DISPLAY_COM1] || divisions_changed || active_radio_changed;
 	display_data_changed[DISPLAY_COM1_STBY] = copy_if_changed(&instrument_state.external.com1.freq.standby_index, &report->com1.freq.standby_index, sizeof(instrument_state.external.com1.freq.standby_index)) || display_data_changed[DISPLAY_COM1_STBY] || divisions_changed;
-	display_data_changed[DISPLAY_COM2] = copy_if_changed(&instrument_state.external.com2.freq.active_index, &report->com2.freq.active_index, sizeof(instrument_state.external.com2.freq.active_index)) || display_data_changed[DISPLAY_COM2] || divisions_changed;
+	display_data_changed[DISPLAY_COM2] = copy_if_changed(&instrument_state.external.com2.freq.active_index, &report->com2.freq.active_index, sizeof(instrument_state.external.com2.freq.active_index)) || display_data_changed[DISPLAY_COM2] || divisions_changed || active_radio_changed;
 	display_data_changed[DISPLAY_COM2_STBY] = copy_if_changed(&instrument_state.external.com2.freq.standby_index, &report->com2.freq.standby_index, sizeof(instrument_state.external.com2.freq.standby_index)) || display_data_changed[DISPLAY_COM2_STBY] || divisions_changed;
+
 	display_data_changed[DISPLAY_NAV1] = copy_if_changed(&instrument_state.external.nav1.freq.active_index, &report->nav1.freq.active_index, sizeof(instrument_state.external.nav1.freq.active_index)) || display_data_changed[DISPLAY_NAV1] || divisions_changed;
 	display_data_changed[DISPLAY_NAV1_STBY] = copy_if_changed(&instrument_state.external.nav1.freq.standby_index, &report->nav1.freq.standby_index, sizeof(instrument_state.external.nav1.freq.standby_index)) || display_data_changed[DISPLAY_NAV1_STBY] || divisions_changed;
 	display_data_changed[DISPLAY_NAV1_STBY] = copy_if_changed(&instrument_state.external.nav1.obs, &report->nav1.obs, sizeof(instrument_state.external.nav1.obs)) || display_data_changed[DISPLAY_NAV1_STBY] || divisions_changed;
