@@ -909,6 +909,7 @@ static void handle_switches(void) {
 	instrument_state.external.flip_switches = new_state;
 	if (changed_switches & SWITCH_MASTER) {
 		/* MASTER flip switch has been updated. */
+		unblank();
 		update_leds();
 		for (int i = 0; i < DISPLAY_COUNT; i++) {
 			display_data_changed[i] = true;
