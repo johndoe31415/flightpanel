@@ -201,6 +201,7 @@ collection.fp_add_items([
 	("COM divisions", 1),
 	("NAV divisions", 1),
 	("TX radio ID", 1),
+	("DME nav ID", 1),
 	("COM1 frequency active index", 2),
 	("COM1 frequency standby index", 2),
 	("COM2 frequency active index", 2),
@@ -227,7 +228,7 @@ collection.fp_add_items([
 collection.add_report_id(2)
 collection.add_usage_page(UsagePage.GenericDesktop)
 collection.add_usage(GenericDesktop.Undefined)
-collection.add_output_bytes(43)
+collection.add_output_bytes(44)
 
 collection.add_report_id(3)
 collection.add_usage_page(UsagePage.GenericDesktop)

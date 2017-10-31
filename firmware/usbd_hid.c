@@ -79,9 +79,10 @@ static uint8_t HIDReportDescriptor[] = {
 		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x09, 0xbc,					// Usage(FlightCommunication)
+		0x09, 0xbc,					// Usage(FlightCommunication)
 		0x15, 0x00,					// LogicalMinimum(0)
 		0x25, 0xff,					// LogicalMaximum(255)
-		0x95, 0x05,					// ReportCount(5)
+		0x95, 0x06,					// ReportCount(6)
 		0x75, 0x08,					// ReportSize(8)
 		0x81, 0x82,					// Input(Variable, Volatile)
 
@@ -151,7 +152,7 @@ static uint8_t HIDReportDescriptor[] = {
 		0x85, 0x02,					// ReportID(2)
 		0x05, 0x01,					// UsagePage(GenericDesktop)
 		0x09, 0x00,					// Usage(Undefined)
-		0x95, 0x2b,					// ReportCount(43)
+		0x95, 0x2c,					// ReportCount(44)
 		0x75, 0x08,					// ReportSize(8)
 		0x91, 0x02,					// Output(Variable)
 
@@ -161,6 +162,7 @@ static uint8_t HIDReportDescriptor[] = {
 		0x95, 0x1b,					// ReportCount(27)
 		0x75, 0x08,					// ReportSize(8)
 		0x91, 0x02,					// Output(Variable)
+
 	0xc0,						// EndCollection
 };
 #define HID_REPORT_DESCRIPTOR_SIZE_BYTES					sizeof(HIDReportDescriptor)

@@ -28,6 +28,7 @@ struct arbiter_elements_t {
 	bool radio_panel;
 	bool divisions;
 	bool tx_radio_id;
+	bool dme_nav_id;
 	bool com1, com2;
 	bool nav1, nav2;
 	bool xpdr;
@@ -40,7 +41,7 @@ struct arbiter_elements_t {
 	bool dme_values;
 
 	bool fp_send_report_02() const {
-		return radio_panel || divisions || tx_radio_id || com1 || com2 || nav1 || nav2 || xpdr || adf || ap || qnh || navigate_by_gps;
+		return radio_panel || divisions || tx_radio_id || dme_nav_id || com1 || com2 || nav1 || nav2 || xpdr || adf || ap || qnh || navigate_by_gps;
 	}
 
 	bool fp_send_report_03() const {

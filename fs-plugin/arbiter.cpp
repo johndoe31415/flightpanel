@@ -75,6 +75,7 @@ struct arbiter_result_t Arbiter::arbitrate(const struct instrument_data_t &new_f
 	arbitrate_value(&result.fs.divisions, &result.fp.divisions, _last_authoritative_data.external.com_divisions, new_fs_data.external.com_divisions, new_fp_data.external.com_divisions, &authoritative_data.external.com_divisions);
 	arbitrate_value(&result.fs.divisions, &result.fp.divisions, _last_authoritative_data.external.nav_divisions, new_fs_data.external.nav_divisions, new_fp_data.external.nav_divisions, &authoritative_data.external.nav_divisions);
 	arbitrate_value(&result.fs.tx_radio_id, &result.fp.tx_radio_id, _last_authoritative_data.external.tx_radio_id, new_fs_data.external.tx_radio_id, new_fp_data.external.tx_radio_id, &authoritative_data.external.tx_radio_id);
+	arbitrate_value(&result.fs.dme_nav_id, &result.fp.dme_nav_id, _last_authoritative_data.external.dme_nav_id, new_fs_data.external.dme_nav_id, new_fp_data.external.dme_nav_id, &authoritative_data.external.dme_nav_id);
 	arbitrate_value(&result.fs.com1, &result.fp.com1, _last_authoritative_data.external.com1, new_fs_data.external.com1, new_fp_data.external.com1, &authoritative_data.external.com1);
 	arbitrate_value(&result.fs.com2, &result.fp.com2, _last_authoritative_data.external.com2, new_fs_data.external.com2, new_fp_data.external.com2, &authoritative_data.external.com2);
 	arbitrate_value(&result.fs.nav1, &result.fp.nav1, _last_authoritative_data.external.nav1, new_fs_data.external.nav1, new_fp_data.external.nav1, &authoritative_data.external.nav1);

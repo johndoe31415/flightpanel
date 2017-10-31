@@ -155,6 +155,7 @@ void FPConnection::put_data(const struct instrument_data_t &data, const struct a
 		report.com_divisions = data.external.com_divisions;
 		report.nav_divisions = data.external.nav_divisions;
 		report.tx_radio_id = data.external.tx_radio_id;
+		report.dme_nav_id = data.external.dme_nav_id;
 		report.com1 = data.external.com1;
 		report.com2 = data.external.com2;
 		report.nav1 = data.external.nav1;

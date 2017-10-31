@@ -58,7 +58,7 @@ static bool dump_instrument_data_line(int line, char buffer[256], const struct i
 			break;
 
 		case 4:
-			buf += sprintf(buf, "DME %-3s dist %5.1f nm, speed %3d kt", data.internal.dme.available ? "yes" : "no", (double)data.internal.dme.distance_tenth_nm / 10, data.internal.dme.velocity);
+			buf += sprintf(buf, "DME %-3s (NAV%d) dist %5.1f nm, speed %3d kt", data.internal.dme.available ? "yes" : "no", data.external.dme_nav_id, (double)data.internal.dme.distance_tenth_nm / 10, data.internal.dme.velocity);
 			break;
 
 		case 5:
@@ -66,9 +66,10 @@ static bool dump_instrument_data_line(int line, char buffer[256], const struct i
 			break;
 
 		case 6:
-			buf += sprintf(buf, "Radios: %1s%4s  %1s%4s  Audio: %4s %4s %3s %3s",
-					(data.external.tx_radio_id == 1) ? ">" : "", (data.external.radio_panel & RADIO_COM1) ? "COM1" : "",
-					(data.external.tx_radio_id == 2) ? ">" : "", (data.external.radio_panel & RADIO_COM2) ? "COM2" : "",
+			buf += sprintf(buf, "Radios: %4s %4s (TX %d)  Audio: %4s %4s %3s %3s",
+					(data.external.radio_panel & RADIO_COM1) ? "COM1" : "",
+					(data.external.radio_panel & RADIO_COM2) ? "COM2" : "",
+					data.external.tx_radio_id,
 					(data.external.radio_panel & RADIO_NAV1) ? "NAV1" : "",
 					(data.external.radio_panel & RADIO_NAV2) ? "NAV2" : "",
 					(data.external.radio_panel & RADIO_DME) ? "DME" : "",

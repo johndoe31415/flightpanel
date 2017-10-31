@@ -143,6 +143,7 @@ struct hid_report_t {
 	uint8_t com_divisions;
 	uint8_t nav_divisions;
 	uint8_t tx_radio_id;
+	uint8_t dme_nav_id;
 	struct com_state_t com1, com2;
 	struct nav_state_t nav1, nav2;
 	struct xpdr_state_t xpdr;
@@ -168,6 +169,7 @@ struct hid_set_report_02_t {
 	uint8_t com_divisions;
 	uint8_t nav_divisions;
 	uint8_t tx_radio_id;
+	uint8_t dme_nav_id;
 	struct com_state_t com1, com2;
 	struct nav_state_t nav1, nav2;
 	struct xpdr_state_t xpdr;

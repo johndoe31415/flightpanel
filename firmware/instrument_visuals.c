@@ -255,9 +255,17 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 					if (!istate->internal.ident.nav1_ident_inhibit_timeout) {
 						ident = istate->internal.ident.nav1;
 					}
+				} else if (display == DISPLAY_NAV1_STBY) {
+					if (istate->external.dme_nav_id == 1) {
+						tx_dme = "DME";
+					}
 				} else if (display == DISPLAY_NAV2) {
 					if (!istate->internal.ident.nav2_ident_inhibit_timeout) {
 						ident = istate->internal.ident.nav2;
+					}
+				} else if (display == DISPLAY_NAV2_STBY) {
+					if (istate->external.dme_nav_id == 2) {
+						tx_dme = "DME";
 					}
 				} else if (display == DISPLAY_COM1) {
 					if (istate->external.tx_radio_id == 1) {

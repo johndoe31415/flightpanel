@@ -625,7 +625,7 @@ static void handle_radiopanel_inputs(void) {
 			instrument_state.external.radio_panel ^= RADIO_COM1;
 		} else {
 			/* Long press */
-			instrument_state.external.tx_radio_id = (instrument_state.external.tx_radio_id == 1) ? 0 : 1;
+			instrument_state.external.tx_radio_id = 1;
 			display_data_changed[DISPLAY_COM1] = true;
 			display_data_changed[DISPLAY_COM2] = true;
 		}
@@ -647,7 +647,7 @@ static void handle_radiopanel_inputs(void) {
 			instrument_state.external.radio_panel ^= RADIO_COM2;
 		} else {
 			/* Long press */
-			instrument_state.external.tx_radio_id = (instrument_state.external.tx_radio_id == 2) ? 0 : 2;
+			instrument_state.external.tx_radio_id = 2;
 			display_data_changed[DISPLAY_COM1] = true;
 			display_data_changed[DISPLAY_COM2] = true;
 		}
@@ -833,6 +833,11 @@ static void handle_adf_inputs(void) {
 		instrument_state.external.adf.frequency_khz = rotary_getvalue(&rotary_dme_adf.rotary);
 		display_data_changed[DISPLAY_ADF] = true;
 	}
+	if (button_pressed(&rotary_dme_adf.button)) {
+		instrument_state.external.dme_nav_id = 3 - instrument_state.external.dme_nav_id;
+		display_data_changed[DISPLAY_NAV1_STBY] = true;
+		display_data_changed[DISPLAY_NAV2_STBY] = true;
+	}
 }
 
 static void handle_nav_src_inputs(void) {
@@ -1011,6 +1016,14 @@ static void instruments_set_by_host_report02(const struct hid_set_report_02_t *r
 	display_data_changed[DISPLAY_NAV2] = copy_if_changed(&instrument_state.external.nav2.freq.active_index, &report->nav2.freq.active_index, sizeof(instrument_state.external.nav2.freq.active_index)) || display_data_changed[DISPLAY_NAV2] || divisions_changed;
 	display_data_changed[DISPLAY_NAV2_STBY] = copy_if_changed(&instrument_state.external.nav2.freq.standby_index, &report->nav2.freq.standby_index, sizeof(instrument_state.external.nav2.freq.standby_index)) || display_data_changed[DISPLAY_NAV2_STBY] || divisions_changed;
 	display_data_changed[DISPLAY_NAV2_STBY] = copy_if_changed(&instrument_state.external.nav2.obs, &report->nav2.obs, sizeof(instrument_state.external.nav2.obs)) || display_data_changed[DISPLAY_NAV2_STBY] || divisions_changed;
+	if ((report->dme_nav_id == 1) || (report->dme_nav_id == 2)) {
+		bool dme_nav_source_changed = copy_if_changed(&instrument_state.external.dme_nav_id, &report->dme_nav_id, sizeof(instrument_state.external.dme_nav_id));
+		if (dme_nav_source_changed) {
+			display_data_changed[DISPLAY_NAV1_STBY] = true;
+			display_data_changed[DISPLAY_NAV2_STBY] = true;
+		}
+	}
+
 	bool xpdr_state_changed = copy_if_changed(&instrument_state.external.xpdr, &report->xpdr, sizeof(instrument_state.external.xpdr));
 	display_data_changed[DISPLAY_XPDR] = xpdr_state_changed || display_data_changed[DISPLAY_XPDR];
 	led_state_changed = xpdr_state_changed || led_state_changed;
@@ -1088,6 +1101,7 @@ void instruments_init(void) {
 	rotary_setvalue(&rotary_atm.rotary, instrument_state.external.qnh);
 
 	instrument_state.external.tx_radio_id = active_configuration.instruments.tx_radio_id;
+	instrument_state.external.dme_nav_id = 1;
 
 	led_state_changed = true;
 	for (int did = 0; did < DISPLAY_COUNT; did++) {
