@@ -23,10 +23,10 @@ CFLAGS += -DBUILD_TIMESTAMP_UTC='"$(BUILD_TIMESTAMP_UTC)"' -DBUILD_REVISION='"$(
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -Icube -Icube/include-core -Icube/include-hid -Icube/include-hal -Icube/include-cmsis
 #CFLAGS += -specs=nano.specs -specs=rdimon.specs
-#LDFLAGS := -Tstm32f407.ld
-#WRITE_ADDR := 0x08000000
-LDFLAGS := -Tstm32f407_boot_ram.ld
-WRITE_ADDR := 0x20000000
+LDFLAGS := -Tstm32f407.ld
+WRITE_ADDR := 0x08000000
+#LDFLAGS := -Tstm32f407_boot_ram.ld
+#WRITE_ADDR := 0x20000000
 LDFLAGS += -Wl,--gc-sections
 STATICLIBS := ext-st/stdperiph.a cube/cube.a
 

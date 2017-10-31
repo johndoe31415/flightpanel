@@ -256,6 +256,8 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 						ident = istate->internal.ident.nav1;
 					}
 				} else if (display == DISPLAY_NAV1_STBY) {
+					obs = &istate->external.nav1.obs;
+					active_obs = istate->internal.active_obs == 0;
 					if (istate->external.dme_nav_id == 1) {
 						tx_dme = "DME";
 					}
@@ -264,6 +266,8 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 						ident = istate->internal.ident.nav2;
 					}
 				} else if (display == DISPLAY_NAV2_STBY) {
+					obs = &istate->external.nav2.obs;
+					active_obs = istate->internal.active_obs == 1;
 					if (istate->external.dme_nav_id == 2) {
 						tx_dme = "DME";
 					}
@@ -275,12 +279,6 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 					if (istate->external.tx_radio_id == 2) {
 						tx_dme = "TX";
 					}
-				} else if (display == DISPLAY_NAV1_STBY) {
-					obs = &istate->external.nav1.obs;
-					active_obs = istate->internal.active_obs == 0;
-				} else if (display == DISPLAY_NAV2_STBY) {
-					obs = &istate->external.nav2.obs;
-					active_obs = istate->internal.active_obs == 1;
 				}
 				redraw_com_nav_display(surface, istate, frequency_khz, ident, tx_dme, active_obs, obs);
 			} else {
