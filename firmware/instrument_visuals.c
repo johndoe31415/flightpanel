@@ -89,12 +89,16 @@ static void draw_ident(const struct surface_t *surface, const char *ident) {
 	}
 }
 
-static void redraw_com_nav_display(const struct surface_t *surface, const struct instrument_state_t *istate, uint32_t frequency_khz, const char *ident, const char *tx_dme, bool active_obs, const uint16_t *obs) {
+static void redraw_com_nav_display(const struct surface_t *surface, bool three_decimal_places, uint32_t frequency_khz, const char *ident, const char *tx_dme, bool active_obs, const uint16_t *obs) {
 	char text[16];
 	int mhz = frequency_khz / 1000;
 	int khz = frequency_khz % 1000;
-	sprintf(text, "%3d.%03d", mhz, khz);
-	struct cursor_t cursor = { 4, 35 };
+	if (three_decimal_places) {
+		sprintf(text, "%3d.%03d", mhz, khz);
+	} else {
+		sprintf(text, "%3d.%02d", mhz, khz / 10);
+	}
+	struct cursor_t cursor = { TEXT_CENTER, 35 };
 	surface_clear(surface);
 	blit_string_to_cursor(&font_inconsolata_30, text, surface, &cursor, false);
 	draw_ident(surface, ident);
@@ -180,25 +184,36 @@ static void redraw_ap_display(const struct surface_t *surface, const struct inst
 	}
 
 	{
-		struct cursor_t cursor = { 41, 54 };
+		struct cursor_t cursor = { 40, 54 };
+		if (istate->external.ap.state & (AP_NAVIGATION_ARMED | AP_NAVIGATION_HOLD)) {
+			if (istate->external.ap.state & AP_NAVIGATION_HOLD) {
+				blit_rectangle(surface, cursor.x - 1, cursor.y - 18, 14, 20);
+			}
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "N", surface, &cursor, istate->external.ap.state & AP_NAVIGATION_HOLD);
+		}
+	}
+	{
+		struct cursor_t cursor = { 54, 54 };
+		if (istate->external.ap.state & (AP_GLIDESLOPE_ARMED | AP_GLIDESLOPE_HOLD)) {
+			if (istate->external.ap.state & AP_GLIDESLOPE_HOLD) {
+				blit_rectangle(surface, cursor.x - 1, cursor.y - 18, 14, 20);
+			}
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "A", surface, &cursor, istate->external.ap.state & AP_GLIDESLOPE_HOLD);
+		}
+	}
+	{
+		struct cursor_t cursor = { 68, 54 };
 		if (istate->external.ap.state & AP_STATE_BACKCOURSE) {
-			blit_rectangle(surface, cursor.x - 1 + (istate->external.ap.state & AP_GLIDESLOPE_HOLD ? 0 : 35), cursor.y - 18, 128, 20);
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "R", surface, &cursor, false);
 		}
-		if (istate->external.ap.state & AP_GLIDESLOPE_ARMED) {
-			blit_string_to_cursor(&font_vcr_osd_mono_20, "G-", surface, &cursor, istate->external.ap.state & AP_STATE_BACKCOURSE);
-		} else if (istate->external.ap.state & AP_GLIDESLOPE_HOLD) {
-			blit_string_to_cursor(&font_vcr_osd_mono_20, "G+", surface, &cursor, istate->external.ap.state & AP_STATE_BACKCOURSE);
+	}
+	{
+		struct cursor_t cursor = { 83, 54 };
+		snprintf(text, sizeof(text), "%3d" CHAR_DEGREES, istate->external.ap.heading);
+		if (istate->external.ap.state & AP_HEADING_HOLD) {
+			blit_rectangle(surface, cursor.x - 1, cursor.y - 18, 47, 20);
 		}
-
-		cursor = (struct cursor_t) { TEXT_RIGHT_JUSTIFY, 54 };
-		if (istate->external.ap.state & AP_NAVIGATION_ARMED) {
-			blit_string_to_cursor(&font_vcr_osd_mono_20, "L-", surface, &cursor, istate->external.ap.state & AP_STATE_BACKCOURSE);
-		} else if (istate->external.ap.state & AP_NAVIGATION_HOLD) {
-			blit_string_to_cursor(&font_vcr_osd_mono_20, "L+", surface, &cursor, istate->external.ap.state & AP_STATE_BACKCOURSE);
-		} else {
-			snprintf(text, sizeof(text), "%3d" CHAR_DEGREES, istate->external.ap.heading);
-			blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, istate->external.ap.state & AP_STATE_BACKCOURSE);
-		}
+		blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, istate->external.ap.state & AP_HEADING_HOLD);
 	}
 
 	{
@@ -251,6 +266,7 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 				const char *tx_dme = NULL;
 				const uint16_t *obs = NULL;
 				bool active_obs = false;
+				bool three_decimal_places = false;
 				if (display == DISPLAY_NAV1) {
 					if (!istate->internal.ident.nav1_ident_inhibit_timeout) {
 						ident = istate->internal.ident.nav1;
@@ -275,12 +291,14 @@ void redraw_display(const struct surface_t *surface, const struct instrument_sta
 					if (istate->external.tx_radio_id == 1) {
 						tx_dme = "TX";
 					}
+					three_decimal_places = (istate->external.com_divisions == COM_RANGE_5KHZ);
 				} else if (display == DISPLAY_COM2) {
 					if (istate->external.tx_radio_id == 2) {
 						tx_dme = "TX";
 					}
+					three_decimal_places = (istate->external.com_divisions == COM_RANGE_5KHZ);
 				}
-				redraw_com_nav_display(surface, istate, frequency_khz, ident, tx_dme, active_obs, obs);
+				redraw_com_nav_display(surface, three_decimal_places, frequency_khz, ident, tx_dme, active_obs, obs);
 			} else {
 				redraw_qnh_display(surface, istate);
 			}

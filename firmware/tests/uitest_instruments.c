@@ -62,9 +62,9 @@ static void test_instruments(void) {
 				.squawk = 7001,
 			},
 			.ap = {
-				.state = AP_STATE_ACTIVE | AP_ALTITUDE_HOLD | AP_IAS_HOLD,
+				.state = AP_STATE_ACTIVE | AP_ALTITUDE_HOLD | AP_IAS_HOLD | AP_GLIDESLOPE_ARMED | AP_NAVIGATION_HOLD | AP_STATE_BACKCOURSE | AP_HEADING_HOLD,
 				.altitude = 6900,
-				.climbrate = 0,
+				.climbrate = 3000,
 				.ias = 125,
 				.heading = 180,
 			},
