@@ -52,7 +52,6 @@ static bool display_data_changed[DISPLAY_COUNT];
 static bool led_state_changed;
 extern struct configuration active_configuration;
 static bool report_via_usb = false;
-//static uint32_t milliseconds_to_blank;
 
 static struct rotary_encoder_with_button_t rotary_com1 = {
 	.rotary = {
@@ -492,11 +491,17 @@ static void redraw_all_displays(void) {
 	}
 }
 
+static void display_mode_set_active(void) {
+	instrument_state.internal.display_mode.state = ACTIVE;
+	instrument_state.internal.display_mode.timer = active_configuration.misc.time_to_blank_milliseconds;
+	redraw_all_displays();
+}
+
 static void unblank(void) {
 	if (instrument_state.internal.display_mode.state == BLANKED) {
-		instrument_state.internal.display_mode.state = ACTIVE;
+		display_mode_set_active();
+	} else if (instrument_state.internal.display_mode.state == ACTIVE) {
 		instrument_state.internal.display_mode.timer = active_configuration.misc.time_to_blank_milliseconds;
-		redraw_all_displays();
 	}
 }
 
@@ -935,10 +940,15 @@ static void handle_display_mode_transitions(void) {
 			if (instrument_state.internal.display_mode.state == ACTIVE) {
 				/* Blank now */
 				instrument_state.internal.display_mode.state = BLANKED;
+				for (int did = 0; did < DISPLAY_COUNT; did++) {
+					display_data_changed[did] = false;
+					const struct surface_t *surface = displays_get_surface(did);
+					redraw_display(surface, &instrument_state, did);
+					display_mark_surface_dirty(did);
+				}
 			} else if (instrument_state.internal.display_mode.state == BOOTING) {
 				/* Set active now */
-				instrument_state.internal.display_mode.state = BLANKED;
-				unblank();
+				display_mode_set_active();
 			}
 		}
 	}
