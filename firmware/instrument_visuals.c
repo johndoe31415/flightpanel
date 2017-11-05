@@ -34,6 +34,7 @@
 #include "instrument_visuals.h"
 #include "frequencies.h"
 #include "morse.h"
+#include "selftest.h"
 
 static uint32_t get_instrument_frequency_khz(const struct instrument_state_t *istate, const enum display_t display) {
 	switch (display) {
@@ -243,6 +244,15 @@ static void redraw_display_booting(const struct surface_t *surface, enum display
 			struct cursor_t cursor = { TEXT_CENTER, 25 };
 			blit_string_to_cursor(&font_vcr_osd_mono_20, "Flightpanel", surface, &cursor, false);
 
+			cursor = (struct cursor_t){ TEXT_CENTER, 25 + 15 };
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "~~~~~~~~~~~", surface, &cursor, false);
+			break;
+		}
+
+		case DISPLAY_COM1_STBY: {
+			struct cursor_t cursor = { TEXT_CENTER, 25 };
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "Revision", surface, &cursor, false);
+
 			cursor = (struct cursor_t){ TEXT_CENTER, 25 + 25 };
 			blit_string_to_cursor(&font_vcr_osd_mono_20, BUILD_REVISION, surface, &cursor, false);
 			break;
@@ -250,11 +260,12 @@ static void redraw_display_booting(const struct surface_t *surface, enum display
 
 		case DISPLAY_COM2: {
 			struct cursor_t cursor = { TEXT_CENTER, 25 };
-			blit_string_to_cursor(&font_vcr_osd_mono_20, "CRC32", surface, &cursor, false);
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "Origin", surface, &cursor, false);
 
 			char text[16];
 			cursor = (struct cursor_t){ TEXT_CENTER, 25 + 25 };
-			sprintf(text, "%08x", 0xaabb1122);
+			const struct selftest_result_t *selftest = get_selftest_result();
+			sprintf(text, "%" PRIx32, selftest->origin);
 			blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 			break;
 		}
@@ -265,7 +276,20 @@ static void redraw_display_booting(const struct surface_t *surface, enum display
 
 			char text[16];
 			cursor = (struct cursor_t){ TEXT_CENTER, 25 + 25 };
-			sprintf(text, "%d", 123456);
+			const struct selftest_result_t *selftest = get_selftest_result();
+			sprintf(text, "%" PRId32, selftest->length);
+			blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
+			break;
+		}
+
+		case DISPLAY_NAV1: {
+			struct cursor_t cursor = { TEXT_CENTER, 25 };
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "CRC32", surface, &cursor, false);
+
+			char text[16];
+			cursor = (struct cursor_t){ TEXT_CENTER, 25 + 25 };
+			const struct selftest_result_t *selftest = get_selftest_result();
+			sprintf(text, "%08" PRIx32, selftest->crc32);
 			blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
 			break;
 		}

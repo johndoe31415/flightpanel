@@ -40,7 +40,7 @@ test_boundedbuffer: $(TEST_COMMON_OBJS) boundedbuffer.o
 test_telemetry: $(TEST_COMMON_OBJS) stm32f407_tempsensor.o
 test_testbed: $(TEST_COMMON_OBJS)
 test_bitwise: $(TEST_COMMON_OBJS)
-test_instruments: $(TEST_COMMON_OBJS) instrument_visuals.o frequencies.o surface.o font.o vcr-osd-mono-20.o inconsolata-30.o symbol-font.o morse.o
+test_instruments: $(TEST_COMMON_OBJS) instrument_visuals.o frequencies.o surface.o font.o vcr-osd-mono-20.o inconsolata-30.o symbol-font.o morse.o selftest_mock.o
 
 test: all
 	rm -f tests.log

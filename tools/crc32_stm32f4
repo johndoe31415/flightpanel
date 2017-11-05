@@ -1,0 +1,67 @@
+#!/usr/bin/python3
+#
+#	flightpanel - A Cortex-M4 based USB flight panel for flight simulators.
+#	Copyright (C) 2017-2017 Johannes Bauer
+#
+#	This file is part of flightpanel.
+#
+#	flightpanel is free software; you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation; this program is ONLY licensed under
+#	version 3 of the License, later versions are explicitly excluded.
+#
+#	flightpanel is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#
+#	You should have received a copy of the GNU General Public License
+#	along with flightpanel; if not, write to the Free Software
+#	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#	Johannes Bauer <JohannesBauer@gmx.de>
+
+import sys
+import struct
+
+class CortexM4CRC32(object):
+	_WORD = struct.Struct("< L")
+
+	def __init__(self):
+		self._state = 0xffffffff
+		self._poly = 0x4c11db7
+
+	def hash_word(self, word):
+		assert(0 <= word < 2 ** 32)
+		self._state ^= word
+		for i in range(32):
+			if self._state & 0x80000000:
+				self._state = (self._state << 1) ^ self._poly
+			else:
+				self._state = self._state << 1
+			self._state &= 0xffffffff
+		return self
+
+	def hash_data(self, data):		
+		assert((len(data) % 4) == 0)
+		for i in range(0, len(data), 4):
+			word = data[i : i + 4]
+			(value, ) = self._WORD.unpack(word)
+			self.hash_word(value)
+		return self
+		
+	@property
+	def value(self):
+		return self._state
+
+	@classmethod
+	def selftest(cls):
+		assert(cls().hash_data(b"").value == 0xffffffff)
+		assert(cls().hash_data(b"\xaa\xaa\xaa\xaa").value == 0x42fc4b29)
+		assert(cls().hash_data(b"\xaa\xbb\xcc\xdd").value == 0x19354eb8)
+		assert(cls().hash_data(b"\xaa\xbb\xcc\xdd\x11\x22\x33\x44").value == 0x06c986cc)
+
+CortexM4CRC32.selftest()
+filename = sys.argv[1]
+with open(filename, "rb") as f:
+	print("0x%x" % (CortexM4CRC32().hash_data(f.read()).value))

@@ -23,14 +23,14 @@ CFLAGS += -DBUILD_TIMESTAMP_UTC='"$(BUILD_TIMESTAMP_UTC)"' -DBUILD_REVISION='"$(
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -Icube -Icube/include-core -Icube/include-hid -Icube/include-hal -Icube/include-cmsis
 #CFLAGS += -specs=nano.specs -specs=rdimon.specs
-#LDFLAGS := -Tstm32f407.ld
-#WRITE_ADDR := 0x08000000
-LDFLAGS := -Tstm32f407_boot_ram.ld
-WRITE_ADDR := 0x20000000
+LDFLAGS := -Tstm32f407.ld
+WRITE_ADDR := 0x08000000
+#LDFLAGS := -Tstm32f407_boot_ram.ld
+#WRITE_ADDR := 0x20000000
 LDFLAGS += -Wl,--gc-sections
 STATICLIBS := ext-st/stdperiph.a cube/cube.a
 
-OBJS := pinmap.o iomux_pinmap.o ivt.o flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o configuration.o ssd1306.o displays.o surface.o font.o vcr-osd-mono-20.o inconsolata-30.o instruments.o iomux.o frequencies.o debounce.o stm32f4xx_devid.o stm32f4xx_stackpaint.o corefault.o boundedbuffer.o debugconsole.o debug.o stm32f4xx_reset.o stm32f407_adc.o stm32f407_tempsensor.o dsr_tasks.o stm32f4xx_debug.o atomic.o atomic_mutex.o instrument_visuals.o symbol-font.o morse.o
+OBJS := pinmap.o iomux_pinmap.o ivt.o flightpanel.o syscalls.o init.o rs232.o fault.o timer.o rotary.o spi.o usb.o usbd_hid.o i2c.o eeprom.o configuration.o ssd1306.o displays.o surface.o font.o vcr-osd-mono-20.o inconsolata-30.o instruments.o iomux.o frequencies.o debounce.o stm32f4xx_devid.o stm32f4xx_stackpaint.o corefault.o boundedbuffer.o debugconsole.o debug.o stm32f4xx_reset.o stm32f407_adc.o stm32f407_tempsensor.o dsr_tasks.o stm32f4xx_debug.o atomic.o atomic_mutex.o instrument_visuals.o symbol-font.o morse.o selftest.o
 ADDITIONAL_DEPENDENCY := pinmap.h iomux_pinmap.h
 
 all: $(TARGETS)

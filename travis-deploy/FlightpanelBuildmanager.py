@@ -144,6 +144,13 @@ class FlightpanelBuildmanager(BuildManager):
 			print(file = f)
 			print("Created at: %s UTC" % (self._now_utc.strftime("%A, %Y-%m-%d %H:%M:%S")), file = f)
 			print("Built from Git revision %s" % (git_rev), file = f)
+			try:
+				crc32 = subprocess.check_output([ "tools/crc32_stm32f4", "firmware/flightpanel.bin" ])
+				crc32 = crc32.decode().rstrip("\r\n")
+			except subprocess.CalledProcessError:
+				crc32 = "Could not determine."
+			print("Correct firmware CRC32 value: %s" % (crc32), file = f)
+
 			print(file = f)
 			print("flightpanel is open source software and licensed under the GNU GPL-3.", file = f)
 			print(file = f)
