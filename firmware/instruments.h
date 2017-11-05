@@ -55,9 +55,19 @@ enum screen_qnh_t {
 	QNH,
 };
 
+enum display_state_t {
+	BOOTING = 0,
+	ACTIVE,
+	BLANKED,
+};
+
 struct instrument_state_t {
 	struct hid_report_t external;
 	struct {
+		struct {
+			enum display_state_t state;
+			uint32_t timer;
+		} display_mode;
 		struct {
 			enum screen_qnh_t qnh;
 			uint16_t qnh_timeout;

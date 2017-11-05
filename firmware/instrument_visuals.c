@@ -99,7 +99,6 @@ static void redraw_com_nav_display(const struct surface_t *surface, bool three_d
 		sprintf(text, "%3d.%02d", mhz, khz / 10);
 	}
 	struct cursor_t cursor = { TEXT_CENTER, 35 };
-	surface_clear(surface);
 	blit_string_to_cursor(&font_inconsolata_30, text, surface, &cursor, false);
 	draw_ident(surface, ident);
 	if (tx_dme) {
@@ -125,7 +124,6 @@ static uint32_t mbar_to_inhg_hundreds(uint32_t mbar) {
 }
 
 static void redraw_qnh_display(const struct surface_t *surface, const struct instrument_state_t *istate) {
-	surface_clear(surface);
 	char text[16];
 	sprintf(text, "%d", istate->external.qnh);
 	struct cursor_t cursor = { TEXT_CENTER, 28 };
@@ -138,7 +136,6 @@ static void redraw_qnh_display(const struct surface_t *surface, const struct ins
 }
 
 static void redraw_adf_display(const struct surface_t *surface, const struct instrument_state_t *istate) {
-	surface_clear(surface);
 
 	char text[16];
 	struct cursor_t cursor = { TEXT_CENTER, 25 };
@@ -149,7 +146,6 @@ static void redraw_adf_display(const struct surface_t *surface, const struct ins
 }
 
 static void redraw_dme_display(const struct surface_t *surface, const struct instrument_state_t *istate) {
-	surface_clear(surface);
 
 	if (istate->internal.dme.available) {
 		char text[16];
@@ -167,7 +163,6 @@ static void redraw_dme_display(const struct surface_t *surface, const struct ins
 }
 
 static void redraw_ap_display(const struct surface_t *surface, const struct instrument_state_t *istate) {
-	surface_clear(surface);
 	char text[16];
 	{
 		struct cursor_t cursor = { 0, 23 };
@@ -224,8 +219,6 @@ static void redraw_ap_display(const struct surface_t *surface, const struct inst
 }
 
 static void redraw_xpdr_display(const struct surface_t *surface, const struct instrument_state_t *istate) {
-	surface_clear(surface);
-
 	char text[16];
 	sprintf(text, "%04d", istate->external.xpdr.squawk);
 
@@ -244,80 +237,120 @@ static void redraw_xpdr_display(const struct surface_t *surface, const struct in
 	}
 }
 
-void redraw_display(const struct surface_t *surface, const struct instrument_state_t *istate, enum display_t display) {
-	if ((istate->external.flip_switches & SWITCH_MASTER) == 0) {
-		/* All displays off, MASTER off */
-		surface_clear(surface);
-		return;
-	}
-
+static void redraw_display_booting(const struct surface_t *surface, enum display_t display) {
 	switch (display) {
-		case DISPLAY_COM1:
-		case DISPLAY_COM1_STBY:
-		case DISPLAY_COM2:
-		case DISPLAY_COM2_STBY:
-		case DISPLAY_NAV1:
-		case DISPLAY_NAV1_STBY:
-		case DISPLAY_NAV2:
-		case DISPLAY_NAV2_STBY:
-			if ((display != DISPLAY_QNH) || (istate->internal.screen_mplex.qnh == DEFAULT)) {
-				uint32_t frequency_khz = get_instrument_frequency_khz(istate, display);
-				const char *ident = NULL;
-				const char *tx_dme = NULL;
-				const uint16_t *obs = NULL;
-				bool active_obs = false;
-				bool three_decimal_places = false;
-				if (display == DISPLAY_NAV1) {
-					if (!istate->internal.ident.nav1_ident_inhibit_timeout) {
-						ident = istate->internal.ident.nav1;
+		case DISPLAY_COM1: {
+			struct cursor_t cursor = { TEXT_CENTER, 25 };
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "Flightpanel", surface, &cursor, false);
+
+			cursor = (struct cursor_t){ TEXT_CENTER, 25 + 25 };
+			blit_string_to_cursor(&font_vcr_osd_mono_20, BUILD_REVISION, surface, &cursor, false);
+			break;
+		}
+
+		case DISPLAY_COM2: {
+			struct cursor_t cursor = { TEXT_CENTER, 25 };
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "CRC32", surface, &cursor, false);
+
+			char text[16];
+			cursor = (struct cursor_t){ TEXT_CENTER, 25 + 25 };
+			sprintf(text, "%08x", 0xaabb1122);
+			blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
+			break;
+		}
+
+		case DISPLAY_COM2_STBY: {
+			struct cursor_t cursor = { TEXT_CENTER, 25 };
+			blit_string_to_cursor(&font_vcr_osd_mono_20, "Length", surface, &cursor, false);
+
+			char text[16];
+			cursor = (struct cursor_t){ TEXT_CENTER, 25 + 25 };
+			sprintf(text, "%d", 123456);
+			blit_string_to_cursor(&font_vcr_osd_mono_20, text, surface, &cursor, false);
+			break;
+		}
+
+		default:
+			break;
+	}
+}
+
+void redraw_display(const struct surface_t *surface, const struct instrument_state_t *istate, enum display_t display) {
+	surface_clear(surface);
+	if (istate->internal.display_mode.state == BOOTING) {
+		/* Still in booting phase */
+		redraw_display_booting(surface, display);
+	} else if (((istate->external.flip_switches & SWITCH_MASTER) == 0) || (istate->internal.display_mode.state == BLANKED)) {
+		/* All displays off, MASTER off -- no drawing of anything */
+	} else {
+		switch (display) {
+			case DISPLAY_COM1:
+			case DISPLAY_COM1_STBY:
+			case DISPLAY_COM2:
+			case DISPLAY_COM2_STBY:
+			case DISPLAY_NAV1:
+			case DISPLAY_NAV1_STBY:
+			case DISPLAY_NAV2:
+			case DISPLAY_NAV2_STBY:
+				if ((display != DISPLAY_QNH) || (istate->internal.screen_mplex.qnh == DEFAULT)) {
+					uint32_t frequency_khz = get_instrument_frequency_khz(istate, display);
+					const char *ident = NULL;
+					const char *tx_dme = NULL;
+					const uint16_t *obs = NULL;
+					bool active_obs = false;
+					bool three_decimal_places = false;
+					if (display == DISPLAY_NAV1) {
+						if (!istate->internal.ident.nav1_ident_inhibit_timeout) {
+							ident = istate->internal.ident.nav1;
+						}
+					} else if (display == DISPLAY_NAV1_STBY) {
+						obs = &istate->external.nav1.obs;
+						active_obs = istate->internal.active_obs == 0;
+						if (istate->external.dme_nav_id == 1) {
+							tx_dme = "DME";
+						}
+					} else if (display == DISPLAY_NAV2) {
+						if (!istate->internal.ident.nav2_ident_inhibit_timeout) {
+							ident = istate->internal.ident.nav2;
+						}
+					} else if (display == DISPLAY_NAV2_STBY) {
+						obs = &istate->external.nav2.obs;
+						active_obs = istate->internal.active_obs == 1;
+						if (istate->external.dme_nav_id == 2) {
+							tx_dme = "DME";
+						}
+					} else if (display == DISPLAY_COM1) {
+						if (istate->external.tx_radio_id == 1) {
+							tx_dme = "TX";
+						}
+						three_decimal_places = (istate->external.com_divisions == COM_RANGE_5KHZ);
+					} else if (display == DISPLAY_COM2) {
+						if (istate->external.tx_radio_id == 2) {
+							tx_dme = "TX";
+						}
+						three_decimal_places = (istate->external.com_divisions == COM_RANGE_5KHZ);
 					}
-				} else if (display == DISPLAY_NAV1_STBY) {
-					obs = &istate->external.nav1.obs;
-					active_obs = istate->internal.active_obs == 0;
-					if (istate->external.dme_nav_id == 1) {
-						tx_dme = "DME";
-					}
-				} else if (display == DISPLAY_NAV2) {
-					if (!istate->internal.ident.nav2_ident_inhibit_timeout) {
-						ident = istate->internal.ident.nav2;
-					}
-				} else if (display == DISPLAY_NAV2_STBY) {
-					obs = &istate->external.nav2.obs;
-					active_obs = istate->internal.active_obs == 1;
-					if (istate->external.dme_nav_id == 2) {
-						tx_dme = "DME";
-					}
-				} else if (display == DISPLAY_COM1) {
-					if (istate->external.tx_radio_id == 1) {
-						tx_dme = "TX";
-					}
-					three_decimal_places = (istate->external.com_divisions == COM_RANGE_5KHZ);
-				} else if (display == DISPLAY_COM2) {
-					if (istate->external.tx_radio_id == 2) {
-						tx_dme = "TX";
-					}
-					three_decimal_places = (istate->external.com_divisions == COM_RANGE_5KHZ);
+					redraw_com_nav_display(surface, three_decimal_places, frequency_khz, ident, tx_dme, active_obs, obs);
+				} else {
+					redraw_qnh_display(surface, istate);
 				}
-				redraw_com_nav_display(surface, three_decimal_places, frequency_khz, ident, tx_dme, active_obs, obs);
-			} else {
-				redraw_qnh_display(surface, istate);
-			}
-			break;
+				break;
 
-		case DISPLAY_ADF:
-			redraw_adf_display(surface, istate);
-			break;
+			case DISPLAY_ADF:
+				redraw_adf_display(surface, istate);
+				break;
 
-		case DISPLAY_DME:
-			redraw_dme_display(surface, istate);
-			break;
+			case DISPLAY_DME:
+				redraw_dme_display(surface, istate);
+				break;
 
-		case DISPLAY_AP:
-			redraw_ap_display(surface, istate);
-			break;
+			case DISPLAY_AP:
+				redraw_ap_display(surface, istate);
+				break;
 
-		case DISPLAY_XPDR:
-			redraw_xpdr_display(surface, istate);
-			break;
+			case DISPLAY_XPDR:
+				redraw_xpdr_display(surface, istate);
+				break;
+		}
 	}
 }

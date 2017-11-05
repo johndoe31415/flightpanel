@@ -52,7 +52,7 @@ static bool display_data_changed[DISPLAY_COUNT];
 static bool led_state_changed;
 extern struct configuration active_configuration;
 static bool report_via_usb = false;
-static uint32_t milliseconds_to_blank;
+//static uint32_t milliseconds_to_blank;
 
 static struct rotary_encoder_with_button_t rotary_com1 = {
 	.rotary = {
@@ -486,13 +486,17 @@ static const struct button_input_t button_inputs[] = {
 	},
 };
 
+static void redraw_all_displays(void) {
+	for (int i = 0; i < DISPLAY_COUNT; i++) {
+		display_data_changed[i] = true;
+	}
+}
+
 static void unblank(void) {
-	bool was_blanked = (milliseconds_to_blank == 0);
-	milliseconds_to_blank = active_configuration.misc.time_to_blank_milliseconds;
-	if (was_blanked) {
-		for (int i = 0; i < DISPLAY_COUNT; i++) {
-			display_data_changed[i] = true;
-		}
+	if (instrument_state.internal.display_mode.state == BLANKED) {
+		instrument_state.internal.display_mode.state = ACTIVE;
+		instrument_state.internal.display_mode.timer = active_configuration.misc.time_to_blank_milliseconds;
+		redraw_all_displays();
 	}
 }
 
@@ -689,7 +693,7 @@ static void handle_comnav_inputs(struct xcom_state_t *comnav, struct rotary_enco
 				display_data_changed[standby_display] = true;
 			}
 		} else {
-			/* Short button press, exchange ACTIVE <-> STBY */
+			/* Long button press, exchange NAV1 <-> NAV2 */
 			// TODO
 		}
 		rotary->button.lastpress = BUTTON_NOACTION;
@@ -911,9 +915,7 @@ static void handle_switches(void) {
 		/* MASTER flip switch has been updated. */
 		unblank();
 		update_leds();
-		for (int i = 0; i < DISPLAY_COUNT; i++) {
-			display_data_changed[i] = true;
-		}
+		redraw_all_displays();
 	}
 }
 
@@ -926,15 +928,17 @@ static void handle_nav_ident_inhibit_timeouts(void) {
 	}
 }
 
-static void handle_blanking(void) {
-	if (milliseconds_to_blank > 0) {
-		milliseconds_to_blank--;
-		if (milliseconds_to_blank == 0) {
-			/* Blank now! */
-			for (int i = 0; i < DISPLAY_COUNT; i++) {
-				const struct surface_t* surface = displays_get_surface(i);
-				surface_clear(surface);
-				display_mark_surface_dirty(i);
+static void handle_display_mode_transitions(void) {
+	if (instrument_state.internal.display_mode.timer > 0) {
+		instrument_state.internal.display_mode.timer--;
+		if (!instrument_state.internal.display_mode.timer) {
+			if (instrument_state.internal.display_mode.state == ACTIVE) {
+				/* Blank now */
+				instrument_state.internal.display_mode.state = BLANKED;
+			} else if (instrument_state.internal.display_mode.state == BOOTING) {
+				/* Set active now */
+				instrument_state.internal.display_mode.state = BLANKED;
+				unblank();
 			}
 		}
 	}
@@ -965,7 +969,7 @@ void dsr_idle_task(void) {
 	handle_qnh_inputs();
 	handle_obs_inputs();
 	handle_switches();
-	handle_blanking();
+	handle_display_mode_transitions();
 	handle_shutoff();
 
 	if (led_state_changed) {
@@ -1104,9 +1108,10 @@ void instruments_init(void) {
 	instrument_state.external.tx_radio_id = active_configuration.instruments.tx_radio_id;
 	instrument_state.external.dme_nav_id = 1;
 
+	instrument_state.internal.display_mode.state = BOOTING;
+	instrument_state.internal.display_mode.timer = 3000;
+
 	led_state_changed = true;
-	for (int did = 0; did < DISPLAY_COUNT; did++) {
-		display_data_changed[did] = true;
-	}
+	redraw_all_displays();
 	report_via_usb = true;
 }
