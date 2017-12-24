@@ -272,15 +272,15 @@ class TemplateHelper(object):
 
 	@property
 	def h_filename(self):
-		return self._h_filename
+		return os.path.basename(self._h_filename)
 
 	@property
 	def includeguard_symbol(self):
-		return "__" + re.sub("[^A-Z0-9]", "_", self._h_filename.upper()) + "__"
+		return "__" + re.sub("[^A-Z0-9]", "_", self.h_filename.upper()) + "__"
 
 	@property
 	def symbol(self):
-		return "font_" + re.sub("[^a-z0-9]", "_", self._h_filename.lower()[:-2])
+		return "font_" + re.sub("[^a-z0-9]", "_", self.h_filename.lower()[:-2])
 
 	@staticmethod
 	def hexarray(data):
